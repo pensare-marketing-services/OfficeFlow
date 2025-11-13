@@ -48,10 +48,10 @@ const EditableTableCell: React.FC<{ value: string; onChange: (value: string) => 
     };
     
     if (type === 'textarea') {
-         return <Textarea value={currentValue} onChange={handleChange} onBlur={handleBlur} className="bg-transparent border-0 focus-visible:ring-1" />;
+         return <Textarea value={currentValue} onChange={handleChange} onBlur={handleBlur} className="bg-transparent border-0 focus-visible:ring-1 text-xs" />;
     }
 
-    return <Input value={currentValue} onChange={handleChange} onBlur={handleBlur} className="bg-transparent border-0 focus-visible:ring-1" />;
+    return <Input value={currentValue} onChange={handleChange} onBlur={handleBlur} className="bg-transparent border-0 focus-visible:ring-1 text-xs" />;
 };
 
 export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentScheduleProps) {
@@ -78,16 +78,16 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
         <Card>
             <CardContent className="p-0">
                  <div className="overflow-x-auto">
-                    <Table>
+                    <Table className="text-xs">
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[150px]">Date</TableHead>
-                                <TableHead className="min-w-[200px]">Content Title</TableHead>
-                                <TableHead className="min-w-[300px]">Content Description</TableHead>
-                                <TableHead className="w-[150px]">Type</TableHead>
-                                <TableHead className="w-[150px]">Status</TableHead>
-                                <TableHead className="w-[200px]">Assigned To</TableHead>
-                                <TableHead className="w-[100px]">Notes</TableHead>
+                                <TableHead className="w-[80px]">Date</TableHead>
+                                <TableHead className="min-w-[150px]">Content Title</TableHead>
+                                <TableHead className="min-w-[250px]">Content Description</TableHead>
+                                <TableHead className="w-[130px]">Type</TableHead>
+                                <TableHead className="w-[140px]">Status</TableHead>
+                                <TableHead className="w-[150px]">Assigned To</TableHead>
+                                <TableHead className="w-[80px]">References</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -97,17 +97,17 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         <Popover>
                                             <PopoverTrigger asChild>
                                                 <Button
-                                                    variant={'outline'}
-                                                    className={cn('w-full justify-start text-left font-normal', !task.deadline && 'text-muted-foreground')}
+                                                    variant={'ghost'}
+                                                    size="icon"
+                                                    className={cn('w-full justify-center text-left font-normal', !task.deadline && 'text-muted-foreground')}
                                                 >
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {task.deadline ? format(new Date(task.deadline), 'PPP') : <span>Pick a date</span>}
+                                                    <CalendarIcon className="h-4 w-4" />
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-auto p-0">
                                                 <Calendar
                                                     mode="single"
-                                                    selected={new Date(task.deadline)}
+                                                    selected={task.deadline ? new Date(task.deadline) : undefined}
                                                     onSelect={(date) => handleFieldChange(task.id, 'deadline', date?.toISOString())}
                                                     initialFocus
                                                 />
@@ -157,7 +157,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                             <AvatarImage src={users.find(u => u.id === task.assigneeId)?.avatar} />
                                                             <AvatarFallback>{getInitials(users.find(u => u.id === task.assigneeId)?.name || '')}</AvatarFallback>
                                                         </Avatar>
-                                                        <SelectValue />
+                                                        <span className="truncate">{users.find(u => u.id === task.assigneeId)?.name}</span>
                                                     </div>
                                                 ) : <SelectValue placeholder="Assign..." />}
                                             </SelectTrigger>
@@ -165,8 +165,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                 {users.map(user => (
                                                     <SelectItem key={user.id} value={user.id}>
                                                         <div className="flex items-center gap-3">
-                                                            <Avatar className="h-6 w-6">
-                                                                <AvatarImage src={user.avatar} />
+                                                             <Avatar className="h-6 w-6">
                                                                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                                                             </Avatar>
                                                             <span>{user.name}</span>
@@ -186,7 +185,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </PopoverTrigger>
                                             <PopoverContent className="w-80">
                                                 <div className="space-y-4">
-                                                    <h4 className="font-medium leading-none">Progress Notes</h4>
+                                                    <h4 className="font-medium leading-none">References</h4>
                                                      <div className="max-h-48 space-y-2 overflow-y-auto">
                                                         {task.progressNotes.slice().reverse().map((note, i) => (
                                                         <div key={i} className="text-xs text-muted-foreground bg-secondary/50 p-2 rounded-md">"{note.note}"
@@ -195,7 +194,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                         ))}
                                                     </div>
                                                     <Textarea 
-                                                        placeholder="Add a new note..."
+                                                        placeholder="Add a new reference..."
                                                         onKeyDown={(e) => {
                                                             if (e.key === 'Enter' && !e.shiftKey) {
                                                                 e.preventDefault();
