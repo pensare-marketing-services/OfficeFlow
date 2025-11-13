@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
+import { useMemo } from 'react';
 
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
@@ -61,6 +62,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
     const handleFieldChange = (taskId: string, field: keyof Task, value: any) => {
         onTaskUpdate({ id: taskId, [field]: value });
     };
+
+    const employeeUsers = useMemo(() => {
+        return users.filter(u => u.role === 'employee');
+    }, [users]);
 
     if (tasks.length === 0) {
         return (
@@ -165,7 +170,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="unassigned">Unassigned</SelectItem>
-                                                {users.map(user => (
+                                                {employeeUsers.map(user => (
                                                     <SelectItem key={user.id} value={user.email}>
                                                         <div className="flex items-center gap-3">
                                                              <Avatar className="h-6 w-6">
