@@ -132,7 +132,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         <Select value={task.status as ContentStatus} onValueChange={(value: ContentStatus) => handleFieldChange(task.id, 'status', value)}>
                                             <SelectTrigger>
                                                 <div className="flex items-center gap-2">
-                                                    <div className={cn("h-2 w-2 rounded-full", statusColors[value as ContentStatus])} />
+                                                    <div className={cn("h-2 w-2 rounded-full", statusColors[task.status as ContentStatus])} />
                                                     <SelectValue />
                                                 </div>
                                             </SelectTrigger>
