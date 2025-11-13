@@ -64,6 +64,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
     };
 
     const employeeUsers = useMemo(() => {
+        if (!users) return [];
         return users.filter(u => u.role === 'employee');
     }, [users]);
 
@@ -112,7 +113,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                 <Calendar
                                                     mode="single"
                                                     selected={task.deadline ? new Date(task.deadline) : undefined}
-                                                    onSelect={(date) => handleFieldChange(task.id, 'deadline', date?.toISOString())}
+                                                    onSelect={(date) => handleFieldChange(task.id, 'deadline', date?.toISOString() || '')}
                                                     initialFocus
                                                 />
                                             </PopoverContent>
