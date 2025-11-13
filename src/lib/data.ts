@@ -17,6 +17,13 @@ export type Task = {
   deadline: string;
   assigneeId: string;
   progressNotes: { note: string; date: string }[];
+  clientId?: string;
+  date?: string;
+};
+
+export type Client = {
+  id: string;
+  name: string;
 };
 
 const userAvatars: Record<string, string> = PlaceHolderImages.reduce((acc, img) => {
@@ -53,6 +60,14 @@ const initialUsers: User[] = [
     role: 'employee',
     avatar: userAvatars['user-avatar-4'] || '',
   },
+];
+
+export const clients: Client[] = [
+    { id: 'client-1', name: 'Bar Co.' },
+    { id: 'client-2', name: 'Mala Inc.' },
+    { id: 'client-3', name: 'Habari Group' },
+    { id: 'client-4', name: 'Tetra Corp.' },
+    { id: 'client-5', name: 'Nexus Solutions' },
 ];
 
 export const tasks: Task[] = [
@@ -139,3 +154,13 @@ export let allTasks = [...tasks];
 export const addTask = (task: Task) => {
     allTasks.unshift(task);
 }
+
+export const updateTask = (updatedTask: Task) => {
+    const index = allTasks.findIndex(t => t.id === updatedTask.id);
+    if (index !== -1) {
+        allTasks[index] = updatedTask;
+    } else {
+        // If task doesn't exist, add it.
+        addTask(updatedTask);
+    }
+};
