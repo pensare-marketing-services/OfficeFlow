@@ -22,8 +22,8 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <TasksOverviewChart />
-        <RecentTasks tasks={tasks} title="All Recent Tasks" />
+        <TasksOverviewChart tasks={tasks} />
+        <RecentTasks tasks={tasks} users={users} title="All Recent Tasks" />
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { tasks as initialTasks, users } from '@/lib/data';
-import type { Task } from '@/lib/data';
+import { allTasks, addTask, getUsers } from '@/lib/data';
+import type { Task, User } from '@/lib/data';
 import TaskList from '@/components/tasks/task-list';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -11,13 +11,19 @@ import { AssignTaskDialog } from '@/components/tasks/assign-task-dialog';
 
 export default function TasksPage() {
   const { user } = useAuth();
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>(allTasks);
+  const [users, setUsers] = useState<User[]>([]);
   const [isAssignDialogOpen, setAssignDialogOpen] = useState(false);
+
+   useEffect(() => {
+    setUsers(getUsers());
+  }, []);
 
   if (!user) return null;
 
   const handleTaskAssigned = (newTask: Task) => {
-    setTasks(prevTasks => [newTask, ...prevTasks]);
+    addTask(newTask);
+    setTasks(allTasks);
   };
 
   const handleTaskUpdate = (updatedTask: Task) => {

@@ -1,20 +1,25 @@
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
-import { tasks } from '@/lib/data';
+import type { Task, User } from '@/lib/data';
+import { getUsers } from '@/lib/data';
 import { StatsCard } from './stats-card';
 import { ClipboardList, CheckCircle2, Clock, Hourglass } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 
-export default function EmployeeDashboard() {
+interface EmployeeDashboardProps {
+  employeeTasks: Task[];
+}
+
+export default function EmployeeDashboard({ employeeTasks }: EmployeeDashboardProps) {
   const { user } = useAuth();
   if (!user) return null;
 
-  const myTasks = tasks.filter(t => t.assigneeId === user.id);
-  const totalTasks = myTasks.length;
-  const inProgressTasks = myTasks.filter(t => t.status === 'In Progress').length;
-  const completedTasks = myTasks.filter(t => t.status === 'Done').length;
-  const overdueTasks = myTasks.filter(t => t.status === 'Overdue').length;
+  const users = getUsers();
+  const totalTasks = employeeTasks.length;
+  const inProgressTasks = employeeTasks.filter(t => t.status === 'In Progress').length;
+  const completedTasks = employeeTasks.filter(t => t.status === 'Done').length;
+  const overdueTasks = employeeTasks.filter(t => t.status === 'Overdue').length;
   
   return (
     <div className="space-y-6">
@@ -26,7 +31,7 @@ export default function EmployeeDashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <RecentTasks tasks={myTasks} title="My Tasks" />
+        <RecentTasks tasks={employeeTasks} users={users} title="My Tasks" />
       </div>
     </div>
   );

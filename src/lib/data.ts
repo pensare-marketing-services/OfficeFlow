@@ -117,3 +117,20 @@ export const tasks: Task[] = [
     progressNotes: [],
   },
 ];
+
+
+let allUsers = [...users];
+
+export const addUser = (user: User) => {
+    allUsers.push(user);
+}
+
+export const getUsers = () => {
+    return allUsers;
+}
+
+export let allTasks = [...tasks];
+
+export const addTask = (task: Task) => {
+    allTasks.unshift(task);
+}

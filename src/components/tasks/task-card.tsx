@@ -2,15 +2,15 @@
 
 import { useState } from 'react';
 import type { Task, User } from '@/lib/data';
-import { users } from '@/lib/data';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format, formatDistanceToNow } from 'date-fns';
-import { CalendarIcon, User as UserIcon, Flag, Edit } from 'lucide-react';
+import { CalendarIcon, Flag, Edit } from 'lucide-react';
 import { UpdateTaskDialog } from './update-task-dialog';
+import { getUsers } from '@/lib/data';
 
 interface TaskCardProps {
   task: Task;
@@ -35,6 +35,7 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 export default function TaskCard({ task, onTaskUpdate }: TaskCardProps) {
   const { user } = useAuth();
   const [isUpdateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const users = getUsers();
   const assignee = users.find(u => u.id === task.assigneeId);
 
   return (

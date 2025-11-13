@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/use-auth';
-import { LayoutDashboard, ClipboardList, FileText, BotMessageSquare, Users } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, FileText, BotMessageSquare, Settings } from 'lucide-react';
 import Link from 'next/link';
 
 const navItems = [
@@ -17,6 +17,7 @@ const navItems = [
   { href: '/tasks', label: 'Tasks', icon: ClipboardList, adminOnly: false },
   { href: '/reports', label: 'Create Report', icon: FileText, adminOnly: true },
   { href: '/summarize', label: 'Summarize', icon: BotMessageSquare, adminOnly: true },
+  { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true },
 ];
 
 function OfficeIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -61,7 +62,7 @@ export function SidebarNav() {
               <Link href={item.href} passHref legacyBehavior>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === item.href}
+                  isActive={pathname.startsWith(item.href)}
                   tooltip={{
                     children: item.label,
                   }}

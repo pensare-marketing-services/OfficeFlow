@@ -13,6 +13,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/tasks')) return 'Tasks';
   if (pathname.startsWith('/reports')) return 'Create Client Report';
   if (pathname.startsWith('/summarize')) return 'Summarize Project Progress';
+  if (pathname.startsWith('/settings')) return 'Settings';
   return 'OfficeFlow';
 }
 

@@ -1,7 +1,6 @@
 'use client';
 
 import type { Task, User } from '@/lib/data';
-import { users } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,6 +10,7 @@ import { useAuth } from '@/hooks/use-auth';
 
 interface RecentTasksProps {
   tasks: Task[];
+  users: User[];
   title: string;
 }
 
@@ -30,7 +30,7 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 }
 
 
-export default function RecentTasks({ tasks, title }: RecentTasksProps) {
+export default function RecentTasks({ tasks, users, title }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
   const recentTasks = tasks.slice(0, 5);
 

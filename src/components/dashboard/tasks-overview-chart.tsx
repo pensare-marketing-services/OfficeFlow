@@ -12,10 +12,8 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from '@/components/ui/chart';
-import { tasks } from '@/lib/data';
+import type { Task } from '@/lib/data';
 import type { ChartConfig } from '@/components/ui/chart';
 
 const chartConfig = {
@@ -40,7 +38,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function TasksOverviewChart() {
+export default function TasksOverviewChart({ tasks }: { tasks: Task[] }) {
   const statusCounts = tasks.reduce((acc, task) => {
     acc[task.status] = (acc[task.status] || 0) + 1;
     return acc;

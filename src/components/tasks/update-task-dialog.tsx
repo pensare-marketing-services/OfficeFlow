@@ -28,7 +28,7 @@ import { CalendarIcon, Flag, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
-import { users } from '@/lib/data';
+import { getUsers } from '@/lib/data';
 
 const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('');
 
@@ -54,6 +54,7 @@ interface UpdateTaskDialogProps {
 
 export function UpdateTaskDialog({ open, onOpenChange, task, onTaskUpdate, assignee }: UpdateTaskDialogProps) {
   const { user } = useAuth();
+  const users = getUsers();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
