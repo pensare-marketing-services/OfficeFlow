@@ -106,7 +106,7 @@ export default function ClientsPage() {
             {(tasksLoading || usersLoading) ? <div>Loading...</div> : selectedClient ? (
                 <ContentSchedule 
                     tasks={filteredTasks} 
-                    users={employeeUsers || []} 
+                    users={users || []} 
                     onTaskUpdate={handleTaskUpdate}
                 />
             ) : (
