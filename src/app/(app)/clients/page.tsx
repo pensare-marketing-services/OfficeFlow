@@ -30,15 +30,14 @@ export default function ClientsPage() {
     }, []);
 
     const handleTaskUpdate = (updatedTask: Task) => {
-        setTasks(prevTasks => {
-            const newTasks = prevTasks.map(task => (task.id === updatedTask.id ? updatedTask : task));
-            // This is a mock update. In a real app, you would persist this change.
-            const taskIndex = allTasks.findIndex(t => t.id === updatedTask.id);
-            if (taskIndex !== -1) {
-                allTasks[taskIndex] = updatedTask;
-            }
-            return newTasks;
-        });
+        const newTasks = tasks.map(task => (task.id === updatedTask.id ? updatedTask : task));
+        setTasks(newTasks);
+        
+        // This is a mock update. In a real app, you would persist this change.
+        const taskIndex = allTasks.findIndex(t => t.id === updatedTask.id);
+        if (taskIndex !== -1) {
+            allTasks[taskIndex] = updatedTask;
+        }
     };
     
     const handleAddTask = (client: Client) => {
@@ -56,7 +55,7 @@ export default function ClientsPage() {
             date: new Date().toISOString(),
         };
         addTask(newTask);
-        setTasks(prev => [newTask, ...prev]);
+        setTasks([newTask, ...tasks]);
     };
 
     if (user?.role !== 'admin') {
