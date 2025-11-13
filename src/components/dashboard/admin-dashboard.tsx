@@ -1,11 +1,10 @@
 'use client';
 
-import { tasks, users, clients } from '@/lib/data';
+import { tasks, users } from '@/lib/data';
 import { StatsCard } from './stats-card';
 import { ClipboardList, Users, CheckCircle2, Clock } from 'lucide-react';
 import TasksOverviewChart from './tasks-overview-chart';
 import RecentTasks from './recent-tasks';
-import ClientSchedule from './client-schedule';
 
 export default function AdminDashboard() {
   const totalTasks = tasks.length;
@@ -26,8 +25,6 @@ export default function AdminDashboard() {
         <TasksOverviewChart tasks={tasks} />
         <RecentTasks tasks={tasks} users={users} title="All Recent Tasks" />
       </div>
-
-      <ClientSchedule clients={clients} initialTasks={tasks} users={users.filter(u => u.role === 'employee')} />
     </div>
   );
 }

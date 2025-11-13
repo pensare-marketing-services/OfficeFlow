@@ -11,6 +11,7 @@ import { Separator } from '../ui/separator';
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/dashboard')) return 'Dashboard';
   if (pathname.startsWith('/tasks')) return 'Tasks';
+  if (pathname.startsWith('/clients')) return 'Clients';
   if (pathname.startsWith('/reports')) return 'Create Client Report';
   if (pathname.startsWith('/summarize')) return 'Summarize Project Progress';
   if (pathname.startsWith('/settings')) return 'Settings';
