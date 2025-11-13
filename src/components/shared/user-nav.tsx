@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, Settings, User as UserIcon } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
+import Link from 'next/link';
 
 export function UserNav() {
   const { user, logout, loading } = useAuth();
@@ -58,10 +59,12 @@ export function UserNav() {
             <UserIcon />
             <span>Profile</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings />
-            <span>Settings</span>
-          </DropdownMenuItem>
+          <Link href="/settings" passHref>
+            <DropdownMenuItem>
+              <Settings />
+              <span>Settings</span>
+            </DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>
