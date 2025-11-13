@@ -101,13 +101,13 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                         <TableCell>
                             {isEmployeeView && onTaskUpdate ? (
                                 <Select value={task.status} onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)}>
-                                    <SelectTrigger className="w-[140px] text-xs">
+                                    <SelectTrigger className="w-[140px] text-xs focus:ring-accent">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {allStatuses.map(status => (
                                             <SelectItem key={status} value={status}>
-                                                <Badge variant={statusVariant[status] || 'default'} className="capitalize">{status}</Badge>
+                                                <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
