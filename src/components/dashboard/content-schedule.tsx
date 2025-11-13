@@ -150,20 +150,20 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                      <TableCell>
                                         <Select value={task.assigneeId} onValueChange={(value) => handleFieldChange(task.id, 'assigneeId', value)}>
                                             <SelectTrigger>
-                                                {task.assigneeId && users.find(u => u.id === task.assigneeId) ? (
+                                                {task.assigneeId && users.find(u => u.email === task.assigneeId) ? (
                                                     <div className="flex items-center gap-2">
                                                         <Avatar className="h-6 w-6">
-                                                            <AvatarImage src={users.find(u => u.id === task.assigneeId)?.avatar} />
-                                                            <AvatarFallback>{getInitials(users.find(u => u.id === task.assigneeId)?.name || '')}</AvatarFallback>
+                                                            <AvatarImage src={users.find(u => u.email === task.assigneeId)?.avatar} />
+                                                            <AvatarFallback>{getInitials(users.find(u => u.email === task.assigneeId)?.name || '')}</AvatarFallback>
                                                         </Avatar>
-                                                        <span className="truncate">{users.find(u => u.id === task.assigneeId)?.name}</span>
+                                                        <span className="truncate">{users.find(u => u.email === task.assigneeId)?.name}</span>
                                                     </div>
                                                 ) : <SelectValue placeholder="Assign..." />}
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="">Unassigned</SelectItem>
                                                 {users.map(user => (
-                                                    <SelectItem key={user.id} value={user.id}>
+                                                    <SelectItem key={user.id} value={user.email}>
                                                         <div className="flex items-center gap-3">
                                                              <Avatar className="h-6 w-6">
                                                                 <AvatarImage src={user.avatar} />
