@@ -24,7 +24,7 @@ const userAvatars: Record<string, string> = PlaceHolderImages.reduce((acc, img) 
     return acc;
 }, {} as Record<string, string>);
 
-export const users: User[] = [
+const initialUsers: User[] = [
   {
     id: '1',
     name: 'Admin User',
@@ -119,15 +119,20 @@ export const tasks: Task[] = [
 ];
 
 
-let allUsers = [...users];
+let allUsers = [...initialUsers];
 
 export const addUser = (user: User) => {
     allUsers.push(user);
+    // Also add to the login list
+    users.push(user);
 }
 
 export const getUsers = () => {
     return allUsers;
 }
+
+// This is used by the login page
+export let users = [...initialUsers];
 
 export let allTasks = [...tasks];
 

@@ -58,7 +58,7 @@ export default function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProp
         name: data.name,
         email: data.email,
         role: 'employee',
-        avatar: `https://picsum.photos/seed/${users.length + 1}/200/200`
+        avatar: `https://picsum.photos/seed/${Math.random()}/200/200`
       };
       
       addUser(newUser);
