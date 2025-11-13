@@ -8,17 +8,21 @@ export type User = {
   avatar: string;
 };
 
+export type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
+export type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold';
+
 export type Task = {
   id: string;
   title: string;
   description: string;
-  status: 'To Do' | 'In Progress' | 'Done' | 'Overdue';
+  status: 'To Do' | 'In Progress' | 'Done' | 'Overdue' | ContentStatus;
   priority: 'Low' | 'Medium' | 'High';
   deadline: string;
   assigneeId: string;
   progressNotes: { note: string; date: string }[];
   clientId?: string;
   date?: string;
+  contentType?: ContentType;
 };
 
 export type Client = {
@@ -60,6 +64,34 @@ const initialUsers: User[] = [
     role: 'employee',
     avatar: userAvatars['user-avatar-4'] || '',
   },
+   {
+    id: '5',
+    name: 'Yaseen',
+    email: 'yaseen@officeflow.com',
+    role: 'employee',
+    avatar: `https://picsum.photos/seed/yaseen/200/200`
+  },
+  {
+    id: '6',
+    name: 'Issec',
+    email: 'issec@officeflow.com',
+    role: 'employee',
+    avatar: `https://picsum.photos/seed/issec/200/200`
+  },
+   {
+    id: '7',
+    name: 'Zeenath',
+    email: 'zeenath@officeflow.com',
+    role: 'employee',
+    avatar: `https://picsum.photos/seed/zeenath/200/200`
+  },
+   {
+    id: '8',
+    name: 'Jasnas',
+    email: 'jasnas@officeflow.com',
+    role: 'employee',
+    avatar: `https://picsum.photos/seed/jasnas/200/200`
+  },
 ];
 
 export const clients: Client[] = [
@@ -70,7 +102,7 @@ export const clients: Client[] = [
     { id: 'client-5', name: 'Nexus Solutions' },
 ];
 
-export const tasks: Task[] = [
+export let tasks: Task[] = [
   {
     id: 'TASK-8782',
     title: 'Develop new client reporting feature',
@@ -131,15 +163,82 @@ export const tasks: Task[] = [
     assigneeId: '2',
     progressNotes: [],
   },
+  // New sample data for Habari Group
+  {
+      id: 'TASK-1101',
+      clientId: 'client-3',
+      date: '2024-11-12',
+      deadline: '2024-11-12',
+      title: 'Q-poll',
+      description: 'Instagram question poll-1',
+      contentType: 'Story',
+      status: 'Posted',
+      assigneeId: '5',
+      priority: 'Medium',
+      progressNotes: [],
+  },
+  {
+      id: 'TASK-1102',
+      clientId: 'client-3',
+      date: '2024-11-13',
+      deadline: '2024-11-13',
+      title: 'Gen Ad- Monday',
+      description: 'Monday genreal AD- 17 Nov',
+      contentType: 'Image Ad',
+      status: 'Scheduled',
+      assigneeId: '6',
+      priority: 'Medium',
+      progressNotes: [],
+  },
+  {
+      id: 'TASK-1103',
+      clientId: 'client-3',
+      date: '2024-11-13',
+      deadline: '2024-11-13',
+      title: 'Creative',
+      description: 'Villa & Apartments',
+      contentType: 'Image Ad',
+      status: 'Scheduled',
+      assigneeId: '6',
+      priority: 'Medium',
+      progressNotes: [],
+  },
+  {
+      id: 'TASK-1104',
+      clientId: 'client-3',
+      date: '2024-11-17',
+      deadline: '2024-11-17',
+      title: 'AI video',
+      description: 'Creative AI video',
+      contentType: 'Video Ad',
+      status: 'Scheduled',
+      assigneeId: '6',
+      priority: 'High',
+      progressNotes: [],
+  },
+  {
+      id: 'TASK-1105',
+      clientId: 'client-3',
+      date: '2024-11-18',
+      deadline: '2024-11-18',
+      title: 'Blog',
+      description: 'Top 10 Factors',
+      contentType: 'Web Blogs',
+      status: 'Scheduled',
+      assigneeId: '7',
+      priority: 'Medium',
+      progressNotes: [],
+  }
 ];
 
 
 let allUsers = [...initialUsers];
 
 export const addUser = (user: User) => {
-    allUsers.push(user);
+    const newUser = { ...user, avatar: `https://picsum.photos/seed/${user.name}/200/200`};
+    allUsers.push(newUser);
     // Also add to the login list
-    users.push(user);
+    users.push(newUser);
 }
 
 export const getUsers = () => {
