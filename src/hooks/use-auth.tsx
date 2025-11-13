@@ -1,6 +1,3 @@
-// This file is unused now but kept for reference.
-// Firebase handles authentication now.
-
 'use client';
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
@@ -10,7 +7,7 @@ import { users } from '@/lib/data';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string) => boolean;
+  login: (name: string) => boolean;
   logout: () => void;
   loading: boolean;
 }
@@ -40,22 +37,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (!loading && !user && !pathname.startsWith('/login')) {
+    if (!loading && !user && pathname !== '/login') {
       router.push('/login');
+    }
+     if (!loading && user && pathname === '/login') {
+      router.push('/dashboard');
     }
   }, [user, loading, router, pathname]);
 
-  const login = (email: string) => {
-    setLoading(true);
-    const foundUser = users.find((u) => u.email === email);
+  const login = (name: string) => {
+    const foundUser = users.find((u) => u.name.toLowerCase() === name.toLowerCase());
     if (foundUser) {
       setUser(foundUser);
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(foundUser));
-      router.push('/dashboard');
-      setLoading(false);
       return true;
     }
-    setLoading(false);
     return false;
   };
 

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/sidebar';
 import { LayoutDashboard, Settings, Briefcase } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
@@ -38,10 +39,9 @@ function OfficeIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export function SidebarNav() {
   const pathname = usePathname();
-  // Mocking admin user to show all nav items
-  const user = { data: { role: 'admin' } };
+  const { user } = useAuth();
 
-  const filteredNavItems = navItems.filter(item => !item.adminOnly || user?.data?.role === 'admin');
+  const filteredNavItems = navItems.filter(item => !item.adminOnly || user?.role === 'admin');
 
   return (
     <>

@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useUser } from '@/firebase';
+import { useAuth } from '@/hooks/use-auth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
@@ -42,7 +42,7 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 
 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
-  const { user: currentUser } = useUser();
+  const { user: currentUser } = useAuth();
   const recentTasks = tasks.sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime()).slice(0, 10);
 
   const getAssignee = (assigneeId: string): User | undefined => {
@@ -60,7 +60,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
       <CardHeader>
         <CardTitle className="font-headline">{title}</CardTitle>
         <CardDescription>
-            { currentUser?.data?.role === 'admin' ? "An overview of the latest tasks across the company." : "Your most recent tasks."}
+            { currentUser?.role === 'admin' ? "An overview of the latest tasks across the company." : "Your most recent tasks."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -68,7 +68,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
           <TableHeader>
             <TableRow>
               <TableHead>Task</TableHead>
-               {currentUser?.data?.role === 'admin' && <TableHead>Assignee</TableHead>}
+               {currentUser?.role === 'admin' && <TableHead>Assignee</TableHead>}
               <TableHead>Status</TableHead>
               <TableHead>Priority</TableHead>
             </TableRow>
@@ -76,14 +76,14 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
           <TableBody>
             {recentTasks.map(task => {
                 const assignee = getAssignee(task.assigneeId);
-                const isEmployeeView = currentUser?.data?.role === 'employee';
+                const isEmployeeView = currentUser?.role === 'employee';
                 return (
                     <TableRow key={task.id}>
                         <TableCell>
                             <div className="font-medium">{task.title}</div>
                             <div className="text-xs text-muted-foreground">{task.id}</div>
                         </TableCell>
-                        {currentUser?.data?.role === 'admin' && (
+                        {currentUser?.role === 'admin' && (
                             <TableCell>
                                 {assignee ? (
                                      <div className="flex items-center gap-2">

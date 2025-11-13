@@ -6,16 +6,13 @@ import EmployeeDashboard from '@/components/dashboard/employee-dashboard';
 import { useCollection, useFirestore } from '@/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { collection, doc, updateDoc } from 'firebase/firestore';
-import type { Task } from '@/lib/data';
+import type { Task, User } from '@/lib/data';
 import { useMemoFirebase } from '@/firebase/hooks';
-import { users as mockUsers } from '@/lib/data';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function DashboardPage() {
   const firestore = useFirestore();
-
-  // Mocking an admin user to bypass login
-  const user = { data: { role: 'admin', email: 'admin@officeflow.com' }};
-  const userLoading = false;
+  const { user, loading: userLoading } = useAuth();
 
   const tasksQuery = useMemoFirebase(
     () => (firestore ? collection(firestore, 'tasks') : null),
@@ -27,7 +24,9 @@ export default function DashboardPage() {
     () => (firestore ? collection(firestore, 'users') : null),
     [firestore]
   );
-  const { data: users, loading: usersLoading } = useCollection(usersQuery);
+  const { data: usersData, loading: usersLoading } = useCollection<User>(usersQuery);
+
+  const users = useMemo(() => usersData || [], [usersData]);
 
   const handleTaskUpdate = async (updatedTask: Task) => {
     if (!firestore || !updatedTask.id) return;
@@ -38,8 +37,8 @@ export default function DashboardPage() {
   const loading = userLoading || tasksLoading || usersLoading;
 
   const employeeTasks = useMemo(() => {
-    if (!tasks || !user?.data.email) return [];
-    return tasks.filter(task => task.assigneeId === user.data?.email);
+    if (!tasks || !user?.email) return [];
+    return tasks.filter(task => task.assigneeId === user.email);
   }, [tasks, user]);
 
 
@@ -60,7 +59,11 @@ export default function DashboardPage() {
     );
   }
 
-  return user.data?.role === 'admin' ? 
-    <AdminDashboard tasks={tasks || []} users={users || mockUsers} /> : 
-    <EmployeeDashboard employeeTasks={employeeTasks} users={users || mockUsers} onTaskUpdate={handleTaskUpdate} />;
+  if (!user) {
+    return null; // Or a redirect, but layout should handle it.
+  }
+
+  return user.role === 'admin' ? 
+    <AdminDashboard tasks={tasks || []} users={users} /> : 
+    <EmployeeDashboard employeeTasks={employeeTasks} users={users} onTaskUpdate={handleTaskUpdate} />;
 }

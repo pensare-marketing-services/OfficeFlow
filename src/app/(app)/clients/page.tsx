@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import type { Task, User, Client } from '@/lib/data';
-import { clients, users as mockUsers } from '@/lib/data';
+import { clients } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { useCollection, useFirestore } from '@/firebase';
 import { Button } from "@/components/ui/button";
@@ -16,22 +16,19 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { collection, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/hooks';
+import { useAuth } from '@/hooks/use-auth';
 
 
 export default function ClientsPage() {
     const firestore = useFirestore();
-    
-    // Mocking an admin user to bypass login
-    const user = { data: { role: 'admin' } };
+    const { user } = useAuth();
 
     const tasksQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'tasks') : null), [firestore]);
     const { data: tasks, loading: tasksLoading } = useCollection<Task>(tasksQuery);
     
     const usersQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'users') : null), [firestore]);
-    const { data: usersData, loading: usersLoading } = useCollection<User>(usersQuery);
+    const { data: users, loading: usersLoading } = useCollection<User>(usersQuery);
     
-    const users = usersData?.length ? usersData : mockUsers;
-
     const [selectedClient, setSelectedClient] = useState<Client | null>(clients[0] || null);
 
     const handleTaskUpdate = async (updatedTask: Partial<Task> & { id: string }) => {
@@ -109,7 +106,7 @@ export default function ClientsPage() {
             {(tasksLoading || usersLoading) ? <div>Loading...</div> : selectedClient ? (
                 <ContentSchedule 
                     tasks={filteredTasks} 
-                    users={employeeUsers} 
+                    users={employeeUsers || []} 
                     onTaskUpdate={handleTaskUpdate}
                 />
             ) : (

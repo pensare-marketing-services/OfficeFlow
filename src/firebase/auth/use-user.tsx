@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
-import { useAuth, useFirestore } from '../provider';
+import { useAuth as useFirebaseAuth } from '../provider';
+import { useFirestore } from '../provider';
 import { useDoc } from '../firestore/use-doc';
 import { useMemoFirebase } from '../hooks';
-import type { User as UserProfile } from '@/lib/data';
+import type { UserProfile } from '@/lib/data';
 
 interface UserState {
   auth: FirebaseUser;
@@ -13,7 +14,7 @@ interface UserState {
 }
 
 export function useUser() {
-  const { auth } = useAuth();
+  const { auth } = useFirebaseAuth();
   const firestore = useFirestore();
   const [user, setUser] = useState<UserState | null>(null);
   const [loading, setLoading] = useState(true);

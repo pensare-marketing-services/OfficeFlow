@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser } from '@/firebase';
+import { useAuth } from '@/hooks/use-auth';
 import type { Task, User } from '@/lib/data';
 import { StatsCard } from './stats-card';
 import { ClipboardList, CheckCircle2, Clock, Hourglass } from 'lucide-react';
@@ -13,7 +13,7 @@ interface EmployeeDashboardProps {
 }
 
 export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }: EmployeeDashboardProps) {
-  const { user } = useUser();
+  const { user } = useAuth();
   if (!user) return null;
 
   const totalTasks = employeeTasks.length;

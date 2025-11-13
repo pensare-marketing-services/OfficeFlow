@@ -3,6 +3,7 @@
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import type { ReactNode } from 'react';
 import { initializeFirebase } from '@/firebase';
+import { AuthProvider } from '@/hooks/use-auth';
 
 const { firebaseApp, firestore, auth } = initializeFirebase();
 
@@ -13,7 +14,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
       firestore={firestore}
       auth={auth}
     >
-      {children}
+      <AuthProvider>
+        {children}
+      </AuthProvider>
     </FirebaseClientProvider>
   );
 }

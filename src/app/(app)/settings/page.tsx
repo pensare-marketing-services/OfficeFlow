@@ -5,7 +5,6 @@ import { Users } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import AddEmployeeForm from '@/components/settings/add-employee-form';
 import type { User as UserType } from '@/lib/data';
-import { users as mockUsers } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { collection } from 'firebase/firestore';
@@ -17,9 +16,7 @@ export default function SettingsPage() {
     const firestore = useFirestore();
 
     const usersQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'users') : null), [firestore]);
-    const { data: usersData, loading, error } = useCollection<UserType>(usersQuery);
-
-    const users = usersData?.length ? usersData : mockUsers;
+    const { data: users, loading, error } = useCollection<UserType>(usersQuery);
 
     const employees = useMemo(() => {
         if (!users) return [];
