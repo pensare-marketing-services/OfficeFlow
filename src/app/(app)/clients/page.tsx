@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { allTasks, getUsers, clients, addTask } from '@/lib/data';
+import { allTasks, getUsers, clients, addTask, updateTask } from '@/lib/data';
 import type { Task, User, Client } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { useAuth } from '@/hooks/use-auth';
@@ -30,14 +30,8 @@ export default function ClientsPage() {
     }, []);
 
     const handleTaskUpdate = (updatedTask: Task) => {
-        const newTasks = tasks.map(task => (task.id === updatedTask.id ? updatedTask : task));
-        setTasks(newTasks);
-        
-        // This is a mock update. In a real app, you would persist this change.
-        const taskIndex = allTasks.findIndex(t => t.id === updatedTask.id);
-        if (taskIndex !== -1) {
-            allTasks[taskIndex] = updatedTask;
-        }
+        updateTask(updatedTask);
+        setTasks([...allTasks]);
     };
     
     const handleAddTask = (client: Client) => {
@@ -55,7 +49,7 @@ export default function ClientsPage() {
             date: new Date().toISOString(),
         };
         addTask(newTask);
-        setTasks([newTask, ...tasks]);
+        setTasks([...allTasks]);
     };
 
     if (user?.role !== 'admin') {

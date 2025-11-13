@@ -259,7 +259,7 @@ export const updateTask = (updatedTask: Task) => {
     if (index !== -1) {
         allTasks[index] = updatedTask;
     } else {
-        // If task doesn't exist, add it.
+        // If task doesn't exist, add it. This case shouldn't be hit with the current UI.
         addTask(updatedTask);
     }
 };
