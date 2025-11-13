@@ -148,7 +148,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         </Select>
                                     </TableCell>
                                      <TableCell>
-                                        <Select value={task.assigneeId} onValueChange={(value) => handleFieldChange(task.id, 'assigneeId', value)}>
+                                        <Select
+                                            value={task.assigneeId || 'unassigned'}
+                                            onValueChange={(value) => handleFieldChange(task.id, 'assigneeId', value === 'unassigned' ? '' : value)}
+                                        >
                                             <SelectTrigger>
                                                 {task.assigneeId && users.find(u => u.email === task.assigneeId) ? (
                                                     <div className="flex items-center gap-2">
@@ -161,7 +164,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                 ) : <SelectValue placeholder="Assign..." />}
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="">Unassigned</SelectItem>
+                                                <SelectItem value="unassigned">Unassigned</SelectItem>
                                                 {users.map(user => (
                                                     <SelectItem key={user.id} value={user.email}>
                                                         <div className="flex items-center gap-3">
