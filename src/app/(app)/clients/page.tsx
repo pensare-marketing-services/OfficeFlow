@@ -16,12 +16,9 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { collection, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/hooks';
-import { useAuth } from '@/hooks/use-auth';
-
 
 export default function ClientsPage() {
     const firestore = useFirestore();
-    const { user } = useAuth();
 
     const tasksQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'tasks') : null), [firestore]);
     const { data: tasks, loading: tasksLoading } = useCollection<Task>(tasksQuery);
@@ -65,12 +62,6 @@ export default function ClientsPage() {
         if (!tasks || !selectedClient) return [];
         return tasks.filter(task => task.clientId === selectedClient.id);
     }, [tasks, selectedClient]);
-    
-    const employeeUsers = useMemo(() => {
-        if (!users) return [];
-        return users.filter(u => u.role === 'employee');
-    }, [users]);
-
 
     return (
         <div className="space-y-6">
