@@ -29,6 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
 import { getUsers } from '@/lib/data';
+import { Label } from '../ui/label';
 
 const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('');
 

@@ -59,12 +59,6 @@ export function UserNav() {
             <UserIcon />
             <span>Profile</span>
           </DropdownMenuItem>
-          <Link href="/settings" passHref>
-            <DropdownMenuItem>
-              <Settings />
-              <span>Settings</span>
-            </DropdownMenuItem>
-          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>
