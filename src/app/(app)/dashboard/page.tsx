@@ -3,15 +3,19 @@
 import { useMemo } from 'react';
 import AdminDashboard from '@/components/dashboard/admin-dashboard';
 import EmployeeDashboard from '@/components/dashboard/employee-dashboard';
-import { useUser, useCollection, useFirestore } from '@/firebase';
+import { useCollection, useFirestore } from '@/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { collection, doc, updateDoc } from 'firebase/firestore';
 import type { Task } from '@/lib/data';
 import { useMemoFirebase } from '@/firebase/hooks';
+import { users as mockUsers } from '@/lib/data';
 
 export default function DashboardPage() {
-  const { user, loading: userLoading } = useUser();
   const firestore = useFirestore();
+
+  // Mocking an admin user to bypass login
+  const user = { data: { role: 'admin', email: 'admin@officeflow.com' }};
+  const userLoading = false;
 
   const tasksQuery = useMemoFirebase(
     () => (firestore ? collection(firestore, 'tasks') : null),
@@ -34,9 +38,7 @@ export default function DashboardPage() {
   const loading = userLoading || tasksLoading || usersLoading;
 
   const employeeTasks = useMemo(() => {
-    if (!tasks || !user?.auth.uid) return [];
-    // Note: Firebase Auth UID is often the email for email/password auth
-    // but can be different. We match on email here as our user profile `id` is the email.
+    if (!tasks || !user?.data.email) return [];
     return tasks.filter(task => task.assigneeId === user.data?.email);
   }, [tasks, user]);
 
@@ -58,11 +60,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!user) {
-    return null; // Or a message indicating no user found
-  }
-
   return user.data?.role === 'admin' ? 
-    <AdminDashboard tasks={tasks || []} users={users || []} /> : 
-    <EmployeeDashboard employeeTasks={employeeTasks} users={users || []} onTaskUpdate={handleTaskUpdate} />;
+    <AdminDashboard tasks={tasks || []} users={users || mockUsers} /> : 
+    <EmployeeDashboard employeeTasks={employeeTasks} users={users || mockUsers} onTaskUpdate={handleTaskUpdate} />;
 }

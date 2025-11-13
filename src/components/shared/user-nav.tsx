@@ -1,13 +1,10 @@
 'use client';
 
-import { useUser, useAuth } from '@/firebase';
-import { signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -15,19 +12,22 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
-import { useRouter } from 'next/navigation';
 
 export function UserNav() {
-  const { user, loading } = useUser();
-  const { auth } = useAuth();
-  const router = useRouter();
+  // Mock user data since auth is removed
+  const user = {
+    data: {
+      name: 'Admin User',
+      email: 'admin@officeflow.com',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjI5MzU5MTR8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    }
+  };
+  const loading = false;
 
 
   const handleLogout = async () => {
-    if (auth) {
-      await signOut(auth);
-      router.push('/login');
-    }
+    // Logout functionality is disabled
+    alert("Logout is currently disabled.");
   };
 
   if (loading) {
@@ -68,7 +68,7 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut />
-          <span>Log out</span>
+          <span>Log out (disabled)</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

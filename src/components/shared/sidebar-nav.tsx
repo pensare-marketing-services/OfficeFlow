@@ -8,7 +8,6 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
-import { useUser } from '@/firebase';
 import { LayoutDashboard, Settings, Briefcase } from 'lucide-react';
 import Link from 'next/link';
 
@@ -39,7 +38,8 @@ function OfficeIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export function SidebarNav() {
   const pathname = usePathname();
-  const { user } = useUser();
+  // Mocking admin user to show all nav items
+  const user = { data: { role: 'admin' } };
 
   const filteredNavItems = navItems.filter(item => !item.adminOnly || user?.data?.role === 'admin');
 
