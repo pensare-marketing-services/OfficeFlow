@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -19,9 +19,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2 } from 'lucide-react';
-import { users as mockUsers } from '@/lib/data';
-import { doc, setDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { users as mockUsers, tasks as mockTasks } from '@/lib/data';
+import { doc, setDoc, writeBatch, collection, getDocs } from 'firebase/firestore';
 
 function AtSignIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -51,46 +50,74 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Function to create user profiles from mock data
-  const seedUser = async (email: string) => {
+  // Function to seed database if it's empty
+  const seedDatabase = async () => {
     if (!firestore) return;
-    const userToSeed = mockUsers.find((u) => u.email === email);
-    if (userToSeed) {
-      try {
-        await setDoc(doc(firestore, 'users', userToSeed.email), {
-          name: userToSeed.name,
-          email: userToSeed.email,
-          role: userToSeed.role,
-          avatar: userToSeed.avatar,
+    
+    // Check if users are already seeded
+    const usersCollection = collection(firestore, 'users');
+    const userSnapshot = await getDocs(usersCollection);
+    if (!userSnapshot.empty) {
+        // Data already exists
+        return;
+    }
+
+    const batch = writeBatch(firestore);
+
+    // Seed users
+    mockUsers.forEach(user => {
+        const userRef = doc(firestore, 'users', user.email);
+        batch.set(userRef, {
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            avatar: user.avatar,
         });
-      } catch (e) {
-        console.error('Error seeding user profile:', e);
-      }
+    });
+
+    // Seed tasks
+    mockTasks.forEach(task => {
+        const taskRef = doc(collection(firestore, 'tasks'));
+        batch.set(taskRef, task);
+    });
+
+    try {
+        await batch.commit();
+    } catch (e) {
+        console.error("Error seeding database:", e);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    if (!auth) {
-      setError('Auth service is not available.');
+    if (!auth || !firestore) {
+      setError('Auth or Firestore service is not available.');
       setLoading(false);
       return;
     }
+    
+    const userToLogin = mockUsers.find(u => u.email === email);
 
     try {
       // Try to sign in
       await signInWithEmailAndPassword(auth, email, password);
+      // Seed data if it's the admin user and data is not present
+      if (userToLogin?.role === 'admin') {
+          await seedDatabase();
+      }
+
     } catch (signInError: any) {
-      // If sign-in fails because the user doesn't exist, create a new account
       if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/invalid-credential') {
-        const isMockUser = mockUsers.some((u) => u.email === email);
-        if (isMockUser) {
+        if (userToLogin) {
           try {
             await createUserWithEmailAndPassword(auth, email, password);
-            await seedUser(email); // Create the user profile document
+             // Seed data if it's the admin user
+            if (userToLogin.role === 'admin') {
+                await seedDatabase();
+            }
           } catch (signUpError: any) {
             setError(signUpError.message);
           }
@@ -138,7 +165,7 @@ export default function LoginPage() {
             Sign in or create an account to continue.
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

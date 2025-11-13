@@ -12,7 +12,7 @@ import { Loader2, UserPlus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
-import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 
 
@@ -59,8 +59,6 @@ export default function AddEmployeeForm() {
             return;
         }
       
-      // We don't create auth user here, we just add them to the users collection.
-      // The user will be created in Auth when they first log in.
       const newUser = {
         id: data.email,
         name: data.name,
@@ -69,20 +67,20 @@ export default function AddEmployeeForm() {
         avatar: `https://picsum.photos/seed/${data.name}/200/200`
       };
       
-      await setDoc(userDocRef, newUser);
-      
-      // This is a temporary solution for the demo.
-      // In a real app, you would send an invitation email.
-      // We will create the auth user here so they can log in.
+      // We create the auth user here so they can log in.
+      // In a real app, you would likely send an invitation email.
       try {
         await createUserWithEmailAndPassword(auth, data.email, data.password);
       } catch (authError: any) {
-        // Ignore if user already exists in auth, but not in firestore.
+        // If the user already exists in Auth (but not Firestore), we can still proceed
+        // to create their profile, but we should let the admin know.
         if (authError.code !== 'auth/email-already-in-use') {
-          throw authError;
+          throw authError; // Re-throw other auth errors
         }
       }
-
+      
+      // After successfully creating the auth user (or if they existed), create the Firestore profile.
+      await setDoc(userDocRef, newUser);
 
       toast({
           title: "Employee Added",

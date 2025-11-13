@@ -102,9 +102,8 @@ export const clients: Client[] = [
     { id: 'client-5', name: 'Nexus Solutions' },
 ];
 
-export let tasks: Task[] = [
+export const tasks: Omit<Task, 'id'>[] = [
   {
-    id: 'TASK-8782',
     title: 'Develop new client reporting feature',
     description: 'Create a new feature that allows admins to generate PDF reports for clients. This should include AI-powered summaries.',
     status: 'In Progress',
@@ -114,7 +113,6 @@ export let tasks: Task[] = [
     progressNotes: [{ note: 'Initial setup and component creation complete.', date: new Date().toISOString() }],
   },
   {
-    id: 'TASK-7821',
     title: 'Update UI Kit to v2.0',
     description: 'Update all components in the UI kit to match the new design specifications.',
     status: 'To Do',
@@ -124,7 +122,6 @@ export let tasks: Task[] = [
     progressNotes: [],
   },
   {
-    id: 'TASK-4533',
     title: 'Fix login authentication bug',
     description: 'Users are reporting being unable to log in on Safari. Investigate and deploy a fix.',
     status: 'Done',
@@ -134,7 +131,6 @@ export let tasks: Task[] = [
     progressNotes: [{ note: 'Identified issue with Safari cookie policy. Deployed a patch.', date: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString() }],
   },
   {
-    id: 'TASK-9812',
     title: 'Prepare Q3 financial projections',
     description: 'Gather all financial data and prepare the projection report for the next quarter.',
     status: 'To Do',
@@ -144,7 +140,6 @@ export let tasks: Task[] = [
     progressNotes: [],
   },
   {
-    id: 'TASK-5545',
     title: 'Onboard new marketing intern',
     description: 'Create an onboarding plan and guide the new intern through their first week.',
     status: 'In Progress',
@@ -154,7 +149,6 @@ export let tasks: Task[] = [
     progressNotes: [{ note: 'Onboarding plan created. First day activities completed.', date: new Date().toISOString() }],
   },
     {
-    id: 'TASK-3214',
     title: 'Client Meeting Preparation',
     description: 'Prepare presentation slides for the upcoming meeting with Client X.',
     status: 'Overdue',
@@ -165,7 +159,6 @@ export let tasks: Task[] = [
   },
   // New sample data for Habari Group
   {
-      id: 'TASK-1101',
       clientId: 'client-3',
       date: '2024-11-12',
       deadline: '2024-11-12',
@@ -178,7 +171,6 @@ export let tasks: Task[] = [
       progressNotes: [],
   },
   {
-      id: 'TASK-1102',
       clientId: 'client-3',
       date: '2024-11-13',
       deadline: '2024-11-13',
@@ -191,7 +183,6 @@ export let tasks: Task[] = [
       progressNotes: [],
   },
   {
-      id: 'TASK-1103',
       clientId: 'client-3',
       date: '2024-11-13',
       deadline: '2024-11-13',
@@ -204,7 +195,6 @@ export let tasks: Task[] = [
       progressNotes: [],
   },
   {
-      id: 'TASK-1104',
       clientId: 'client-3',
       date: '2024-11-17',
       deadline: '2024-11-17',
@@ -217,7 +207,6 @@ export let tasks: Task[] = [
       progressNotes: [],
   },
   {
-      id: 'TASK-1105',
       clientId: 'client-3',
       date: '2024-11-18',
       deadline: '2024-11-18',
@@ -231,35 +220,4 @@ export let tasks: Task[] = [
   }
 ];
 
-
-let allUsers = [...initialUsers];
-
-export const addUser = (user: User) => {
-    const newUser = { ...user, avatar: `https://picsum.photos/seed/${user.name}/200/200`};
-    allUsers.push(newUser);
-    // Also add to the login list
-    users.push(newUser);
-}
-
-export const getUsers = () => {
-    return allUsers;
-}
-
-// This is used by the login page
-export let users = [...initialUsers];
-
-export let allTasks = [...tasks];
-
-export const addTask = (task: Task) => {
-    allTasks.unshift(task);
-}
-
-export const updateTask = (updatedTask: Task) => {
-    const index = allTasks.findIndex(t => t.id === updatedTask.id);
-    if (index !== -1) {
-        allTasks[index] = updatedTask;
-    } else {
-        // If task doesn't exist, add it. This case shouldn't be hit with the current UI.
-        addTask(updatedTask);
-    }
-};
+export const users: User[] = [...initialUsers];
