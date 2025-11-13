@@ -85,9 +85,6 @@ export default function LoginPage() {
                 required
               />
             </div>
-             <p className="text-xs text-muted-foreground">
-                Available users: {users.map(u => u.name).join(', ')}
-            </p>
             {error && (
               <Alert variant="destructive">
                 <AlertTitle>Login Failed</AlertTitle>
@@ -95,11 +92,14 @@ export default function LoginPage() {
               </Alert>
             )}
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
+            <p className="text-xs text-muted-foreground text-center">
+                Available users: {users.map(u => u.name).join(', ')}
+            </p>
           </CardFooter>
         </form>
       </Card>
