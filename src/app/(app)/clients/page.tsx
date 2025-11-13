@@ -43,7 +43,7 @@ export default function ClientsPage() {
     
     const handleAddTask = (client: Client) => {
         const newTask: Task = {
-            id: `TASK-${Date.now()}`,
+            id: `TASK-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
             title: 'New Content Title',
             description: 'A brief description of the content.',
             status: 'Scheduled',
