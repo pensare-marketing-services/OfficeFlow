@@ -37,21 +37,23 @@ const statusColors: Record<ContentStatus, string> = {
 }
 
 const EditableTableCell: React.FC<{ value: string; onChange: (value: string) => void; type?: 'text' | 'textarea' }> = ({ value, onChange, type = 'text' }) => {
-    const [currentValue, setCurrentValue] = React.useState(value);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setCurrentValue(e.target.value);
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        onChange(e.target.value);
     };
 
-    const handleBlur = () => {
-        onChange(currentValue);
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            onChange(e.currentTarget.value);
+            e.currentTarget.blur();
+        }
     };
     
     if (type === 'textarea') {
-         return <Textarea value={currentValue} onChange={handleChange} onBlur={handleBlur} className="bg-transparent border-0 focus-visible:ring-1 text-xs" />;
+         return <Textarea defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 text-xs" />;
     }
 
-    return <Input value={currentValue} onChange={handleChange} onBlur={handleBlur} className="bg-transparent border-0 focus-visible:ring-1 text-xs" />;
+    return <Input defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 text-xs" />;
 };
 
 export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentScheduleProps) {
@@ -166,6 +168,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                     <SelectItem key={user.id} value={user.id}>
                                                         <div className="flex items-center gap-3">
                                                              <Avatar className="h-6 w-6">
+                                                                <AvatarImage src={user.avatar} />
                                                                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                                                             </Avatar>
                                                             <span>{user.name}</span>
