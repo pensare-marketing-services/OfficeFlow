@@ -1,34 +1,47 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import AdminDashboard from '@/components/dashboard/admin-dashboard';
 import EmployeeDashboard from '@/components/dashboard/employee-dashboard';
-import { useAuth } from '@/hooks/use-auth';
+import { useUser, useCollection, useFirestore } from '@/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getUsers, allTasks, updateTask } from '@/lib/data';
-import type { User, Task } from '@/lib/data';
+import { collection, doc, updateDoc } from 'firebase/firestore';
+import type { Task } from '@/lib/data';
+import { useMemoFirebase } from '@/firebase/hooks';
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [dataLoading, setDataLoading] = useState(true);
+  const { user, loading: userLoading } = useUser();
+  const firestore = useFirestore();
 
-  useEffect(() => {
-    // Simulate fetching data
-    const loadedUsers = getUsers();
-    const loadedTasks = allTasks;
-    setUsers(loadedUsers);
-    setTasks(loadedTasks);
-    setDataLoading(false);
-  }, []);
+  const tasksQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'tasks') : null),
+    [firestore]
+  );
+  const { data: tasks, loading: tasksLoading } = useCollection<Task>(tasksQuery);
+  
+  const usersQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'users') : null),
+    [firestore]
+  );
+  const { data: users, loading: usersLoading } = useCollection(usersQuery);
 
-   const handleTaskUpdate = (updatedTask: Task) => {
-        updateTask(updatedTask);
-        setTasks([...allTasks]);
-    };
+  const handleTaskUpdate = async (updatedTask: Task) => {
+    if (!firestore || !updatedTask.id) return;
+    const taskRef = doc(firestore, 'tasks', updatedTask.id);
+    await updateDoc(taskRef, { ...updatedTask });
+  };
+  
+  const loading = userLoading || tasksLoading || usersLoading;
 
-  if (loading || dataLoading) {
+  const employeeTasks = useMemo(() => {
+    if (!tasks || !user?.auth.uid) return [];
+    // Note: Firebase Auth UID is often the email for email/password auth
+    // but can be different. We match on email here as our user profile `id` is the email.
+    return tasks.filter(task => task.assigneeId === user.data?.email);
+  }, [tasks, user]);
+
+
+  if (loading) {
     return (
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -38,8 +51,8 @@ export default function DashboardPage() {
           <Skeleton className="h-28" />
         </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Skeleton className="h-80" />
-            <Skeleton className="h-80" />
+          <Skeleton className="h-80" />
+          <Skeleton className="h-80" />
         </div>
       </div>
     );
@@ -49,7 +62,7 @@ export default function DashboardPage() {
     return null; // Or a message indicating no user found
   }
 
-  const employeeTasks = tasks.filter(task => task.assigneeId === user.id);
-
-  return user.role === 'admin' ? <AdminDashboard /> : <EmployeeDashboard employeeTasks={employeeTasks} onTaskUpdate={handleTaskUpdate} />;
+  return user.data?.role === 'admin' ? 
+    <AdminDashboard tasks={tasks || []} users={users || []} /> : 
+    <EmployeeDashboard employeeTasks={employeeTasks} users={users || []} onTaskUpdate={handleTaskUpdate} />;
 }

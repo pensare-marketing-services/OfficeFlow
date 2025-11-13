@@ -10,59 +10,79 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, UserPlus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import type { User } from '@/lib/data';
-import { addUser, getUsers } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
+import { useFirestore } from '@/firebase';
+import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
+
 
 const employeeSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   email: z.string().email('Please enter a valid email address.'),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
 });
 
 type EmployeeFormValues = z.infer<typeof employeeSchema>;
 
-interface AddEmployeeFormProps {
-    onEmployeeAdded: (newUser: User) => void;
-}
-
-export default function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
+export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const auth = getAuth();
+
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
       name: '',
       email: '',
+      password: '',
     },
   });
 
   async function onSubmit(data: EmployeeFormValues) {
+    if (!firestore) {
+      setError('Database is not connected');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-        const users = getUsers();
-        if (users.find(u => u.email === data.email)) {
+        const userDocRef = doc(firestore, 'users', data.email);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
             setError('An employee with this email already exists.');
             setLoading(false);
             return;
         }
-
-      // In a real app, this would be an API call.
-      // We simulate a delay.
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const newUser: User = {
-        id: (users.length + 1).toString(),
+      // We don't create auth user here, we just add them to the users collection.
+      // The user will be created in Auth when they first log in.
+      const newUser = {
+        id: data.email,
         name: data.name,
         email: data.email,
         role: 'employee',
-        avatar: `https://picsum.photos/seed/${Math.random()}/200/200`
+        avatar: `https://picsum.photos/seed/${data.name}/200/200`
       };
       
-      addUser(newUser);
-      onEmployeeAdded(newUser);
+      await setDoc(userDocRef, newUser);
+      
+      // This is a temporary solution for the demo.
+      // In a real app, you would send an invitation email.
+      // We will create the auth user here so they can log in.
+      try {
+        await createUserWithEmailAndPassword(auth, data.email, data.password);
+      } catch (authError: any) {
+        // Ignore if user already exists in auth, but not in firestore.
+        if (authError.code !== 'auth/email-already-in-use') {
+          throw authError;
+        }
+      }
+
 
       toast({
           title: "Employee Added",
@@ -70,9 +90,9 @@ export default function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProp
       });
       form.reset();
 
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setError('Failed to add employee. Please try again.');
+      setError(e.message || 'Failed to add employee. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -92,6 +112,9 @@ export default function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProp
                     )} />
                     <FormField control={form.control} name="email" render={({ field }) => (
                         <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input placeholder="e.g., jane.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                     <FormField control={form.control} name="password" render={({ field }) => (
+                        <FormItem><FormLabel>Temporary Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">

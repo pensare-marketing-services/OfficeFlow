@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { allTasks, getUsers, clients, addTask, updateTask } from '@/lib/data';
+import { useState, useMemo } from 'react';
 import type { Task, User, Client } from '@/lib/data';
+import { clients } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
-import { useAuth } from '@/hooks/use-auth';
+import { useUser, useCollection, useFirestore } from '@/firebase';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Lock } from "lucide-react";
 import Link from "next/link";
@@ -17,26 +17,31 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { collection, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { useMemoFirebase } from '@/firebase/hooks';
+
 
 export default function ClientsPage() {
-    const { user } = useAuth();
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [users, setUsers] = useState<User[]>([]);
+    const { user } = useUser();
+    const firestore = useFirestore();
+
+    const tasksQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'tasks') : null), [firestore]);
+    const { data: tasks, loading: tasksLoading } = useCollection<Task>(tasksQuery);
+    
+    const usersQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'users') : null), [firestore]);
+    const { data: users, loading: usersLoading } = useCollection<User>(usersQuery);
+
     const [selectedClient, setSelectedClient] = useState<Client | null>(clients[0] || null);
 
-    useEffect(() => {
-        setTasks(allTasks);
-        setUsers(getUsers());
-    }, []);
-
-    const handleTaskUpdate = (updatedTask: Task) => {
-        updateTask(updatedTask);
-        setTasks([...allTasks]);
+    const handleTaskUpdate = async (updatedTask: Partial<Task> & { id: string }) => {
+        if (!firestore) return;
+        const taskRef = doc(firestore, 'tasks', updatedTask.id);
+        await updateDoc(taskRef, updatedTask);
     };
     
-    const handleAddTask = (client: Client) => {
-        const newTask: Task = {
-            id: `TASK-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    const handleAddTask = async (client: Client) => {
+        if (!firestore) return;
+        const newTask: Omit<Task, 'id'> = {
             title: 'New Content Title',
             description: 'A brief description of the content.',
             status: 'Scheduled',
@@ -48,11 +53,17 @@ export default function ClientsPage() {
             clientId: client.id,
             date: new Date().toISOString(),
         };
-        addTask(newTask);
-        setTasks([...allTasks]);
+        try {
+            await addDoc(collection(firestore, 'tasks'), {
+                ...newTask,
+                createdAt: serverTimestamp(),
+            });
+        } catch (error) {
+            console.error("Error adding task: ", error);
+        }
     };
 
-    if (user?.role !== 'admin') {
+    if (user?.data?.role !== 'admin') {
         return (
              <div className="flex items-center justify-center h-[60vh]">
                 <Alert variant="destructive" className="max-w-md">
@@ -71,7 +82,16 @@ export default function ClientsPage() {
         )
     }
 
-    const filteredTasks = selectedClient ? tasks.filter(task => task.clientId === selectedClient.id) : [];
+    const filteredTasks = useMemo(() => {
+        if (!tasks || !selectedClient) return [];
+        return tasks.filter(task => task.clientId === selectedClient.id);
+    }, [tasks, selectedClient]);
+    
+    const employeeUsers = useMemo(() => {
+        if (!users) return [];
+        return users.filter(u => u.role === 'employee');
+    }, [users]);
+
 
     return (
         <div className="space-y-6">
@@ -97,17 +117,17 @@ export default function ClientsPage() {
                                 </SelectContent>
                             </Select>
                             {selectedClient && (
-                                <Button onClick={() => handleAddTask(selectedClient)}>Add Content</Button>
+                                <Button onClick={() => handleAddTask(selectedClient)} disabled={tasksLoading}>Add Content</Button>
                             )}
                         </div>
                     </div>
                 </CardHeader>
             </Card>
 
-            {selectedClient ? (
+            {(tasksLoading || usersLoading) ? <div>Loading...</div> : selectedClient ? (
                 <ContentSchedule 
                     tasks={filteredTasks} 
-                    users={users.filter(u => u.role === 'employee')} 
+                    users={employeeUsers} 
                     onTaskUpdate={handleTaskUpdate}
                 />
             ) : (

@@ -1,26 +1,25 @@
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@/firebase';
 import type { Task, User } from '@/lib/data';
-import { getUsers } from '@/lib/data';
 import { StatsCard } from './stats-card';
 import { ClipboardList, CheckCircle2, Clock, Hourglass } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 
 interface EmployeeDashboardProps {
   employeeTasks: Task[];
+  users: User[];
   onTaskUpdate: (task: Task) => void;
 }
 
-export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: EmployeeDashboardProps) {
-  const { user } = useAuth();
+export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }: EmployeeDashboardProps) {
+  const { user } = useUser();
   if (!user) return null;
 
-  const users = getUsers();
   const totalTasks = employeeTasks.length;
   const inProgressTasks = employeeTasks.filter(t => t.status === 'In Progress' || t.status === 'On Work').length;
   const completedTasks = employeeTasks.filter(t => t.status === 'Done' || t.status === 'Posted' || t.status === 'Approved').length;
-  const overdueTasks = employeeTasks.filter(t => t.status === 'Overdue').length;
+  const overdueTasks = employeeTasks.filter(t => new Date(t.deadline) < new Date() && t.status !== 'Done').length;
   
   return (
     <div className="space-y-6">

@@ -37,56 +37,56 @@ const userAvatars: Record<string, string> = PlaceHolderImages.reduce((acc, img) 
 
 const initialUsers: User[] = [
   {
-    id: '1',
+    id: 'admin@officeflow.com',
     name: 'Admin User',
     email: 'admin@officeflow.com',
     role: 'admin',
     avatar: userAvatars['user-avatar-1'] || '',
   },
   {
-    id: '2',
+    id: 'alice@officeflow.com',
     name: 'Alice Johnson',
     email: 'alice@officeflow.com',
     role: 'employee',
     avatar: userAvatars['user-avatar-2'] || '',
   },
   {
-    id: '3',
+    id: 'bob@officeflow.com',
     name: 'Bob Williams',
     email: 'bob@officeflow.com',
     role: 'employee',
     avatar: userAvatars['user-avatar-3'] || '',
   },
   {
-    id: '4',
+    id: 'charlie@officeflow.com',
     name: 'Charlie Brown',
     email: 'charlie@officeflow.com',
     role: 'employee',
     avatar: userAvatars['user-avatar-4'] || '',
   },
    {
-    id: '5',
+    id: 'yaseen@officeflow.com',
     name: 'Yaseen',
     email: 'yaseen@officeflow.com',
     role: 'employee',
     avatar: `https://picsum.photos/seed/yaseen/200/200`
   },
   {
-    id: '6',
+    id: 'issec@officeflow.com',
     name: 'Issec',
     email: 'issec@officeflow.com',
     role: 'employee',
     avatar: `https://picsum.photos/seed/issec/200/200`
   },
    {
-    id: '7',
+    id: 'zeenath@officeflow.com',
     name: 'Zeenath',
     email: 'zeenath@officeflow.com',
     role: 'employee',
     avatar: `https://picsum.photos/seed/zeenath/200/200`
   },
    {
-    id: '8',
+    id: 'jasnas@officeflow.com',
     name: 'Jasnas',
     email: 'jasnas@officeflow.com',
     role: 'employee',
@@ -110,7 +110,7 @@ export let tasks: Task[] = [
     status: 'In Progress',
     priority: 'High',
     deadline: new Date(new Date().setDate(new Date().getDate() + 10)).toISOString(),
-    assigneeId: '2',
+    assigneeId: 'alice@officeflow.com',
     progressNotes: [{ note: 'Initial setup and component creation complete.', date: new Date().toISOString() }],
   },
   {
@@ -120,7 +120,7 @@ export let tasks: Task[] = [
     status: 'To Do',
     priority: 'Medium',
     deadline: new Date(new Date().setDate(new Date().getDate() + 20)).toISOString(),
-    assigneeId: '2',
+    assigneeId: 'alice@officeflow.com',
     progressNotes: [],
   },
   {
@@ -130,7 +130,7 @@ export let tasks: Task[] = [
     status: 'Done',
     priority: 'High',
     deadline: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
-    assigneeId: '3',
+    assigneeId: 'bob@officeflow.com',
     progressNotes: [{ note: 'Identified issue with Safari cookie policy. Deployed a patch.', date: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString() }],
   },
   {
@@ -140,7 +140,7 @@ export let tasks: Task[] = [
     status: 'To Do',
     priority: 'Medium',
     deadline: new Date(new Date().setDate(new Date().getDate() + 15)).toISOString(),
-    assigneeId: '4',
+    assigneeId: 'charlie@officeflow.com',
     progressNotes: [],
   },
   {
@@ -150,7 +150,7 @@ export let tasks: Task[] = [
     status: 'In Progress',
     priority: 'Low',
     deadline: new Date(new Date().setDate(new Date().getDate() + 5)).toISOString(),
-    assigneeId: '3',
+    assigneeId: 'bob@officeflow.com',
     progressNotes: [{ note: 'Onboarding plan created. First day activities completed.', date: new Date().toISOString() }],
   },
     {
@@ -160,7 +160,7 @@ export let tasks: Task[] = [
     status: 'Overdue',
     priority: 'High',
     deadline: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
-    assigneeId: '2',
+    assigneeId: 'alice@officeflow.com',
     progressNotes: [],
   },
   // New sample data for Habari Group
@@ -173,7 +173,7 @@ export let tasks: Task[] = [
       description: 'Instagram question poll-1',
       contentType: 'Story',
       status: 'Posted',
-      assigneeId: '5',
+      assigneeId: 'yaseen@officeflow.com',
       priority: 'Medium',
       progressNotes: [],
   },
@@ -186,7 +186,7 @@ export let tasks: Task[] = [
       description: 'Monday genreal AD- 17 Nov',
       contentType: 'Image Ad',
       status: 'Scheduled',
-      assigneeId: '6',
+      assigneeId: 'issec@officeflow.com',
       priority: 'Medium',
       progressNotes: [],
   },
@@ -199,7 +199,7 @@ export let tasks: Task[] = [
       description: 'Villa & Apartments',
       contentType: 'Image Ad',
       status: 'Scheduled',
-      assigneeId: '6',
+      assigneeId: 'issec@officeflow.com',
       priority: 'Medium',
       progressNotes: [],
   },
@@ -212,7 +212,7 @@ export let tasks: Task[] = [
       description: 'Creative AI video',
       contentType: 'Video Ad',
       status: 'Scheduled',
-      assigneeId: '6',
+      assigneeId: 'issec@officeflow.com',
       priority: 'High',
       progressNotes: [],
   },
@@ -225,7 +225,7 @@ export let tasks: Task[] = [
       description: 'Top 10 Factors',
       contentType: 'Web Blogs',
       status: 'Scheduled',
-      assigneeId: '7',
+      assigneeId: 'zeenath@officeflow.com',
       priority: 'Medium',
       progressNotes: [],
   }

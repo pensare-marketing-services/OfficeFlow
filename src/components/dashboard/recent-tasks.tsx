@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@/firebase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
@@ -17,7 +17,7 @@ interface RecentTasksProps {
   onTaskUpdate?: (task: Task) => void;
 }
 
-const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('');
+const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').toUpperCase();
 
 const allStatuses = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
 
@@ -42,11 +42,11 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 
 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
-  const { user: currentUser } = useAuth();
-  const recentTasks = tasks.slice(0, 10);
+  const { user: currentUser } = useUser();
+  const recentTasks = tasks.sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime()).slice(0, 10);
 
   const getAssignee = (assigneeId: string): User | undefined => {
-    return users.find(u => u.id === assigneeId);
+    return users.find(u => u.email === assigneeId); // Matching by email as ID
   }
 
   const handleStatusChange = (task: Task, newStatus: ContentStatus | 'To Do' | 'In Progress' | 'Done' | 'Overdue') => {
@@ -60,7 +60,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
       <CardHeader>
         <CardTitle className="font-headline">{title}</CardTitle>
         <CardDescription>
-            { currentUser?.role === 'admin' ? "An overview of the latest tasks across the company." : "Your most recent tasks."}
+            { currentUser?.data?.role === 'admin' ? "An overview of the latest tasks across the company." : "Your most recent tasks."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -68,7 +68,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
           <TableHeader>
             <TableRow>
               <TableHead>Task</TableHead>
-               {currentUser?.role === 'admin' && <TableHead>Assignee</TableHead>}
+               {currentUser?.data?.role === 'admin' && <TableHead>Assignee</TableHead>}
               <TableHead>Status</TableHead>
               <TableHead>Priority</TableHead>
             </TableRow>
@@ -76,14 +76,14 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
           <TableBody>
             {recentTasks.map(task => {
                 const assignee = getAssignee(task.assigneeId);
-                const isEmployeeView = currentUser?.role === 'employee';
+                const isEmployeeView = currentUser?.data?.role === 'employee';
                 return (
                     <TableRow key={task.id}>
                         <TableCell>
                             <div className="font-medium">{task.title}</div>
                             <div className="text-xs text-muted-foreground">{task.id}</div>
                         </TableCell>
-                        {currentUser?.role === 'admin' && (
+                        {currentUser?.data?.role === 'admin' && (
                             <TableCell>
                                 {assignee ? (
                                      <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                             </TableCell>
                         )}
                         <TableCell>
-                            {isEmployeeView ? (
+                            {isEmployeeView && onTaskUpdate ? (
                                 <Select value={task.status} onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)}>
                                     <SelectTrigger className="w-[140px] text-xs">
                                         <SelectValue />

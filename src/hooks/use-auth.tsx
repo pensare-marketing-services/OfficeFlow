@@ -1,3 +1,6 @@
+// This file is unused now but kept for reference.
+// Firebase handles authentication now.
+
 'use client';
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';

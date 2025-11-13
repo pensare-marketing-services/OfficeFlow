@@ -1,28 +1,34 @@
 'use client';
-import { useState } from 'react';
-import { useAuth } from "@/hooks/use-auth";
+import { useMemo } from 'react';
+import { useUser, useCollection, useFirestore } from "@/firebase";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Lock, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import AddEmployeeForm from '@/components/settings/add-employee-form';
-import { getUsers } from '@/lib/data';
-import type { User } from '@/lib/data';
+import type { User as UserType } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { collection } from 'firebase/firestore';
+import { useMemoFirebase } from '@/firebase/hooks';
 
-const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('');
+const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').toUpperCase();
 
 export default function SettingsPage() {
-    const { user } = useAuth();
-    const [employees, setEmployees] = useState<User[]>(getUsers().filter(u => u.role === 'employee'));
+    const { user } = useUser();
+    const firestore = useFirestore();
 
-    const handleEmployeeAdded = (newUser: User) => {
-        setEmployees(prev => [...prev, newUser]);
-    }
+    const usersQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'users') : null), [firestore]);
+    const { data: users, loading, error } = useCollection<UserType>(usersQuery);
 
-    if (user?.role !== 'admin') {
+    const employees = useMemo(() => {
+        if (!users) return [];
+        return users.filter(u => u.role === 'employee');
+    }, [users]);
+
+
+    if (user?.data?.role !== 'admin') {
         return (
              <div className="flex items-center justify-center h-[60vh]">
                 <Alert variant="destructive" className="max-w-md">
@@ -40,7 +46,7 @@ export default function SettingsPage() {
             </div>
         )
     }
-
+    
     return (
         <div className="space-y-8">
             <div>
@@ -68,7 +74,9 @@ export default function SettingsPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {employees.map(employee => (
+                                    {loading && <TableRow><TableCell colSpan={2}>Loading...</TableCell></TableRow>}
+                                    {error && <TableRow><TableCell colSpan={2} className="text-destructive">Error loading employees.</TableCell></TableRow>}
+                                    {!loading && employees.map(employee => (
                                         <TableRow key={employee.id}>
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
@@ -88,7 +96,7 @@ export default function SettingsPage() {
                     </Card>
                 </div>
                 <div>
-                    <AddEmployeeForm onEmployeeAdded={handleEmployeeAdded} />
+                    <AddEmployeeForm />
                 </div>
             </div>
         </div>

@@ -1,0 +1,124 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user's profile in the system.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "avatar": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the user's avatar image."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "admin",
+            "employee"
+          ],
+          "description": "The role of the user."
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "role"
+      ]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Represents a task in the system.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "Low",
+            "Medium",
+            "High"
+          ]
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "assigneeId": {
+          "type": "string",
+          "description": "The email of the user this task is assigned to."
+        },
+        "clientId": {
+          "type": "string"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "progressNotes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "note": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "createdAt": {
+            "type": "string",
+            "format": "date-time"
+        }
+      },
+      "required": [
+        "title",
+        "status",
+        "priority",
+        "deadline"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "email-password"
+    ]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Stores public profiles for all users."
+    },
+    "/tasks/{taskId}": {
+      "schema": {
+        "$ref": "#/entities/Task"
+      },
+      "description": "Stores all tasks for the application."
+    }
+  }
+}

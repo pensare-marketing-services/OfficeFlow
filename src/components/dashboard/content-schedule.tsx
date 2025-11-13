@@ -17,15 +17,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 
 interface ContentScheduleProps {
-    tasks: Task[];
+    tasks: (Task & { id: string })[];
     users: User[];
-    onTaskUpdate: (task: Task) => void;
+    onTaskUpdate: (task: Partial<Task> & { id: string }) => void;
 }
 
 const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs'];
 const statuses: ContentStatus[] = ['Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
 
-const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('');
+const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').toUpperCase();
 
 const statusColors: Record<ContentStatus, string> = {
     Scheduled: 'bg-blue-500',
@@ -36,15 +36,15 @@ const statusColors: Record<ContentStatus, string> = {
     Hold: 'bg-gray-500',
 }
 
-const EditableTableCell: React.FC<{ value: string; onChange: (value: string) => void; type?: 'text' | 'textarea' }> = ({ value, onChange, type = 'text' }) => {
+const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea' }> = ({ value, onSave, type = 'text' }) => {
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        onChange(e.target.value);
+        onSave(e.target.value);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            onChange(e.currentTarget.value);
+            onSave(e.currentTarget.value);
             e.currentTarget.blur();
         }
     };
@@ -59,10 +59,7 @@ const EditableTableCell: React.FC<{ value: string; onChange: (value: string) => 
 export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentScheduleProps) {
     
     const handleFieldChange = (taskId: string, field: keyof Task, value: any) => {
-        const task = tasks.find(t => t.id === taskId);
-        if (task) {
-            onTaskUpdate({ ...task, [field]: value });
-        }
+        onTaskUpdate({ id: taskId, [field]: value });
     };
 
     if (tasks.length === 0) {
@@ -117,10 +114,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         </Popover>
                                     </TableCell>
                                     <TableCell>
-                                        <EditableTableCell value={task.title} onChange={(value) => handleFieldChange(task.id, 'title', value)} />
+                                        <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} />
                                     </TableCell>
                                     <TableCell>
-                                        <EditableTableCell value={task.description} onChange={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" />
+                                        <EditableTableCell value={task.description} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" />
                                     </TableCell>
                                     <TableCell>
                                         <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
@@ -153,7 +150,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                      <TableCell>
                                         <Select value={task.assigneeId} onValueChange={(value) => handleFieldChange(task.id, 'assigneeId', value)}>
                                             <SelectTrigger>
-                                                {task.assigneeId ? (
+                                                {task.assigneeId && users.find(u => u.id === task.assigneeId) ? (
                                                     <div className="flex items-center gap-2">
                                                         <Avatar className="h-6 w-6">
                                                             <AvatarImage src={users.find(u => u.id === task.assigneeId)?.avatar} />
@@ -164,6 +161,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                 ) : <SelectValue placeholder="Assign..." />}
                                             </SelectTrigger>
                                             <SelectContent>
+                                                <SelectItem value="">Unassigned</SelectItem>
                                                 {users.map(user => (
                                                     <SelectItem key={user.id} value={user.id}>
                                                         <div className="flex items-center gap-3">
@@ -183,14 +181,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             <PopoverTrigger asChild>
                                                 <Button variant="ghost" size="icon" disabled={!task.assigneeId}>
                                                     <MessageSquare className="h-5 w-5" />
-                                                    {task.progressNotes.length > 0 && <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">{task.progressNotes.length}</Badge>}
+                                                    {task.progressNotes?.length > 0 && <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">{task.progressNotes.length}</Badge>}
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-80">
                                                 <div className="space-y-4">
                                                     <h4 className="font-medium leading-none">References</h4>
                                                      <div className="max-h-48 space-y-2 overflow-y-auto">
-                                                        {task.progressNotes.slice().reverse().map((note, i) => (
+                                                        {(task.progressNotes || []).slice().reverse().map((note, i) => (
                                                         <div key={i} className="text-xs text-muted-foreground bg-secondary/50 p-2 rounded-md">"{note.note}"
                                                             <p className="text-right text-muted-foreground/50 text-[10px] mt-1">{format(new Date(note.date), "MMM d, HH:mm")}</p>
                                                         </div>
@@ -203,7 +201,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                                 e.preventDefault();
                                                                 if(e.currentTarget.value.trim()){
                                                                     const newNote = { note: e.currentTarget.value, date: new Date().toISOString() };
-                                                                    handleFieldChange(task.id, 'progressNotes', [...task.progressNotes, newNote]);
+                                                                    handleFieldChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
                                                                     e.currentTarget.value = '';
                                                                 }
                                                             }

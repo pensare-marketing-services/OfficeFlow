@@ -1,16 +1,21 @@
 'use client';
 
-import { tasks, users } from '@/lib/data';
 import { StatsCard } from './stats-card';
 import { ClipboardList, Users, CheckCircle2, Clock } from 'lucide-react';
 import TasksOverviewChart from './tasks-overview-chart';
 import RecentTasks from './recent-tasks';
+import type { Task, User } from '@/lib/data';
 
-export default function AdminDashboard() {
+interface AdminDashboardProps {
+  tasks: Task[];
+  users: User[];
+}
+
+export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
   const totalTasks = tasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
   const completedTasks = tasks.filter(t => t.status === 'Done').length;
-  const overdueTasks = tasks.filter(t => t.status === 'Overdue').length;
+  const overdueTasks = tasks.filter(t => new Date(t.deadline) < new Date() && t.status !== 'Done').length;
 
   return (
     <div className="space-y-6">
