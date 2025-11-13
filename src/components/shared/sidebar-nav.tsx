@@ -9,15 +9,12 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/use-auth';
-import { LayoutDashboard, ClipboardList, FileText, BotMessageSquare, Settings, Briefcase } from 'lucide-react';
+import { LayoutDashboard, Settings, Briefcase } from 'lucide-react';
 import Link from 'next/link';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { href: '/tasks', label: 'Tasks', icon: ClipboardList, adminOnly: false },
   { href: '/clients', label: 'Clients', icon: Briefcase, adminOnly: true },
-  { href: '/reports', label: 'Create Report', icon: FileText, adminOnly: true },
-  { href: '/summarize', label: 'Summarize', icon: BotMessageSquare, adminOnly: true },
   { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true },
 ];
 

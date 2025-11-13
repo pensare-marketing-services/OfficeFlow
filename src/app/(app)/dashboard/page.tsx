@@ -44,7 +44,7 @@ export default function DashboardPage() {
     return null; // Or a message indicating no user found
   }
 
-  const employeeTasks = tasks.filter(task => task.assigneeId === user.id);
+  const employeeTasks = tasks.filter(task => task.assigneeId === user.id && task.clientId === undefined);
 
   return user.role === 'admin' ? <AdminDashboard /> : <EmployeeDashboard employeeTasks={employeeTasks} />;
 }
