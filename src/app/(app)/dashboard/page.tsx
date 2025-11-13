@@ -5,7 +5,7 @@ import AdminDashboard from '@/components/dashboard/admin-dashboard';
 import EmployeeDashboard from '@/components/dashboard/employee-dashboard';
 import { useAuth } from '@/hooks/use-auth';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getUsers, allTasks } from '@/lib/data';
+import { getUsers, allTasks, updateTask } from '@/lib/data';
 import type { User, Task } from '@/lib/data';
 
 export default function DashboardPage() {
@@ -22,6 +22,11 @@ export default function DashboardPage() {
     setTasks(loadedTasks);
     setDataLoading(false);
   }, []);
+
+   const handleTaskUpdate = (updatedTask: Task) => {
+        updateTask(updatedTask);
+        setTasks([...allTasks]);
+    };
 
   if (loading || dataLoading) {
     return (
@@ -44,7 +49,7 @@ export default function DashboardPage() {
     return null; // Or a message indicating no user found
   }
 
-  const employeeTasks = tasks.filter(task => task.assigneeId === user.id && task.clientId === undefined);
+  const employeeTasks = tasks.filter(task => task.assigneeId === user.id);
 
-  return user.role === 'admin' ? <AdminDashboard /> : <EmployeeDashboard employeeTasks={employeeTasks} />;
+  return user.role === 'admin' ? <AdminDashboard /> : <EmployeeDashboard employeeTasks={employeeTasks} onTaskUpdate={handleTaskUpdate} />;
 }

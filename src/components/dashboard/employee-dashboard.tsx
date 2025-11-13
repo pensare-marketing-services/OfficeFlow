@@ -9,16 +9,17 @@ import RecentTasks from './recent-tasks';
 
 interface EmployeeDashboardProps {
   employeeTasks: Task[];
+  onTaskUpdate: (task: Task) => void;
 }
 
-export default function EmployeeDashboard({ employeeTasks }: EmployeeDashboardProps) {
+export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: EmployeeDashboardProps) {
   const { user } = useAuth();
   if (!user) return null;
 
   const users = getUsers();
   const totalTasks = employeeTasks.length;
-  const inProgressTasks = employeeTasks.filter(t => t.status === 'In Progress').length;
-  const completedTasks = employeeTasks.filter(t => t.status === 'Done').length;
+  const inProgressTasks = employeeTasks.filter(t => t.status === 'In Progress' || t.status === 'On Work').length;
+  const completedTasks = employeeTasks.filter(t => t.status === 'Done' || t.status === 'Posted' || t.status === 'Approved').length;
   const overdueTasks = employeeTasks.filter(t => t.status === 'Overdue').length;
   
   return (
@@ -31,7 +32,7 @@ export default function EmployeeDashboard({ employeeTasks }: EmployeeDashboardPr
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <RecentTasks tasks={employeeTasks} users={users} title="My Tasks" />
+        <RecentTasks tasks={employeeTasks} users={users} title="My Tasks" onTaskUpdate={onTaskUpdate} />
       </div>
     </div>
   );
