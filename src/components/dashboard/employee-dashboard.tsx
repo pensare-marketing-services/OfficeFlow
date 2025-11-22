@@ -1,15 +1,17 @@
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
-import type { Task, User } from '@/lib/data';
+import type { Task, UserProfile as User } from '@/lib/data';
 import { StatsCard } from './stats-card';
 import { ClipboardList, CheckCircle2, Clock, Hourglass } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 
+type UserWithId = User & { id: string };
+
 interface EmployeeDashboardProps {
   employeeTasks: Task[];
-  users: User[];
-  onTaskUpdate: (task: Task) => void;
+  users: UserWithId[];
+  onTaskUpdate: (task: Partial<Task> & {id: string}) => void;
 }
 
 export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }: EmployeeDashboardProps) {

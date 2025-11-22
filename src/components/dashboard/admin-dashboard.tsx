@@ -4,12 +4,14 @@ import { useState, useMemo } from 'react';
 import { StatsCard } from './stats-card';
 import { ClipboardList, Users, CheckCircle2, Clock } from 'lucide-react';
 import RecentTasks from './recent-tasks';
-import type { Task, User } from '@/lib/data';
+import type { Task, UserProfile as User } from '@/lib/data';
 import EmployeeTasks from './employee-tasks';
+
+type UserWithId = User & { id: string };
 
 interface AdminDashboardProps {
   tasks: Task[];
-  users: User[];
+  users: UserWithId[];
 }
 
 type TaskFilter = 'total' | 'completed' | 'overdue';

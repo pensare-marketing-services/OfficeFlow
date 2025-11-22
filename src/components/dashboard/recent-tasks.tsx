@@ -1,6 +1,6 @@
 'use client';
 
-import type { Task, User, TaskStatus } from '@/lib/data';
+import type { Task, UserProfile as User } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,17 +8,18 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+type UserWithId = User & { id: string };
 
 interface RecentTasksProps {
   tasks: Task[];
-  users: User[];
+  users: UserWithId[];
   title: string;
-  onTaskUpdate?: (task: Task) => void;
+  onTaskUpdate?: (task: Partial<Task> & {id: string}) => void;
 }
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
-const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
+const allStatuses: Task['status'][] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     'Done': 'default',
@@ -43,13 +44,13 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
 
-  const getAssignee = (assigneeId: string): User | undefined => {
+  const getAssignee = (assigneeId: string): UserWithId | undefined => {
     return users.find(u => u.id === assigneeId);
   }
 
-  const handleStatusChange = (task: Task, newStatus: TaskStatus) => {
+  const handleStatusChange = (task: Task, newStatus: Task['status']) => {
     if(onTaskUpdate) {
-        onTaskUpdate({ ...task, status: newStatus });
+        onTaskUpdate({ id: task.id, status: newStatus });
     }
   }
 

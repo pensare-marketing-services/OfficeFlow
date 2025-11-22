@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Task, User, Client } from '@/lib/data';
+import type { Task, UserProfile as User, Client } from '@/lib/data';
 import { clients } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
@@ -15,15 +15,14 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 
+type UserWithId = User & { id: string };
+
 export default function ClientsPage() {
     const { tasks, users, loading, addTask, updateTask } = useTasks();
     const [selectedClient, setSelectedClient] = useState<Client | null>(clients[0] || null);
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
-        const existingTask = tasks.find(t => t.id === updatedTask.id);
-        if (existingTask) {
-            updateTask({ ...existingTask, ...updatedTask });
-        }
+        updateTask(updatedTask);
     };
     
     const handleAddTask = (client: Client) => {
@@ -82,7 +81,7 @@ export default function ClientsPage() {
             {loading ? <div>Loading...</div> : selectedClient ? (
                 <ContentSchedule 
                     tasks={filteredTasks} 
-                    users={users || []} 
+                    users={users as UserWithId[]} 
                     onTaskUpdate={handleTaskUpdate}
                 />
             ) : (

@@ -6,7 +6,7 @@ import EmployeeDashboard from '@/components/dashboard/employee-dashboard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
 import { useTasks } from '@/hooks/use-tasks';
-import type { Task } from '@/lib/data';
+import type { Task, UserProfile } from '@/lib/data';
 
 export default function DashboardPage() {
   const { user, loading: userLoading } = useAuth();
@@ -14,13 +14,13 @@ export default function DashboardPage() {
   
   const finalLoading = userLoading || tasksLoading;
 
-  const handleTaskUpdate = (updatedTask: Task) => {
+  const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
     updateTask(updatedTask);
   };
 
   const employeeTasks = useMemo(() => {
-    if (!tasks || !user?.email) return [];
-    return tasks.filter(task => task.assigneeId === user.email);
+    if (!tasks || !user?.uid) return [];
+    return tasks.filter(task => task.assigneeId === user.uid);
   }, [tasks, user]);
 
 
@@ -44,8 +44,12 @@ export default function DashboardPage() {
   if (!user) {
     return null; // Or a redirect, but layout should handle it.
   }
+  
+  // Note: Firestore returns UserProfile, which might not have `id` at the top level.
+  // The `useCollection` hook adds it. We ensure here that we pass a consistent User type.
+  const allUsers = (users as (UserProfile & {id: string})[]);
 
   return user.role === 'admin' ? 
-    <AdminDashboard tasks={tasks || []} users={users || []} /> : 
-    <EmployeeDashboard employeeTasks={employeeTasks} users={users || []} onTaskUpdate={handleTaskUpdate} />;
+    <AdminDashboard tasks={tasks || []} users={allUsers} /> : 
+    <EmployeeDashboard employeeTasks={employeeTasks} users={allUsers} onTaskUpdate={handleTaskUpdate} />;
 }

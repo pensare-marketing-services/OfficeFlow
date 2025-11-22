@@ -36,25 +36,17 @@ export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Find the user by name (case-insensitive)
-    const userToLogin = users.find(u => u.name.toLowerCase() === name.toLowerCase());
-
-    if (userToLogin) {
-      const success = login(userToLogin.name);
-      if (success) {
-        router.push('/dashboard');
-      } else {
-        // This case should ideally not happen if user is found, but as a fallback
-        setError('Login failed. Please try again.');
-        setLoading(false);
-      }
+    const success = await login(name);
+    
+    if (success) {
+      // The auth provider will redirect on successful login via its useEffect
     } else {
-      setError('User not found. Please check the name.');
+      setError('Login failed. Please check the name and try again. Note: User must exist in Firebase Authentication.');
       setLoading(false);
     }
   };
@@ -71,7 +63,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Welcome Back</CardTitle>
-            <CardDescription>Enter your name to sign in to your account.</CardDescription>
+            <CardDescription>Enter your name to sign in. Default password is "password123".</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -89,7 +81,7 @@ export default function LoginPage() {
               <Alert variant="destructive">
                 <AlertTitle>Login Failed</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
-              </Alert>
+              </Aler>
             )}
           </CardContent>
           <CardFooter className="flex-col gap-4">

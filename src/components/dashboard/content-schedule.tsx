@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { Task, User, ContentType, ContentStatus } from '@/lib/data';
+import type { Task, UserProfile as User, ContentType, ContentStatus } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -17,9 +17,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { useMemo } from 'react';
 
+type UserWithId = User & { id: string };
+
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
-    users: User[];
+    users: UserWithId[];
     onTaskUpdate: (task: Partial<Task> & { id: string }) => void;
 }
 

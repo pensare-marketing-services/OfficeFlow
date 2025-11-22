@@ -1,15 +1,21 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AuthProvider } from '@/hooks/use-auth';
-import { TaskProvider } from '@/hooks/use-tasks';
+import { initializeFirebase } from '@/firebase';
+import { FirebaseClientProvider } from '@/firebase';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
+
+const { firebaseApp, firestore, auth } = initializeFirebase();
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <AuthProvider>
-      <TaskProvider>
-        {children}
-      </TaskProvider>
-    </AuthProvider>
+    <FirebaseClientProvider
+      firebaseApp={firebaseApp}
+      firestore={firestore}
+      auth={auth}
+    >
+      {children}
+      <FirebaseErrorListener />
+    </FirebaseClientProvider>
   );
 }

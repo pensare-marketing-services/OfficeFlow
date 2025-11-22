@@ -1,6 +1,6 @@
 'use client';
 
-import type { Task, User } from '@/lib/data';
+import type { Task, UserProfile as User } from '@/lib/data';
 import { useMemo } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,9 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '../ui/card';
 import { format } from 'date-fns';
 
+type UserWithId = User & { id: string };
+
 interface EmployeeTasksProps {
   tasks: Task[];
-  users: User[];
+  users: UserWithId[];
 }
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
@@ -37,7 +39,7 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 
 export default function EmployeeTasks({ tasks, users }: EmployeeTasksProps) {
   const employees = useMemo(() => {
-    const employeeMap = new Map<string, { user: User; tasks: Task[] }>();
+    const employeeMap = new Map<string, { user: UserWithId; tasks: Task[] }>();
     
     users.filter(u => u.role === 'employee').forEach(employee => {
       employeeMap.set(employee.id, { user: employee, tasks: [] });
