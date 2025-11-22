@@ -4,7 +4,7 @@ import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar'
 import { SidebarNav } from '@/components/shared/sidebar-nav';
 import { Header } from '@/components/shared/header';
 import { TaskProvider } from '@/hooks/use-tasks';
-import { AuthProvider, useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -49,10 +49,8 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-        <TaskProvider>
-            <AppLayoutContent>{children}</AppLayoutContent>
-        </TaskProvider>
-    </AuthProvider>
+    <TaskProvider>
+        <AppLayoutContent>{children}</AppLayoutContent>
+    </TaskProvider>
   )
 }
