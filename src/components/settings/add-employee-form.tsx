@@ -13,11 +13,13 @@ import { Loader2, UserPlus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useTasks } from '@/hooks/use-tasks';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 
 const employeeSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   email: z.string().email('Invalid email address.'),
+  role: z.enum(['admin', 'employee']),
 });
 
 type EmployeeFormValues = z.infer<typeof employeeSchema>;
@@ -33,6 +35,7 @@ export default function AddEmployeeForm() {
     defaultValues: {
       name: '',
       email: '',
+      role: 'employee',
     },
   });
 
@@ -40,11 +43,11 @@ export default function AddEmployeeForm() {
     setLoading(true);
     setError(null);
     try {
-        await addEmployee({ name: data.name, email: data.email });
+        await addEmployee({ name: data.name, email: data.email, role: data.role });
         
         toast({
-            title: "Employee Added",
-            description: `${data.name} has been added with a default password of "password".`
+            title: "User Added",
+            description: `${data.name} has been added as an ${data.role} with a default password of "password".`
         });
         form.reset();
 
@@ -52,7 +55,7 @@ export default function AddEmployeeForm() {
         if (e.code === 'auth/email-already-in-use') {
             setError('This email address is already in use.');
         } else {
-            setError(e.message || 'Failed to add employee.');
+            setError(e.message || 'Failed to add user.');
         }
     } finally {
         setLoading(false);
@@ -62,17 +65,34 @@ export default function AddEmployeeForm() {
   return (
     <Card className="shadow-lg">
         <CardHeader>
-            <CardTitle className="font-headline text-xl flex items-center gap-2"><UserPlus /> Add New Employee</CardTitle>
-            <CardDescription>Create a new user account. The default password will be "password".</CardDescription>
+            <CardTitle className="font-headline text-xl flex items-center gap-2"><UserPlus /> Add New User</CardTitle>
+            <CardDescription>Create a new admin or employee account. The default password will be "password".</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
                 <CardContent className="space-y-4">
                     <FormField control={form.control} name="name" render={({ field }) => (
-                        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Admin User" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Jane Doe" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="email" render={({ field }) => (
-                        <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="e.g., admin@officeflow.com" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="e.g., jane@officeflow.com" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="role" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Role</FormLabel>
+                             <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a role" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="employee">Employee</SelectItem>
+                                    <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
                     )} />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
@@ -84,7 +104,7 @@ export default function AddEmployeeForm() {
                     )}
                     <Button type="submit" disabled={loading} className="w-full">
                         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
-                        {loading ? 'Adding...' : 'Add Employee'}
+                        {loading ? 'Adding...' : 'Add User'}
                     </Button>
                 </CardFooter>
             </form>

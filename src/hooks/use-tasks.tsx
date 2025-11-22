@@ -17,7 +17,7 @@ interface TaskContextType {
     error: Error | null;
     addTask: (task: Omit<Task, 'id'>) => void;
     updateTask: (taskId: string, task: Partial<Task>) => void;
-    addEmployee: (employeeData: Omit<UserProfile, 'id' | 'role' | 'avatar'>) => Promise<void>;
+    addEmployee: (employeeData: Omit<UserProfile, 'id' | 'role' | 'avatar'> & {role?: 'admin' | 'employee'}) => Promise<void>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -35,7 +35,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         firestore ? collection(firestore, 'users') : null
     );
 
-    const addEmployee = useCallback(async (employeeData: Omit<UserProfile, 'id' | 'role' | 'avatar'>) => {
+    const addEmployee = useCallback(async (employeeData: Omit<UserProfile, 'id' | 'role' | 'avatar'> & {role?: 'admin' | 'employee'}) => {
         if (!auth || !firestore) {
             throw new Error("Firebase not initialized.");
         }
@@ -49,7 +49,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const newUserProfile: UserProfile = {
             name: employeeData.name,
             email: employeeData.email,
-            role: 'employee',
+            role: employeeData.role || 'employee', // Default to employee
             avatar: `https://picsum.photos/seed/${employeeData.name}/200/200`
         };
         

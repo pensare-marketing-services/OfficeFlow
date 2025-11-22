@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!auth || !firestore) {
       // Firebase might not be initialized yet
+      setLoading(false); // Set loading to false if firebase is not ready
       return;
     }
 
@@ -40,8 +41,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const userData = userDocSnap.data() as UserProfile;
           setUser({ ...userData, uid: firebaseUser.uid });
         } else {
-          // Handle case where user exists in Auth but not in Firestore
-          console.error("User data not found in Firestore. Logging out.");
+          // This can happen if a user is in Auth but not Firestore.
+          // For a robust app, you might want to create the doc here or log them out.
+          console.error("User data not found in Firestore for UID:", firebaseUser.uid);
           await signOut(auth);
           setUser(null);
         }

@@ -101,7 +101,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
-          <CardDescription>Enter your credentials to sign in. Default password for all users is "password".</CardDescription>
+          <CardDescription>Enter your credentials to sign in. Create users via the Settings page if needed. Default password is "password".</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>

@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { AppProviders } from '@/components/providers';
+import { AuthProvider } from '@/hooks/use-auth';
 
 
 export const metadata: Metadata = {
@@ -24,7 +25,9 @@ export default function RootLayout({
       </head>
       <body className={cn('font-body antialiased')} suppressHydrationWarning>
           <AppProviders>
-            {children}
+            <AuthProvider>
+              {children}
+            </AuthProvider>
           </AppProviders>
           <Toaster />
       </body>
