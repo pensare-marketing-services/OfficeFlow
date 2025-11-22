@@ -11,7 +11,7 @@ import { useTasks } from '@/hooks/use-tasks';
 const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').toUpperCase();
 
 export default function SettingsPage() {
-    const { users, loading, error } = useTasks(); // Using useTasks to get users from Firestore
+    const { users, loading, error } = useTasks();
 
     const employees = useMemo(() => {
         if (!users) return [];
@@ -46,7 +46,7 @@ export default function SettingsPage() {
                                 </TableHeader>
                                 <TableBody>
                                     {loading && <TableRow><TableCell colSpan={2}>Loading...</TableCell></TableRow>}
-                                    {error && <TableRow><TableCell colSpan={2} className="text-destructive">{error.message}</TableCell></TableRow>}
+                                    {error && <TableRow><TableCell colSpan={2} className="text-destructive">{error as any}</TableCell></TableRow>}
                                     {!loading && employees.map(employee => (
                                         <TableRow key={employee.id}>
                                             <TableCell>

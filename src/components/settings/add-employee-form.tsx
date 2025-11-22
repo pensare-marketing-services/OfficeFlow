@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -14,8 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, UserPlus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { useFirebaseApp, useFirestore } from '@/firebase';
-import type { UserProfile } from '@/lib/data';
+import { useTasks } from '@/hooks/use-tasks';
 
 
 const employeeSchema = z.object({
@@ -29,8 +26,7 @@ export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const firebaseApp = useFirebaseApp();
-  const firestore = useFirestore();
+  // const { addEmployee } = useTasks(); // This will be used to add employee to the mock data
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeSchema),
@@ -41,44 +37,23 @@ export default function AddEmployeeForm() {
   });
 
   async function onSubmit(data: EmployeeFormValues) {
-    if (!firebaseApp || !firestore) {
-        setError("Firebase is not initialized.");
-        return;
-    }
     setLoading(true);
     setError(null);
-
-    const auth = getAuth(firebaseApp);
-    const password = 'password123'; // Default password for new users
-
     try {
-        // Step 1: Create user in Firebase Authentication
-        const userCredential = await createUserWithEmailAndPassword(auth, data.email, password);
-        const { user } = userCredential;
-
-        // Step 2: Create user profile in Firestore
-        const userProfile: UserProfile = {
-            name: data.name,
-            email: data.email,
-            role: 'employee',
-            avatar: `https://picsum.photos/seed/${data.name}/200/200`
-        };
-
-        await setDoc(doc(firestore, "users", user.uid), userProfile);
+        // Here you would typically call a function to add the employee to your state management
+        // For example: addEmployee({ ...data, role: 'employee', avatar: `https://picsum.photos/seed/${data.name}/200/200` });
+        
+        // Simulating an async operation
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         toast({
-            title: "Employee Added",
-            description: `${data.name} has been added with email ${data.email}. Default password is "password123".`
+            title: "Employee Added (Simulation)",
+            description: `${data.name} has been added. This is a simulation and will not persist on refresh.`
         });
         form.reset();
 
     } catch (e: any) {
-        console.error("Error adding employee:", e);
-        if (e.code === 'auth/email-already-in-use') {
-            setError('This email address is already in use.');
-        } else {
-            setError(e.message || 'Failed to add employee. Please try again.');
-        }
+        setError(e.message || 'Failed to add employee.');
     } finally {
         setLoading(false);
     }
@@ -88,7 +63,7 @@ export default function AddEmployeeForm() {
     <Card className="shadow-lg">
         <CardHeader>
             <CardTitle className="font-headline text-xl flex items-center gap-2"><UserPlus /> Add New Employee</CardTitle>
-            <CardDescription>Create a new employee account. Their default password will be "password123".</CardDescription>
+            <CardDescription>Create a new employee account. This is a simulation.</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>

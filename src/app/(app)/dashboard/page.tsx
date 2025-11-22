@@ -45,8 +45,6 @@ export default function DashboardPage() {
     return null; // Or a redirect, but layout should handle it.
   }
   
-  // Note: Firestore returns UserProfile, which might not have `id` at the top level.
-  // The `useCollection` hook adds it. We ensure here that we pass a consistent User type.
   const allUsers = (users as (UserProfile & {id: string})[]);
 
   return user.role === 'admin' ? 
