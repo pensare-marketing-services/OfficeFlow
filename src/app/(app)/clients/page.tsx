@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Task, User, Client } from '@/lib/data';
-import { clients } from '@/lib/data';
+import { clients, tasks as mockTasks, users as mockUsers } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
-import { useCollection, useFirestore } from '@/firebase';
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,40 +13,32 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { collection, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { useMemoFirebase } from '@/firebase/hooks';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function ClientsPage() {
-    const firestore = useFirestore();
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        // Simulate fetching data
+        setTasks(mockTasks);
+        setUsers(mockUsers);
+        setLoading(false);
+    }, []);
 
-    const tasksQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'tasks') : null), [firestore]);
-    const { data: tasks, loading: tasksLoading } = useCollection<Task>(tasksQuery);
-    
-    const usersQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'users') : null), [firestore]);
-    const { data: users, loading: usersLoading } = useCollection<User>(usersQuery);
-    
     const [selectedClient, setSelectedClient] = useState<Client | null>(clients[0] || null);
 
-    const handleTaskUpdate = async (updatedTask: Partial<Task> & { id: string }) => {
-        if (!firestore) return;
-        const taskRef = doc(firestore, 'tasks', updatedTask.id);
-        const { id, ...taskData } = updatedTask;
-        updateDoc(taskRef, taskData).catch(async (serverError) => {
-            const permissionError = new FirestorePermissionError({
-                path: taskRef.path,
-                operation: 'update',
-                requestResourceData: taskData,
-            });
-            errorEmitter.emit('permission-error', permissionError);
-        });
+    const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
+        setTasks(currentTasks => 
+            currentTasks.map(task => 
+                task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+            )
+        );
     };
     
-    const handleAddTask = async (client: Client) => {
-        if (!firestore) return;
-        const tasksCollection = collection(firestore, 'tasks');
-        const newTask: Omit<Task, 'id'> = {
+    const handleAddTask = (client: Client) => {
+        const newTask: Task = {
+            id: `task-${Date.now()}`,
             title: 'New Content Title',
             description: 'A brief description of the content.',
             status: 'Scheduled',
@@ -60,19 +51,7 @@ export default function ClientsPage() {
             date: new Date().toISOString(),
             createdAt: new Date().toISOString(),
         };
-        const taskPayload = {
-            ...newTask,
-            createdAt: serverTimestamp(),
-        }
-
-        addDoc(tasksCollection, taskPayload).catch(async (serverError) => {
-            const permissionError = new FirestorePermissionError({
-                path: tasksCollection.path,
-                operation: 'create',
-                requestResourceData: taskPayload
-            });
-            errorEmitter.emit('permission-error', permissionError);
-        });
+        setTasks(currentTasks => [...currentTasks, newTask]);
     };
 
     const filteredTasks = useMemo(() => {
@@ -104,14 +83,14 @@ export default function ClientsPage() {
                                 </SelectContent>
                             </Select>
                             {selectedClient && (
-                                <Button onClick={() => handleAddTask(selectedClient)} disabled={tasksLoading}>Add Content</Button>
+                                <Button onClick={() => handleAddTask(selectedClient)} disabled={loading}>Add Content</Button>
                             )}
                         </div>
                     </div>
                 </CardHeader>
             </Card>
 
-            {(tasksLoading || usersLoading) ? <div>Loading...</div> : selectedClient ? (
+            {loading ? <div>Loading...</div> : selectedClient ? (
                 <ContentSchedule 
                     tasks={filteredTasks} 
                     users={users || []} 

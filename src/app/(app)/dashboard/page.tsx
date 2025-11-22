@@ -1,50 +1,31 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import AdminDashboard from '@/components/dashboard/admin-dashboard';
 import EmployeeDashboard from '@/components/dashboard/employee-dashboard';
-import { useCollection, useFirestore } from '@/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
-import { collection, doc, updateDoc } from 'firebase/firestore';
 import type { Task, User } from '@/lib/data';
-import { useMemoFirebase } from '@/firebase/hooks';
+import { tasks as mockTasks, users as mockUsers } from '@/lib/data';
 import { useAuth } from '@/hooks/use-auth';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function DashboardPage() {
-  const firestore = useFirestore();
   const { user, loading: userLoading } = useAuth();
+  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [loading, setLoading] = useState(true);
 
-  const tasksQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'tasks') : null),
-    [firestore]
-  );
-  const { data: tasks, loading: tasksLoading } = useCollection<Task>(tasksQuery);
-  
-  const usersQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'users') : null),
-    [firestore]
-  );
-  const { data: usersData, loading: usersLoading } = useCollection<User>(usersQuery);
-
-  const users = useMemo(() => usersData || [], [usersData]);
+  useEffect(() => {
+    // Simulate fetching data
+    setTasks(mockTasks);
+    setUsers(mockUsers);
+    setLoading(false);
+  }, []);
 
   const handleTaskUpdate = (updatedTask: Task) => {
-    if (!firestore || !updatedTask.id) return;
-    const taskRef = doc(firestore, 'tasks', updatedTask.id);
-    const { id, ...taskData } = updatedTask;
-    updateDoc(taskRef, taskData).catch(async (serverError) => {
-        const permissionError = new FirestorePermissionError({
-            path: taskRef.path,
-            operation: 'update',
-            requestResourceData: taskData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-    });
+    setTasks(currentTasks => currentTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
   };
   
-  const loading = userLoading || tasksLoading || usersLoading;
+  const finalLoading = userLoading || loading;
 
   const employeeTasks = useMemo(() => {
     if (!tasks || !user?.email) return [];
@@ -52,7 +33,7 @@ export default function DashboardPage() {
   }, [tasks, user]);
 
 
-  if (loading) {
+  if (finalLoading) {
     return (
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -26,7 +26,7 @@ interface ContentScheduleProps {
 const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs'];
 const statuses: ContentStatus[] = ['Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
 
-const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').toUpperCase();
+const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
 const statusColors: Record<ContentStatus, string> = {
     Scheduled: 'bg-blue-500',
@@ -113,7 +113,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                 <Calendar
                                                     mode="single"
                                                     selected={task.deadline ? new Date(task.deadline) : undefined}
-                                                    onSelect={(date) => handleFieldChange(task.id, 'deadline', date?.toISOString() || '')}
+                                                    onSelect={(date) => handleFieldChange(task.id, 'deadline', date ? date.toISOString() : '')}
                                                     initialFocus
                                                 />
                                             </PopoverContent>
@@ -159,20 +159,20 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             onValueChange={(value) => handleFieldChange(task.id, 'assigneeId', value === 'unassigned' ? '' : value)}
                                         >
                                             <SelectTrigger>
-                                                {task.assigneeId && users.find(u => u.email === task.assigneeId) ? (
+                                                {task.assigneeId && users.find(u => u.id === task.assigneeId) ? (
                                                     <div className="flex items-center gap-2">
                                                         <Avatar className="h-6 w-6">
-                                                            <AvatarImage src={users.find(u => u.email === task.assigneeId)?.avatar} />
-                                                            <AvatarFallback>{getInitials(users.find(u => u.email === task.assigneeId)?.name || '')}</AvatarFallback>
+                                                            <AvatarImage src={users.find(u => u.id === task.assigneeId)?.avatar} />
+                                                            <AvatarFallback>{getInitials(users.find(u => u.id === task.assigneeId)?.name || '')}</AvatarFallback>
                                                         </Avatar>
-                                                        <span className="truncate">{users.find(u => u.email === task.assigneeId)?.name}</span>
+                                                        <span className="truncate">{users.find(u => u.id === task.assigneeId)?.name}</span>
                                                     </div>
                                                 ) : <SelectValue placeholder="Assign..." />}
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="unassigned">Unassigned</SelectItem>
                                                 {employeeUsers.map(user => (
-                                                    <SelectItem key={user.id} value={user.email}>
+                                                    <SelectItem key={user.id} value={user.id}>
                                                         <div className="flex items-center gap-3">
                                                              <Avatar className="h-6 w-6">
                                                                 <AvatarImage src={user.avatar} />

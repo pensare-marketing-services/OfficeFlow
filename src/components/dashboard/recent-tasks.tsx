@@ -1,11 +1,10 @@
 'use client';
 
-import type { Task, User, ContentStatus } from '@/lib/data';
+import type { Task, User, TaskStatus } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -17,9 +16,9 @@ interface RecentTasksProps {
   onTaskUpdate?: (task: Task) => void;
 }
 
-const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').toUpperCase();
+const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
-const allStatuses = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
+const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     'Done': 'default',
@@ -46,10 +45,10 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
   const recentTasks = tasks.sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime()).slice(0, 10);
 
   const getAssignee = (assigneeId: string): User | undefined => {
-    return users.find(u => u.email === assigneeId); // Matching by email as ID
+    return users.find(u => u.id === assigneeId);
   }
 
-  const handleStatusChange = (task: Task, newStatus: ContentStatus | 'To Do' | 'In Progress' | 'Done' | 'Overdue') => {
+  const handleStatusChange = (task: Task, newStatus: TaskStatus) => {
     if(onTaskUpdate) {
         onTaskUpdate({ ...task, status: newStatus });
     }

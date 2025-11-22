@@ -26,7 +26,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        // Quick validation to ensure the stored user is in our mock list
+        if (users.find(u => u.id === parsedUser.id)) {
+            setUser(parsedUser);
+        } else {
+            localStorage.removeItem(USER_STORAGE_KEY);
+        }
       }
     } catch (error) {
       console.error('Failed to parse user from localStorage', error);
