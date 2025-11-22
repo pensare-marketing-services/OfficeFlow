@@ -27,13 +27,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!auth || !firestore) {
-      // Firebase might not be initialized yet
-      setLoading(false); // Set loading to false if firebase is not ready
+      setLoading(false); 
       return;
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
+        // Keep loading until we have the firestore doc
+        setLoading(true); 
         const userDocRef = doc(firestore, 'users', firebaseUser.uid);
         const userDocSnap = await getDoc(userDocRef);
 
@@ -41,8 +42,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const userData = userDocSnap.data() as UserProfile;
           setUser({ ...userData, uid: firebaseUser.uid });
         } else {
-          // This can happen if a user is in Auth but not Firestore.
-          // For a robust app, you might want to create the doc here or log them out.
           console.error("User data not found in Firestore for UID:", firebaseUser.uid);
           await signOut(auth);
           setUser(null);
@@ -50,6 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUser(null);
       }
+      // Only set loading to false after all auth and firestore checks are done
       setLoading(false);
     });
 
