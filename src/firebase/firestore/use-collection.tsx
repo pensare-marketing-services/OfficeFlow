@@ -8,6 +8,8 @@ import {
   CollectionReference,
   QuerySnapshot,
 } from 'firebase/firestore';
+import { errorEmitter } from '../error-emitter';
+import { FirestorePermissionError } from '../errors';
 
 export function useCollection<T = DocumentData>(
   query: Query | CollectionReference | null
@@ -32,10 +34,15 @@ export function useCollection<T = DocumentData>(
         })) as T[];
         setData(docs);
         setLoading(false);
+        setError(null);
       },
       (err) => {
-        console.error(err);
-        setError(err);
+        const permissionError = new FirestorePermissionError({
+          path: (query as CollectionReference).path,
+          operation: 'list',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        setError(permissionError);
         setLoading(false);
       }
     );

@@ -7,6 +7,8 @@ import {
   DocumentData,
   DocumentSnapshot,
 } from 'firebase/firestore';
+import { errorEmitter } from '../error-emitter';
+import { FirestorePermissionError } from '../errors';
 
 export function useDoc<T = DocumentData>(ref: DocumentReference | null) {
   const [data, setData] = useState<T | null>(null);
@@ -33,10 +35,15 @@ export function useDoc<T = DocumentData>(ref: DocumentReference | null) {
           setData(null);
         }
         setLoading(false);
+        setError(null);
       },
       (err) => {
-        console.error(err);
-        setError(err);
+        const permissionError = new FirestorePermissionError({
+            path: ref.path,
+            operation: 'get',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        setError(permissionError);
         setLoading(false);
       }
     );

@@ -16,6 +16,8 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { collection, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/hooks';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function ClientsPage() {
     const firestore = useFirestore();
@@ -31,11 +33,20 @@ export default function ClientsPage() {
     const handleTaskUpdate = async (updatedTask: Partial<Task> & { id: string }) => {
         if (!firestore) return;
         const taskRef = doc(firestore, 'tasks', updatedTask.id);
-        await updateDoc(taskRef, updatedTask);
+        const { id, ...taskData } = updatedTask;
+        updateDoc(taskRef, taskData).catch(async (serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: taskRef.path,
+                operation: 'update',
+                requestResourceData: taskData,
+            });
+            errorEmitter.emit('permission-error', permissionError);
+        });
     };
     
     const handleAddTask = async (client: Client) => {
         if (!firestore) return;
+        const tasksCollection = collection(firestore, 'tasks');
         const newTask: Omit<Task, 'id'> = {
             title: 'New Content Title',
             description: 'A brief description of the content.',
@@ -47,15 +58,21 @@ export default function ClientsPage() {
             progressNotes: [],
             clientId: client.id,
             date: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
         };
-        try {
-            await addDoc(collection(firestore, 'tasks'), {
-                ...newTask,
-                createdAt: serverTimestamp(),
-            });
-        } catch (error) {
-            console.error("Error adding task: ", error);
+        const taskPayload = {
+            ...newTask,
+            createdAt: serverTimestamp(),
         }
+
+        addDoc(tasksCollection, taskPayload).catch(async (serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: tasksCollection.path,
+                operation: 'create',
+                requestResourceData: taskPayload
+            });
+            errorEmitter.emit('permission-error', permissionError);
+        });
     };
 
     const filteredTasks = useMemo(() => {
