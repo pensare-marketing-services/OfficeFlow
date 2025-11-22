@@ -42,7 +42,6 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
-  const recentTasks = tasks.sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime()).slice(0, 10);
 
   const getAssignee = (assigneeId: string): User | undefined => {
     return users.find(u => u.id === assigneeId);
@@ -73,7 +72,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recentTasks.map(task => {
+            {tasks.map(task => {
                 const assignee = getAssignee(task.assigneeId);
                 const isEmployeeView = currentUser?.role === 'employee';
                 return (
@@ -123,7 +122,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
             })}
           </TableBody>
         </Table>
-         {recentTasks.length === 0 && (
+         {tasks.length === 0 && (
             <div className="text-center text-muted-foreground p-8">No tasks to display.</div>
         )}
       </CardContent>

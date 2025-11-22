@@ -5,6 +5,8 @@ import { StatsCard } from './stats-card';
 import { ClipboardList, Users, CheckCircle2, Clock } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 import type { Task, User } from '@/lib/data';
+import EmployeeTasks from './employee-tasks';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface AdminDashboardProps {
   tasks: Task[];
@@ -53,7 +55,6 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
             title="Employees" 
             value={totalEmployees} 
             icon={Users}
-            // Non-task related, so no filter change
             isActive={false} 
         />
         <StatsCard 
@@ -73,9 +74,18 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
-        <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[filter]} />
-      </div>
+       <Tabs defaultValue="tasks" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="tasks">Tasks Overview</TabsTrigger>
+          <TabsTrigger value="employees">Employees</TabsTrigger>
+        </TabsList>
+        <TabsContent value="tasks">
+          <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[filter]} />
+        </TabsContent>
+        <TabsContent value="employees">
+          <EmployeeTasks tasks={tasks} users={users} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
