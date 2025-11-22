@@ -1,0 +1,20 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can read any user's profile, but can only write to their own.
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Any authenticated user can create, read, update, and delete tasks.
+    // In a real-world app, you'd likely want more granular control,
+    // for example, only allowing an assigned user or an admin to modify a task.
+    match /tasks/{taskId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
