@@ -25,92 +25,36 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// In a real app, you would fetch the current user from your auth system
+const mockUser: AuthContextType['user'] = {
+  uid: 'admin-uid',
+  name: 'Admin User',
+  email: 'admin@officeflow.com',
+  role: 'admin',
+  avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjI5MzU5MTR8MA&ixlib=rb-4.1.0&q=80&w=1080',
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { auth } = useFirebaseAuth();
-  const firestore = useFirestore();
-  const [user, setUser] = useState<AuthContextType['user'] | null>(null);
-  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!auth || !firestore) return;
-
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      setLoading(true);
-      if (fbUser) {
-        setFirebaseUser(fbUser);
-        const userDocRef = doc(firestore, 'users', fbUser.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (userDoc.exists()) {
-          setUser({ uid: fbUser.uid, ...userDoc.data() } as AuthContextType['user']);
-        } else {
-          // Handle case where user exists in Auth but not Firestore
-           const mockUser = mockUsers.find(u => u.email === fbUser.email);
-           if (mockUser) {
-              const newUserProfile: UserProfile = {
-                name: mockUser.name,
-                email: mockUser.email,
-                role: mockUser.role,
-                avatar: mockUser.avatar
-              };
-              await setDoc(userDocRef, newUserProfile);
-              setUser({ uid: fbUser.uid, ...newUserProfile });
-           } else {
-             setUser(null);
-           }
-        }
-        router.replace('/dashboard');
-      } else {
-        setFirebaseUser(null);
-        setUser(null);
-        router.replace('/login');
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [auth, firestore, router]);
-
-
+  const [user, setUser] = useState<AuthContextType['user'] | null>(mockUser);
+  const [loading, setLoading] = useState(false);
+  
   const login = useCallback(async (name: string): Promise<boolean> => {
-     if (!auth) return false;
-    
-    // This is a simplified login. We find a user by name in the mock data,
-    // get their email, and use a dummy password for the demo.
-    // In a real app, you'd have a proper registration flow.
-    const mockUser = mockUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
-
-    if (!mockUser || !mockUser.email) {
-      return false;
-    }
-    
-    try {
-       // Using a fixed password for simplicity, as we don't have one in mock data.
-       // The user account must be pre-created in Firebase Auth.
-      await signInWithEmailAndPassword(auth, mockUser.email, 'password123');
+    // This is a mock login. In a real app, you'd integrate with an auth service.
+    console.log(`Logging in as ${name}`);
+    const foundUser = mockUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
+    if (foundUser) {
+      setUser({ ...foundUser, uid: foundUser.id });
       return true;
-    } catch (error: any) {
-      // Handle login errors (e.g., user not found, wrong password)
-      console.error("Firebase login failed:", error);
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-          // In a dev environment, we could auto-create the user here for ease of use.
-          console.log("Login failed, user may not exist in Firebase Auth.");
-      }
-      return false;
     }
-  }, [auth]);
+    return false;
+  }, []);
 
-  const logout = useCallback(async () => {
-    if (auth) {
-      await signOut(auth);
-      // The onAuthStateChanged listener will handle redirecting to /login
-    }
-  }, [auth]);
+  const logout = useCallback(() => {
+    console.log('Logging out');
+    setUser(null);
+  }, []);
 
-  const value = { user, login, logout, loading, firebaseUser };
+  const value = { user, login, logout, loading, firebaseUser: null };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
