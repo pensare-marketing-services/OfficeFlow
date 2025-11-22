@@ -9,23 +9,15 @@ service cloud.firestore {
       // Allow any authenticated user to get a user's profile
       allow get: if request.auth != null;
       // Only allow a user to update their own profile
-      allow update: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth.uid == userId;
+      // Allow any authenticated user to list all users for assignee dropdowns
+      allow list: if request.auth != null;
     }
     
-    // Allow authenticated users to list users (for assignee dropdowns)
-    match /users {
-        allow list: if request.auth != null;
-    }
-
     // Rules for the 'tasks' collection
     match /tasks/{taskId} {
-        // Allow any authenticated user to get, update, or delete a single task.
-        allow get, update, delete: if request.auth != null;
-    }
-    
-    // Allow any authenticated user to list all tasks or create new tasks.
-    match /tasks {
-        allow list, create: if request.auth != null;
+      // Allow any authenticated user to read (get, list) and write (create, update, delete) tasks.
+      allow read, write: if request.auth != null;
     }
   }
 }
