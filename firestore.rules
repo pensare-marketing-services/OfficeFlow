@@ -4,16 +4,28 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Authenticated users can list and get any user's profile,
-    // but can only write to their own profile.
+    // Rules for the 'users' collection
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      // Allow any authenticated user to get a user's profile
+      allow get: if request.auth != null;
+      // Only allow a user to update their own profile
+      allow update: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to list users (for assignee dropdowns)
+    match /users {
+        allow list: if request.auth != null;
     }
 
-    // Any authenticated user can read (get, list) and write (create, update, delete) tasks.
-    match /tasks/{document=**} {
-      allow read, write: if request.auth != null;
+    // Rules for the 'tasks' collection
+    match /tasks/{taskId} {
+        // Allow any authenticated user to get, update, or delete a single task.
+        allow get, update, delete: if request.auth != null;
+    }
+    
+    // Allow any authenticated user to list all tasks or create new tasks.
+    match /tasks {
+        allow list, create: if request.auth != null;
     }
   }
 }
