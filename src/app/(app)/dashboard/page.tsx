@@ -9,6 +9,8 @@ import { collection, doc, updateDoc } from 'firebase/firestore';
 import type { Task, User } from '@/lib/data';
 import { useMemoFirebase } from '@/firebase/hooks';
 import { useAuth } from '@/hooks/use-auth';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function DashboardPage() {
   const firestore = useFirestore();
@@ -28,10 +30,18 @@ export default function DashboardPage() {
 
   const users = useMemo(() => usersData || [], [usersData]);
 
-  const handleTaskUpdate = async (updatedTask: Task) => {
+  const handleTaskUpdate = (updatedTask: Task) => {
     if (!firestore || !updatedTask.id) return;
     const taskRef = doc(firestore, 'tasks', updatedTask.id);
-    await updateDoc(taskRef, { ...updatedTask });
+    const { id, ...taskData } = updatedTask;
+    updateDoc(taskRef, taskData).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+            path: taskRef.path,
+            operation: 'update',
+            requestResourceData: taskData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+    });
   };
   
   const loading = userLoading || tasksLoading || usersLoading;

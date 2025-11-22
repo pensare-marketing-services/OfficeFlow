@@ -14,6 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 
 const employeeSchema = z.object({
@@ -49,8 +51,17 @@ export default function AddEmployeeForm() {
 
     setLoading(true);
     setError(null);
+    
+    const userDocRef = doc(firestore, 'users', data.email);
+    const newUser = {
+      id: data.email,
+      name: data.name,
+      email: data.email,
+      role: 'employee',
+      avatar: `https://picsum.photos/seed/${data.name}/200/200`
+    };
+
     try {
-        const userDocRef = doc(firestore, 'users', data.email);
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
@@ -58,14 +69,6 @@ export default function AddEmployeeForm() {
             setLoading(false);
             return;
         }
-      
-      const newUser = {
-        id: data.email,
-        name: data.name,
-        email: data.email,
-        role: 'employee',
-        avatar: `https://picsum.photos/seed/${data.name}/200/200`
-      };
       
       // We create the auth user here so they can log in.
       // In a real app, you would likely send an invitation email.
@@ -80,7 +83,14 @@ export default function AddEmployeeForm() {
       }
       
       // After successfully creating the auth user (or if they existed), create the Firestore profile.
-      await setDoc(userDocRef, newUser);
+      setDoc(userDocRef, newUser).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+            path: userDocRef.path,
+            operation: 'create',
+            requestResourceData: newUser,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
 
       toast({
           title: "Employee Added",
@@ -89,7 +99,6 @@ export default function AddEmployeeForm() {
       form.reset();
 
     } catch (e: any) {
-      console.error(e);
       setError(e.message || 'Failed to add employee. Please try again.');
     } finally {
       setLoading(false);
