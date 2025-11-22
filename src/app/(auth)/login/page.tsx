@@ -81,7 +81,7 @@ export default function LoginPage() {
               <Alert variant="destructive">
                 <AlertTitle>Login Failed</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
-              </Aler>
+              </Alert>
             )}
           </CardContent>
           <CardFooter className="flex-col gap-4">
