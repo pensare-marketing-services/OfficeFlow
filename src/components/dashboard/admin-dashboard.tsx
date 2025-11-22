@@ -26,8 +26,7 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
         <StatsCard title="Overdue Tasks" value={overdueTasks} icon={Clock} variant="destructive" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <TasksOverviewChart tasks={tasks} />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
         <RecentTasks tasks={tasks} users={users} title="All Recent Tasks" />
       </div>
     </div>

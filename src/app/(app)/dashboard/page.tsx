@@ -1,31 +1,22 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import AdminDashboard from '@/components/dashboard/admin-dashboard';
 import EmployeeDashboard from '@/components/dashboard/employee-dashboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Task, User } from '@/lib/data';
-import { tasks as mockTasks, users as mockUsers } from '@/lib/data';
 import { useAuth } from '@/hooks/use-auth';
+import { useTasks } from '@/hooks/use-tasks';
+import type { Task } from '@/lib/data';
 
 export default function DashboardPage() {
   const { user, loading: userLoading } = useAuth();
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate fetching data
-    setTasks(mockTasks);
-    setUsers(mockUsers);
-    setLoading(false);
-  }, []);
+  const { tasks, users, loading: tasksLoading, updateTask } = useTasks();
+  
+  const finalLoading = userLoading || tasksLoading;
 
   const handleTaskUpdate = (updatedTask: Task) => {
-    setTasks(currentTasks => currentTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+    updateTask(updatedTask);
   };
-  
-  const finalLoading = userLoading || loading;
 
   const employeeTasks = useMemo(() => {
     if (!tasks || !user?.email) return [];
@@ -55,6 +46,6 @@ export default function DashboardPage() {
   }
 
   return user.role === 'admin' ? 
-    <AdminDashboard tasks={tasks || []} users={users} /> : 
-    <EmployeeDashboard employeeTasks={employeeTasks} users={users} onTaskUpdate={handleTaskUpdate} />;
+    <AdminDashboard tasks={tasks || []} users={users || []} /> : 
+    <EmployeeDashboard employeeTasks={employeeTasks} users={users || []} onTaskUpdate={handleTaskUpdate} />;
 }

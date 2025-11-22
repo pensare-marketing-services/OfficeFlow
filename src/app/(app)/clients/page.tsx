@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import type { Task, User, Client } from '@/lib/data';
-import { clients, tasks as mockTasks, users as mockUsers } from '@/lib/data';
+import { clients } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
 import {
@@ -13,32 +13,21 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useTasks } from '@/hooks/use-tasks';
 
 export default function ClientsPage() {
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(true);
-    
-    useEffect(() => {
-        // Simulate fetching data
-        setTasks(mockTasks);
-        setUsers(mockUsers);
-        setLoading(false);
-    }, []);
-
+    const { tasks, users, loading, addTask, updateTask } = useTasks();
     const [selectedClient, setSelectedClient] = useState<Client | null>(clients[0] || null);
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
-        setTasks(currentTasks => 
-            currentTasks.map(task => 
-                task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-            )
-        );
+        const existingTask = tasks.find(t => t.id === updatedTask.id);
+        if (existingTask) {
+            updateTask({ ...existingTask, ...updatedTask });
+        }
     };
     
     const handleAddTask = (client: Client) => {
-        const newTask: Task = {
-            id: `task-${Date.now()}`,
+        const newTask: Omit<Task, 'id'> = {
             title: 'New Content Title',
             description: 'A brief description of the content.',
             status: 'Scheduled',
@@ -51,7 +40,7 @@ export default function ClientsPage() {
             date: new Date().toISOString(),
             createdAt: new Date().toISOString(),
         };
-        setTasks(currentTasks => [...currentTasks, newTask]);
+        addTask(newTask);
     };
 
     const filteredTasks = useMemo(() => {
