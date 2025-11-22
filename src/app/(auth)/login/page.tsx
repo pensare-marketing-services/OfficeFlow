@@ -49,8 +49,7 @@ function OfficeIcon(props: React.SVGProps<SVGSVGElement>) {
 
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(1, { message: 'Password is required.' }),
+  name: z.string().min(1, { message: 'Name is required.' }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -63,15 +62,19 @@ export default function LoginPage() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { name: '' },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
     setError(null);
     try {
-      await login(data.email, data.password);
-      router.push('/dashboard');
+      const success = await login(data.name);
+      if(success) {
+        router.push('/dashboard');
+      } else {
+        setError('User not found. Try "Admin User" or "Alice Johnson".');
+      }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred.');
     } finally {
@@ -89,8 +92,8 @@ export default function LoginPage() {
         </div>
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">Welcome Back</CardTitle>
-          <CardDescription>Enter your credentials to access your account.</CardDescription>
+          <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
+          <CardDescription>Enter a name to sign in. (e.g., "Admin User", "Alice Johnson")</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -103,25 +106,12 @@ export default function LoginPage() {
                     )}
                     <FormField
                         control={form.control}
-                        name="email"
+                        name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>Name</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="name@example.com" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Password</FormLabel>
-                                <FormControl>
-                                    <Input type="password" {...field} />
+                                    <Input placeholder="Enter a name..." {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
