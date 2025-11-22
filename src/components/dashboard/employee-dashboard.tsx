@@ -9,9 +9,9 @@ import RecentTasks from './recent-tasks';
 type UserWithId = User & { id: string };
 
 interface EmployeeDashboardProps {
-  employeeTasks: Task[];
+  employeeTasks: (Task & {id: string})[];
   users: UserWithId[];
-  onTaskUpdate: (task: Partial<Task> & {id: string}) => void;
+  onTaskUpdate: (taskId: string, updatedData: Partial<Task>) => void;
 }
 
 export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }: EmployeeDashboardProps) {

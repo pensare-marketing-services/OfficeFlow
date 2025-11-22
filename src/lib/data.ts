@@ -1,15 +1,14 @@
 import { PlaceHolderImages } from './placeholder-images';
+import type { Timestamp } from 'firebase/firestore';
 
-// This represents the data structure in Firestore, not the full User object used in the auth context
 export type UserProfile = {
-  id?: string; // Firestore ID will be the doc id
+  id?: string;
   name: string;
   email: string;
   role: 'admin' | 'employee';
   avatar: string;
 };
 
-// This type alias is for local mock data structure compatibility
 export type User = UserProfile & { id: string };
 
 export type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
@@ -17,18 +16,18 @@ export type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved
 export type TaskStatus = 'To Do' | 'In Progress' | 'Done' | 'Overdue' | ContentStatus;
 
 export type Task = {
-  id: string; // Firestore document ID
+  id: string;
   title: string;
   description: string;
   status: TaskStatus;
   priority: 'Low' | 'Medium' | 'High';
-  deadline: string; // ISO string
-  assigneeId: string; // This will now be the user's Firestore UID
+  deadline: string; 
+  assigneeId: string; 
   progressNotes: { note: string; date: string }[];
   clientId?: string;
-  date?: string; // ISO string
+  date?: string; 
   contentType?: ContentType;
-  createdAt?: string; // ISO string, but will be a server timestamp in Firestore
+  createdAt?: Timestamp | string;
 };
 
 export type Client = {
@@ -36,42 +35,36 @@ export type Client = {
   name: string;
 };
 
-const userAvatars: Record<string, string> = PlaceHolderImages.reduce((acc, img) => {
-    acc[img.id] = img.imageUrl;
-    return acc;
-}, {} as Record<string, string>);
-
-// This 'users' array is now for providing initial data for login mapping and seeding Firestore
-// The 'id' here is the user's email, used to find the user for login.
-// In a real app, user creation would be a formal process.
+// This is now primarily for seeding the database or local testing.
+// In a production app, user creation would happen through a registration flow.
 export const users: User[] = [
   {
     id: 'admin@officeflow.com',
     name: 'Admin User',
     email: 'admin@officeflow.com',
     role: 'admin',
-    avatar: userAvatars['user-avatar-1'] || `https://picsum.photos/seed/Admin/200/200`,
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjI5MzU5MTR8MA&ixlib=rb-4.1.0&q=80&w=1080',
   },
   {
     id: 'alice@officeflow.com',
     name: 'Alice Johnson',
     email: 'alice@officeflow.com',
     role: 'employee',
-    avatar: userAvatars['user-avatar-2'] || `https://picsum.photos/seed/Alice/200/200`,
+    avatar: 'https://images.unsplash.com/photo-1525134479668-1bee5c7c6845?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3b21hbiUyMHNtaWxpbmd8ZW58MHx8fHwxNzYyOTc1Nzg1fDA&ixlib=rb-4.1.0&q=80&w=1080',
   },
   {
     id: 'bob@officeflow.com',
     name: 'Bob Williams',
     email: 'bob@officeflow.com',
     role: 'employee',
-    avatar: userAvatars['user-avatar-3'] || `https://picsum.photos/seed/Bob/200/200`,
+    avatar: 'https://images.unsplash.com/photo-1624395213043-fa2e123b2656?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjI5NTI2MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
   },
   {
     id: 'charlie@officeflow.com',
     name: 'Charlie Brown',
     email: 'charlie@officeflow.com',
     role: 'employee',
-    avatar: userAvatars['user-avatar-4'] || `https://picsum.photos/seed/Charlie/200/200`,
+    avatar: 'https://images.unsplash.com/photo-1634795776422-5a85c8e0f1ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwZXJzb24lMjBnbGFzc2VzfGVufDB8fHx8MTc2Mjk3MjM1N3ww&ixlib=rb-4.1.0&q=80&w=1080',
   },
    {
     id: 'yaseen@officeflow.com',
@@ -112,5 +105,4 @@ export const clients: Client[] = [
     { id: 'client-5', name: 'Nexus Solutions' },
 ];
 
-// Mock tasks are no longer the source of truth, but can be kept for reference or seeding scripts.
 export const tasks: Task[] = [];

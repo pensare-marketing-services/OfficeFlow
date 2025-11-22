@@ -14,18 +14,22 @@ import {
 } from "@/components/ui/select"
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
+import { useAuth } from '@/hooks/use-auth';
 
 type UserWithId = User & { id: string };
 
 export default function ClientsPage() {
+    const { user: currentUser } = useAuth();
     const { tasks, users, loading, addTask, updateTask } = useTasks();
     const [selectedClient, setSelectedClient] = useState<Client | null>(clients[0] || null);
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
-        updateTask(updatedTask);
+        updateTask(updatedTask.id, updatedTask);
     };
     
     const handleAddTask = (client: Client) => {
+        if (!currentUser) return;
+
         const newTask: Omit<Task, 'id'> = {
             title: 'New Content Title',
             description: 'A brief description of the content.',

@@ -13,9 +13,20 @@ import {
 import { LogOut } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export function UserNav() {
-  const { user, loading, logout } = useAuth();
+  const { user, auth, loading } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    if (auth) {
+      await signOut(auth);
+      router.push('/login');
+    }
+  };
+
 
   if (loading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
@@ -54,7 +65,7 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut />
           <span>Log out</span>
         </DropdownMenuItem>

@@ -11,10 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 type UserWithId = User & { id: string };
 
 interface RecentTasksProps {
-  tasks: Task[];
+  tasks: (Task & {id: string})[];
   users: UserWithId[];
   title: string;
-  onTaskUpdate?: (task: Partial<Task> & {id: string}) => void;
+  onTaskUpdate?: (taskId: string, updatedData: Partial<Task>) => void;
 }
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
@@ -48,9 +48,9 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     return users.find(u => u.id === assigneeId);
   }
 
-  const handleStatusChange = (task: Task, newStatus: Task['status']) => {
+  const handleStatusChange = (task: Task & {id: string}, newStatus: Task['status']) => {
     if(onTaskUpdate) {
-        onTaskUpdate({ id: task.id, status: newStatus });
+        onTaskUpdate(task.id, { status: newStatus });
     }
   }
 

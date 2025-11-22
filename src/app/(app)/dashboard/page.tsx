@@ -14,8 +14,8 @@ export default function DashboardPage() {
   
   const finalLoading = userLoading || tasksLoading;
 
-  const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
-    updateTask(updatedTask);
+  const handleTaskUpdate = (taskId: string, updatedData: Partial<Task>) => {
+    updateTask(taskId, updatedData);
   };
 
   const employeeTasks = useMemo(() => {

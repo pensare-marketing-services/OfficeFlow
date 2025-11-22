@@ -1,56 +1,81 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
-import { tasks as initialTasks, users as initialUsers } from '@/lib/data';
-import type { Task, UserProfile as User } from '@/lib/data';
-
-// Ensure tasks have unique IDs
-let taskCounter = initialTasks.length;
-const generateTaskId = () => `task-${++taskCounter}`;
+import React, { createContext, useContext, ReactNode, useCallback } from 'react';
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { useFirestore, useCollection } from '@/firebase';
+import type { Task, UserProfile } from '@/lib/data';
+import { useAuth } from './use-auth';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 
 interface TaskContextType {
-    tasks: Task[];
-    users: User[];
+    tasks: (Task & {id: string})[];
+    users: (UserProfile & {id: string})[];
     loading: boolean;
     error: Error | null;
     addTask: (task: Omit<Task, 'id'>) => void;
-    updateTask: (task: Partial<Task> & { id: string }) => void;
+    updateTask: (taskId: string, task: Partial<Task>) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
-export const TaskProvider = ({ children }: { children: ReactNode }) => {
-    const [tasks, setTasks] = useState<Task[]>(initialTasks.map(t => ({...t, id: t.id || generateTaskId()})));
-    const [users, setUsers] = useState<User[]>(initialUsers);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const firestore = useFirestore();
+    const { user } = useAuth();
+    
+    const { data: tasks, loading: tasksLoading, error: tasksError } = useCollection<Task & {id: string}>(
+        firestore ? collection(firestore, 'tasks') : null
+    );
+
+    const { data: users, loading: usersLoading, error: usersError } = useCollection<UserProfile & {id: string}>(
+        firestore ? collection(firestore, 'users') : null
+    );
 
     const addTask = useCallback((task: Omit<Task, 'id'>) => {
-        setTasks(prevTasks => {
-            const newTask: Task = {
-                ...task,
-                id: generateTaskId(),
-            };
-            return [...prevTasks, newTask];
-        });
-    }, []);
+        if (!firestore || !user) return;
+        
+        const tasksCollection = collection(firestore, 'tasks');
+        const newTask = {
+            ...task,
+            createdAt: serverTimestamp(),
+        };
 
-    const updateTask = useCallback((updatedTask: Partial<Task> & { id: string }) => {
-        setTasks(prevTasks => 
-            prevTasks.map(task => 
-                task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-            )
-        );
-    }, []);
+        addDoc(tasksCollection, newTask)
+            .catch(async (serverError) => {
+                const permissionError = new FirestorePermissionError({
+                    path: tasksCollection.path,
+                    operation: 'create',
+                    requestResourceData: newTask
+                });
+                errorEmitter.emit('permission-error', permissionError);
+            });
 
-    const value = { 
-        tasks, 
-        users, 
-        loading,
-        error,
-        addTask, 
-        updateTask 
+    }, [firestore, user]);
+
+    const updateTask = useCallback((taskId: string, taskUpdate: Partial<Task>) => {
+        if (!firestore) return;
+
+        const taskDocRef = doc(firestore, 'tasks', taskId);
+        updateDoc(taskDocRef, taskUpdate)
+         .catch(async (serverError) => {
+                const permissionError = new FirestorePermissionError({
+                    path: taskDocRef.path,
+                    operation: 'update',
+                    requestResourceData: taskUpdate
+                });
+                errorEmitter.emit('permission-error', permissionError);
+            });
+
+    }, [firestore]);
+    
+    const value = {
+        tasks: tasks || [],
+        users: users || [],
+        loading: tasksLoading || usersLoading,
+        error: tasksError || usersError,
+        addTask,
+        updateTask,
     };
 
     return (

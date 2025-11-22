@@ -34,23 +34,23 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarNav />
-      </Sidebar>
-      <SidebarInset>
-        <Header />
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
+     <TaskProvider>
+      <SidebarProvider>
+        <Sidebar>
+          <SidebarNav />
+        </Sidebar>
+        <SidebarInset>
+          <Header />
+          <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
+    </TaskProvider>
   );
 }
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <TaskProvider>
-        <AppLayoutContent>{children}</AppLayoutContent>
-    </TaskProvider>
+      <AppLayoutContent>{children}</AppLayoutContent>
   )
 }

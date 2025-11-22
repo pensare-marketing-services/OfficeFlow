@@ -6,6 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword } from "firebase/auth";
+
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,34 +51,40 @@ function OfficeIcon(props: React.SVGProps<SVGSVGElement>) {
 
 
 const loginSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required.' }),
+  email: z.string().email({ message: 'Please enter a valid email.' }),
+  password: z.string().min(1, { message: 'Password is required.' }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { auth } = useAuth();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { name: '' },
+    defaultValues: { email: '', password: '' },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
     setError(null);
+    if (!auth) {
+        setError("Auth service is not available.");
+        setLoading(false);
+        return;
+    }
     try {
-      const success = await login(data.name);
-      if(success) {
-        router.push('/dashboard');
-      } else {
-        setError('User not found. Try "Admin User" or "Alice Johnson".');
-      }
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('Invalid email or password. Please try again.');
+      } else {
+        setError(err.message || 'An unexpected error occurred during login.');
+      }
     } finally {
       setLoading(false);
     }
@@ -93,7 +101,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
-          <CardDescription>Enter a name to sign in. (e.g., "Admin User", "Alice Johnson")</CardDescription>
+          <CardDescription>Enter your credentials to sign in. Default password for all users is "password".</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -106,12 +114,25 @@ export default function LoginPage() {
                     )}
                     <FormField
                         control={form.control}
-                        name="name"
+                        name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Name</FormLabel>
+                                <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter a name..." {...field} />
+                                    <Input placeholder="e.g., admin@officeflow.com" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                     <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Password</FormLabel>
+                                <FormControl>
+                                    <Input type="password" placeholder="Enter your password" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

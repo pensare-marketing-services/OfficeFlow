@@ -1,58 +1,63 @@
 'use client';
 
-import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { onAuthStateChanged, User as FirebaseUser, Auth, signOut } from 'firebase/auth';
+import { doc, getDoc, Firestore } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import { users } from '@/lib/data';
+import { useFirebase } from '@/firebase';
 import type { UserProfile } from '@/lib/data';
 
 interface AuthContextType {
   user: (UserProfile & { uid: string }) | null;
-  login: (name: string) => Promise<boolean>;
-  logout: () => void;
   loading: boolean;
+  auth: Auth | null;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  auth: null,
+});
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthContextType['user'] | null>(null);
   const [loading, setLoading] = useState(true);
+  const { auth, firestore } = useFirebase();
   const router = useRouter();
 
   useEffect(() => {
-    // Check if a user is saved in session storage
-    const savedUser = sessionStorage.getItem('officeflow-user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    if (!auth || !firestore) {
+      // Firebase might not be initialized yet
+      return;
     }
-    setLoading(false);
-  }, []);
-  
-  const login = useCallback(async (name: string): Promise<boolean> => {
-    setLoading(true);
-    const foundUser = users.find(u => u.name.toLowerCase() === name.toLowerCase());
-    if (foundUser) {
-      const userToSave = { ...foundUser, uid: foundUser.id };
-      setUser(userToSave);
-      sessionStorage.setItem('officeflow-user', JSON.stringify(userToSave));
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        const userDocRef = doc(firestore, 'users', firebaseUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data() as UserProfile;
+          setUser({ ...userData, uid: firebaseUser.uid });
+        } else {
+          // Handle case where user exists in Auth but not in Firestore
+          console.error("User data not found in Firestore. Logging out.");
+          await signOut(auth);
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
       setLoading(false);
-      return true;
-    }
-    setLoading(false);
-    return false;
-  }, []);
+    });
 
-  const logout = useCallback(() => {
-    setUser(null);
-    sessionStorage.removeItem('officeflow-user');
-    router.push('/login');
-  }, [router]);
+    return () => unsubscribe();
+  }, [auth, firestore, router]);
 
-  const value = { user, login, logout, loading };
+  const value = { user, loading, auth };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
