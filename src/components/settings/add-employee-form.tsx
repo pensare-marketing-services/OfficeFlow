@@ -26,7 +26,7 @@ export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  // const { addEmployee } = useTasks(); // This will be used to add employee to the mock data
+  const { addEmployee } = useTasks();
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeSchema),
@@ -40,20 +40,20 @@ export default function AddEmployeeForm() {
     setLoading(true);
     setError(null);
     try {
-        // Here you would typically call a function to add the employee to your state management
-        // For example: addEmployee({ ...data, role: 'employee', avatar: `https://picsum.photos/seed/${data.name}/200/200` });
-        
-        // Simulating an async operation
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await addEmployee({ name: data.name, email: data.email });
         
         toast({
-            title: "Employee Added (Simulation)",
-            description: `${data.name} has been added. This is a simulation and will not persist on refresh.`
+            title: "Employee Added",
+            description: `${data.name} has been added with a default password of "password".`
         });
         form.reset();
 
     } catch (e: any) {
-        setError(e.message || 'Failed to add employee.');
+        if (e.code === 'auth/email-already-in-use') {
+            setError('This email address is already in use.');
+        } else {
+            setError(e.message || 'Failed to add employee.');
+        }
     } finally {
         setLoading(false);
     }
@@ -63,16 +63,16 @@ export default function AddEmployeeForm() {
     <Card className="shadow-lg">
         <CardHeader>
             <CardTitle className="font-headline text-xl flex items-center gap-2"><UserPlus /> Add New Employee</CardTitle>
-            <CardDescription>Create a new employee account. This is a simulation.</CardDescription>
+            <CardDescription>Create a new user account. The default password will be "password".</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
                 <CardContent className="space-y-4">
                     <FormField control={form.control} name="name" render={({ field }) => (
-                        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Jane Doe" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Admin User" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="email" render={({ field }) => (
-                        <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="e.g., jane.doe@officeflow.com" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="e.g., admin@officeflow.com" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
