@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
-import { clients } from '@/lib/data';
+import { clients as defaultClients } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
 import {
@@ -20,8 +20,10 @@ type UserWithId = User & { id: string };
 
 export default function ClientsPage() {
     const { user: currentUser } = useAuth();
-    const { tasks, users, loading, addTask, updateTask } = useTasks();
+    const { tasks, users, addTask, updateTask } = useTasks();
+    const [clients] = useState<Client[]>(defaultClients);
     const [selectedClient, setSelectedClient] = useState<Client | null>(clients[0] || null);
+    const [loading, setLoading] = useState(false);
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
         updateTask(updatedTask.id, updatedTask);

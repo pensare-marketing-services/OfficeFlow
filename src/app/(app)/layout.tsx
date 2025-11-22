@@ -3,13 +3,13 @@
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/shared/sidebar-nav';
 import { Header } from '@/components/shared/header';
-import { TaskProvider } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TaskProvider } from '@/hooks/use-tasks';
 
-function AppLayoutContent({ children }: { children: React.ReactNode }) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -34,7 +34,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-     <TaskProvider>
+    <TaskProvider>
       <SidebarProvider>
         <Sidebar>
           <SidebarNav />
@@ -46,11 +46,4 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
       </SidebarProvider>
     </TaskProvider>
   );
-}
-
-
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  return (
-      <AppLayoutContent>{children}</AppLayoutContent>
-  )
 }

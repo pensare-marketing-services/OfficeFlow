@@ -1,62 +1,59 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User as FirebaseUser, Auth, signOut } from 'firebase/auth';
-import { doc, getDoc, Firestore } from 'firebase/firestore';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useFirebase } from '@/firebase';
-import type { UserProfile } from '@/lib/data';
+import type { UserProfile as User } from '@/lib/data';
+import { users as mockUsers } from '@/lib/data';
+
+type UserWithId = User & { id: string };
 
 interface AuthContextType {
-  user: (UserProfile & { uid: string }) | null;
+  user: UserWithId | null;
   loading: boolean;
-  auth: Auth | null;
+  login: (email: string, pass: string) => Promise<boolean>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  auth: null,
+  login: async () => false,
+  logout: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<AuthContextType['user'] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { auth, firestore } = useFirebase();
-  const router = useRouter();
+  const [user, setUser] = useState<UserWithId | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!auth || !firestore) {
-      setLoading(false); 
-      return;
+  const login = useCallback(async (email: string, pass: string): Promise<boolean> => {
+    setLoading(true);
+    // Find the user in our mock data
+    const foundUser = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (foundUser) {
+      setUser(foundUser);
+      setLoading(false);
+      return true;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      if (firebaseUser) {
-        // Keep loading until we have the firestore doc
-        setLoading(true); 
-        const userDocRef = doc(firestore, 'users', firebaseUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
+    setUser(null);
+    setLoading(false);
+    return false;
+  }, []);
 
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data() as UserProfile;
-          setUser({ ...userData, uid: firebaseUser.uid });
-        } else {
-          console.error("User data not found in Firestore for UID:", firebaseUser.uid);
-          await signOut(auth);
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-      // Only set loading to false after all auth and firestore checks are done
-      setLoading(false);
-    });
+  const logout = useCallback(async () => {
+    setLoading(true);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setUser(null);
+    setLoading(false);
+  }, []);
 
-    return () => unsubscribe();
-  }, [auth, firestore, router]);
 
-  const value = { user, loading, auth };
+  const value = { user, loading, login, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

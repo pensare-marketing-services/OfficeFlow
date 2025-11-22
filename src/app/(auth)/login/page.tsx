@@ -6,8 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { signInWithEmailAndPassword } from "firebase/auth";
-
 
 import { Button } from "@/components/ui/button";
 import {
@@ -58,7 +56,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { auth } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -71,21 +69,13 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
     setError(null);
-    if (!auth) {
-        setError("Auth service is not available.");
-        setLoading(false);
-        return;
-    }
-    try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+    
+    const success = await login(data.email, data.password);
+
+    if (success) {
       router.push('/dashboard');
-    } catch (err: any) {
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Invalid email or password. Please try again.');
-      } else {
-        setError(err.message || 'An unexpected error occurred during login.');
-      }
-    } finally {
+    } else {
+      setError('Invalid email or password. Please try again.');
       setLoading(false);
     }
   };
@@ -101,7 +91,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
-          <CardDescription>Enter your credentials to sign in. Create users via the Settings page if needed. Default password is "password".</CardDescription>
+          <CardDescription>Enter your credentials to sign in. Any password will work with a valid user email.</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>

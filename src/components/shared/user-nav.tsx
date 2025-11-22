@@ -13,18 +13,15 @@ import {
 import { LogOut } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
-import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 export function UserNav() {
-  const { user, auth, loading } = useAuth();
+  const { user, logout, loading } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
-    if (auth) {
-      await signOut(auth);
-      router.push('/login');
-    }
+    await logout();
+    router.push('/login');
   };
 
 

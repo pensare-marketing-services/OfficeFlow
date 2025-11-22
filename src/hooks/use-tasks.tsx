@@ -1,111 +1,69 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode, useCallback } from 'react';
-import { collection, addDoc, updateDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { useFirestore, useCollection, useAuth as useFirebaseAuth } from '@/firebase';
+import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
 import type { Task, UserProfile } from '@/lib/data';
-import { useAuth } from './use-auth';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
+import { users as initialUsers, tasks as initialTasks } from '@/lib/data';
 
+type UserWithId = UserProfile & { id: string };
 
 interface TaskContextType {
-    tasks: (Task & {id: string})[];
-    users: (UserProfile & {id: string})[];
+    tasks: (Task & { id: string })[];
+    users: UserWithId[];
     loading: boolean;
     error: Error | null;
-    addTask: (task: Omit<Task, 'id'>) => void;
+    addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
     updateTask: (taskId: string, task: Partial<Task>) => void;
-    addEmployee: (employeeData: Omit<UserProfile, 'id' | 'role' | 'avatar'> & {role?: 'admin' | 'employee'}) => Promise<void>;
+    addEmployee: (employeeData: Omit<UserWithId, 'id' | 'avatar'>) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const firestore = useFirestore();
-    const { auth } = useFirebaseAuth();
-    const { user } = useAuth();
-    
-    const { data: tasks, loading: tasksLoading, error: tasksError } = useCollection<Task & {id: string}>(
-        firestore ? collection(firestore, 'tasks') : null
-    );
+    const [tasks, setTasks] = useState<(Task & { id: string })[]>(initialTasks as (Task & {id: string})[]);
+    const [users, setUsers] = useState<UserWithId[]>(initialUsers);
+    const [loading] = useState(false);
+    const [error] = useState<Error | null>(null);
 
-    const { data: users, loading: usersLoading, error: usersError } = useCollection<UserProfile & {id: string}>(
-        firestore ? collection(firestore, 'users') : null
-    );
-
-    const addEmployee = useCallback(async (employeeData: Omit<UserProfile, 'id' | 'role' | 'avatar'> & {role?: 'admin' | 'employee'}) => {
-        if (!auth || !firestore) {
-            throw new Error("Firebase not initialized.");
-        }
-        
-        // 1. Create user in Firebase Auth
-        const userCredential = await createUserWithEmailAndPassword(auth, employeeData.email, "password");
-        const newUserId = userCredential.user.uid;
-
-        // 2. Create user profile in Firestore
-        const userDocRef = doc(firestore, 'users', newUserId);
-        const newUserProfile: UserProfile = {
-            name: employeeData.name,
-            email: employeeData.email,
-            role: employeeData.role || 'employee', // Default to employee
-            avatar: `https://picsum.photos/seed/${employeeData.name}/200/200`
-        };
-        
-        setDoc(userDocRef, newUserProfile)
-            .catch(async (serverError) => {
-                const permissionError = new FirestorePermissionError({
-                    path: userDocRef.path,
-                    operation: 'create',
-                    requestResourceData: newUserProfile
-                });
-                errorEmitter.emit('permission-error', permissionError);
-            });
-    }, [auth, firestore]);
-
-    const addTask = useCallback((task: Omit<Task, 'id'>) => {
-        if (!firestore || !user) return;
-        
-        const tasksCollection = collection(firestore, 'tasks');
-        const newTask = {
-            ...task,
-            createdAt: serverTimestamp(),
-        };
-
-        addDoc(tasksCollection, newTask)
-            .catch(async (serverError) => {
-                const permissionError = new FirestorePermissionError({
-                    path: tasksCollection.path,
-                    operation: 'create',
-                    requestResourceData: newTask
-                });
-                errorEmitter.emit('permission-error', permissionError);
-            });
-
-    }, [firestore, user]);
+    const addTask = useCallback((task: Omit<Task, 'id' | 'createdAt'>) => {
+        setTasks(prevTasks => {
+            const newTask: Task & { id: string } = {
+                ...task,
+                id: `task-${Date.now()}-${Math.random()}`,
+                createdAt: new Date().toISOString(),
+            };
+            return [...prevTasks, newTask];
+        });
+    }, []);
 
     const updateTask = useCallback((taskId: string, taskUpdate: Partial<Task>) => {
-        if (!firestore) return;
-
-        const taskDocRef = doc(firestore, 'tasks', taskId);
-        updateDoc(taskDocRef, taskUpdate)
-         .catch(async (serverError) => {
-                const permissionError = new FirestorePermissionError({
-                    path: taskDocRef.path,
-                    operation: 'update',
-                    requestResourceData: taskUpdate
-                });
-                errorEmitter.emit('permission-error', permissionError);
-            });
-
-    }, [firestore]);
+        setTasks(prevTasks =>
+            prevTasks.map(task =>
+                task.id === taskId ? { ...task, ...taskUpdate } : task
+            )
+        );
+    }, []);
     
+    const addEmployee = useCallback((employeeData: Omit<UserWithId, 'id' | 'avatar'>) => {
+        setUsers(prevUsers => {
+            const newUser: UserWithId = {
+                ...employeeData,
+                id: employeeData.email,
+                avatar: `https://picsum.photos/seed/${employeeData.name}/200/200`
+            };
+            // Prevent adding duplicates
+            if (prevUsers.some(u => u.email === newUser.email)) {
+                return prevUsers;
+            }
+            return [...prevUsers, newUser];
+        });
+    }, []);
+
+
     const value = {
-        tasks: tasks || [],
-        users: users || [],
-        loading: tasksLoading || usersLoading,
-        error: tasksError || usersError,
+        tasks,
+        users,
+        loading,
+        error,
         addTask,
         updateTask,
         addEmployee,

@@ -1,6 +1,3 @@
-import { PlaceHolderImages } from './placeholder-images';
-import type { Timestamp } from 'firebase/firestore';
-
 export type UserProfile = {
   id?: string;
   name: string;
@@ -27,7 +24,7 @@ export type Task = {
   clientId?: string;
   date?: string; 
   contentType?: ContentType;
-  createdAt?: Timestamp | string;
+  createdAt?: string;
 };
 
 export type Client = {

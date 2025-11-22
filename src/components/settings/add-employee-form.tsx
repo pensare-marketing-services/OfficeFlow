@@ -43,20 +43,16 @@ export default function AddEmployeeForm() {
     setLoading(true);
     setError(null);
     try {
-        await addEmployee({ name: data.name, email: data.email, role: data.role });
+        addEmployee({ name: data.name, email: data.email, role: data.role });
         
         toast({
             title: "User Added",
-            description: `${data.name} has been added as an ${data.role} with a default password of "password".`
+            description: `${data.name} has been added as an ${data.role}.`
         });
         form.reset();
 
     } catch (e: any) {
-        if (e.code === 'auth/email-already-in-use') {
-            setError('This email address is already in use.');
-        } else {
-            setError(e.message || 'Failed to add user.');
-        }
+       setError(e.message || 'Failed to add user.');
     } finally {
         setLoading(false);
     }
@@ -66,7 +62,7 @@ export default function AddEmployeeForm() {
     <Card className="shadow-lg">
         <CardHeader>
             <CardTitle className="font-headline text-xl flex items-center gap-2"><UserPlus /> Add New User</CardTitle>
-            <CardDescription>Create a new admin or employee account. The default password will be "password".</CardDescription>
+            <CardDescription>Create a new admin or employee account.</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
