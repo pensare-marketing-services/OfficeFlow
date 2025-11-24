@@ -27,8 +27,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/firebase/client';
 
 function OfficeIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -65,7 +63,7 @@ export default function LoginPage() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: 'admin@officeflow.com', password: 'password' },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -75,7 +73,11 @@ export default function LoginPage() {
       await login(data.email, data.password);
       router.push('/dashboard');
     } catch (e: any) {
-      setError('Invalid email or password. Please try again.');
+      if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+        setError('Invalid email or password. Please try again.');
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
       setLoading(false);
     }
   };
@@ -91,7 +93,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
-          <CardDescription>Enter your credentials to sign in. The default password for new users is "password".</CardDescription>
+          <CardDescription>Enter credentials to sign in. Default password for new users is "password".</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>

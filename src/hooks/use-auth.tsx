@@ -2,14 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, signOut, User, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/firebase/client';
 import type { UserProfile } from '@/lib/data';
 
-type UserWithId = UserProfile & { uid: string };
+type UserWithRole = UserProfile & { uid: string };
 
 interface AuthContextType {
-  user: UserWithId | null;
+  user: UserWithRole | null;
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -18,12 +18,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserWithId | null>(null);
+  const [user, setUser] = useState<UserWithRole | null>(null);
   const [loading, setLoading] = useState(true);
 
   const login = useCallback(async (email: string, pass: string) => {
     await signInWithEmailAndPassword(auth, email, pass);
-    // onAuthStateChanged will handle the rest
+    // onAuthStateChanged will handle fetching the user profile
   }, []);
 
   const logout = useCallback(async () => {
@@ -31,9 +31,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: User | null) => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
+      setLoading(true);
       if (firebaseUser) {
-        // User is signed in, now get their profile.
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         
         const unsubProfile = onSnapshot(userDocRef, (docSnap) => {
@@ -44,8 +44,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     uid: firebaseUser.uid,
                 });
             } else {
-                // This case can happen if the user record is deleted from firestore but not auth
+                // User exists in Auth, but not in Firestore.
+                // This can happen if profile creation fails. Log them out.
+                console.error("User profile not found in Firestore for UID:", firebaseUser.uid);
                 setUser(null);
+                signOut(auth);
             }
             setLoading(false);
         }, (error) => {

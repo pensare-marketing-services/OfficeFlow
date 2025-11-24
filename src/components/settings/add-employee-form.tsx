@@ -11,12 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Loader2, UserPlus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { useTasks } from '@/hooks/use-tasks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/firebase/client';
-import { setDoc, doc } from 'firebase/firestore';
-import { db } from '@/firebase/client';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '@/firebase/client';
 
 
 const employeeSchema = z.object({
@@ -45,8 +43,8 @@ export default function AddEmployeeForm() {
     setLoading(true);
     setError(null);
     try {
-        // IMPORTANT: In a real app, this should be a secure backend call.
-        // This is creating a user on the client, which is insecure.
+        // IMPORTANT: In a real production app, this should be a secure backend cloud function.
+        // For development, we create the user on the client.
         const userCredential = await createUserWithEmailAndPassword(auth, data.email, "password");
         const user = userCredential.user;
 
@@ -54,19 +52,25 @@ export default function AddEmployeeForm() {
             name: data.name,
             email: data.email,
             role: data.role,
-            avatar: `https://picsum.photos/seed/${data.name}/200/200`
+            avatar: `https://picsum.photos/seed/${user.uid}/200/200`
         };
 
+        // Create the user profile in Firestore
         await setDoc(doc(db, "users", user.uid), userProfile);
         
         toast({
             title: "User Added",
-            description: `${data.name} has been added as an ${data.role}. Default password is "password".`
+            description: `${data.name} has been added as an ${data.role}. The default password is "password".`
         });
         form.reset();
 
     } catch (e: any) {
-       setError(e.message || 'Failed to add user.');
+       // A more user-friendly error message
+       if (e.code === 'auth/email-already-in-use') {
+         setError('This email address is already in use by another account.');
+       } else {
+         setError(e.message || 'Failed to add user.');
+       }
     } finally {
         setLoading(false);
     }
