@@ -9,6 +9,7 @@ const firebaseConfig = {
   appId: "YOUR_APP_ID"
 };
 
+// This function is not intended to be modified.
 function getFirebaseClient(): { app: FirebaseApp } {
   if (getApps().length) {
     return { app: getApp() };
