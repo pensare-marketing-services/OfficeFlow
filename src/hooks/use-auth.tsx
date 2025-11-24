@@ -1,57 +1,70 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import type { UserProfile as User } from '@/lib/data';
-import { users as mockUsers } from '@/lib/data';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { onAuthStateChanged, signOut, User, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { auth, db } from '@/firebase/client';
+import type { UserProfile } from '@/lib/data';
 
-type UserWithId = User & { id: string };
+type UserWithId = UserProfile & { uid: string };
 
 interface AuthContextType {
   user: UserWithId | null;
   loading: boolean;
-  login: (email: string, pass: string) => Promise<boolean>;
+  login: (email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  login: async () => false,
-  logout: async () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserWithId | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const login = useCallback(async (email: string, pass: string): Promise<boolean> => {
-    setLoading(true);
-    // Find the user in our mock data
-    const foundUser = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-    
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    if (foundUser) {
-      setUser(foundUser);
-      setLoading(false);
-      return true;
-    }
-
-    setUser(null);
-    setLoading(false);
-    return false;
+  const login = useCallback(async (email: string, pass: string) => {
+    await signInWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged will handle the rest
   }, []);
 
   const logout = useCallback(async () => {
-    setLoading(true);
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setUser(null);
-    setLoading(false);
+    await signOut(auth);
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: User | null) => {
+      if (firebaseUser) {
+        // User is signed in, now get their profile.
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        
+        const unsubProfile = onSnapshot(userDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const userProfile = docSnap.data() as UserProfile;
+                setUser({
+                    ...userProfile,
+                    uid: firebaseUser.uid,
+                });
+            } else {
+                // This case can happen if the user record is deleted from firestore but not auth
+                setUser(null);
+            }
+            setLoading(false);
+        }, (error) => {
+            console.error("Error fetching user profile:", error);
+            setUser(null);
+            setLoading(false);
+        });
+
+        return () => unsubProfile();
+
+      } else {
+        // User is signed out
+        setUser(null);
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const value = { user, loading, login, logout };
 

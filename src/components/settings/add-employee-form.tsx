@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -14,6 +13,10 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useTasks } from '@/hooks/use-tasks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/firebase/client';
+import { setDoc, doc } from 'firebase/firestore';
+import { db } from '@/firebase/client';
 
 
 const employeeSchema = z.object({
@@ -28,7 +31,6 @@ export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { addEmployee } = useTasks();
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeSchema),
@@ -43,11 +45,23 @@ export default function AddEmployeeForm() {
     setLoading(true);
     setError(null);
     try {
-        addEmployee({ name: data.name, email: data.email, role: data.role });
+        // IMPORTANT: In a real app, this should be a secure backend call.
+        // This is creating a user on the client, which is insecure.
+        const userCredential = await createUserWithEmailAndPassword(auth, data.email, "password");
+        const user = userCredential.user;
+
+        const userProfile = {
+            name: data.name,
+            email: data.email,
+            role: data.role,
+            avatar: `https://picsum.photos/seed/${data.name}/200/200`
+        };
+
+        await setDoc(doc(db, "users", user.uid), userProfile);
         
         toast({
             title: "User Added",
-            description: `${data.name} has been added as an ${data.role}.`
+            description: `${data.name} has been added as an ${data.role}. Default password is "password".`
         });
         form.reset();
 

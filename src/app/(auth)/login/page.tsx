@@ -27,6 +27,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/firebase/client';
 
 function OfficeIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -69,12 +71,10 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
     setError(null);
-    
-    const success = await login(data.email, data.password);
-
-    if (success) {
+    try {
+      await login(data.email, data.password);
       router.push('/dashboard');
-    } else {
+    } catch (e: any) {
       setError('Invalid email or password. Please try again.');
       setLoading(false);
     }
@@ -91,7 +91,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
-          <CardDescription>Enter your credentials to sign in. Any password will work with a valid user email.</CardDescription>
+          <CardDescription>Enter your credentials to sign in. The default password for new users is "password".</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>

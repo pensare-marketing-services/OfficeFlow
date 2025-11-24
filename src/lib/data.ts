@@ -1,5 +1,5 @@
 export type UserProfile = {
-  id?: string;
+  uid?: string;
   name: string;
   email: string;
   role: 'admin' | 'employee';
@@ -24,7 +24,7 @@ export type Task = {
   clientId?: string;
   date?: string; 
   contentType?: ContentType;
-  createdAt?: string;
+  createdAt?: any; // Allow serverTimestamp
 };
 
 export type Client = {

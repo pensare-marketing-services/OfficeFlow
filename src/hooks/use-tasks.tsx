@@ -1,63 +1,81 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import type { Task, UserProfile } from '@/lib/data';
-import { users as initialUsers, tasks as initialTasks } from '@/lib/data';
+import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { db } from '@/firebase/client';
+import { useAuth } from './use-auth';
 
 type UserWithId = UserProfile & { id: string };
+type TaskWithId = Task & { id: string };
 
 interface TaskContextType {
-    tasks: (Task & { id: string })[];
+    tasks: TaskWithId[];
     users: UserWithId[];
     loading: boolean;
     error: Error | null;
     addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
     updateTask: (taskId: string, task: Partial<Task>) => void;
-    addEmployee: (employeeData: Omit<UserWithId, 'id' | 'avatar'>) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [tasks, setTasks] = useState<(Task & { id: string })[]>(initialTasks as (Task & {id: string})[]);
-    const [users, setUsers] = useState<UserWithId[]>(initialUsers);
-    const [loading] = useState(false);
-    const [error] = useState<Error | null>(null);
+    const { user: currentUser } = useAuth();
+    const [tasks, setTasks] = useState<TaskWithId[]>([]);
+    const [users, setUsers] = useState<UserWithId[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
 
-    const addTask = useCallback((task: Omit<Task, 'id' | 'createdAt'>) => {
-        setTasks(prevTasks => {
-            const newTask: Task & { id: string } = {
+    useEffect(() => {
+        setLoading(true);
+        const tasksQuery = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'));
+        const usersQuery = query(collection(db, 'users'), orderBy('name', 'asc'));
+
+        const unsubTasks = onSnapshot(tasksQuery, (snapshot) => {
+            const tasksData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as TaskWithId));
+            setTasks(tasksData);
+            setLoading(false);
+        }, (err) => {
+            console.error(err);
+            setError(err);
+            setLoading(false);
+        });
+
+        const unsubUsers = onSnapshot(usersQuery, (snapshot) => {
+            const usersData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as UserWithId));
+            setUsers(usersData);
+        }, (err) => {
+            console.error(err);
+        });
+
+        return () => {
+            unsubTasks();
+            unsubUsers();
+        };
+
+    }, [currentUser]);
+
+
+    const addTask = useCallback(async (task: Omit<Task, 'id' | 'createdAt'>) => {
+        try {
+            await addDoc(collection(db, 'tasks'), {
                 ...task,
-                id: `task-${Date.now()}-${Math.random()}`,
-                createdAt: new Date().toISOString(),
-            };
-            return [...prevTasks, newTask];
-        });
+                createdAt: serverTimestamp(),
+            });
+        } catch (e) {
+            console.error("Error adding document: ", e);
+        }
     }, []);
 
-    const updateTask = useCallback((taskId: string, taskUpdate: Partial<Task>) => {
-        setTasks(prevTasks =>
-            prevTasks.map(task =>
-                task.id === taskId ? { ...task, ...taskUpdate } : task
-            )
-        );
+    const updateTask = useCallback(async (taskId: string, taskUpdate: Partial<Task>) => {
+        try {
+            const taskRef = doc(db, 'tasks', taskId);
+            await updateDoc(taskRef, taskUpdate);
+        } catch (e) {
+            console.error("Error updating document: ", e);
+        }
     }, []);
-    
-    const addEmployee = useCallback((employeeData: Omit<UserWithId, 'id' | 'avatar'>) => {
-        setUsers(prevUsers => {
-            const newUser: UserWithId = {
-                ...employeeData,
-                id: employeeData.email,
-                avatar: `https://picsum.photos/seed/${employeeData.name}/200/200`
-            };
-            // Prevent adding duplicates
-            if (prevUsers.some(u => u.email === newUser.email)) {
-                return prevUsers;
-            }
-            return [...prevUsers, newUser];
-        });
-    }, []);
-
 
     const value = {
         tasks,
@@ -66,7 +84,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         error,
         addTask,
         updateTask,
-        addEmployee,
     };
 
     return (

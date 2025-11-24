@@ -1,0 +1,116 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user in the system, either an admin or an employee.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address, used for login."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "employee"],
+          "description": "The user's role in the system."
+        },
+        "avatar": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the user's profile picture."
+        }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Represents a single task or piece of content to be worked on.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["To Do", "In Progress", "Done", "Overdue", "Scheduled", "On Work", "For Approval", "Approved", "Posted", "Hold"]
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["Low", "Medium", "High"]
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "assigneeId": {
+          "type": "string",
+          "description": "The UID of the user this task is assigned to."
+        },
+        "clientId": {
+          "type": "string",
+          "description": "The ID of the client this task is for."
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "progressNotes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "note": {"type": "string"},
+              "date": {"type": "string", "format": "date-time"}
+            }
+          }
+        }
+      },
+      "required": ["title", "status", "priority", "deadline"]
+    },
+    "Client": {
+        "title": "Client",
+        "description": "Represents a client of the agency.",
+        "type": "object",
+        "properties": {
+            "name": {
+                "type": "string"
+            }
+        },
+        "required": ["name"]
+    }
+  },
+  "auth": {
+    "providers": ["password"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Stores public profiles for all users."
+    },
+    "/tasks/{taskId}": {
+      "schema": {
+        "$ref": "#/entities/Task"
+      },
+      "description": "Stores all tasks for the organization."
+    },
+    "/clients/{clientId}": {
+      "schema": {
+        "$ref": "#/entities/Client"
+      },
+      "description": "Stores all clients for the organization."
+    }
+  }
+}

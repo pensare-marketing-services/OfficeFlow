@@ -15,6 +15,7 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
+import { serverTimestamp } from 'firebase/firestore';
 
 type UserWithId = User & { id: string };
 
@@ -43,7 +44,7 @@ export default function ClientsPage() {
             progressNotes: [],
             clientId: client.id,
             date: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
+            createdAt: serverTimestamp() as any,
         };
         addTask(newTask);
     };
