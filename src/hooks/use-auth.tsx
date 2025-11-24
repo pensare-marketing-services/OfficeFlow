@@ -32,8 +32,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
-      setLoading(true);
       if (firebaseUser) {
+        // Set loading to true when we start fetching profile
+        setLoading(true);
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         
         const unsubProfile = onSnapshot(userDocRef, (docSnap) => {
@@ -44,12 +45,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     uid: firebaseUser.uid,
                 });
             } else {
-                // User exists in Auth, but not in Firestore.
-                // This can happen if profile creation fails. Log them out.
                 console.error("User profile not found in Firestore for UID:", firebaseUser.uid);
                 setUser(null);
                 signOut(auth);
             }
+            // Set loading to false only after profile is fetched (or fails)
             setLoading(false);
         }, (error) => {
             console.error("Error fetching user profile:", error);
