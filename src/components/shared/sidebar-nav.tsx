@@ -57,7 +57,7 @@ export function SidebarNav() {
         <SidebarMenu>
           {filteredNavItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
+              <Link href={item.href}>
                   <SidebarMenuButton
                     asChild
                     isActive={pathname.startsWith(item.href)}
@@ -65,10 +65,10 @@ export function SidebarNav() {
                       children: item.label,
                     }}
                   >
-                      <a>
+                      <span>
                         <item.icon />
                         <span>{item.label}</span>
-                      </a>
+                      </span>
                   </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
