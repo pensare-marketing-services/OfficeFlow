@@ -14,7 +14,7 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
-import { collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -47,7 +47,7 @@ export default function ClientsPage() {
         });
 
         return () => unsubscribe();
-    }, [selectedClient]);
+    }, []);
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
         updateTask(updatedTask.id, updatedTask);
@@ -119,7 +119,7 @@ export default function ClientsPage() {
                 />
             ) : (
                 <div className="text-center text-muted-foreground py-16">
-                    {loading ? <Skeleton className="w-48 h-8 mx-auto" /> : (clients.length === 0 ? "No clients found. Add clients in Settings to get started." : "Please select a client to view their schedule.")}
+                    {clients.length === 0 ? "No clients found. Add clients in Settings to get started." : "Please select a client to view their schedule."}
                 </div>
             )}
         </div>
