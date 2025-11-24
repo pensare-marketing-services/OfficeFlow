@@ -41,7 +41,10 @@ export function SidebarNav() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  const filteredNavItems = navItems.filter(item => !item.adminOnly || user?.role === 'admin');
+  const filteredNavItems = navItems.filter(item => {
+    if (!item.adminOnly) return true;
+    return user?.role === 'admin';
+  });
 
   return (
     <>
