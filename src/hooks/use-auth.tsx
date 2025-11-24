@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, signOut, User, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebase/client';
 import type { UserProfile } from '@/lib/data';
 
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = useCallback(async (email: string, pass: string) => {
     await signInWithEmailAndPassword(auth, email, pass);
-    // onAuthStateChanged will handle fetching the user profile
+    // onAuthStateChanged will handle the rest
   }, []);
 
   const logout = useCallback(async () => {
@@ -33,28 +33,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
       if (firebaseUser) {
-        // Set loading to true when we start fetching profile
         setLoading(true);
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         
-        const unsubProfile = onSnapshot(userDocRef, (docSnap) => {
+        const unsubProfile = onSnapshot(userDocRef, async (docSnap) => {
             if (docSnap.exists()) {
                 const userProfile = docSnap.data() as UserProfile;
                 setUser({
                     ...userProfile,
                     uid: firebaseUser.uid,
                 });
+                setLoading(false);
             } else {
-                console.error("User profile not found in Firestore for UID:", firebaseUser.uid);
-                setUser(null);
-                signOut(auth);
+                // Profile doesn't exist, this might be a first-time login
+                // after manual creation in Auth. Let's create a default profile.
+                console.log("User profile not found, creating a default one.");
+                const newUserProfile: UserProfile = {
+                    name: firebaseUser.displayName || firebaseUser.email || 'New User',
+                    email: firebaseUser.email!,
+                    role: 'employee', // Default role
+                    avatar: firebaseUser.photoURL || `https://picsum.photos/seed/${firebaseUser.uid}/200/200`
+                };
+
+                try {
+                    await setDoc(userDocRef, newUserProfile);
+                    // The onSnapshot listener will fire again with the new data,
+                    // so we don't need to call setUser here.
+                } catch (error) {
+                    console.error("Error creating user profile:", error);
+                    setUser(null);
+                    setLoading(false);
+                    signOut(auth);
+                }
             }
-            // Set loading to false only after profile is fetched (or fails)
-            setLoading(false);
         }, (error) => {
             console.error("Error fetching user profile:", error);
             setUser(null);
             setLoading(false);
+            signOut(auth); // Sign out if we can't read the profile
         });
 
         return () => unsubProfile();
