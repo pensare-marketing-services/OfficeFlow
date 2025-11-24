@@ -14,8 +14,10 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
-import { serverTimestamp, collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase/client';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
@@ -29,9 +31,10 @@ export default function ClientsPage() {
 
     useEffect(() => {
         const fetchClients = async () => {
+            setLoading(true);
             try {
                 const querySnapshot = await getDocs(collection(db, "clients"));
-                const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as ClientWithId));
+                const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
                 setClients(clientsData);
                 if (clientsData.length > 0) {
                     setSelectedClient(clientsData[0]);
@@ -84,20 +87,22 @@ export default function ClientsPage() {
                             <CardDescription>Manage content plans and progress for your clients.</CardDescription>
                         </div>
                         <div className="flex items-center gap-4">
-                            <Select
-                                value={selectedClient?.id}
-                                onValueChange={(clientId) => setSelectedClient(clients.find(c => c.id === clientId) || null)}
-                                disabled={clients.length === 0}
-                            >
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Select a client" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {clients.map(client => (
-                                        <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            {loading ? <Skeleton className="h-10 w-[180px]" /> :
+                                <Select
+                                    value={selectedClient?.id}
+                                    onValueChange={(clientId) => setSelectedClient(clients.find(c => c.id === clientId) || null)}
+                                    disabled={clients.length === 0}
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Select a client" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {clients.map(client => (
+                                            <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            }
                             {selectedClient && (
                                 <Button onClick={() => handleAddTask(selectedClient)} disabled={tasksLoading}>Add Content</Button>
                             )}
@@ -106,7 +111,7 @@ export default function ClientsPage() {
                 </CardHeader>
             </Card>
 
-            {pageLoading ? <div>Loading...</div> : selectedClient ? (
+            {pageLoading ? <Skeleton className="h-96 w-full" /> : selectedClient ? (
                 <ContentSchedule 
                     tasks={filteredTasks} 
                     users={users as UserWithId[]} 
@@ -114,7 +119,7 @@ export default function ClientsPage() {
                 />
             ) : (
                 <div className="text-center text-muted-foreground py-16">
-                    {clients.length === 0 ? "No clients found. Add clients to get started." : "Please select a client to view their schedule."}
+                    {clients.length === 0 ? "No clients found. Add clients in Settings to get started." : "Please select a client to view their schedule."}
                 </div>
             )}
         </div>

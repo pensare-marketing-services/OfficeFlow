@@ -1,12 +1,14 @@
 'use client';
 import { useMemo } from 'react';
-import { Users } from "lucide-react";
+import { Users, Building } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import AddEmployeeForm from '@/components/settings/add-employee-form';
-import type { UserProfile as UserType } from '@/lib/data';
+import AddClientForm from '@/components/settings/add-client-form';
+import type { UserProfile as UserType, Client } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useTasks } from '@/hooks/use-tasks';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
@@ -25,13 +27,13 @@ export default function SettingsPage() {
                     Settings
                 </h2>
                 <p className="text-muted-foreground">
-                    Manage your team and application settings.
+                    Manage your team, clients, and application settings.
                 </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                    <Card>
+                <div className="lg:col-span-2 space-y-8">
+                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Users /> Manage Employees</CardTitle>
                             <CardDescription>View and manage the employees in your organization.</CardDescription>
@@ -45,7 +47,12 @@ export default function SettingsPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {loading && <TableRow><TableCell colSpan={2}>Loading...</TableCell></TableRow>}
+                                    {loading && Array.from({length: 3}).map((_, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell><Skeleton className="h-8 w-48" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-48" /></TableCell>
+                                        </TableRow>
+                                    ))}
                                     {error && <TableRow><TableCell colSpan={2} className="text-destructive">{error.message}</TableCell></TableRow>}
                                     {!loading && employees.map(employee => (
                                         <TableRow key={employee.id}>
@@ -66,8 +73,9 @@ export default function SettingsPage() {
                         </CardContent>
                     </Card>
                 </div>
-                <div>
+                <div className="space-y-8">
                     <AddEmployeeForm />
+                    <AddClientForm />
                 </div>
             </div>
         </div>
