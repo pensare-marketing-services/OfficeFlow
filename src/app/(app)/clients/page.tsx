@@ -14,7 +14,7 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -30,24 +30,24 @@ export default function ClientsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchClients = async () => {
-            setLoading(true);
-            try {
-                const querySnapshot = await getDocs(collection(db, "clients"));
-                const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
-                setClients(clientsData);
-                if (clientsData.length > 0) {
-                    setSelectedClient(clientsData[0]);
-                }
-            } catch (error) {
-                console.error("Error fetching clients: ", error);
-            } finally {
-                setLoading(false);
+        setLoading(true);
+        const clientsQuery = collection(db, "clients");
+        const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
+            const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
+            setClients(clientsData);
+            if (clientsData.length > 0 && !selectedClient) {
+                setSelectedClient(clientsData[0]);
+            } else if (clientsData.length === 0) {
+                setSelectedClient(null);
             }
-        };
+            setLoading(false);
+        }, (error) => {
+            console.error("Error fetching clients: ", error);
+            setLoading(false);
+        });
 
-        fetchClients();
-    }, []);
+        return () => unsubscribe();
+    }, [selectedClient]);
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
         updateTask(updatedTask.id, updatedTask);
@@ -119,7 +119,7 @@ export default function ClientsPage() {
                 />
             ) : (
                 <div className="text-center text-muted-foreground py-16">
-                    {clients.length === 0 ? "No clients found. Add clients in Settings to get started." : "Please select a client to view their schedule."}
+                    {loading ? <Skeleton className="w-48 h-8 mx-auto" /> : (clients.length === 0 ? "No clients found. Add clients in Settings to get started." : "Please select a client to view their schedule.")}
                 </div>
             )}
         </div>

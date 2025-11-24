@@ -4,7 +4,6 @@ import { Users, Building } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import AddEmployeeForm from '@/components/settings/add-employee-form';
 import AddClientForm from '@/components/settings/add-client-form';
-import type { UserProfile as UserType, Client } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useTasks } from '@/hooks/use-tasks';
