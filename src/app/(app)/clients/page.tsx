@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
-import { clients as defaultClients } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
 import {
@@ -15,25 +14,46 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
-import { serverTimestamp } from 'firebase/firestore';
+import { serverTimestamp, collection, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase/client';
 
 type UserWithId = User & { id: string };
+type ClientWithId = Client & { id: string };
 
 export default function ClientsPage() {
     const { user: currentUser } = useAuth();
-    const { tasks, users, addTask, updateTask } = useTasks();
-    const [clients] = useState<Client[]>(defaultClients);
-    const [selectedClient, setSelectedClient] = useState<Client | null>(clients[0] || null);
-    const [loading, setLoading] = useState(false);
+    const { tasks, users, addTask, updateTask, loading: tasksLoading } = useTasks();
+    const [clients, setClients] = useState<ClientWithId[]>([]);
+    const [selectedClient, setSelectedClient] = useState<ClientWithId | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchClients = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "clients"));
+                const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as ClientWithId));
+                setClients(clientsData);
+                if (clientsData.length > 0) {
+                    setSelectedClient(clientsData[0]);
+                }
+            } catch (error) {
+                console.error("Error fetching clients: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchClients();
+    }, []);
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
         updateTask(updatedTask.id, updatedTask);
     };
     
-    const handleAddTask = (client: Client) => {
+    const handleAddTask = (client: ClientWithId) => {
         if (!currentUser) return;
 
-        const newTask: Omit<Task, 'id'> = {
+        const newTask: Omit<Task, 'id' | 'createdAt'> = {
             title: 'New Content Title',
             description: 'A brief description of the content.',
             status: 'Scheduled',
@@ -43,8 +63,6 @@ export default function ClientsPage() {
             assigneeId: '',
             progressNotes: [],
             clientId: client.id,
-            date: new Date().toISOString(),
-            createdAt: serverTimestamp() as any,
         };
         addTask(newTask);
     };
@@ -53,6 +71,8 @@ export default function ClientsPage() {
         if (!tasks || !selectedClient) return [];
         return tasks.filter(task => task.clientId === selectedClient.id);
     }, [tasks, selectedClient]);
+
+    const pageLoading = loading || tasksLoading;
 
     return (
         <div className="space-y-6">
@@ -67,6 +87,7 @@ export default function ClientsPage() {
                             <Select
                                 value={selectedClient?.id}
                                 onValueChange={(clientId) => setSelectedClient(clients.find(c => c.id === clientId) || null)}
+                                disabled={clients.length === 0}
                             >
                                 <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="Select a client" />
@@ -78,21 +99,23 @@ export default function ClientsPage() {
                                 </SelectContent>
                             </Select>
                             {selectedClient && (
-                                <Button onClick={() => handleAddTask(selectedClient)} disabled={loading}>Add Content</Button>
+                                <Button onClick={() => handleAddTask(selectedClient)} disabled={tasksLoading}>Add Content</Button>
                             )}
                         </div>
                     </div>
                 </CardHeader>
             </Card>
 
-            {loading ? <div>Loading...</div> : selectedClient ? (
+            {pageLoading ? <div>Loading...</div> : selectedClient ? (
                 <ContentSchedule 
                     tasks={filteredTasks} 
                     users={users as UserWithId[]} 
                     onTaskUpdate={handleTaskUpdate}
                 />
             ) : (
-                <div className="text-center text-muted-foreground py-16">Please select a client to view their schedule.</div>
+                <div className="text-center text-muted-foreground py-16">
+                    {clients.length === 0 ? "No clients found. Add clients to get started." : "Please select a client to view their schedule."}
+                </div>
             )}
         </div>
     );

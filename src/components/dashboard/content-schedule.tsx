@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { Task, UserProfile as User, ContentType, ContentStatus } from '@/lib/data';
+import type { Task, UserProfile as User } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,9 @@ import { Badge } from '../ui/badge';
 import { useMemo } from 'react';
 
 type UserWithId = User & { id: string };
+
+type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
+type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold';
 
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
@@ -37,7 +40,7 @@ const statusColors: Record<ContentStatus, string> = {
     Approved: 'bg-green-500',
     Posted: 'bg-purple-500',
     Hold: 'bg-gray-500',
-}
+};
 
 const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea' }> = ({ value, onSave, type = 'text' }) => {
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {

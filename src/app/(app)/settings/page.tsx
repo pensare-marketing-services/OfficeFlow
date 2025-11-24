@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useTasks } from '@/hooks/use-tasks';
 
-const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').toUpperCase();
+const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
 export default function SettingsPage() {
     const { users, loading, error } = useTasks();
@@ -46,7 +46,7 @@ export default function SettingsPage() {
                                 </TableHeader>
                                 <TableBody>
                                     {loading && <TableRow><TableCell colSpan={2}>Loading...</TableCell></TableRow>}
-                                    {error && <TableRow><TableCell colSpan={2} className="text-destructive">{error as any}</TableCell></TableRow>}
+                                    {error && <TableRow><TableCell colSpan={2} className="text-destructive">{error.message}</TableCell></TableRow>}
                                     {!loading && employees.map(employee => (
                                         <TableRow key={employee.id}>
                                             <TableCell>
