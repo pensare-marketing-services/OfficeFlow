@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -11,13 +12,17 @@ import { Loader2, UserPlus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { createUser } from '@/ai/flows/user-flow';
-import { CreateUserInputSchema, type CreateUserInput } from '@/ai/flows/user-flow-schema';
+import { collection, doc, setDoc } from 'firebase/firestore';
+import { db } from '@/firebase/client';
 
 
-const employeeSchema = CreateUserInputSchema;
+const employeeSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email(),
+  role: z.enum(['admin', 'employee']),
+});
 
-type EmployeeFormValues = CreateUserInput;
+type EmployeeFormValues = z.infer<typeof employeeSchema>;
 
 export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
@@ -37,22 +42,27 @@ export default function AddEmployeeForm() {
     setLoading(true);
     setError(null);
     try {
-        await createUser(data);
+        // We will create the user profile in Firestore directly.
+        // We will generate a temporary ID for the document.
+        const userRef = doc(collection(db, 'users'));
+        const userProfile = {
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          avatar: `https://picsum.photos/seed/${userRef.id}/200/200`,
+        };
+
+        await setDoc(userRef, userProfile);
         
         toast({
             title: "User Profile Created",
             description: `${data.name}'s profile was saved. Please create their login in the Firebase Authentication console.`,
-            duration: 5000,
+            duration: 7000,
         });
         form.reset();
 
     } catch (e: any) {
-       // A more user-friendly error message
-       if (e.message?.includes('auth/email-already-exists')) {
-         setError('This email address is already in use by another account.');
-       } else {
-         setError(e.message || 'Failed to add user. Please try again.');
-       }
+       setError(e.message || 'Failed to add user. Please try again.');
     } finally {
         setLoading(false);
     }
