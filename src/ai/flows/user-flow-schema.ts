@@ -1,4 +1,3 @@
-'use server';
 /**
  * @fileoverview Defines the schema for creating a new user.
  */
