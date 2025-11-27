@@ -12,9 +12,7 @@ import { Loader2, UserPlus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '@/firebase/client';
+import { createUser } from '@/ai/flows/user-flow';
 
 
 const employeeSchema = z.object({
@@ -43,23 +41,7 @@ export default function AddEmployeeForm() {
     setLoading(true);
     setError(null);
     try {
-        // IMPORTANT: In a real production app, this should be a secure backend cloud function.
-        // For development, we create the user on the client.
-        // This will fail if you're not logged in as an authorized user with sufficient permissions.
-        // We create the user with a temporary password, which they should change.
-        const userCredential = await createUserWithEmailAndPassword(auth, data.email, "password");
-        const user = userCredential.user;
-
-        const userProfile = {
-            name: data.name,
-            email: data.email,
-            role: data.role,
-            avatar: `https://picsum.photos/seed/${user.uid}/200/200`
-        };
-
-        // Create the user profile in Firestore
-        // This will make the user data available to the app's auth context
-        await setDoc(doc(db, "users", user.uid), userProfile);
+        await createUser(data);
         
         toast({
             title: "User Added",
@@ -69,10 +51,8 @@ export default function AddEmployeeForm() {
 
     } catch (e: any) {
        // A more user-friendly error message
-       if (e.code === 'auth/email-already-in-use') {
+       if (e.message?.includes('email-already-exists')) {
          setError('This email address is already in use by another account.');
-       } else if (e.code === 'auth/requires-recent-login') {
-         setError('This operation is sensitive and requires recent authentication. Please log out and log back in before creating a new user.');
        } else {
          setError(e.message || 'Failed to add user. You may not have permission to perform this action.');
        }
