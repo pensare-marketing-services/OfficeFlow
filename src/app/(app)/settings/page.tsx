@@ -1,5 +1,5 @@
 'use client';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Users, Building } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import AddEmployeeForm from '@/components/settings/add-employee-form';
@@ -8,11 +8,32 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useTasks } from '@/hooks/use-tasks';
 import { Skeleton } from '@/components/ui/skeleton';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '@/firebase/client';
+import type { Client } from '@/lib/data';
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
+type ClientWithId = Client & { id: string };
+
 export default function SettingsPage() {
-    const { users, loading, error } = useTasks();
+    const { users, loading: usersLoading, error } = useTasks();
+    const [clients, setClients] = useState<ClientWithId[]>([]);
+    const [clientsLoading, setClientsLoading] = useState(true);
+
+    useEffect(() => {
+        const clientsQuery = collection(db, "clients");
+        const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
+            const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
+            setClients(clientsData);
+            setClientsLoading(false);
+        }, (error) => {
+            console.error("Error fetching clients: ", error);
+            setClientsLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     const employees = useMemo(() => {
         if (!users) return [];
@@ -46,14 +67,14 @@ export default function SettingsPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {loading && Array.from({length: 3}).map((_, i) => (
+                                    {usersLoading && Array.from({length: 3}).map((_, i) => (
                                         <TableRow key={i}>
                                             <TableCell><Skeleton className="h-8 w-48" /></TableCell>
                                             <TableCell><Skeleton className="h-8 w-48" /></TableCell>
                                         </TableRow>
                                     ))}
                                     {error && <TableRow><TableCell colSpan={2} className="text-destructive">{error.message}</TableCell></TableRow>}
-                                    {!loading && employees.map(employee => (
+                                    {!usersLoading && employees.map(employee => (
                                         <TableRow key={employee.id}>
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
@@ -67,6 +88,32 @@ export default function SettingsPage() {
                                             <TableCell>{employee.email}</TableCell>
                                         </TableRow>
                                     ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Building /> Manage Clients</CardTitle>
+                            <CardDescription>View all your clients in one place.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Client Name</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {clientsLoading && <TableRow><TableCell><Skeleton className="h-8 w-full" /></TableCell></TableRow>}
+                                    {!clientsLoading && clients.map(client => (
+                                        <TableRow key={client.id}>
+                                            <TableCell className="font-medium">{client.name}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {!clientsLoading && clients.length === 0 && (
+                                        <TableRow><TableCell className="text-center text-muted-foreground">No clients added yet.</TableCell></TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
                         </CardContent>
