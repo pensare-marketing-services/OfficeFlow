@@ -171,7 +171,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                             {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-2 -right-2 h-4 w-4 justify-center p-0">{unreadCount}</Badge>}
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-96">
+                                    <PopoverContent className="w-96" side="bottom" align="end">
                                         <div className="space-y-4">
                                             <h4 className="font-medium leading-none">Remarks</h4>
                                                 <div className="max-h-60 space-y-4 overflow-y-auto p-1">

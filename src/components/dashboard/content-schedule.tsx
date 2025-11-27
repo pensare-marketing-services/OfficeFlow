@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, MessageSquare } from 'lucide-react';
+import { CalendarIcon, MessageSquare, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -100,6 +100,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
         if (JSON.stringify(updatedNotes) !== JSON.stringify(task.progressNotes)) {
              handleFieldChange(task.id, 'progressNotes', updatedNotes);
         }
+    }
+
+    const handleClearChat = (taskId: string) => {
+        handleFieldChange(taskId, 'progressNotes', []);
     }
 
     const employeeUsers = useMemo(() => {
@@ -235,9 +239,17 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                     {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-2 -right-2 h-4 w-4 justify-center p-0">{unreadCount}</Badge>}
                                                 </Button>
                                             </PopoverTrigger>
-                                            <PopoverContent className="w-96">
+                                            <PopoverContent className="w-96" side="bottom" align="end">
                                                 <div className="space-y-4">
-                                                    <h4 className="font-medium leading-none">Remarks</h4>
+                                                    <div className="flex justify-between items-center">
+                                                        <h4 className="font-medium leading-none">Remarks</h4>
+                                                        {(task.progressNotes || []).length > 0 && (
+                                                            <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-xs text-muted-foreground">
+                                                                <Trash2 className="mr-1 h-3 w-3" />
+                                                                Clear Chat
+                                                            </Button>
+                                                        )}
+                                                    </div>
                                                      <div className="max-h-60 space-y-4 overflow-y-auto p-1">
                                                         {(task.progressNotes || []).slice().reverse().map((note, i) => (
                                                             <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
