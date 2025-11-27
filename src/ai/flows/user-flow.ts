@@ -3,7 +3,7 @@
  * @fileoverview This flow handles user creation securely on the backend.
  */
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit/zod';
+import { z } from 'zod';
 import * as admin from 'firebase-admin';
 
 export const CreateUserInputSchema = z.object({
