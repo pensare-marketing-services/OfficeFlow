@@ -2,12 +2,11 @@
 /**
  * @fileoverview This flow handles user creation securely on the backend.
  */
-import * as admin from 'firebase-admin';
 import { CreateUserInput, CreateUserInputSchema } from './user-flow-schema';
+import * as admin from 'firebase-admin';
 
 // Helper to initialize Firebase Admin SDK safely.
 function initializeFirebaseAdmin() {
-  console.log("print");
   if (!admin.apps.length) {
     // Use application default credentials to connect to Firebase.
     admin.initializeApp({
@@ -16,9 +15,7 @@ function initializeFirebaseAdmin() {
   }
 }
 
-export async function createUser(data: CreateUserInput): Promise<void> {
-  console.log("printf");
-  // Initialize first to prevent crashes.
+export async function createUser(data: CreateUserInput): Promise<{uid: string}> {
   initializeFirebaseAdmin();
   
   const validation = CreateUserInputSchema.safeParse(data);
@@ -26,32 +23,27 @@ export async function createUser(data: CreateUserInput): Promise<void> {
     throw new Error('Invalid input data.');
   }
 
-  const auth = admin.auth();
   const firestore = admin.firestore();
 
   try {
-    // Create user in Firebase Auth
-    const userRecord = await auth.createUser({
-      email: data.email,
-      password: 'password', // Default temporary password
-      displayName: data.name,
-    });
-    // Create user profile in Firestore
+    // For this workaround, we will just create the user in Firestore.
+    // We will generate a temporary ID for the document.
+    const userRef = firestore.collection('users').doc();
     const userProfile = {
       name: data.name,
       email: data.email,
       role: data.role,
-      avatar: `https://picsum.photos/seed/${userRecord.uid}/200/200`,
+      avatar: `https://picsum.photos/seed/${userRef.id}/200/200`,
     };
 
-    await firestore.collection('users').doc(userRecord.uid).set(userProfile);
+    await userRef.set(userProfile);
+
+    // Return the generated UID so the client knows it was successful.
+    return { uid: userRef.id };
+
   } catch (error: any) {
-    // Re-throw specific errors to be caught by the client
-    if (error.code === 'auth/email-already-exists') {
-        throw new Error('auth/email-already-exists');
-    }
     // Log other unexpected errors
-    console.error('Error creating user:', error);
-    throw new Error('An unexpected error occurred during user creation.');
+    console.error('Error creating user profile in Firestore:', error);
+    throw new Error('An unexpected error occurred during user profile creation.');
   }
 }

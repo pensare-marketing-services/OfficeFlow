@@ -40,8 +40,9 @@ export default function AddEmployeeForm() {
         await createUser(data);
         
         toast({
-            title: "User Added",
-            description: `${data.name} has been added as an ${data.role}. The default password is "password".`
+            title: "User Profile Created",
+            description: `${data.name}'s profile was saved. Please create their login in the Firebase Authentication console.`,
+            duration: 5000,
         });
         form.reset();
 
