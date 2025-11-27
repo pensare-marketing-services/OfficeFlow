@@ -141,7 +141,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                             </TableCell>
                         )}
                         <TableCell>
-                            {isEmployeeView && onTaskUpdate ? (
+                            {onTaskUpdate ? (
                                 <Select value={task.status} onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)}>
                                     <SelectTrigger className="w-[140px] text-xs focus:ring-accent">
                                         <SelectValue />
@@ -176,7 +176,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                 <div className="max-h-60 space-y-4 overflow-y-auto p-1">
                                                 {(task.progressNotes || []).map((note, i) => {
                                                     const author = users.find(u => u.id === note.authorId);
-                                                    const authorName = author ? author.name : note.authorName;
+                                                    const authorName = author ? author.name : (note.authorName || '');
                                                     const authorAvatar = author ? author.avatar : '';
                                                     return (
                                                         <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
