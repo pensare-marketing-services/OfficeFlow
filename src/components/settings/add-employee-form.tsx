@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -13,15 +12,12 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { createUser } from '@/ai/flows/user-flow';
+import { CreateUserInputSchema, type CreateUserInput } from '@/ai/flows/user-flow-schema';
 
 
-const employeeSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.'),
-  email: z.string().email('Invalid email address.'),
-  role: z.enum(['admin', 'employee']),
-});
+const employeeSchema = CreateUserInputSchema;
 
-type EmployeeFormValues = z.infer<typeof employeeSchema>;
+type EmployeeFormValues = CreateUserInput;
 
 export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
@@ -51,7 +47,7 @@ export default function AddEmployeeForm() {
 
     } catch (e: any) {
        // A more user-friendly error message
-       if (e.message?.includes('email-already-exists')) {
+       if (e.message?.includes('email-already-exists') || e.message?.includes('auth/email-already-exists')) {
          setError('This email address is already in use by another account.');
        } else {
          setError(e.message || 'Failed to add user. You may not have permission to perform this action.');

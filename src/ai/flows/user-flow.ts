@@ -5,14 +5,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import * as admin from 'firebase-admin';
+import { CreateUserInputSchema, type CreateUserInput } from './user-flow-schema';
 
-export const CreateUserInputSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  role: z.enum(['admin', 'employee']),
-});
-
-export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
 
 export async function createUser(input: CreateUserInput): Promise<void> {
   await createUserFlow(input);
@@ -25,6 +19,9 @@ const createUserFlow = ai.defineFlow(
     outputSchema: z.void(),
   },
   async (data) => {
+    if (admin.apps.length === 0) {
+      admin.initializeApp();
+    }
     // Create user in Firebase Auth
     const userRecord = await admin.auth().createUser({
       email: data.email,
