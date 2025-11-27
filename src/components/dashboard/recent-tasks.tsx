@@ -83,7 +83,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
 
   const handleMarkAsRead = (task: Task & {id: string}) => {
     if (!currentUser || !onTaskUpdate) return;
-    const updatedNotes = task.progressNotes.map(note => {
+    const updatedNotes = (task.progressNotes || []).map(note => {
         if (note.readBy && !note.readBy.includes(currentUser.uid)) {
             return { ...note, readBy: [...note.readBy, currentUser.uid] };
         }
@@ -118,7 +118,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
             {tasks.map(task => {
                 const assignee = getAssignee(task.assigneeId);
                 const isEmployeeView = currentUser?.role === 'employee';
-                const unreadCount = currentUser ? task.progressNotes?.filter(n => n.readBy && !n.readBy.includes(currentUser.uid)).length : 0;
+                const unreadCount = currentUser ? (task.progressNotes || []).filter(n => n.readBy && !n.readBy.includes(currentUser.uid)).length : 0;
                 
                 return (
                     <TableRow key={task.id}>
@@ -175,27 +175,32 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                         <div className="space-y-4">
                                             <h4 className="font-medium leading-none">Remarks</h4>
                                                 <div className="max-h-60 space-y-4 overflow-y-auto p-1">
-                                                {(task.progressNotes || []).map((note, i) => (
-                                                    <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
-                                                        {note.authorId !== currentUser?.uid && (
-                                                                <Avatar className="h-8 w-8 border">
-                                                                <AvatarImage src={users.find(u => u.id === note.authorId)?.avatar} />
-                                                                <AvatarFallback>{getInitials(note.authorName)}</AvatarFallback>
-                                                            </Avatar>
-                                                        )}
-                                                        <div className={cn("max-w-[75%] rounded-lg p-3", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                                                            <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : note.authorName}</p>
-                                                            <p>{note.note}</p>
-                                                            <p className={cn("text-right text-[10px] mt-2 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
+                                                {(task.progressNotes || []).map((note, i) => {
+                                                    const author = users.find(u => u.id === note.authorId);
+                                                    const authorName = author ? author.name : note.authorName;
+                                                    const authorAvatar = author ? author.avatar : '';
+                                                    return (
+                                                        <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                            {note.authorId !== currentUser?.uid && (
+                                                                    <Avatar className="h-8 w-8 border">
+                                                                    <AvatarImage src={authorAvatar} />
+                                                                    <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
+                                                                </Avatar>
+                                                            )}
+                                                            <div className={cn("max-w-[75%] rounded-lg p-3", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                                <p>{note.note}</p>
+                                                                <p className={cn("text-right text-[10px] mt-2 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
+                                                            </div>
+                                                                {note.authorId === currentUser?.uid && (
+                                                                    <Avatar className="h-8 w-8 border">
+                                                                    <AvatarImage src={currentUser?.avatar} />
+                                                                    <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
+                                                                </Avatar>
+                                                            )}
                                                         </div>
-                                                            {note.authorId === currentUser?.uid && (
-                                                                <Avatar className="h-8 w-8 border">
-                                                                <AvatarImage src={currentUser?.avatar} />
-                                                                <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
-                                                            </Avatar>
-                                                        )}
-                                                    </div>
-                                                ))}
+                                                    )
+                                                })}
                                             </div>
                                             <Textarea 
                                                 placeholder="Add a new remark..."
