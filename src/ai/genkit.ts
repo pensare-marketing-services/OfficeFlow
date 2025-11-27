@@ -4,10 +4,10 @@
  * It sets up the Firebase plugin for backend operations.
  */
 import { genkit } from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 export const ai = genkit({
-  plugins: [
-  ],
+  plugins: [googleAI()],
   logLevel: 'debug',
   enableTracingAndMetrics: true,
 });

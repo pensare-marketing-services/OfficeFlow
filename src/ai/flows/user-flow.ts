@@ -7,6 +7,13 @@ import { z } from 'zod';
 import * as admin from 'firebase-admin';
 import { CreateUserInputSchema, type CreateUserInput } from './user-flow-schema';
 
+// Helper to initialize Firebase Admin SDK safely.
+function initializeFirebaseAdmin() {
+  if (!admin.apps.length) {
+    admin.initializeApp();
+  }
+  return { auth: admin.auth(), firestore: admin.firestore() };
+}
 
 export async function createUser(input: CreateUserInput): Promise<void> {
   await createUserFlow(input);
@@ -19,11 +26,10 @@ const createUserFlow = ai.defineFlow(
     outputSchema: z.void(),
   },
   async (data) => {
-    if (admin.apps.length === 0) {
-      admin.initializeApp();
-    }
+    const { auth, firestore } = initializeFirebaseAdmin();
+
     // Create user in Firebase Auth
-    const userRecord = await admin.auth().createUser({
+    const userRecord = await auth.createUser({
       email: data.email,
       password: 'password', // Default temporary password
       displayName: data.name,
@@ -37,6 +43,6 @@ const createUserFlow = ai.defineFlow(
       avatar: `https://picsum.photos/seed/${userRecord.uid}/200/200`,
     };
 
-    await admin.firestore().collection('users').doc(userRecord.uid).set(userProfile);
+    await firestore.collection('users').doc(userRecord.uid).set(userProfile);
   }
 );
