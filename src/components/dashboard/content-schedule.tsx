@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { Task, UserProfile as User, ProgressNote } from '@/lib/data';
+import type { Task, UserProfile as User, ProgressNote, TaskStatus } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,6 @@ import { useAuth } from '@/hooks/use-auth';
 type UserWithId = User & { id: string };
 
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
-type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold';
 
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
@@ -30,17 +29,22 @@ interface ContentScheduleProps {
 }
 
 const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs'];
-const statuses: ContentStatus[] = ['Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
+const statuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
+
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
-const statusColors: Record<ContentStatus, string> = {
+const statusColors: Record<TaskStatus, string> = {
+    'To Do': 'bg-gray-500',
+    'In Progress': 'bg-blue-500',
     Scheduled: 'bg-blue-500',
     'On Work': 'bg-yellow-500',
     'For Approval': 'bg-orange-500',
     Approved: 'bg-green-500',
+    Done: 'bg-green-500',
     Posted: 'bg-purple-500',
     Hold: 'bg-gray-500',
+    Overdue: 'bg-red-500'
 };
 
 const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea' }> = ({ value, onSave, type = 'text' }) => {
@@ -179,10 +183,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         </Select>
                                     </TableCell>
                                     <TableCell>
-                                        <Select value={task.status as ContentStatus} onValueChange={(value: ContentStatus) => handleFieldChange(task.id, 'status', value)}>
+                                        <Select value={task.status as TaskStatus} onValueChange={(value: TaskStatus) => handleFieldChange(task.id, 'status', value)}>
                                             <SelectTrigger>
                                                 <div className="flex items-center gap-2">
-                                                    <div className={cn("h-2 w-2 rounded-full", statusColors[task.status as ContentStatus])} />
+                                                    <div className={cn("h-2 w-2 rounded-full", statusColors[task.status as TaskStatus])} />
                                                     <SelectValue />
                                                 </div>
                                             </SelectTrigger>
