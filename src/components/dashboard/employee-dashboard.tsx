@@ -66,6 +66,7 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
             title="In Progress" 
             value={inProgressTasksCount} 
             icon={Hourglass} 
+            variant="warning"
             onClick={() => setTaskFilter('inProgress')}
             isActive={taskFilter === 'inProgress'}
         />
@@ -73,6 +74,7 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
             title="Completed" 
             value={completedTasksCount} 
             icon={CheckCircle2} 
+            variant="success"
             onClick={() => setTaskFilter('completed')}
             isActive={taskFilter === 'completed'}
         />

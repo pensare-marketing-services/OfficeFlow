@@ -75,6 +75,7 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
             title="Completed Tasks" 
             value={completedTasks} 
             icon={CheckCircle2} 
+            variant="success"
             onClick={() => handleTaskFilterClick('completed')}
             isActive={viewMode === 'tasks' && taskFilter === 'completed'}
         />

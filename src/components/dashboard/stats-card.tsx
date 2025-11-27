@@ -6,7 +6,7 @@ interface StatsCardProps {
   title: string;
   value: number | string;
   icon: LucideIcon;
-  variant?: 'default' | 'destructive';
+  variant?: 'default' | 'destructive' | 'success' | 'warning';
   onClick?: () => void;
   isActive?: boolean;
 }
@@ -15,16 +15,29 @@ export function StatsCard({ title, value, icon: Icon, variant = 'default', onCli
   const cardClasses = cn(
     "shadow-md transition-all",
     onClick && "cursor-pointer hover:shadow-lg hover:-translate-y-1",
-    isActive && "ring-2 ring-primary shadow-lg",
-    variant === 'destructive' && "bg-destructive/10 border-destructive/30",
-    isActive && variant === 'destructive' && "ring-destructive"
+    isActive && "ring-2 shadow-lg",
+    {
+      'ring-primary': isActive && variant === 'default',
+      'bg-destructive/10 border-destructive/30': variant === 'destructive',
+      'ring-destructive': isActive && variant === 'destructive',
+      'bg-emerald-500/10 border-emerald-500/30': variant === 'success',
+      'ring-emerald-500': isActive && variant === 'success',
+      'bg-amber-500/10 border-amber-500/30': variant === 'warning',
+      'ring-amber-500': isActive && variant === 'warning',
+    }
   );
   
+  const iconClasses = cn("h-5 w-5 text-muted-foreground", {
+    'text-destructive': variant === 'destructive',
+    'text-emerald-500': variant === 'success',
+    'text-amber-500': variant === 'warning',
+  });
+
   return (
     <Card className={cardClasses} onClick={onClick}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className={cn("h-5 w-5 text-muted-foreground", variant === 'destructive' && "text-destructive")} />
+        <Icon className={iconClasses} />
       </CardHeader>
       <CardContent>
         <div className="font-headline text-2xl font-bold">{value}</div>
