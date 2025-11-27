@@ -84,7 +84,7 @@ export default function ClientsPage() {
                     <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                         <div>
                             <CardTitle className="font-headline">Client Content Schedule</CardTitle>
-                            <CardDescription>Manage content plans and progress for your clients.</CardDescription>
+                            <CardDescription>Manage client plans and progress.</CardDescription>
                         </div>
                         <div className="flex items-center gap-4">
                             {loading ? <Skeleton className="h-10 w-[180px]" /> :
@@ -104,7 +104,7 @@ export default function ClientsPage() {
                                 </Select>
                             }
                             {selectedClient && (
-                                <Button onClick={() => handleAddTask(selectedClient)} disabled={tasksLoading}>Add Content</Button>
+                                <Button onClick={() => handleAddTask(selectedClient)} disabled={tasksLoading}>Schedule</Button>
                             )}
                         </div>
                     </div>

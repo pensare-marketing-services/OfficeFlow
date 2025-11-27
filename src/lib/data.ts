@@ -12,6 +12,13 @@ export type User = UserProfile & { id: string };
 export type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 export type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold';
 export type TaskStatus = 'To Do' | 'In Progress' | 'Done' | 'Overdue' | ContentStatus;
+export type ProgressNote = {
+    note: string;
+    date: string;
+    authorId: string;
+    authorName: string;
+    readBy: string[];
+};
 
 export type Task = {
   id: string;
@@ -21,7 +28,7 @@ export type Task = {
   priority: 'Low' | 'Medium' | 'High';
   deadline: string; 
   assigneeId: string; 
-  progressNotes: { note: string; date: string }[];
+  progressNotes: ProgressNote[];
   clientId?: string;
   date?: string; 
   contentType?: ContentType;
@@ -114,7 +121,7 @@ export const tasks: Task[] = [
     assigneeId: 'yaseen@officeflow.com',
     clientId: 'client-1',
     contentType: 'Video Ad',
-    progressNotes: [{ note: 'First draft is ready for review.', date: new Date().toISOString() }],
+    progressNotes: [{ note: 'First draft is ready for review.', date: new Date().toISOString(), authorId: 'admin@officeflow.com', authorName: 'Admin User', readBy: ['admin@officeflow.com'] }],
   },
   {
     id: 'task-2',
@@ -138,7 +145,7 @@ export const tasks: Task[] = [
     assigneeId: 'zeenath@officeflow.com',
     clientId: 'client-3',
     contentType: 'Backend Ad',
-    progressNotes: [{note: 'Report is complete and has been sent to the client.', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()}],
+    progressNotes: [{note: 'Report is complete and has been sent to the client.', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), authorId: 'zeenath@officeflow.com', authorName: 'Zeenath', readBy: ['zeenath@officeflow.com']}],
   },
   {
     id: 'task-4',
@@ -174,7 +181,7 @@ export const tasks: Task[] = [
     assigneeId: 'issec@officeflow.com',
     clientId: 'client-5',
     contentType: 'Carousel',
-    progressNotes: [{note: 'Wireframes are done.', date: new Date().toISOString()}],
+    progressNotes: [{note: 'Wireframes are done.', date: new Date().toISOString(), authorId: 'issec@officeflow.com', authorName: 'Issec', readBy: ['issec@officeflow.com']}],
   },
   {
     id: 'task-7',

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { Task, UserProfile as User } from '@/lib/data';
+import type { Task, UserProfile as User, ProgressNote } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import { Textarea } from '../ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { useMemo } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 
 type UserWithId = User & { id: string };
 
@@ -63,10 +64,42 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
 };
 
 export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentScheduleProps) {
+    const { user: currentUser } = useAuth();
     
     const handleFieldChange = (taskId: string, field: keyof Task, value: any) => {
         onTaskUpdate({ id: taskId, [field]: value });
     };
+
+    const handleNewNote = (e: React.KeyboardEvent<HTMLTextAreaElement>, task: Task & { id: string }) => {
+        if (e.key === 'Enter' && !e.shiftKey && currentUser) {
+            e.preventDefault();
+            const noteText = e.currentTarget.value.trim();
+            if(noteText){
+                const newNote: ProgressNote = { 
+                    note: noteText, 
+                    date: new Date().toISOString(),
+                    authorId: currentUser.uid,
+                    authorName: currentUser.name,
+                    readBy: [currentUser.uid],
+                };
+                handleFieldChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
+                e.currentTarget.value = '';
+            }
+        }
+    }
+    
+    const handleMarkAsRead = (task: Task & {id: string}) => {
+        if (!currentUser) return;
+        const updatedNotes = task.progressNotes.map(note => {
+            if (!note.readBy.includes(currentUser.uid)) {
+                return { ...note, readBy: [...note.readBy, currentUser.uid] };
+            }
+            return note;
+        });
+        if (JSON.stringify(updatedNotes) !== JSON.stringify(task.progressNotes)) {
+             handleFieldChange(task.id, 'progressNotes', updatedNotes);
+        }
+    }
 
     const employeeUsers = useMemo(() => {
         if (!users) return [];
@@ -78,7 +111,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
              <div className="flex h-64 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 bg-card">
                 <div className="text-center">
                 <h3 className="font-headline text-lg font-semibold">No Content Scheduled</h3>
-                <p className="text-muted-foreground">Click "Add Content" to get started.</p>
+                <p className="text-muted-foreground">Click "Schedule" to get started.</p>
                 </div>
             </div>
         )
@@ -97,11 +130,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                 <TableHead className="w-[130px]">Type</TableHead>
                                 <TableHead className="w-[140px]">Status</TableHead>
                                 <TableHead className="w-[150px]">Assigned To</TableHead>
-                                <TableHead className="w-[80px]">References</TableHead>
+                                <TableHead className="w-[80px]">Remarks</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {tasks.map((task) => (
+                            {tasks.map((task) => {
+                                const unreadCount = currentUser ? task.progressNotes?.filter(n => !n.readBy.includes(currentUser.uid)).length : 0;
+                                
+                                return (
                                 <TableRow key={task.id}>
                                     <TableCell>
                                         <Popover>
@@ -191,42 +227,49 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         </Select>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                         <Popover>
+                                         <Popover onOpenChange={(open) => open && handleMarkAsRead(task)}>
                                             <PopoverTrigger asChild>
-                                                <Button variant="ghost" size="icon" disabled={!task.assigneeId}>
+                                                <Button variant="ghost" size="icon" disabled={!task.assigneeId} className="relative">
                                                     <MessageSquare className="h-5 w-5" />
-                                                    {task.progressNotes?.length > 0 && <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">{task.progressNotes.length}</Badge>}
+                                                    {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-2 -right-2 h-4 w-4 justify-center p-0">{unreadCount}</Badge>}
                                                 </Button>
                                             </PopoverTrigger>
-                                            <PopoverContent className="w-80">
+                                            <PopoverContent className="w-96">
                                                 <div className="space-y-4">
-                                                    <h4 className="font-medium leading-none">References</h4>
-                                                     <div className="max-h-48 space-y-2 overflow-y-auto">
+                                                    <h4 className="font-medium leading-none">Remarks</h4>
+                                                     <div className="max-h-60 space-y-4 overflow-y-auto p-1">
                                                         {(task.progressNotes || []).slice().reverse().map((note, i) => (
-                                                        <div key={i} className="text-xs text-muted-foreground bg-secondary/50 p-2 rounded-md">"{note.note}"
-                                                            <p className="text-right text-muted-foreground/50 text-[10px] mt-1">{format(new Date(note.date), "MMM d, HH:mm")}</p>
-                                                        </div>
+                                                            <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                                {note.authorId !== currentUser?.uid && (
+                                                                     <Avatar className="h-8 w-8 border">
+                                                                        <AvatarImage src={users.find(u => u.id === note.authorId)?.avatar} />
+                                                                        <AvatarFallback>{getInitials(note.authorName)}</AvatarFallback>
+                                                                    </Avatar>
+                                                                )}
+                                                                <div className={cn("max-w-[75%] rounded-lg p-3", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                    <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : note.authorName}</p>
+                                                                    <p>{note.note}</p>
+                                                                    <p className={cn("text-right text-[10px] mt-2 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
+                                                                </div>
+                                                                 {note.authorId === currentUser?.uid && (
+                                                                     <Avatar className="h-8 w-8 border">
+                                                                        <AvatarImage src={currentUser?.avatar} />
+                                                                        <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
+                                                                    </Avatar>
+                                                                )}
+                                                            </div>
                                                         ))}
                                                     </div>
                                                     <Textarea 
-                                                        placeholder="Add a new reference..."
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                                                e.preventDefault();
-                                                                if(e.currentTarget.value.trim()){
-                                                                    const newNote = { note: e.currentTarget.value, date: new Date().toISOString() };
-                                                                    handleFieldChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
-                                                                    e.currentTarget.value = '';
-                                                                }
-                                                            }
-                                                        }}
+                                                        placeholder="Add a new remark..."
+                                                        onKeyDown={(e) => handleNewNote(e, task)}
                                                     />
                                                 </div>
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )})}
                         </TableBody>
                     </Table>
                 </div>
