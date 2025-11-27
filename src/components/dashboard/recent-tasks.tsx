@@ -83,7 +83,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
   const handleMarkAsRead = (task: Task & {id: string}) => {
     if (!currentUser || !onTaskUpdate) return;
     const updatedNotes = task.progressNotes.map(note => {
-        if (!note.readBy.includes(currentUser.uid)) {
+        if (note.readBy && !note.readBy.includes(currentUser.uid)) {
             return { ...note, readBy: [...note.readBy, currentUser.uid] };
         }
         return note;
@@ -117,7 +117,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
             {tasks.map(task => {
                 const assignee = getAssignee(task.assigneeId);
                 const isEmployeeView = currentUser?.role === 'employee';
-                const unreadCount = currentUser ? task.progressNotes?.filter(n => !n.readBy.includes(currentUser.uid)).length : 0;
+                const unreadCount = currentUser ? task.progressNotes?.filter(n => n.readBy && !n.readBy.includes(currentUser.uid)).length : 0;
                 
                 return (
                     <TableRow key={task.id}>
