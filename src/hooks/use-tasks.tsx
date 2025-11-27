@@ -28,17 +28,24 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
+        if (!currentUser) {
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
+        setError(null);
+        
         const tasksQuery = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'));
         const usersQuery = query(collection(db, 'users'), orderBy('name', 'asc'));
 
         const unsubTasks = onSnapshot(tasksQuery, (snapshot) => {
             const tasksData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as TaskWithId));
             setTasks(tasksData);
-            setLoading(false);
+            if (loading) setLoading(false);
         }, (err) => {
-            console.error(err);
-            setError(err);
+            console.error("Task subscription error:", err);
+            setError(new Error('Failed to load tasks. A browser extension might be blocking network requests.'));
             setLoading(false);
         });
 
@@ -46,7 +53,9 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const usersData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as UserWithId));
             setUsers(usersData);
         }, (err) => {
-            console.error(err);
+            console.error("Users subscription error:", err);
+            setError(new Error('Failed to load users. A browser extension might be blocking network requests.'));
+            setLoading(false);
         });
 
         return () => {
@@ -65,6 +74,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             });
         } catch (e) {
             console.error("Error adding document: ", e);
+            setError(new Error('Failed to add task. Please check your network connection.'));
         }
     }, []);
 
@@ -74,6 +84,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             await updateDoc(taskRef, taskUpdate);
         } catch (e) {
             console.error("Error updating document: ", e);
+            setError(new Error('Failed to update task. Please check your network connection.'));
         }
     }, []);
 
