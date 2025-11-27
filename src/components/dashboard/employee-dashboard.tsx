@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import type { Task, UserProfile as User } from '@/lib/data';
 import { StatsCard } from './stats-card';
@@ -14,26 +15,79 @@ interface EmployeeDashboardProps {
   onTaskUpdate: (taskId: string, updatedData: Partial<Task>) => void;
 }
 
+type TaskFilter = 'active' | 'inProgress' | 'completed' | 'overdue';
+
 export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }: EmployeeDashboardProps) {
   const { user } = useAuth();
+  const [taskFilter, setTaskFilter] = useState<TaskFilter>('active');
+
   if (!user) return null;
 
-  const totalTasks = employeeTasks.length;
-  const inProgressTasks = employeeTasks.filter(t => t.status === 'In Progress' || t.status === 'On Work').length;
-  const completedTasks = employeeTasks.filter(t => t.status === 'Done' || t.status === 'Posted' || t.status === 'Approved').length;
-  const overdueTasks = employeeTasks.filter(t => new Date(t.deadline) < new Date() && t.status !== 'Done').length;
+  const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
   
+  const totalTasks = employeeTasks.length;
+  const completedTasksCount = employeeTasks.filter(t => completedStatuses.includes(t.status)).length;
+  const activeTasksCount = totalTasks - completedTasksCount;
+  const inProgressTasksCount = employeeTasks.filter(t => t.status === 'In Progress' || t.status === 'On Work').length;
+  const overdueTasksCount = employeeTasks.filter(t => new Date(t.deadline) < new Date() && !completedStatuses.includes(t.status)).length;
+  
+  const filteredTasks = useMemo(() => {
+    switch (taskFilter) {
+      case 'inProgress':
+        return employeeTasks.filter(t => t.status === 'In Progress' || t.status === 'On Work');
+      case 'completed':
+        return employeeTasks.filter(t => completedStatuses.includes(t.status));
+      case 'overdue':
+        return employeeTasks.filter(t => new Date(t.deadline) < new Date() && !completedStatuses.includes(t.status));
+      case 'active':
+      default:
+        return employeeTasks.filter(t => !completedStatuses.includes(t.status));
+    }
+  }, [employeeTasks, taskFilter]);
+
+  const filterTitles: Record<TaskFilter, string> = {
+    active: "My Active Tasks",
+    inProgress: "My In Progress Tasks",
+    completed: "My Completed Tasks",
+    overdue: "My Overdue Tasks"
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard title="My Active Tasks" value={totalTasks - completedTasks} icon={ClipboardList} />
-        <StatsCard title="In Progress" value={inProgressTasks} icon={Hourglass} />
-        <StatsCard title="Completed" value={completedTasks} icon={CheckCircle2} />
-        <StatsCard title="Overdue" value={overdueTasks} icon={Clock} variant="destructive" />
+        <StatsCard 
+            title="My Active Tasks" 
+            value={activeTasksCount} 
+            icon={ClipboardList} 
+            onClick={() => setTaskFilter('active')}
+            isActive={taskFilter === 'active'}
+        />
+        <StatsCard 
+            title="In Progress" 
+            value={inProgressTasksCount} 
+            icon={Hourglass} 
+            onClick={() => setTaskFilter('inProgress')}
+            isActive={taskFilter === 'inProgress'}
+        />
+        <StatsCard 
+            title="Completed" 
+            value={completedTasksCount} 
+            icon={CheckCircle2} 
+            onClick={() => setTaskFilter('completed')}
+            isActive={taskFilter === 'completed'}
+        />
+        <StatsCard 
+            title="Overdue" 
+            value={overdueTasksCount} 
+            icon={Clock} 
+            variant="destructive"
+            onClick={() => setTaskFilter('overdue')}
+            isActive={taskFilter === 'overdue'}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <RecentTasks tasks={employeeTasks} users={users} title="My Tasks" onTaskUpdate={onTaskUpdate} />
+        <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskUpdate={onTaskUpdate} />
       </div>
     </div>
   );
