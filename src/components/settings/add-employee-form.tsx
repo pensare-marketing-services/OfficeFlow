@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -12,25 +11,16 @@ import { Loader2, UserPlus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { collection, doc, setDoc } from 'firebase/firestore';
-import { db } from '@/firebase/client';
-
-
-const employeeSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email(),
-  role: z.enum(['admin', 'employee']),
-});
-
-type EmployeeFormValues = z.infer<typeof employeeSchema>;
+import { createUser } from '@/ai/flows/user-flow';
+import { CreateUserInput, CreateUserInputSchema } from '@/ai/flows/user-flow-schema';
 
 export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<EmployeeFormValues>({
-    resolver: zodResolver(employeeSchema),
+  const form = useForm<CreateUserInput>({
+    resolver: zodResolver(CreateUserInputSchema),
     defaultValues: {
       name: '',
       email: '',
@@ -38,25 +28,15 @@ export default function AddEmployeeForm() {
     },
   });
 
-  async function onSubmit(data: EmployeeFormValues) {
+  async function onSubmit(data: CreateUserInput) {
     setLoading(true);
     setError(null);
     try {
-        // We will create the user profile in Firestore directly.
-        // We will generate a temporary ID for the document.
-        const userRef = doc(collection(db, 'users'));
-        const userProfile = {
-          name: data.name,
-          email: data.email,
-          role: data.role,
-          avatar: `https://picsum.photos/seed/${userRef.id}/200/200`,
-        };
-
-        await setDoc(userRef, userProfile);
+        const result = await createUser(data);
         
         toast({
-            title: "User Profile Created",
-            description: `${data.name}'s profile was saved. Please create their login in the Firebase Authentication console.`,
+            title: "User Created Successfully",
+            description: `${data.name}'s account has been created. They can now log in with the default password.`,
             duration: 7000,
         });
         form.reset();

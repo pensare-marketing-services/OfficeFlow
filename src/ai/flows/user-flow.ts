@@ -6,12 +6,8 @@ import { CreateUserInput, CreateUserInputSchema } from './user-flow-schema';
 import * as admin from 'firebase-admin';
 
 // Helper to initialize Firebase Admin SDK safely.
-
-
-0
- function initializeFirebaseAdmin() {
+function initializeFirebaseAdmin() {
   if (!admin.apps.length) {
-    // Use application default credentials to connect to Firebase.
     admin.initializeApp({
       credential: admin.credential.applicationDefault(),
     });
@@ -26,27 +22,38 @@ export async function createUser(data: CreateUserInput): Promise<{uid: string}> 
     throw new Error('Invalid input data.');
   }
 
+  const { name, email, role } = validation.data;
+  const auth = admin.auth();
   const firestore = admin.firestore();
 
   try {
-    // For this workaround, we will just create the user in Firestore.
-    // We will generate a temporary ID for the document.
-    const userRef = firestore.collection('users').doc();
+    // Create user in Firebase Authentication
+    const userRecord = await auth.createUser({
+      email: email,
+      emailVerified: true, // Or false, depending on your flow
+      password: 'password', // Default password
+      displayName: name,
+    });
+
+    // Create user profile in Firestore
     const userProfile = {
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      avatar: `https://picsum.photos/seed/${userRef.id}/200/200`,
+      name: name,
+      email: email,
+      role: role,
+      avatar: `https://picsum.photos/seed/${userRecord.uid}/200/200`,
     };
 
-    await userRef.set(userProfile);
+    await firestore.collection('users').doc(userRecord.uid).set(userProfile);
 
-    // Return the generated UID so the client knows it was successful.
-    return { uid: userRef.id };
+    // Return the new UID so the client knows it was successful.
+    return { uid: userRecord.uid };
 
   } catch (error: any) {
+    if (error.code === 'auth/email-already-exists') {
+        throw new Error('This email address is already in use by another account.');
+    }
     // Log other unexpected errors
-    console.error('Error creating user profile in Firestore:', error);
-    throw new Error('An unexpected error occurred during user profile creation.');
+    console.error('Error creating user:', error);
+    throw new Error('An unexpected error occurred during user creation.');
   }
 }
