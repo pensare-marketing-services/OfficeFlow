@@ -91,7 +91,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
     
     const handleMarkAsRead = (task: Task & {id: string}) => {
         if (!currentUser) return;
-        const updatedNotes = task.progressNotes.map(note => {
+        const updatedNotes = (task.progressNotes || []).map(note => {
             if (note.readBy && !note.readBy.includes(currentUser.uid)) {
                 return { ...note, readBy: [...note.readBy, currentUser.uid] };
             }
@@ -140,7 +140,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                         </TableHeader>
                         <TableBody>
                             {tasks.map((task) => {
-                                const unreadCount = currentUser ? task.progressNotes?.filter(n => n.readBy && !n.readBy.includes(currentUser.uid)).length : 0;
+                                const unreadCount = currentUser ? (task.progressNotes || []).filter(n => n.readBy && !n.readBy.includes(currentUser.uid)).length : 0;
                                 
                                 return (
                                 <TableRow key={task.id}>
