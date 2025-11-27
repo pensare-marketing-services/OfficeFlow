@@ -8,9 +8,9 @@ import { CreateUserInput, CreateUserInputSchema } from './user-flow-schema';
 // Helper to initialize Firebase Admin SDK safely.
 function initializeFirebaseAdmin() {
   if (!admin.apps.length) {
-    // Explicitly provide the project ID for robust initialization.
+    // Use application default credentials to connect to Firebase.
     admin.initializeApp({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      credential: admin.credential.applicationDefault(),
     });
   }
 }
@@ -32,7 +32,6 @@ export async function createUser(data: CreateUserInput): Promise<void> {
       password: 'password', // Default temporary password
       displayName: data.name,
     });
-
     // Create user profile in Firestore
     const userProfile = {
       name: data.name,
