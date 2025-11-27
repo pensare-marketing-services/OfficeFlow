@@ -7,6 +7,7 @@ import { CreateUserInput, CreateUserInputSchema } from './user-flow-schema';
 
 // Helper to initialize Firebase Admin SDK safely.
 function initializeFirebaseAdmin() {
+  console.log("p[rint");
   if (!admin.apps.length) {
     // Use application default credentials to connect to Firebase.
     admin.initializeApp({
@@ -16,12 +17,14 @@ function initializeFirebaseAdmin() {
 }
 
 export async function createUser(data: CreateUserInput): Promise<void> {
+  // Initialize first to prevent crashes.
+  initializeFirebaseAdmin();
+  
   const validation = CreateUserInputSchema.safeParse(data);
   if (!validation.success) {
     throw new Error('Invalid input data.');
   }
 
-  initializeFirebaseAdmin();
   const auth = admin.auth();
   const firestore = admin.firestore();
 
