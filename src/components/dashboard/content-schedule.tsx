@@ -251,7 +251,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                         )}
                                                     </div>
                                                      <div className="max-h-60 space-y-4 overflow-y-auto p-1">
-                                                        {(task.progressNotes || []).slice().reverse().map((note, i) => (
+                                                        {(task.progressNotes || []).map((note, i) => (
                                                             <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                 {note.authorId !== currentUser?.uid && (
                                                                      <Avatar className="h-8 w-8 border">
