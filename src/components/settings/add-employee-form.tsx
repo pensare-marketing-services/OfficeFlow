@@ -47,10 +47,10 @@ export default function AddEmployeeForm() {
 
     } catch (e: any) {
        // A more user-friendly error message
-       if (e.message?.includes('email-already-exists') || e.message?.includes('auth/email-already-exists')) {
+       if (e.message?.includes('auth/email-already-exists')) {
          setError('This email address is already in use by another account.');
        } else {
-         setError(e.message || 'Failed to add user. You may not have permission to perform this action.');
+         setError(e.message || 'Failed to add user. Please try again.');
        }
     } finally {
         setLoading(false);
