@@ -27,6 +27,7 @@ interface RecentTasksProps {
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
 const allStatuses: Task['status'][] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
+const employeeStatuses: Task['status'][] = ['In Progress', 'For Approval'];
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     'Done': 'default',
@@ -93,6 +94,8 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     }
   }
 
+  const availableStatuses = currentUser?.role === 'employee' ? employeeStatuses : allStatuses;
+
 
   return (
     <Card className="shadow-md">
@@ -147,7 +150,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {allStatuses.map(status => (
+                                        {availableStatuses.map(status => (
                                             <SelectItem key={status} value={status}>
                                                 <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
                                             </SelectItem>
