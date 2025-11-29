@@ -129,8 +129,8 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                             <div className="font-medium">{task.title}</div>
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <p className="text-xs text-muted-foreground truncate cursor-pointer hover:text-foreground">
-                                        {task.description}
+                                    <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground hover:underline">
+                                        Read description...
                                     </p>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-[60vw]">
