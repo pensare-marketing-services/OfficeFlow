@@ -185,10 +185,9 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                         <TableCell>
                             {onTaskUpdate && isEmployeeView ? (
                                 <div className="flex items-center gap-2">
-                                    <Badge variant={statusVariant[task.status] || 'default'} className="capitalize">{task.status}</Badge>
-                                    <Select onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)}>
+                                    <Select onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} value={task.status}>
                                         <SelectTrigger className="w-[140px] text-xs focus:ring-accent">
-                                            <SelectValue placeholder="Change status..." />
+                                            <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {availableStatuses.map(status => (
