@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { MessageSquare } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -133,8 +133,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
           <TableHeader>
             <TableRow>
               <TableHead>Task</TableHead>
-               {currentUser?.role === 'admin' && <TableHead>Assignee</TableHead>}
-               {currentUser?.role === 'employee' && <TableHead>Client</TableHead>}
+               <TableHead>Client</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Priority</TableHead>
               {currentUser?.role === 'employee' && <TableHead>Remarks</TableHead>}
@@ -176,30 +175,13 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                 <p className="text-xs text-muted-foreground">{task.description}</p>
                             )}
                         </TableCell>
-                        {currentUser?.role === 'admin' && (
-                            <TableCell>
-                                {assignee ? (
-                                     <div className="flex items-center gap-2">
-                                        <Avatar className="h-6 w-6">
-                                            <AvatarImage src={assignee.avatar} />
-                                            <AvatarFallback>{getInitials(assignee.name)}</AvatarFallback>
-                                        </Avatar>
-                                        <span className="text-sm">{assignee.name}</span>
-                                    </div>
-                                ) : (
-                                    <span className="text-sm text-muted-foreground">Unassigned</span>
-                                )}
-                            </TableCell>
-                        )}
-                        {currentUser?.role === 'employee' && (
-                            <TableCell>
-                                {client ? (
-                                    <span className="text-sm">{client.name}</span>
-                                ) : (
-                                    <span className="text-sm text-muted-foreground">-</span>
-                                )}
-                            </TableCell>
-                        )}
+                        <TableCell>
+                            {client ? (
+                                <span className="text-sm">{client.name}</span>
+                            ) : (
+                                <span className="text-sm text-muted-foreground">-</span>
+                            )}
+                        </TableCell>
                         <TableCell>
                             {onTaskUpdate && isEmployeeView ? (
                                 <div className="flex items-center gap-2">
