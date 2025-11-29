@@ -159,7 +159,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                             </TableCell>
                         )}
                         <TableCell>
-                            {onTaskUpdate ? (
+                            {onTaskUpdate && isEmployeeView ? (
                                 <Select value={task.status} onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)}>
                                     <SelectTrigger className="w-[140px] text-xs focus:ring-accent">
                                         <SelectValue />
