@@ -32,8 +32,9 @@ interface RecentTasksProps {
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
-const allStatuses: Task['status'][] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
 const employeeStatuses: Task['status'][] = ['In Progress', 'For Approval'];
+const completedStatuses: Task['status'][] = ['Done', 'Approved', 'Posted'];
+
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     'Done': 'default',
@@ -116,9 +117,6 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     }
   }
 
-  const availableStatuses = currentUser?.role === 'employee' ? employeeStatuses : allStatuses;
-
-
   return (
     <>
     <Card className="shadow-md">
@@ -149,6 +147,8 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                 const descriptionWords = task.description ? task.description.split(/\s+/).filter(Boolean) : [];
                 const wordCount = descriptionWords.length;
                 const descriptionPreview = descriptionWords.slice(0, 2).join(' ');
+
+                const isCompleted = completedStatuses.includes(task.status);
 
 
                 return (
@@ -185,16 +185,26 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                         <TableCell>
                             {onTaskUpdate && isEmployeeView ? (
                                 <div className="flex items-center gap-2">
-                                    <Select onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} value={task.status}>
+                                    <Select 
+                                        onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
+                                        value={task.status}
+                                        disabled={isCompleted}
+                                    >
                                         <SelectTrigger className="w-[140px] text-xs focus:ring-accent">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {availableStatuses.map(status => (
-                                                <SelectItem key={status} value={status}>
-                                                    <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
+                                            {isCompleted ? (
+                                                <SelectItem value={task.status} disabled>
+                                                    <Badge variant={statusVariant[task.status] || 'default'} className="capitalize w-full justify-start">{task.status}</Badge>
                                                 </SelectItem>
-                                            ))}
+                                            ) : (
+                                                employeeStatuses.map(status => (
+                                                    <SelectItem key={status} value={status}>
+                                                        <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
+                                                    </SelectItem>
+                                                ))
+                                            )}
                                         </SelectContent>
                                     </Select>
                                 </div>
