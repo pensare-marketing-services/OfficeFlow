@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import type { Task, UserProfile as User, ProgressNote } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -122,26 +121,31 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                 const assignee = getAssignee(task.assigneeId);
                 const isEmployeeView = currentUser?.role === 'employee';
                 const unreadCount = currentUser ? (task.progressNotes || []).filter(n => n.readBy && !n.readBy.includes(currentUser.uid)).length : 0;
-                
+                const wordCount = task.description ? task.description.split(/\s+/).filter(Boolean).length : 0;
+
                 return (
                     <TableRow key={task.id}>
                         <TableCell>
                             <div className="font-medium">{task.title}</div>
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground hover:underline">
-                                        Read description...
-                                    </p>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-[60vw]">
-                                    <DialogHeader>
-                                        <DialogTitle>{task.title}</DialogTitle>
-                                    </DialogHeader>
-                                    <DialogDescription className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto">
-                                        {task.description}
-                                    </DialogDescription>
-                                </DialogContent>
-                            </Dialog>
+                            {wordCount > 10 ? (
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground hover:underline">
+                                            Read description...
+                                        </p>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[60vw]">
+                                        <DialogHeader>
+                                            <DialogTitle>{task.title}</DialogTitle>
+                                        </DialogHeader>
+                                        <DialogDescription className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto">
+                                            {task.description}
+                                        </DialogDescription>
+                                    </DialogContent>
+                                </Dialog>
+                            ) : (
+                                <p className="text-xs text-muted-foreground">{task.description}</p>
+                            )}
                         </TableCell>
                         {currentUser?.role === 'admin' && (
                             <TableCell>
