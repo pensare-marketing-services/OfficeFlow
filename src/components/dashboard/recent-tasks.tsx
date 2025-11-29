@@ -126,7 +126,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                     <TableRow key={task.id}>
                         <TableCell>
                             <div className="font-medium">{task.title}</div>
-                            <div className="text-xs text-muted-foreground">{task.id}</div>
+                            <div className="text-xs text-muted-foreground whitespace-pre-wrap">{task.description}</div>
                         </TableCell>
                         {currentUser?.role === 'admin' && (
                             <TableCell>
