@@ -133,11 +133,11 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                         {task.description}
                                     </p>
                                 </DialogTrigger>
-                                <DialogContent>
+                                <DialogContent className="sm:max-w-[60vw]">
                                     <DialogHeader>
                                         <DialogTitle>{task.title}</DialogTitle>
                                     </DialogHeader>
-                                    <DialogDescription className="whitespace-pre-wrap max-h-[60vh] overflow-y-auto">
+                                    <DialogDescription className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto">
                                         {task.description}
                                     </DialogDescription>
                                 </DialogContent>
