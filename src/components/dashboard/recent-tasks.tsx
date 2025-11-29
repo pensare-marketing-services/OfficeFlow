@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { MessageSquare } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -51,7 +52,7 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
-  const [selectedTask, setSelectedTask] = useState<Task & {id: string} | null>(null);
+  const [selectedTaskForDescription, setSelectedTaskForDescription] = useState<Task & {id: string} | null>(null);
 
   const getAssignee = (assigneeId: string): UserWithId | undefined => {
     return users.find(u => u.id === assigneeId);
@@ -98,6 +99,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
 
 
   return (
+    <>
     <Card className="shadow-md">
       <CardHeader>
         <CardTitle className="font-headline">{title}</CardTitle>
@@ -126,7 +128,14 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                     <TableRow key={task.id}>
                         <TableCell>
                             <div className="font-medium">{task.title}</div>
-                            <div className="text-xs text-muted-foreground whitespace-pre-wrap">{task.description}</div>
+                            <DialogTrigger asChild>
+                                <p 
+                                    className="text-xs text-muted-foreground truncate cursor-pointer hover:text-foreground"
+                                    onClick={() => setSelectedTaskForDescription(task)}
+                                >
+                                    {task.description}
+                                </p>
+                            </DialogTrigger>
                         </TableCell>
                         {currentUser?.role === 'admin' && (
                             <TableCell>
@@ -223,6 +232,16 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
         )}
       </CardContent>
     </Card>
+    <Dialog open={!!selectedTaskForDescription} onOpenChange={(isOpen) => !isOpen && setSelectedTaskForDescription(null)}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>{selectedTaskForDescription?.title}</DialogTitle>
+            </DialogHeader>
+            <DialogDescription className="whitespace-pre-wrap max-h-[60vh] overflow-y-auto">
+                {selectedTaskForDescription?.description}
+            </DialogDescription>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }
-  
