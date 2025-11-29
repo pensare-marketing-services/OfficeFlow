@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -29,8 +30,8 @@ interface ContentScheduleProps {
 }
 
 const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs'];
-const statuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
-
+const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
+const employeeStatuses: TaskStatus[] = ['In Progress', 'For Approval'];
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
@@ -113,6 +114,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
         if (!users) return [];
         return users.filter(u => u.role === 'employee');
     }, [users]);
+    
+    const availableStatuses = currentUser?.role === 'employee' ? employeeStatuses : allStatuses;
+
 
     if (tasks.length === 0) {
         return (
@@ -172,7 +176,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} />
                                     </TableCell>
                                     <TableCell>
-                                        <EditableTableCell value={task.description} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" />
+                                        <p className="whitespace-pre-wrap">{task.description}</p>
                                     </TableCell>
                                     <TableCell>
                                         <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
@@ -191,7 +195,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                 </div>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {statuses.map(status => (
+                                                {availableStatuses.map(status => (
                                                     <SelectItem key={status} value={status}>
                                                          <div className="flex items-center gap-2">
                                                             <div className={cn("h-2 w-2 rounded-full", statusColors[status])} />
