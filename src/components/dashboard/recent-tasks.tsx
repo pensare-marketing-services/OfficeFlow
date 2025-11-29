@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Task, UserProfile as User, ProgressNote, Client } from '@/lib/data';
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { MessageSquare } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -57,6 +58,7 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
   const [clients, setClients] = useState<ClientWithId[]>([]);
+  const [selectedTaskForDescription, setSelectedTaskForDescription] = useState<Task | null>(null);
 
   useEffect(() => {
     const clientsQuery = collection(db, "clients");
@@ -154,7 +156,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                     <TableRow key={task.id}>
                         <TableCell>
                             <div className="font-medium">{task.title}</div>
-                            {wordCount > 2 ? (
+                            {wordCount > 10 ? (
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
@@ -200,18 +202,21 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                         )}
                         <TableCell>
                             {onTaskUpdate && isEmployeeView ? (
-                                <Select value={task.status} onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)}>
-                                    <SelectTrigger className="w-[140px] text-xs focus:ring-accent">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {availableStatuses.map(status => (
-                                            <SelectItem key={status} value={status}>
-                                                <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <div className="flex items-center gap-2">
+                                    <Badge variant={statusVariant[task.status] || 'default'} className="capitalize">{task.status}</Badge>
+                                    <Select onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)}>
+                                        <SelectTrigger className="w-[140px] text-xs focus:ring-accent">
+                                            <SelectValue placeholder="Change status..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableStatuses.map(status => (
+                                                <SelectItem key={status} value={status}>
+                                                    <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             ) : (
                                <Badge variant={statusVariant[task.status] || 'default'} className="capitalize">{task.status}</Badge>
                             )}
@@ -281,3 +286,5 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     </>
   );
 }
+
+    
