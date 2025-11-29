@@ -23,6 +23,8 @@ import { useAuth } from '@/hooks/use-auth';
 type UserWithId = User & { id: string };
 
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
+type TaskPriority = 'Low' | 'Medium' | 'High';
+
 
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
@@ -33,6 +35,8 @@ interface ContentScheduleProps {
 const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs'];
 const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
 const employeeStatuses: TaskStatus[] = ['In Progress', 'For Approval'];
+const priorities: TaskPriority[] = ['Low', 'Medium', 'High'];
+
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
@@ -141,6 +145,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                 <TableHead className="min-w-[150px]">Content Title</TableHead>
                                 <TableHead className="min-w-[250px]">Content Description</TableHead>
                                 <TableHead className="w-[130px]">Type</TableHead>
+                                <TableHead className="w-[120px]">Priority</TableHead>
                                 <TableHead className="w-[140px]">Status</TableHead>
                                 <TableHead className="w-[150px]">Assigned To</TableHead>
                                 <TableHead className="w-[80px]">Remarks</TableHead>
@@ -184,6 +189,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             <SelectTrigger><SelectValue /></SelectTrigger>
                                             <SelectContent>
                                                 {contentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                     <TableCell>
+                                        <Select value={task.priority} onValueChange={(value: TaskPriority) => handleFieldChange(task.id, 'priority', value)}>
+                                            <SelectTrigger><SelectValue /></SelectTrigger>
+                                            <SelectContent>
+                                                {priorities.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     </TableCell>

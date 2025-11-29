@@ -1,6 +1,6 @@
 'use client';
 
-import type { Task, UserProfile as User, ProgressNote } from '@/lib/data';
+import type { Task, UserProfile as User, ProgressNote, Client } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,8 +14,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { useTasks } from '@/hooks/use-tasks';
+import { useEffect, useState } from 'react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '@/firebase/client';
 
 type UserWithId = User & { id: string };
+type ClientWithId = Client & { id: string };
 
 interface RecentTasksProps {
   tasks: (Task & {id: string})[];
@@ -51,9 +56,25 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
+  const [clients, setClients] = useState<ClientWithId[]>([]);
+
+  useEffect(() => {
+    const clientsQuery = collection(db, "clients");
+    const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
+        const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
+        setClients(clientsData);
+    });
+
+    return () => unsubscribe();
+  }, []);
   
   const getAssignee = (assigneeId: string): UserWithId | undefined => {
     return users.find(u => u.id === assigneeId);
+  }
+  
+  const getClient = (clientId?: string): ClientWithId | undefined => {
+    if (!clientId) return undefined;
+    return clients.find(c => c.id === clientId);
   }
 
   const handleStatusChange = (task: Task & {id: string}, newStatus: Task['status']) => {
@@ -111,6 +132,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
             <TableRow>
               <TableHead>Task</TableHead>
                {currentUser?.role === 'admin' && <TableHead>Assignee</TableHead>}
+               {currentUser?.role === 'employee' && <TableHead>Client</TableHead>}
               <TableHead>Status</TableHead>
               <TableHead>Priority</TableHead>
               {currentUser?.role === 'employee' && <TableHead>Remarks</TableHead>}
@@ -119,19 +141,24 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
           <TableBody>
             {tasks.map(task => {
                 const assignee = getAssignee(task.assigneeId);
+                const client = getClient(task.clientId);
                 const isEmployeeView = currentUser?.role === 'employee';
                 const unreadCount = currentUser ? (task.progressNotes || []).filter(n => n.readBy && !n.readBy.includes(currentUser.uid)).length : 0;
-                const wordCount = task.description ? task.description.split(/\s+/).filter(Boolean).length : 0;
+                
+                const descriptionWords = task.description ? task.description.split(/\s+/).filter(Boolean) : [];
+                const wordCount = descriptionWords.length;
+                const descriptionPreview = descriptionWords.slice(0, 2).join(' ');
+
 
                 return (
                     <TableRow key={task.id}>
                         <TableCell>
                             <div className="font-medium">{task.title}</div>
-                            {wordCount > 10 ? (
+                            {wordCount > 2 ? (
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground hover:underline">
-                                            Read description...
+                                        <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                                          {descriptionPreview}... <span className="underline">Read description...</span>
                                         </p>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[60vw]">
@@ -159,6 +186,15 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                     </div>
                                 ) : (
                                     <span className="text-sm text-muted-foreground">Unassigned</span>
+                                )}
+                            </TableCell>
+                        )}
+                        {currentUser?.role === 'employee' && (
+                            <TableCell>
+                                {client ? (
+                                    <span className="text-sm">{client.name}</span>
+                                ) : (
+                                    <span className="text-sm text-muted-foreground">-</span>
                                 )}
                             </TableCell>
                         )}
