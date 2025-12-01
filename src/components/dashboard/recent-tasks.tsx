@@ -60,6 +60,7 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
   const [clients, setClients] = useState<ClientWithId[]>([]);
+  const [selectedTaskForDescription, setSelectedTaskForDescription] = useState<Task | null>(null);
 
   useEffect(() => {
     const clientsQuery = collection(db, "clients");
@@ -150,14 +151,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
 
                 const isCompleted = completedStatuses.includes(task.status);
                 
-                let availableStatuses: Task['status'][] = [];
-                if (isEmployeeView) {
-                    if (task.status === 'Scheduled') {
-                        availableStatuses = ['Scheduled', ...baseEmployeeStatuses];
-                    } else {
-                        availableStatuses = baseEmployeeStatuses;
-                    }
-                }
+                const availableStatuses: Task['status'][] = baseEmployeeStatuses;
 
 
                 return (
@@ -208,11 +202,14 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                     <Badge variant={statusVariant[task.status] || 'default'} className="capitalize w-full justify-start">{task.status}</Badge>
                                                 </SelectItem>
                                             ) : (
-                                                availableStatuses.map(status => (
+                                                <>
+                                                 {!availableStatuses.includes(task.status) && <SelectItem value={task.status} disabled><Badge variant={statusVariant[task.status] || 'default'} className="capitalize w-full justify-start">{task.status}</Badge></SelectItem>}
+                                                 {availableStatuses.map(status => (
                                                     <SelectItem key={status} value={status}>
                                                         <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
                                                     </SelectItem>
-                                                ))
+                                                 ))}
+                                                </>
                                             )}
                                         </SelectContent>
                                     </Select>
@@ -290,5 +287,6 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     
 
     
+
 
 
