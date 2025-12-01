@@ -42,19 +42,20 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const unsubTasks = onSnapshot(tasksQuery, (snapshot) => {
             const tasksData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as TaskWithId));
             setTasks(tasksData);
+            setError(null); // Clear error on successful fetch
             if (loading) setLoading(false);
-        }, (err) => {
+        }, (err: any) => {
             console.error("Task subscription error:", err);
-            setError(new Error('Failed to load tasks. A browser extension might be blocking network requests.'));
+            setError(new Error('Failed to load tasks. A browser extension (like an ad blocker) might be blocking network requests to Firebase. Please disable it for this site and refresh the page.'));
             setLoading(false);
         });
 
         const unsubUsers = onSnapshot(usersQuery, (snapshot) => {
             const usersData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as UserWithId));
             setUsers(usersData);
-        }, (err) => {
+        }, (err: any) => {
             console.error("Users subscription error:", err);
-            setError(new Error('Failed to load users. A browser extension might be blocking network requests.'));
+             setError(new Error('Failed to load users. A browser extension (like an ad blocker) might be blocking network requests to Firebase. Please disable it for this site and refresh the page.'));
             setLoading(false);
         });
 
