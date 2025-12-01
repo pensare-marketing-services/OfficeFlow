@@ -60,8 +60,7 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
   const [clients, setClients] = useState<ClientWithId[]>([]);
-  const [selectedTaskForDescription, setSelectedTaskForDescription] = useState<Task | null>(null);
-
+  
   useEffect(() => {
     const clientsQuery = collection(db, "clients");
     const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
@@ -197,20 +196,16 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {isCompleted ? (
-                                                <SelectItem value={task.status} disabled>
-                                                    <Badge variant={statusVariant[task.status] || 'default'} className="capitalize w-full justify-start">{task.status}</Badge>
-                                                </SelectItem>
-                                            ) : (
-                                                <>
-                                                 {!availableStatuses.includes(task.status) && <SelectItem value={task.status} disabled><Badge variant={statusVariant[task.status] || 'default'} className="capitalize w-full justify-start">{task.status}</Badge></SelectItem>}
+                                                {!availableStatuses.includes(task.status) && (
+                                                    <SelectItem value={task.status} disabled>
+                                                        <Badge variant={statusVariant[task.status] || 'default'} className="capitalize w-full justify-start">{task.status}</Badge>
+                                                    </SelectItem>
+                                                )}
                                                  {availableStatuses.map(status => (
                                                     <SelectItem key={status} value={status}>
                                                         <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
                                                     </SelectItem>
                                                  ))}
-                                                </>
-                                            )}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -283,10 +278,3 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     </>
   );
 }
-
-    
-
-    
-
-
-
