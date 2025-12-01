@@ -34,7 +34,7 @@ interface ContentScheduleProps {
 
 const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs'];
 const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
-const employeeStatuses: TaskStatus[] = ['In Progress', 'For Approval'];
+const employeeStatuses: TaskStatus[] = ['Scheduled', 'In Progress', 'For Approval'];
 const priorities: TaskPriority[] = ['Low', 'Medium', 'High'];
 
 

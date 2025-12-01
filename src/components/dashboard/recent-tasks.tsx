@@ -32,7 +32,7 @@ interface RecentTasksProps {
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
-const employeeStatuses: Task['status'][] = ['In Progress', 'For Approval'];
+const baseEmployeeStatuses: Task['status'][] = ['In Progress', 'For Approval'];
 const completedStatuses: Task['status'][] = ['Done', 'Approved', 'Posted'];
 
 
@@ -59,7 +59,6 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
   const [clients, setClients] = useState<ClientWithId[]>([]);
-  const [selectedTaskForDescription, setSelectedTaskForDescription] = useState<Task | null>(null);
 
   useEffect(() => {
     const clientsQuery = collection(db, "clients");
@@ -149,6 +148,15 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                 const descriptionPreview = descriptionWords.slice(0, 2).join(' ');
 
                 const isCompleted = completedStatuses.includes(task.status);
+                
+                let availableStatuses: Task['status'][] = [];
+                if (isEmployeeView) {
+                    if (task.status === 'Scheduled') {
+                        availableStatuses = ['Scheduled', ...baseEmployeeStatuses];
+                    } else {
+                        availableStatuses = baseEmployeeStatuses;
+                    }
+                }
 
 
                 return (
@@ -199,7 +207,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                     <Badge variant={statusVariant[task.status] || 'default'} className="capitalize w-full justify-start">{task.status}</Badge>
                                                 </SelectItem>
                                             ) : (
-                                                employeeStatuses.map(status => (
+                                                availableStatuses.map(status => (
                                                     <SelectItem key={status} value={status}>
                                                         <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
                                                     </SelectItem>
@@ -281,3 +289,4 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     
 
     
+
