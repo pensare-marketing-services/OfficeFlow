@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { Task, UserProfile as User, ProgressNote, Client } from '@/lib/data';
@@ -289,4 +290,5 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     
 
     
+
 
