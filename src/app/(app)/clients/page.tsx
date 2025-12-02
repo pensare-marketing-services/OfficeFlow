@@ -69,7 +69,7 @@ export default function ClientsPage() {
         });
 
         return () => unsubscribe();
-    }, [selectedClient]);
+    }, []);
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
         updateTask(updatedTask.id, updatedTask);
