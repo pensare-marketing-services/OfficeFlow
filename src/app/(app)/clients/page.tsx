@@ -83,7 +83,7 @@ export default function ClientsPage() {
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                         <div>
-                            <CardTitle className="font-headline">Client Content Schedule</CardTitle>
+                             <CardTitle className="font-headline">{selectedClient ? selectedClient.name : "Clients"}</CardTitle>
                             <CardDescription>Manage client plans and progress.</CardDescription>
                         </div>
                         <div className="flex items-center gap-4">

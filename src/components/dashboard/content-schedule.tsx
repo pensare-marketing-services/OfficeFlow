@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import React, { useState } from 'react';
@@ -11,12 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, MessageSquare, Trash2, UserPlus, X, Paperclip } from 'lucide-react';
+import { CalendarIcon, MessageSquare, Trash2, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Badge } from '../ui/badge';
 import { useMemo } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -26,8 +23,6 @@ import { useToast } from '@/hooks/use-toast';
 type UserWithId = User & { id: string };
 
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
-type TaskPriority = 'Low' | 'Medium' | 'High';
-
 
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
@@ -37,8 +32,6 @@ interface ContentScheduleProps {
 
 const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs'];
 const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
-const employeeStatuses: TaskStatus[] = ['Scheduled', 'In Progress', 'For Approval'];
-const priorities: TaskPriority[] = ['Low', 'Medium', 'High'];
 const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
 
 const MAX_IMAGE_SIZE_BYTES = 700 * 1024; // 700KB
@@ -72,10 +65,10 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
     };
     
     if (type === 'textarea') {
-         return <Textarea defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 text-xs" />;
+         return <Textarea defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 text-xs p-1 h-auto" />;
     }
 
-    return <Input defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 text-xs" />;
+    return <Input defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 text-xs p-1 h-8" />;
 };
 
 const AssigneeSelect = ({
@@ -93,10 +86,10 @@ const AssigneeSelect = ({
             value={assigneeId || 'unassigned'}
             onValueChange={(value) => onAssigneeChange(value === 'unassigned' ? '' : value)}
         >
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-[120px] h-8 text-xs p-2">
                 {selectedUser ? (
-                    <div className="flex items-center gap-2 truncate">
-                        <Avatar className="h-6 w-6">
+                    <div className="flex items-center gap-1 truncate">
+                        <Avatar className="h-5 w-5">
                             <AvatarImage src={selectedUser.avatar} />
                             <AvatarFallback>{getInitials(selectedUser.name)}</AvatarFallback>
                         </Avatar>
@@ -108,12 +101,12 @@ const AssigneeSelect = ({
                 <SelectItem value="unassigned">Unassigned</SelectItem>
                 {employeeUsers.map(user => (
                     <SelectItem key={user.id} value={user.id}>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6">
                                 <AvatarImage src={user.avatar} />
                                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                             </Avatar>
-                            <span>{user.name}</span>
+                            <span className="text-xs">{user.name}</span>
                         </div>
                     </SelectItem>
                 ))}
@@ -137,7 +130,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
         if (!task) return;
         const newAssigneeIds = [...(task.assigneeIds || [])];
         newAssigneeIds[index] = newId;
-        // Filter out empty strings and duplicates
         const finalAssignees = [...new Set(newAssigneeIds.filter(id => id))];
         onTaskUpdate({ id: taskId, assigneeIds: finalAssignees });
     };
@@ -145,7 +137,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
     const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
         if (!currentUser) return;
         
-        const newNote: Partial<ProgressNote> & { date: string, authorId: string, authorName: string } = { 
+        const newNote: Partial<ProgressNote> & { date: string; authorId: string; authorName: string } = {
             note: note.note || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
@@ -232,31 +224,33 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                     <Table className="text-xs">
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[80px]">Date</TableHead>
-                                <TableHead className="min-w-[150px]">Content Title</TableHead>
-                                <TableHead className="min-w-[250px]">Content Description</TableHead>
-                                <TableHead className="w-[130px]">Type</TableHead>
-                                <TableHead className="w-[120px]">Priority</TableHead>
-                                <TableHead className="w-[140px]">Status</TableHead>
-                                <TableHead className="w-[320px]">Assigned To</TableHead>
-                                <TableHead className="w-[80px]">Remarks</TableHead>
+                                <TableHead className="w-[50px] px-2">Sl No.</TableHead>
+                                <TableHead className="w-[90px] px-2">Date</TableHead>
+                                <TableHead className="min-w-[150px] px-2">Content Title</TableHead>
+                                <TableHead className="min-w-[200px] px-2">Content Description</TableHead>
+                                <TableHead className="w-[120px] px-2">Type</TableHead>
+                                <TableHead className="w-[130px] px-2">Status</TableHead>
+                                <TableHead className="w-[250px] px-2">Assigned To</TableHead>
+                                <TableHead className="w-[80px] px-2 text-center">Remarks</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {tasks.map((task) => {
+                            {tasks.map((task, index) => {
                                 const isCompleted = completedStatuses.includes(task.status);
                                 
                                 return (
                                 <TableRow key={task.id}>
-                                    <TableCell>
+                                    <TableCell className="p-2 text-center">{index + 1}</TableCell>
+                                    <TableCell className="p-1">
                                         <Popover>
                                             <PopoverTrigger asChild>
                                                 <Button
                                                     variant={'ghost'}
-                                                    size="icon"
-                                                    className={cn('w-full justify-center text-left font-normal', !task.deadline && 'text-muted-foreground')}
+                                                    size="sm"
+                                                    className={cn('w-full justify-start text-left font-normal h-8 text-xs', !task.deadline && 'text-muted-foreground')}
                                                 >
-                                                    <CalendarIcon className="h-4 w-4" />
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {task.deadline ? format(new Date(task.deadline), 'MMM dd') : <span>Pick a date</span>}
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-auto p-0">
@@ -269,31 +263,23 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="p-1">
                                         <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} />
                                     </TableCell>
-                                    <TableCell>
-                                        <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" />
+                                    <TableCell className="p-1">
+                                        <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value || '')} type="textarea" />
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="p-1">
                                         <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
-                                            <SelectTrigger><SelectValue /></SelectTrigger>
+                                            <SelectTrigger className="h-8 text-xs p-2"><SelectValue /></SelectTrigger>
                                             <SelectContent>
                                                 {contentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                     <TableCell>
-                                        <Select value={task.priority} onValueChange={(value: TaskPriority) => handleFieldChange(task.id, 'priority', value)}>
-                                            <SelectTrigger><SelectValue /></SelectTrigger>
-                                            <SelectContent>
-                                                {priorities.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </TableCell>
-                                    <TableCell>
+                                    <TableCell className="p-1">
                                         <Select value={task.status as TaskStatus} onValueChange={(value: TaskStatus) => handleFieldChange(task.id, 'status', value)} disabled={isCompleted && currentUser?.role === 'employee'}>
-                                            <SelectTrigger>
+                                            <SelectTrigger className="h-8 text-xs p-2">
                                                 <div className="flex items-center gap-2">
                                                     <div className={cn("h-2 w-2 rounded-full", statusColors[task.status as TaskStatus])} />
                                                     <SelectValue />
@@ -311,8 +297,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                     <TableCell>
-                                        <div className="flex items-center gap-2">
+                                     <TableCell className="p-1">
+                                        <div className="flex items-center gap-1">
                                             <AssigneeSelect 
                                                 assigneeId={task.assigneeIds ? task.assigneeIds[0] : ''}
                                                 onAssigneeChange={(newId) => handleAssigneeChange(task.id, 0, newId)}
@@ -325,44 +311,44 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             />
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-center">
+                                    <TableCell className="p-1 text-center">
                                          <Popover>
                                             <PopoverTrigger asChild>
-                                                <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative">
-                                                    <MessageSquare className="h-5 w-5" />
+                                                <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-8 w-8">
+                                                    <MessageSquare className="h-4 w-4" />
                                                 </Button>
                                             </PopoverTrigger>
-                                            <PopoverContent className="w-96" side="bottom" align="end">
-                                                <div className="space-y-4">
+                                            <PopoverContent className="w-80" side="left" align="end">
+                                                <div className="space-y-2">
                                                     <div className="flex justify-between items-center">
-                                                        <h4 className="font-medium leading-none">Remarks</h4>
+                                                        <h4 className="font-medium leading-none text-sm">Remarks</h4>
                                                         {(task.progressNotes || []).length > 0 && (
-                                                            <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-xs text-muted-foreground">
+                                                            <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-xs h-7 text-muted-foreground">
                                                                 <Trash2 className="mr-1 h-3 w-3" />
-                                                                Clear Chat
+                                                                Clear
                                                             </Button>
                                                         )}
                                                     </div>
-                                                     <div className="max-h-60 space-y-4 overflow-y-auto p-1">
+                                                     <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                                         {(task.progressNotes || []).map((note, i) => {
                                                             const author = users.find(u => u.id === note.authorId);
                                                             const authorName = author ? author.name : note.authorName;
                                                             const authorAvatar = author ? author.avatar : '';
                                                             return (
-                                                                <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                                <div key={i} className={cn("flex items-start gap-2 text-xs", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                     {note.authorId !== currentUser?.uid && (
-                                                                        <Avatar className="h-8 w-8 border">
+                                                                        <Avatar className="h-6 w-6 border">
                                                                             <AvatarImage src={authorAvatar} />
                                                                             <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
                                                                         </Avatar>
                                                                     )}
-                                                                    <div className={cn("max-w-[75%] rounded-lg p-3", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                    <div className={cn("max-w-[75%] rounded-lg p-2", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                         <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                        {note.note && <p>{note.note}</p>}
+                                                                        {note.note && <p className="text-[11px]">{note.note}</p>}
                                                                         {note.imageUrl && (
                                                                              <Dialog>
                                                                                 <DialogTrigger asChild>
-                                                                                    <img src={note.imageUrl} alt="remark" className="mt-2 rounded-md max-w-full h-auto cursor-pointer" />
+                                                                                    <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto cursor-pointer" />
                                                                                 </DialogTrigger>
                                                                                 <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
                                                                                     <DialogHeader className="sr-only">
@@ -373,10 +359,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                                                 </DialogContent>
                                                                             </Dialog>
                                                                         )}
-                                                                        <p className={cn("text-right text-[10px] mt-2 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
+                                                                        <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
                                                                     </div>
                                                                     {note.authorId === currentUser?.uid && (
-                                                                        <Avatar className="h-8 w-8 border">
+                                                                        <Avatar className="h-6 w-6 border">
                                                                             <AvatarImage src={currentUser?.avatar} />
                                                                             <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
                                                                         </Avatar>
@@ -387,14 +373,15 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                     </div>
                                                     <div className="relative">
                                                         <Textarea 
-                                                            placeholder="Add a remark or paste an image..."
+                                                            placeholder="Add a remark..."
                                                             value={noteInput}
                                                             onChange={(e) => setNoteInput(e.target.value)}
                                                             onKeyDown={(e) => handleNewNote(e, task)}
                                                             onPaste={(e) => handlePaste(e, task)}
-                                                            className="pr-10"
+                                                            className="pr-8 text-xs"
+                                                            rows={2}
                                                         />
-                                                        <Button size="icon" variant="ghost" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
+                                                        <Button size="icon" variant="ghost" className="absolute right-0.5 top-1/2 -translate-y-1/2 h-7 w-7">
                                                             <Paperclip className="h-4 w-4" />
                                                         </Button>
                                                     </div>
