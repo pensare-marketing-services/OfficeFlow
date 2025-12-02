@@ -53,11 +53,11 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'o
     'Overdue': 'destructive'
 }
 
-const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    'High': 'destructive',
-    'Medium': 'secondary',
-    'Low': 'outline'
-}
+const priorityMap: Record<Task['priority'], number> = {
+    'High': 1,
+    'Medium': 2,
+    'Low': 3
+};
 
 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
@@ -173,8 +173,8 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
               <TableHead>Task</TableHead>
                <TableHead>Client</TableHead>
                {currentUser?.role === 'admin' && <TableHead>Assigned To</TableHead>}
-              <TableHead>Status</TableHead>
               <TableHead>Priority</TableHead>
+              <TableHead>Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead>Remarks</TableHead>}
             </TableRow>
           </TableHeader>
@@ -242,6 +242,9 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                           </TableCell>
                         )}
                         <TableCell>
+                           <span className="font-bold text-lg">{priorityMap[task.priority]}</span>
+                        </TableCell>
+                        <TableCell>
                             {onTaskUpdate && isEmployeeView ? (
                                 <div className="flex items-center gap-2">
                                     <Select 
@@ -268,9 +271,6 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                             ) : (
                                <Badge variant={statusVariant[task.status] || 'default'} className="capitalize">{task.status}</Badge>
                             )}
-                        </TableCell>
-                        <TableCell>
-                            <Badge variant={priorityVariant[task.priority] || 'default'} className="capitalize">{task.priority}</Badge>
                         </TableCell>
                         {isEmployeeView && (
                             <TableCell className="text-center">

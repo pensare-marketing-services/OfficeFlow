@@ -57,6 +57,12 @@ const statusColors: Record<TaskStatus, string> = {
     'Ready for Next': 'bg-cyan-500'
 };
 
+const priorityMap: Record<Task['priority'], number> = {
+    'High': 1,
+    'Medium': 2,
+    'Low': 3
+};
+
 const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea' }> = ({ value, onSave, type = 'text' }) => {
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         onSave(e.target.value);
@@ -277,6 +283,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 <TableHead className="min-w-[200px] px-2 border-r">Content Description</TableHead>
                                 <TableHead className="w-[120px] px-2 border-r">Type</TableHead>
                                 {showAssigneeColumn && <TableHead className="w-[250px] px-2 border-r">Assigned To</TableHead>}
+                                <TableHead className="w-[60px] px-2 border-r text-center">Priority</TableHead>
                                 <TableHead className="w-[130px] px-2 border-r">Status</TableHead>
                                 <TableHead className="w-[80px] px-2 text-center">Remarks</TableHead>
                             </TableRow>
@@ -357,6 +364,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             ))}
                                         </div>
                                     </TableCell>}
+                                    <TableCell className="p-1 border-r text-center font-bold text-base">
+                                        {priorityMap[task.priority]}
+                                    </TableCell>
                                     <TableCell className="p-1 border-r">
                                         <Select 
                                             value={displayedStatus} 
