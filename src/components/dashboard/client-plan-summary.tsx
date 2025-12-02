@@ -39,29 +39,23 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
                 <Table>
                     <TableBody>
                         <TableRow className="bg-green-100/50 hover:bg-green-100/60">
-                            <TableCell className="font-bold w-32">CLIENT</TableCell>
+                             <TableCell className="font-bold w-32">PLAN</TableCell>
                             <TableCell>
-                               <EditableField value={client.name || ''} onSave={(value) => handleSave('name', value)} />
+                                <EditableField value={client.plan || ''} onSave={(value) => handleSave('plan', value)} />
                             </TableCell>
-                            <TableCell className="font-bold w-32">Bill Duration</TableCell>
+                             <TableCell className="font-bold w-32">Bill Duration</TableCell>
                             <TableCell className="w-48">
                                 <EditableField value={client.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
                             </TableCell>
                         </TableRow>
                         <TableRow className="bg-green-100/50 hover:bg-green-100/60">
-                             <TableCell className="font-bold">PLAN</TableCell>
+                            <TableCell className="font-bold">Social Platforms</TableCell>
                             <TableCell>
-                                <EditableField value={client.plan || ''} onSave={(value) => handleSave('plan', value)} />
+                                <EditableField value={client.socialPlatforms || ''} onSave={(value) => handleSave('socialPlatforms', value)} />
                             </TableCell>
                             <TableCell className="font-bold">Monthly Reach</TableCell>
                             <TableCell>
                                  <EditableField value={client.monthlyReach || ''} onSave={(value) => handleSave('monthlyReach', value)} />
-                            </TableCell>
-                        </TableRow>
-                         <TableRow className="bg-green-100/50 hover:bg-green-100/60">
-                            <TableCell className="font-bold">Social Platforms</TableCell>
-                            <TableCell colSpan={3}>
-                                <EditableField value={client.socialPlatforms || ''} onSave={(value) => handleSave('socialPlatforms', value)} />
                             </TableCell>
                         </TableRow>
                     </TableBody>

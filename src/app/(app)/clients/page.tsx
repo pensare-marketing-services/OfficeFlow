@@ -18,10 +18,28 @@ import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
+import { Input } from '@/components/ui/input';
 
 
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
+
+
+const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }> = ({ value, onSave }) => {
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        onSave(e.target.value);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            onSave(e.currentTarget.value);
+            e.currentTarget.blur();
+        }
+    };
+    
+    return <Input defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 h-auto p-0 text-2xl font-semibold tracking-tight font-headline" />;
+};
 
 export default function ClientsPage() {
     const { user: currentUser } = useAuth();
@@ -38,6 +56,9 @@ export default function ClientsPage() {
             setClients(clientsData);
             if (clientsData.length > 0 && !selectedClient) {
                 setSelectedClient(clientsData[0]);
+            } else if (clientsData.length > 0 && selectedClient) {
+                // If there's a selected client, make sure it's up-to-date
+                setSelectedClient(prev => clientsData.find(c => c.id === prev?.id) || clientsData[0]);
             } else if (clientsData.length === 0) {
                 setSelectedClient(null);
             }
@@ -48,7 +69,7 @@ export default function ClientsPage() {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [selectedClient]);
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
         updateTask(updatedTask.id, updatedTask);
@@ -93,7 +114,11 @@ export default function ClientsPage() {
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                         <div>
-                             <CardTitle className="font-headline">{selectedClient ? selectedClient.name : "Clients"}</CardTitle>
+                             {selectedClient ? (
+                                <EditableTitle value={selectedClient.name} onSave={(newName) => handleClientUpdate(selectedClient.id, { name: newName })} />
+                             ) : (
+                                <CardTitle className="font-headline">Clients</CardTitle>
+                             )}
                             <CardDescription>Manage client plans and progress.</CardDescription>
                         </div>
                         <div className="flex items-center gap-4">
