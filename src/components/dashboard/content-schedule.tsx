@@ -37,6 +37,7 @@ const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backen
 const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
 const employeeStatuses: TaskStatus[] = ['Scheduled', 'In Progress', 'For Approval'];
 const priorities: TaskPriority[] = ['Low', 'Medium', 'High'];
+const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
 
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
@@ -146,7 +147,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.name,
-            readBy: [currentUser.uid],
         };
 
         handleFieldChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
@@ -182,19 +182,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
             }
         }
     }
-    
-    const handleMarkAsRead = (task: Task & {id: string}) => {
-        if (!currentUser) return;
-        const updatedNotes = (task.progressNotes || []).map(note => {
-            if (note.readBy && !note.readBy.includes(currentUser.uid)) {
-                return { ...note, readBy: [...note.readBy, currentUser.uid] };
-            }
-            return note;
-        });
-        if (JSON.stringify(updatedNotes) !== JSON.stringify(task.progressNotes)) {
-             handleFieldChange(task.id, 'progressNotes', updatedNotes);
-        }
-    }
 
     const handleClearChat = (taskId: string) => {
         handleFieldChange(taskId, 'progressNotes', []);
@@ -205,7 +192,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
         return users.filter(u => u.role === 'employee');
     }, [users]);
     
-    const availableStatuses = currentUser?.role === 'employee' ? employeeStatuses : allStatuses;
+    const availableStatuses = currentUser?.role === 'employee' ? 
+        ['In Progress', 'For Approval'] : 
+        allStatuses;
 
 
     if (tasks.length === 0) {
@@ -238,7 +227,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                         </TableHeader>
                         <TableBody>
                             {tasks.map((task) => {
-                                const unreadCount = currentUser ? (task.progressNotes || []).filter(n => n.readBy && !n.readBy.includes(currentUser.uid)).length : 0;
+                                const isCompleted = completedStatuses.includes(task.status);
                                 
                                 return (
                                 <TableRow key={task.id}>
@@ -286,7 +275,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         </Select>
                                     </TableCell>
                                     <TableCell>
-                                        <Select value={task.status as TaskStatus} onValueChange={(value: TaskStatus) => handleFieldChange(task.id, 'status', value)}>
+                                        <Select value={task.status as TaskStatus} onValueChange={(value: TaskStatus) => handleFieldChange(task.id, 'status', value)} disabled={isCompleted && currentUser?.role === 'employee'}>
                                             <SelectTrigger>
                                                 <div className="flex items-center gap-2">
                                                     <div className={cn("h-2 w-2 rounded-full", statusColors[task.status as TaskStatus])} />
@@ -320,11 +309,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                         <Popover onOpenChange={(open) => open && handleMarkAsRead(task)}>
+                                         <Popover>
                                             <PopoverTrigger asChild>
                                                 <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative">
                                                     <MessageSquare className="h-5 w-5" />
-                                                    {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-2 -right-2 h-4 w-4 justify-center p-0">{unreadCount}</Badge>}
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-96" side="bottom" align="end">

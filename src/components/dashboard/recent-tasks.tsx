@@ -95,7 +95,6 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.name,
-            readBy: [currentUser.uid],
         };
 
         onTaskUpdate(task.id, { progressNotes: [...(task.progressNotes || []), newNote] });
@@ -132,19 +131,6 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     }
   }
 
-  const handleMarkAsRead = (task: Task & {id: string}) => {
-    if (!currentUser || !onTaskUpdate) return;
-    const updatedNotes = (task.progressNotes || []).map(note => {
-        if (note.readBy && !note.readBy.includes(currentUser.uid)) {
-            return { ...note, readBy: [...note.readBy, currentUser.uid] };
-        }
-        return note;
-    });
-    if (JSON.stringify(updatedNotes) !== JSON.stringify(task.progressNotes)) {
-         onTaskUpdate(task.id, { progressNotes: updatedNotes });
-    }
-  }
-
   return (
     <>
     <Card className="shadow-md">
@@ -171,7 +157,6 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                 const assignees = (task.assigneeIds || []).map(id => getAssignee(id)).filter(Boolean) as UserWithId[];
                 const client = getClient(task.clientId);
                 const isEmployeeView = currentUser?.role === 'employee';
-                const unreadCount = currentUser ? (task.progressNotes || []).filter(n => n.readBy && !n.readBy.includes(currentUser.uid)).length : 0;
                 
                 const descriptionWords = task.description ? task.description.split(/\s+/).filter(Boolean) : [];
                 const wordCount = descriptionWords.length;
@@ -180,11 +165,11 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                 const isCompleted = completedStatuses.includes(task.status);
 
                 const availableStatusesForEmployee: TaskStatus[] = useMemo(() => {
-                    const base = ['In Progress', 'For Approval'];
-                    // If the current status is something else (like 'To Do' or 'Hold')
-                    // and not one of the base statuses, add it to the list so it can be displayed.
+                    const base: TaskStatus[] = ['In Progress', 'For Approval'];
+                    // If the current status is not a standard employee action or completed,
+                    // add it to the list so it can be displayed.
                     if (!base.includes(task.status) && !completedStatuses.includes(task.status)) {
-                        return [...base, task.status];
+                      return [task.status, ...base];
                     }
                     return base;
                 }, [task.status]);
@@ -269,13 +254,11 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                 <Popover onOpenChange={(open) => {
                                     if (open) {
                                         setNoteInput('');
-                                        handleMarkAsRead(task);
                                     }
                                 }}>
                                     <PopoverTrigger asChild>
                                         <Button variant="ghost" size="icon" className="relative">
                                             <MessageSquare className="h-5 w-5" />
-                                            {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-2 -right-2 h-4 w-4 justify-center p-0">{unreadCount}</Badge>}
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-96" side="bottom" align="end">

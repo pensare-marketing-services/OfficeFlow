@@ -17,7 +17,6 @@ export type ProgressNote = {
     date: string;
     authorId: string;
     authorName: string;
-    readBy: string[];
     imageUrl?: string;
 };
 
@@ -122,7 +121,7 @@ export const tasks: Task[] = [
     assigneeIds: ['yaseen@officeflow.com'],
     clientId: 'client-1',
     contentType: 'Video Ad',
-    progressNotes: [{ note: 'First draft is ready for review.', date: new Date().toISOString(), authorId: 'admin@officeflow.com', authorName: 'Admin User', readBy: ['admin@officeflow.com'] }],
+    progressNotes: [{ note: 'First draft is ready for review.', date: new Date().toISOString(), authorId: 'admin@officeflow.com', authorName: 'Admin User' }],
   },
   {
     id: 'task-2',
@@ -146,7 +145,7 @@ export const tasks: Task[] = [
     assigneeIds: ['zeenath@officeflow.com'],
     clientId: 'client-3',
     contentType: 'Backend Ad',
-    progressNotes: [{note: 'Report is complete and has been sent to the client.', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), authorId: 'zeenath@officeflow.com', authorName: 'Zeenath', readBy: ['zeenath@officeflow.com']}],
+    progressNotes: [{note: 'Report is complete and has been sent to the client.', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), authorId: 'zeenath@officeflow.com', authorName: 'Zeenath'}],
   },
   {
     id: 'task-4',
@@ -182,7 +181,7 @@ export const tasks: Task[] = [
     assigneeIds: ['issec@officeflow.com'],
     clientId: 'client-5',
     contentType: 'Carousel',
-    progressNotes: [{note: 'Wireframes are done.', date: new Date().toISOString(), authorId: 'issec@officeflow.com', authorName: 'Issec', readBy: ['issec@officeflow.com']}],
+    progressNotes: [{note: 'Wireframes are done.', date: new Date().toISOString(), authorId: 'issec@officeflow.com', authorName: 'Issec'}],
   },
   {
     id: 'task-7',

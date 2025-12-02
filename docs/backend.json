@@ -68,7 +68,9 @@
         },
         "progressNotes": {
           "type": "array",
-          "items": {}
+          "items": {
+            "$ref": "#/entities/ProgressNote"
+          }
         }
       },
       "required": ["title", "status", "priority", "deadline"]
@@ -93,7 +95,6 @@
         "date": { "type": "string", "format": "date-time" },
         "authorId": { "type": "string" },
         "authorName": { "type": "string" },
-        "readBy": { "type": "array", "items": {} },
         "imageUrl": { "type": "string", "format": "uri" }
       }
     }
