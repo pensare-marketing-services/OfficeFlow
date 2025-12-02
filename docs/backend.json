@@ -57,7 +57,8 @@
             "For Approval",
             "Approved",
             "Posted",
-            "Hold"
+            "Hold",
+            "Ready for Next"
           ]
         },
         "priority": {
@@ -95,6 +96,10 @@
           "items": {
             "$ref": "#/entities/ProgressNote"
           }
+        },
+        "activeAssigneeIndex": {
+          "type": "number",
+          "description": "The index of the assignee in the assigneeIds array who is currently responsible for the task."
         }
       },
       "required": [

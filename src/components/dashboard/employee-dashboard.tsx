@@ -6,6 +6,7 @@ import type { Task, UserProfile as User } from '@/lib/data';
 import { StatsCard } from './stats-card';
 import { ClipboardList, CheckCircle2, Clock, Hourglass } from 'lucide-react';
 import ContentSchedule from './content-schedule';
+import { useTasks } from '@/hooks/use-tasks';
 
 type UserWithId = User & { id: string };
 
@@ -20,6 +21,8 @@ type TaskFilter = 'active' | 'inProgress' | 'completed' | 'overdue';
 export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }: EmployeeDashboardProps) {
   const { user } = useAuth();
   const [taskFilter, setTaskFilter] = useState<TaskFilter>('active');
+  const { updateTaskStatus } = useTasks();
+
 
   if (!user) return null;
 
@@ -55,6 +58,11 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
   const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
     onTaskUpdate(updatedTask.id, updatedTask);
   };
+  
+  const handleStatusChange = (task: Task & {id: string}, newStatus: Task['status']) => {
+    updateTaskStatus(task, newStatus);
+  };
+
 
   return (
     <div className="space-y-6">
@@ -98,6 +106,7 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
             tasks={filteredTasks}
             users={users}
             onTaskUpdate={handleTaskUpdate}
+            onStatusChange={handleStatusChange}
         />
       </div>
     </div>

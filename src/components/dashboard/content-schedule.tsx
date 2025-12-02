@@ -26,15 +26,18 @@ type ClientWithId = Client & { id: string };
 
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 
+const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
+const employeeHandoffStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Ready for Next'];
+const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
+
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
     users: UserWithId[];
     onTaskUpdate: (task: Partial<Task> & { id: string }) => void;
+    onStatusChange?: (task: Task & {id: string}, newStatus: TaskStatus) => void;
 }
 
 const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs'];
-const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
-const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
 
 const MAX_IMAGE_SIZE_BYTES = 700 * 1024; // 700KB
 
@@ -50,7 +53,8 @@ const statusColors: Record<TaskStatus, string> = {
     Done: 'bg-green-500',
     Posted: 'bg-purple-500',
     Hold: 'bg-gray-500',
-    Overdue: 'bg-red-500'
+    Overdue: 'bg-red-500',
+    'Ready for Next': 'bg-cyan-500'
 };
 
 const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea' }> = ({ value, onSave, type = 'text' }) => {
@@ -76,11 +80,13 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
 const AssigneeSelect = ({
     assigneeId,
     onAssigneeChange,
-    employeeUsers
+    employeeUsers,
+    isActive
 }: {
     assigneeId: string | undefined;
     onAssigneeChange: (newId: string) => void;
     employeeUsers: UserWithId[];
+    isActive?: boolean;
 }) => {
     const selectedUser = employeeUsers.find(u => u.id === assigneeId);
     return (
@@ -88,7 +94,7 @@ const AssigneeSelect = ({
             value={assigneeId || 'unassigned'}
             onValueChange={(value) => onAssigneeChange(value === 'unassigned' ? '' : value)}
         >
-            <SelectTrigger className="w-[120px] h-8 text-xs p-2">
+            <SelectTrigger className={cn("w-[120px] h-8 text-xs p-2", isActive && "ring-2 ring-accent")}>
                 {selectedUser ? (
                     <div className="flex items-center gap-1 truncate">
                         <Avatar className="h-5 w-5">
@@ -118,7 +124,7 @@ const AssigneeSelect = ({
 };
 
 
-export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentScheduleProps) {
+export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusChange }: ContentScheduleProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const { toast } = useToast();
@@ -142,6 +148,15 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
     const handleFieldChange = (taskId: string, field: keyof Task, value: any) => {
         onTaskUpdate({ id: taskId, [field]: value });
     };
+    
+    const handleLocalStatusChange = (task: Task & { id: string }, newStatus: TaskStatus) => {
+        if (onStatusChange) {
+            onStatusChange(task, newStatus);
+        } else {
+            handleFieldChange(task.id, 'status', newStatus);
+        }
+    }
+
 
     const handleAssigneeChange = (taskId: string, index: number, newId: string) => {
         const task = tasks.find(t => t.id === taskId);
@@ -149,7 +164,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
         const newAssigneeIds = [...(task.assigneeIds || [])];
         newAssigneeIds[index] = newId;
         const finalAssignees = [...new Set(newAssigneeIds.filter(id => id))];
-        onTaskUpdate({ id: taskId, assigneeIds: finalAssignees });
+        onTaskUpdate({ id: taskId, assigneeIds: finalAssignees, activeAssigneeIndex: 0 }); // Reset index on change
     };
 
     const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
@@ -219,9 +234,21 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
         return users.filter(u => u.role === 'employee');
     }, [users]);
     
-    const availableStatuses = currentUser?.role === 'employee' ? 
-        ['In Progress', 'For Approval'] : 
-        allStatuses;
+    const getAvailableStatuses = (task: Task) => {
+        if (currentUser?.role === 'admin') return allStatuses;
+
+        const { assigneeIds = [], activeAssigneeIndex = 0 } = task;
+        const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser?.uid;
+
+        if (!isMyTurn) return [];
+
+        const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
+        if (isLastAssignee) {
+            return ['In Progress', 'For Approval'];
+        }
+        
+        return ['In Progress', 'Ready for Next'];
+    };
 
 
     if (tasks.length === 0) {
@@ -236,7 +263,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
     }
     
     const showAssigneeColumn = currentUser?.role === 'admin';
-    const showClientColumn = true;
 
     return (
         <Card>
@@ -246,12 +272,12 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[90px] px-2 border-r">Date</TableHead>
-                                {showClientColumn && <TableHead className="min-w-[150px] px-2 border-r">Client</TableHead>}
+                                <TableHead className="min-w-[150px] px-2 border-r">Client</TableHead>
                                 <TableHead className="min-w-[150px] px-2 border-r">Content Title</TableHead>
                                 <TableHead className="min-w-[200px] px-2 border-r">Content Description</TableHead>
                                 <TableHead className="w-[120px] px-2 border-r">Type</TableHead>
-                                <TableHead className="w-[130px] px-2 border-r">Status</TableHead>
                                 {showAssigneeColumn && <TableHead className="w-[250px] px-2 border-r">Assigned To</TableHead>}
+                                <TableHead className="w-[130px] px-2 border-r">Status</TableHead>
                                 <TableHead className="w-[80px] px-2 text-center">Remarks</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -259,7 +285,26 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                             {tasks.map((task, index) => {
                                 const isCompleted = completedStatuses.includes(task.status);
                                 const client = getClient(task.clientId);
+                                const { assigneeIds = [], activeAssigneeIndex = 0 } = task;
+                                const isMultiAssignee = assigneeIds.length > 1;
+                                const currentWorkerId = assigneeIds[activeAssigneeIndex];
                                 
+                                const isMyTurn = currentWorkerId === currentUser?.uid;
+                                const isEmployee = currentUser?.role === 'employee';
+                                const isReadOnly = isEmployee && !isMyTurn;
+                                
+                                const availableStatuses = getAvailableStatuses(task);
+                                
+                                const getDisplayedStatus = (): TaskStatus => {
+                                    if (isEmployee && !isMyTurn && task.status !== 'For Approval' && !isCompleted) {
+                                        const worker = users.find(u => u.id === currentWorkerId);
+                                        return 'On Work';
+                                    }
+                                    return task.status;
+                                }
+
+                                const displayedStatus = getDisplayedStatus();
+
                                 return (
                                 <TableRow key={task.id} className="border-b">
                                     <TableCell className="p-1 border-r">
@@ -284,7 +329,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                    {showClientColumn && <TableCell className="p-1 border-r font-medium">{client?.name || '-'}</TableCell>}
+                                    <TableCell className="p-1 border-r font-medium">{client?.name || '-'}</TableCell>
                                     <TableCell className="p-1 border-r">
                                         <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} />
                                     </TableCell>
@@ -299,11 +344,28 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
+                                     {showAssigneeColumn && <TableCell className="p-1 border-r">
+                                        <div className="flex items-center gap-1">
+                                            {[0, 1].map(i => (
+                                                <AssigneeSelect 
+                                                    key={i}
+                                                    assigneeId={assigneeIds[i]}
+                                                    onAssigneeChange={(newId) => handleAssigneeChange(task.id, i, newId)}
+                                                    employeeUsers={employeeUsers.filter(u => u.id !== assigneeIds[1-i])} // filter out the other assignee
+                                                    isActive={isMultiAssignee && activeAssigneeIndex === i}
+                                                />
+                                            ))}
+                                        </div>
+                                    </TableCell>}
                                     <TableCell className="p-1 border-r">
-                                        <Select value={task.status as TaskStatus} onValueChange={(value: TaskStatus) => handleFieldChange(task.id, 'status', value)} disabled={isCompleted && currentUser?.role === 'employee'}>
+                                        <Select 
+                                            value={displayedStatus} 
+                                            onValueChange={(value: TaskStatus) => handleLocalStatusChange(task, value)} 
+                                            disabled={isReadOnly || (isCompleted && isEmployee)}
+                                        >
                                             <SelectTrigger className="h-8 text-xs p-2">
                                                 <div className="flex items-center gap-2">
-                                                    <div className={cn("h-2 w-2 rounded-full", statusColors[task.status as TaskStatus])} />
+                                                    <div className={cn("h-2 w-2 rounded-full", statusColors[displayedStatus])} />
                                                     <SelectValue />
                                                 </div>
                                             </SelectTrigger>
@@ -316,23 +378,17 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                         </div>
                                                     </SelectItem>
                                                 ))}
+                                                {!availableStatuses.includes(displayedStatus) && (
+                                                    <SelectItem value={displayedStatus} disabled>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className={cn("h-2 w-2 rounded-full", statusColors[displayedStatus])} />
+                                                            {displayedStatus} {displayedStatus === 'On Work' && `(by ${users.find(u => u.id === currentWorkerId)?.name.split(' ')[0] || '...'})`}
+                                                        </div>
+                                                    </SelectItem>
+                                                )}
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                     {showAssigneeColumn && <TableCell className="p-1 border-r">
-                                        <div className="flex items-center gap-1">
-                                            <AssigneeSelect 
-                                                assigneeId={task.assigneeIds ? task.assigneeIds[0] : ''}
-                                                onAssigneeChange={(newId) => handleAssigneeChange(task.id, 0, newId)}
-                                                employeeUsers={employeeUsers}
-                                            />
-                                            <AssigneeSelect
-                                                assigneeId={task.assigneeIds ? task.assigneeIds[1] : ''}
-                                                onAssigneeChange={(newId) => handleAssigneeChange(task.id, 1, newId)}
-                                                employeeUsers={employeeUsers.filter(u => u.id !== (task.assigneeIds ? task.assigneeIds[0] : ''))}
-                                            />
-                                        </div>
-                                    </TableCell>}
                                     <TableCell className="p-1 text-center">
                                          <Popover>
                                             <PopoverTrigger asChild>

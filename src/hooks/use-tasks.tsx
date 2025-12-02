@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
-import type { Task, UserProfile } from '@/lib/data';
+import type { Task, UserProfile, TaskStatus } from '@/lib/data';
 import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
@@ -14,8 +14,9 @@ interface TaskContextType {
     users: UserWithId[];
     loading: boolean;
     error: Error | null;
-    addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+    addTask: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
     updateTask: (taskId: string, task: Partial<Task>) => void;
+    updateTaskStatus: (task: TaskWithId, newStatus: TaskStatus) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -67,11 +68,12 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [currentUser]);
 
 
-    const addTask = useCallback(async (task: Omit<Task, 'id' | 'createdAt'>) => {
+    const addTask = useCallback(async (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => {
         try {
             await addDoc(collection(db, 'tasks'), {
                 ...task,
                 createdAt: serverTimestamp(),
+                activeAssigneeIndex: 0,
             });
         } catch (e) {
             console.error("Error adding document: ", e);
@@ -88,6 +90,41 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setError(new Error('Failed to update task. Please check your network connection.'));
         }
     }, []);
+    
+    const updateTaskStatus = useCallback(async (task: TaskWithId, newStatus: TaskStatus) => {
+        const { id, assigneeIds = [], activeAssigneeIndex = 0 } = task;
+        const taskRef = doc(db, 'tasks', id);
+
+        let updateData: Partial<Task> = { status: newStatus };
+
+        // Admin workflow
+        if (currentUser?.role === 'admin') {
+            await updateDoc(taskRef, updateData);
+            return;
+        }
+
+        // Employee workflow
+        const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser?.uid;
+        if (!isMyTurn) return; // Not my turn, do nothing.
+
+        const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
+
+        if (newStatus === 'Ready for Next' && !isLastAssignee) {
+            // Hand off to the next person
+            updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
+            updateData.status = 'In Progress'; // Set status for the next person
+        } else if (newStatus === 'For Approval' && isLastAssignee) {
+            // Final step, send for approval
+            updateData.status = 'For Approval';
+        } else {
+            // Just a regular status update for the current assignee
+            updateData.status = newStatus;
+        }
+        
+        await updateDoc(taskRef, updateData);
+
+    }, [currentUser]);
+
 
     const value = {
         tasks,
@@ -96,6 +133,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         error,
         addTask,
         updateTask,
+        updateTaskStatus,
     };
 
     return (
