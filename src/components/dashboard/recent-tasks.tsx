@@ -137,6 +137,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
         }
     }
 
+  const employeeAllowedStatuses: TaskStatus[] = ['In Progress', 'For Approval'];
 
   return (
     <>
@@ -171,7 +172,10 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
 
                 const isCompleted = completedStatuses.includes(task.status);
                 
-                const availableStatusesForEmployee: TaskStatus[] = ['In Progress', 'For Approval'];
+                const currentStatusIsAllowedForEmployee = employeeAllowedStatuses.includes(task.status);
+                const statusOptions = employeeAllowedStatuses.includes(task.status)
+                  ? employeeAllowedStatuses
+                  : [task.status, ...employeeAllowedStatuses];
 
                 return (
                     <TableRow key={task.id}>
@@ -228,14 +232,12 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {/* Display current status even if not in the list of actions */}
-                                             {!availableStatusesForEmployee.includes(task.status) && !completedStatuses.includes(task.status) && (
-                                                <SelectItem value={task.status} disabled>
-                                                    <Badge variant={statusVariant[task.status] || 'default'} className="capitalize w-full justify-start">{task.status}</Badge>
-                                                </SelectItem>
-                                             )}
-                                             {availableStatusesForEmployee.map(status => (
-                                                <SelectItem key={status} value={status}>
+                                            {statusOptions.map(status => (
+                                                <SelectItem 
+                                                    key={status} 
+                                                    value={status}
+                                                    disabled={!employeeAllowedStatuses.includes(status)}
+                                                >
                                                     <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
                                                 </SelectItem>
                                              ))}
