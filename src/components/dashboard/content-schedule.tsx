@@ -29,6 +29,7 @@ type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story'
 const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 const employeeHandoffStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Ready for Next'];
 const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
+const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
 
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
@@ -282,8 +283,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 <TableHead className="min-w-[150px] px-2 border-r">Content Title</TableHead>
                                 <TableHead className="min-w-[200px] px-2 border-r">Content Description</TableHead>
                                 <TableHead className="w-[120px] px-2 border-r">Type</TableHead>
-                                {showAssigneeColumn && <TableHead className="w-[250px] px-2 border-r">Assigned To</TableHead>}
-                                <TableHead className="w-[60px] px-2 border-r text-center">Priority</TableHead>
+                                <TableHead className="w-[250px] px-2 border-r">Assigned To</TableHead>
+                                <TableHead className="w-[120px] px-2 border-r text-center">Priority</TableHead>
                                 <TableHead className="w-[130px] px-2 border-r">Status</TableHead>
                                 <TableHead className="w-[80px] px-2 text-center">Remarks</TableHead>
                             </TableRow>
@@ -311,6 +312,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 }
 
                                 const displayedStatus = getDisplayedStatus();
+                                const isEditable = currentUser?.role === 'admin';
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
@@ -351,7 +353,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                     {showAssigneeColumn && <TableCell className="p-1 border-r">
+                                     <TableCell className="p-1 border-r">
                                         <div className="flex items-center gap-1">
                                             {[0, 1].map(i => (
                                                 <AssigneeSelect 
@@ -363,9 +365,24 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                 />
                                             ))}
                                         </div>
-                                    </TableCell>}
+                                    </TableCell>
                                     <TableCell className="p-1 border-r text-center font-bold text-base">
-                                        {priorityMap[task.priority]}
+                                      <Select
+                                        value={task.priority}
+                                        onValueChange={(value: Task['priority']) => handleFieldChange(task.id, 'priority', value)}
+                                        disabled={!isEditable}
+                                      >
+                                        <SelectTrigger className="h-8 text-xs p-2 font-bold focus:bg-accent">
+                                            <SelectValue>
+                                                <span className="font-bold text-base">{priorityMap[task.priority]}</span>
+                                            </SelectValue>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {priorities.map(p => (
+                                                <SelectItem key={p} value={p}>{p} ({priorityMap[p]})</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                      </Select>
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
                                         <Select 
@@ -466,10 +483,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                             onChange={(e) => setNoteInput(e.target.value)}
                                                             onKeyDown={(e) => handleNewNote(e, task)}
                                                             onPaste={(e) => handlePaste(e, task)}
-                                                            className="pr-8 text-xs"
-                                                            rows={2}
+                                                            className="pr-10"
                                                         />
-                                                        <Button size="icon" variant="ghost" className="absolute right-0.5 top-1/2 -translate-y-1/2 h-7 w-7">
+                                                         <Button size="icon" variant="ghost" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
                                                             <Paperclip className="h-4 w-4" />
                                                         </Button>
                                                     </div>
