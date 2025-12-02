@@ -27,8 +27,16 @@ type ClientWithId = Client & { id: string };
 
 
 const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }> = ({ value, onSave }) => {
+    const [currentValue, setCurrentValue] = useState(value);
+
+    useEffect(() => {
+        setCurrentValue(value);
+    }, [value]);
+
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        onSave(e.target.value);
+        if(currentValue !== value) {
+            onSave(currentValue);
+        }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -42,7 +50,8 @@ const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }
     return (
       <div className="relative group flex items-center gap-2">
         <Input 
-          defaultValue={value} 
+          value={currentValue}
+          onChange={(e) => setCurrentValue(e.target.value)}
           onBlur={handleBlur} 
           onKeyDown={handleKeyDown} 
           className="bg-transparent border-0 focus-visible:ring-1 h-auto p-0 text-2xl font-semibold tracking-tight font-headline" 
