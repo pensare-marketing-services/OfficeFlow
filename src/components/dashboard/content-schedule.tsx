@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type { Task, UserProfile as User, ProgressNote, TaskStatus, Client } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -277,8 +277,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         )
     }
     
-    const showAssigneeColumn = currentUser?.role === 'admin';
-
     return (
         <Card>
             <CardContent className="p-0">
