@@ -376,8 +376,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                         <DialogHeader>
                                                             <DialogTitle>{task.title}</DialogTitle>
                                                         </DialogHeader>
-                                                        <DialogDescription className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
+                                                        <DialogDescription asChild>
+                                                          <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
                                                             {task.description}
+                                                          </div>
                                                         </DialogDescription>
                                                     </DialogContent>
                                                 </Dialog>
@@ -459,7 +461,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         </Select>
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
-                                         <Popover>
+                                         <Popover onOpenChange={(open) => !open && setNoteInput('')}>
                                             <PopoverTrigger asChild>
                                                 <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-8 w-8">
                                                     <MessageSquare className="h-4 w-4" />
@@ -544,5 +546,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         </Card>
     );
 }
+
+    
 
     
