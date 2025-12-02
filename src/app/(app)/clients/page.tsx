@@ -14,7 +14,7 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
@@ -52,6 +52,15 @@ export default function ClientsPage() {
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
         updateTask(updatedTask.id, updatedTask);
+    };
+    
+    const handleClientUpdate = async (clientId: string, updatedData: Partial<Client>) => {
+        const clientRef = doc(db, 'clients', clientId);
+        try {
+            await updateDoc(clientRef, updatedData);
+        } catch (error) {
+            console.error("Error updating client:", error);
+        }
     };
     
     const handleAddTask = (client: ClientWithId) => {
@@ -115,7 +124,10 @@ export default function ClientsPage() {
             <div className="space-y-2">
                 {pageLoading ? <Skeleton className="h-96 w-full" /> : selectedClient ? (
                     <>
-                        <ClientPlanSummary client={selectedClient} />
+                        <ClientPlanSummary 
+                            client={selectedClient} 
+                            onUpdate={handleClientUpdate} 
+                        />
                         <ContentSchedule 
                             tasks={filteredTasks} 
                             users={users as UserWithId[]} 
