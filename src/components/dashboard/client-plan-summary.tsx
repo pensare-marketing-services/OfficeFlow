@@ -32,7 +32,7 @@ const EditableField: React.FC<{ value: string; onSave: (value: string) => void }
         }
     };
     
-    return <Input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-emerald-50 dark:bg-emerald-900/50 border-0 focus-visible:ring-1 h-8 px-1 text-sm text-foreground" />;
+    return <Input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-stone-50 dark:bg-stone-800 border-0 focus-visible:ring-1 h-8 px-1 text-sm text-foreground" />;
 };
 
 
@@ -47,7 +47,7 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
             <CardContent className="p-0">
                 <Table>
                     <TableBody>
-                        <TableRow className="bg-emerald-50 hover:bg-emerald-100/60 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30">
+                        <TableRow className="border-b">
                              <TableCell className="font-bold w-32">PLAN</TableCell>
                             <TableCell>
                                 <EditableField value={client.plan || ''} onSave={(value) => handleSave('plan', value)} />
@@ -57,7 +57,7 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
                                 <EditableField value={client.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
                             </TableCell>
                         </TableRow>
-                        <TableRow className="bg-emerald-50 hover:bg-emerald-100/60 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30">
+                        <TableRow>
                             <TableCell className="font-bold">Social Platforms</TableCell>
                             <TableCell>
                                 <EditableField value={client.socialPlatforms || ''} onSave={(value) => handleSave('socialPlatforms', value)} />

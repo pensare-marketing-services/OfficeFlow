@@ -54,7 +54,7 @@ const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }
           onChange={(e) => setCurrentValue(e.target.value)}
           onBlur={handleBlur} 
           onKeyDown={handleKeyDown} 
-          className="bg-stone-50 border-0 focus-visible:ring-1 h-auto p-1 rounded-md text-2xl font-semibold tracking-tight font-headline text-foreground" 
+          className="border-0 focus-visible:ring-1 h-auto p-1 rounded-md text-2xl font-semibold tracking-tight font-headline text-foreground bg-transparent" 
         />
         <Pen className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
