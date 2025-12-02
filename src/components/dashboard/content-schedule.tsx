@@ -136,14 +136,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
 
     const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
         if (!currentUser) return;
-        
+
         const newNote: Partial<ProgressNote> & { date: string; authorId: string; authorName: string } = {
-            note: note.note || '',
+            note: note.note,
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.name,
         };
-        
+
         if (note.imageUrl) {
             newNote.imageUrl = note.imageUrl;
         }
@@ -223,6 +223,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                  <div className="overflow-x-auto">
                     <Table className="text-xs">
                         <TableHeader>
+                            <TableRow className="bg-yellow-200 hover:bg-yellow-200/80">
+                                <TableHead colSpan={8} className="text-center font-bold text-black">Regular Contents</TableHead>
+                            </TableRow>
                             <TableRow>
                                 <TableHead className="w-[50px] px-2">Sl No.</TableHead>
                                 <TableHead className="w-[90px] px-2">Date</TableHead>
@@ -239,7 +242,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                 const isCompleted = completedStatuses.includes(task.status);
                                 
                                 return (
-                                <TableRow key={task.id}>
+                                <TableRow key={task.id} className="border-b">
                                     <TableCell className="p-2 text-center">{index + 1}</TableCell>
                                     <TableCell className="p-1">
                                         <Popover>

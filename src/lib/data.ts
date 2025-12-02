@@ -38,6 +38,10 @@ export type Task = {
 export type Client = {
   id: string;
   name: string;
+  socialPlatforms?: string;
+  plan?: string;
+  billDuration?: string;
+  monthlyReach?: string;
 };
 
 // This is now primarily for seeding the database or local testing.
@@ -103,11 +107,11 @@ export const users: User[] = [
 
 
 export const clients: Client[] = [
-    { id: 'client-1', name: 'Bar Co.' },
-    { id: 'client-2', name: 'Mala Inc.' },
-    { id: 'client-3', name: 'Habari Group' },
-    { id: 'client-4', name: 'Tetra Corp.' },
-    { id: 'client-5', name: 'Nexus Solutions' },
+    { id: 'client-1', name: 'Bar Co.', plan: '10 Designs, 2 Reels', billDuration: 'Dec 1 - Dec 31', monthlyReach: '10k - 20k', socialPlatforms: 'FB-Insta' },
+    { id: 'client-2', name: 'Mala Inc.', plan: '20 Designs, 5 Reels, 1 Carousal', billDuration: 'Dec 1 - Dec 31', monthlyReach: '50k - 75k', socialPlatforms: 'FB-Insta-Ytb' },
+    { id: 'client-3', name: 'Habari Group', plan: '12 Designs, 4 Reels, 2 Carousal', billDuration: 'Dec 1 to Dec 31', monthlyReach: '1 Lack - 2 Lack', socialPlatforms: 'FB-Insta-Ytb-GMB-SnapChat-linked-in' },
+    { id: 'client-4', name: 'Tetra Corp.', plan: '5 Designs', billDuration: 'Dec 1 - Dec 31', monthlyReach: '5k', socialPlatforms: 'FB' },
+    { id: 'client-5', name: 'Nexus Solutions', plan: '15 Designs, 3 Reels', billDuration: 'Dec 1 - Dec 31', monthlyReach: '30k - 40k', socialPlatforms: 'Insta-Ytb' },
 ];
 
 export const tasks: Task[] = [

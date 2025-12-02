@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
 
 
 type UserWithId = User & { id: string };
@@ -112,11 +113,14 @@ export default function ClientsPage() {
             </Card>
 
             {pageLoading ? <Skeleton className="h-96 w-full" /> : selectedClient ? (
-                <ContentSchedule 
-                    tasks={filteredTasks} 
-                    users={users as UserWithId[]} 
-                    onTaskUpdate={handleTaskUpdate}
-                />
+                <>
+                    <ClientPlanSummary client={selectedClient} />
+                    <ContentSchedule 
+                        tasks={filteredTasks} 
+                        users={users as UserWithId[]} 
+                        onTaskUpdate={handleTaskUpdate}
+                    />
+                </>
             ) : (
                 <div className="text-center text-muted-foreground py-16">
                     {clients.length === 0 ? "No clients found. Add clients in Settings to get started." : "Please select a client to view their schedule."}
