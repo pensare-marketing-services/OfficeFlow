@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { useMemo } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 type UserWithId = User & { id: string };
 
@@ -57,13 +57,13 @@ const statusColors: Record<TaskStatus, string> = {
 
 const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea' }> = ({ value, onSave, type = 'text' }) => {
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        onSave(e.target.value);
+        onSave(e.target.value || '');
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            onSave(e.currentTarget.value);
+            onSave(e.currentTarget.value || '');
             e.currentTarget.blur();
         }
     };
@@ -141,7 +141,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
     const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
         if (!currentUser) return;
         
-        const newNote: ProgressNote = { 
+        const newNote: Partial<ProgressNote> & { date: string, authorId: string, authorName: string } = { 
             note: note.note || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
@@ -180,8 +180,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
             e.preventDefault();
             const noteText = noteInput.trim();
             if(noteText){
-                addNote(task, { note: noteText });
-                setNoteInput('');
+                const newNote: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>> = { note: noteText };
+                if (noteInput.trim()) {
+                    addNote(task, newNote);
+                    setNoteInput('');
+                }
             }
         }
     }
@@ -351,6 +354,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                                                     <img src={note.imageUrl} alt="remark" className="mt-2 rounded-md max-w-full h-auto cursor-pointer" />
                                                                                 </DialogTrigger>
                                                                                 <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+                                                                                     <DialogHeader className="sr-only">
+                                                                                        <DialogTitle>Image Preview</DialogTitle>
+                                                                                        <DialogDescription>A full-screen view of the image attached to the remark.</DialogDescription>
+                                                                                    </DialogHeader>
                                                                                     <img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain" />
                                                                                 </DialogContent>
                                                                             </Dialog>

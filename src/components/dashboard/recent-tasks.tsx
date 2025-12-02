@@ -89,7 +89,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
         if (!currentUser || !onTaskUpdate) return;
         
-        const newNote: ProgressNote = { 
+        const newNote: Partial<ProgressNote> & { date: string, authorId: string, authorName: string } = { 
             note: note.note || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
@@ -128,8 +128,11 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
         e.preventDefault();
         const noteText = noteInput.trim();
         if(noteText){
-            addNote(task, { note: noteText });
-            setNoteInput('');
+            const newNote: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>> = { note: noteText };
+             if (noteInput.trim()) {
+                addNote(task, newNote);
+                setNoteInput('');
+            }
         }
     }
   }
@@ -302,6 +305,10 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                                             <img src={note.imageUrl} alt="remark" className="mt-2 rounded-md max-w-full h-auto cursor-pointer" />
                                                                         </DialogTrigger>
                                                                         <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+                                                                            <DialogHeader className="sr-only">
+                                                                                <DialogTitle>Image Preview</DialogTitle>
+                                                                                <DialogDescription>A full-screen view of the image attached to the remark.</DialogDescription>
+                                                                            </DialogHeader>
                                                                             <img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain" />
                                                                         </DialogContent>
                                                                     </Dialog>
