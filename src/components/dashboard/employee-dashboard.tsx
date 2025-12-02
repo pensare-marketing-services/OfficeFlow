@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/use-auth';
 import type { Task, UserProfile as User } from '@/lib/data';
 import { StatsCard } from './stats-card';
 import { ClipboardList, CheckCircle2, Clock, Hourglass } from 'lucide-react';
-import RecentTasks from './recent-tasks';
+import ContentSchedule from './content-schedule';
 
 type UserWithId = User & { id: string };
 
@@ -52,6 +52,10 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
     overdue: "My Overdue Tasks"
   };
 
+  const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
+    onTaskUpdate(updatedTask.id, updatedTask);
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -88,8 +92,13 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskUpdate={onTaskUpdate} />
+      <div className="space-y-2">
+         <h2 className="text-xl font-semibold tracking-tight font-headline">{filterTitles[taskFilter]}</h2>
+         <ContentSchedule
+            tasks={filteredTasks}
+            users={users}
+            onTaskUpdate={handleTaskUpdate}
+        />
       </div>
     </div>
   );

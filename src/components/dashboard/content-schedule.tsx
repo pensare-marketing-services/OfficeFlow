@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import type { Task, UserProfile as User, ProgressNote, TaskStatus } from '@/lib/data';
+import React, { useState, useMemo } from 'react';
+import type { Task, UserProfile as User, ProgressNote, TaskStatus, Client } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -14,13 +14,15 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { useMemo } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '@/firebase/client';
 
 
 type UserWithId = User & { id: string };
+type ClientWithId = Client & { id: string };
 
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 
@@ -120,6 +122,22 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const { toast } = useToast();
+    const [clients, setClients] = useState<ClientWithId[]>([]);
+
+    React.useEffect(() => {
+        const clientsQuery = collection(db, "clients");
+        const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
+            const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
+            setClients(clientsData);
+        });
+
+        return () => unsubscribe();
+    }, []);
+    
+    const getClient = (clientId?: string): ClientWithId | undefined => {
+      if (!clientId) return undefined;
+      return clients.find(c => c.id === clientId);
+    }
     
     const handleFieldChange = (taskId: string, field: keyof Task, value: any) => {
         onTaskUpdate({ id: taskId, [field]: value });
@@ -211,39 +229,45 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
              <div className="flex h-64 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 bg-card">
                 <div className="text-center">
                 <h3 className="font-headline text-lg font-semibold">No Content Scheduled</h3>
-                <p className="text-muted-foreground">Click "Schedule" to get started.</p>
+                <p className="text-muted-foreground">There are no tasks in this view.</p>
                 </div>
             </div>
         )
     }
+    
+    const showAssigneeColumn = currentUser?.role === 'admin';
 
     return (
         <Card>
             <CardContent className="p-0">
                  <div className="overflow-x-auto">
                     <Table className="text-xs">
+                        {showAssigneeColumn && (
+                          <TableHeader>
+                              <TableRow className="bg-yellow-200 hover:bg-yellow-200/80">
+                                  <TableHead colSpan={showAssigneeColumn ? 7 : 6} className="text-center font-bold text-black">Regular Contents</TableHead>
+                              </TableRow>
+                          </TableHeader>
+                        )}
                         <TableHeader>
-                            <TableRow className="bg-yellow-200 hover:bg-yellow-200/80">
-                                <TableHead colSpan={8} className="text-center font-bold text-black">Regular Contents</TableHead>
-                            </TableRow>
                             <TableRow>
-                                <TableHead className="w-[50px] px-2 border-r">Sl No.</TableHead>
                                 <TableHead className="w-[90px] px-2 border-r">Date</TableHead>
+                                {showAssigneeColumn && <TableHead className="min-w-[150px] px-2 border-r">Client</TableHead>}
                                 <TableHead className="min-w-[150px] px-2 border-r">Content Title</TableHead>
                                 <TableHead className="min-w-[200px] px-2 border-r">Content Description</TableHead>
                                 <TableHead className="w-[120px] px-2 border-r">Type</TableHead>
                                 <TableHead className="w-[130px] px-2 border-r">Status</TableHead>
-                                <TableHead className="w-[250px] px-2 border-r">Assigned To</TableHead>
+                                {showAssigneeColumn && <TableHead className="w-[250px] px-2 border-r">Assigned To</TableHead>}
                                 <TableHead className="w-[80px] px-2 text-center">Remarks</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {tasks.map((task, index) => {
                                 const isCompleted = completedStatuses.includes(task.status);
+                                const client = getClient(task.clientId);
                                 
                                 return (
                                 <TableRow key={task.id} className="border-b">
-                                    <TableCell className="p-2 text-center border-r">{index + 1}</TableCell>
                                     <TableCell className="p-1 border-r">
                                         <Popover>
                                             <PopoverTrigger asChild>
@@ -266,6 +290,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
+                                    {showAssigneeColumn && <TableCell className="p-1 border-r font-medium">{client?.name || '-'}</TableCell>}
                                     <TableCell className="p-1 border-r">
                                         <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} />
                                     </TableCell>
@@ -300,7 +325,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                     <TableCell className="p-1 border-r">
+                                     {showAssigneeColumn && <TableCell className="p-1 border-r">
                                         <div className="flex items-center gap-1">
                                             <AssigneeSelect 
                                                 assigneeId={task.assigneeIds ? task.assigneeIds[0] : ''}
@@ -313,7 +338,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                 employeeUsers={employeeUsers.filter(u => u.id !== (task.assigneeIds ? task.assigneeIds[0] : ''))}
                                             />
                                         </div>
-                                    </TableCell>
+                                    </TableCell>}
                                     <TableCell className="p-1 text-center">
                                          <Popover>
                                             <PopoverTrigger asChild>
