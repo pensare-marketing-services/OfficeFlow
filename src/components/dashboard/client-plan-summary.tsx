@@ -23,7 +23,7 @@ const EditableField: React.FC<{ value: string; onSave: (value: string) => void }
         }
     };
     
-    return <Input defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-white dark:bg-muted/50 border-0 focus-visible:ring-1 h-8 px-1 text-sm" />;
+    return <Input defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-white dark:bg-muted/50 border-0 focus-visible:ring-1 h-8 px-1 text-sm text-foreground" />;
 };
 
 
