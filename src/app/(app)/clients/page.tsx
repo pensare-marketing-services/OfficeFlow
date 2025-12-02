@@ -112,20 +112,22 @@ export default function ClientsPage() {
                 </CardHeader>
             </Card>
 
-            {pageLoading ? <Skeleton className="h-96 w-full" /> : selectedClient ? (
-                <>
-                    <ClientPlanSummary client={selectedClient} />
-                    <ContentSchedule 
-                        tasks={filteredTasks} 
-                        users={users as UserWithId[]} 
-                        onTaskUpdate={handleTaskUpdate}
-                    />
-                </>
-            ) : (
-                <div className="text-center text-muted-foreground py-16">
-                    {clients.length === 0 ? "No clients found. Add clients in Settings to get started." : "Please select a client to view their schedule."}
-                </div>
-            )}
+            <div className="space-y-2">
+                {pageLoading ? <Skeleton className="h-96 w-full" /> : selectedClient ? (
+                    <>
+                        <ClientPlanSummary client={selectedClient} />
+                        <ContentSchedule 
+                            tasks={filteredTasks} 
+                            users={users as UserWithId[]} 
+                            onTaskUpdate={handleTaskUpdate}
+                        />
+                    </>
+                ) : (
+                    <div className="text-center text-muted-foreground py-16">
+                        {clients.length === 0 ? "No clients found. Add clients in Settings to get started." : "Please select a client to view their schedule."}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

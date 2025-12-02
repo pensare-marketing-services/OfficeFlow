@@ -270,7 +270,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} />
                                     </TableCell>
                                     <TableCell className="p-1">
-                                        <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value || '')} type="textarea" />
+                                        <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" />
                                     </TableCell>
                                     <TableCell className="p-1">
                                         <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
