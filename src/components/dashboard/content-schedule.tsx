@@ -358,7 +358,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         {isEditable ? (
                                             <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Content Title"/>
                                         ) : (
-                                            <div className="text-xs p-1 h-8 flex items-center">{task.title || '-'}</div>
+                                            <div className="text-xs p-1 h-8 flex items-center truncate max-w-xs" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
