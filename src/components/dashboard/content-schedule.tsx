@@ -138,16 +138,19 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
         onTaskUpdate({ id: taskId, assigneeIds: finalAssignees });
     };
 
-    const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
+    const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
         if (!currentUser) return;
         
         const newNote: ProgressNote = { 
             note: note.note || '',
-            imageUrl: note.imageUrl,
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.name,
         };
+        
+        if (note.imageUrl) {
+            newNote.imageUrl = note.imageUrl;
+        }
 
         handleFieldChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
     }

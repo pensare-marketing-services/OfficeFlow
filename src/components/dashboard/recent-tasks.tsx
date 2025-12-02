@@ -86,16 +86,19 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     }
   }
 
-    const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
+    const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
         if (!currentUser || !onTaskUpdate) return;
         
         const newNote: ProgressNote = { 
             note: note.note || '',
-            imageUrl: note.imageUrl,
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.name,
         };
+        
+        if (note.imageUrl) {
+            newNote.imageUrl = note.imageUrl;
+        }
 
         onTaskUpdate(task.id, { progressNotes: [...(task.progressNotes || []), newNote] });
     }
@@ -172,10 +175,13 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
 
                 const isCompleted = completedStatuses.includes(task.status);
                 
-                const currentStatusIsAllowedForEmployee = employeeAllowedStatuses.includes(task.status);
-                const statusOptions = employeeAllowedStatuses.includes(task.status)
-                  ? employeeAllowedStatuses
-                  : [task.status, ...employeeAllowedStatuses];
+                const statusOptions = useMemo(() => {
+                  const options: TaskStatus[] = [...employeeAllowedStatuses];
+                  if (!options.includes(task.status)) {
+                    options.unshift(task.status);
+                  }
+                  return options;
+                }, [task.status]);
 
                 return (
                     <TableRow key={task.id}>
@@ -236,7 +242,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                 <SelectItem 
                                                     key={status} 
                                                     value={status}
-                                                    disabled={!employeeAllowedStatuses.includes(status)}
+                                                    disabled={!employeeAllowedStatuses.includes(status) && status !== task.status}
                                                 >
                                                     <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
                                                 </SelectItem>
