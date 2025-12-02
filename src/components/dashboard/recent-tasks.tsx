@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Paperclip } from 'lucide-react';
+import { MessageSquare, Paperclip, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -86,7 +86,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     }
   }
 
-  const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
+    const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
         if (!currentUser || !onTaskUpdate) return;
         
         const newNote: ProgressNote = { 
@@ -131,6 +131,13 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     }
   }
 
+    const handleClearChat = (taskId: string) => {
+        if (onTaskUpdate) {
+            onTaskUpdate(taskId, { progressNotes: [] });
+        }
+    }
+
+
   return (
     <>
     <Card className="shadow-md">
@@ -160,20 +167,11 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                 
                 const descriptionWords = task.description ? task.description.split(/\s+/).filter(Boolean) : [];
                 const wordCount = descriptionWords.length;
-                const descriptionPreview = descriptionWords.slice(0, 2).join(' ');
+                const descriptionPreview = descriptionWords.slice(0, 10).join(' ');
 
                 const isCompleted = completedStatuses.includes(task.status);
-
-                const availableStatusesForEmployee: TaskStatus[] = useMemo(() => {
-                    const base: TaskStatus[] = ['In Progress', 'For Approval'];
-                    // If the current status is not a standard employee action or completed,
-                    // add it to the list so it can be displayed.
-                    if (!base.includes(task.status) && !completedStatuses.includes(task.status)) {
-                      return [task.status, ...base];
-                    }
-                    return base;
-                }, [task.status]);
-
+                
+                const availableStatusesForEmployee: TaskStatus[] = ['In Progress', 'For Approval'];
 
                 return (
                     <TableRow key={task.id}>
@@ -230,12 +228,14 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
+                                            {/* Display current status even if not in the list of actions */}
+                                             {!availableStatusesForEmployee.includes(task.status) && !completedStatuses.includes(task.status) && (
+                                                <SelectItem value={task.status} disabled>
+                                                    <Badge variant={statusVariant[task.status] || 'default'} className="capitalize w-full justify-start">{task.status}</Badge>
+                                                </SelectItem>
+                                             )}
                                              {availableStatusesForEmployee.map(status => (
-                                                <SelectItem 
-                                                    key={status} 
-                                                    value={status} 
-                                                    disabled={status !== 'In Progress' && status !== 'For Approval'}
-                                                >
+                                                <SelectItem key={status} value={status}>
                                                     <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
                                                 </SelectItem>
                                              ))}
@@ -263,7 +263,15 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                     </PopoverTrigger>
                                     <PopoverContent className="w-96" side="bottom" align="end">
                                         <div className="space-y-4">
-                                            <h4 className="font-medium leading-none">Remarks</h4>
+                                            <div className="flex justify-between items-center">
+                                                <h4 className="font-medium leading-none">Remarks</h4>
+                                                {(task.progressNotes || []).length > 0 && (
+                                                    <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-xs text-muted-foreground">
+                                                        <Trash2 className="mr-1 h-3 w-3" />
+                                                        Clear Chat
+                                                    </Button>
+                                                )}
+                                            </div>
                                                 <div className="max-h-60 space-y-4 overflow-y-auto p-1">
                                                 {(task.progressNotes || []).map((note, i) => {
                                                     const author = users.find(u => u.id === note.authorId);
