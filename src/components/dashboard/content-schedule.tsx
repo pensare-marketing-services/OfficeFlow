@@ -236,23 +236,17 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
     }
     
     const showAssigneeColumn = currentUser?.role === 'admin';
+    const showClientColumn = true;
 
     return (
         <Card>
             <CardContent className="p-0">
                  <div className="overflow-x-auto">
                     <Table className="text-xs">
-                        {showAssigneeColumn && (
-                          <TableHeader>
-                              <TableRow className="bg-yellow-200 hover:bg-yellow-200/80">
-                                  <TableHead colSpan={showAssigneeColumn ? 7 : 6} className="text-center font-bold text-black">Regular Contents</TableHead>
-                              </TableRow>
-                          </TableHeader>
-                        )}
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[90px] px-2 border-r">Date</TableHead>
-                                {showAssigneeColumn && <TableHead className="min-w-[150px] px-2 border-r">Client</TableHead>}
+                                {showClientColumn && <TableHead className="min-w-[150px] px-2 border-r">Client</TableHead>}
                                 <TableHead className="min-w-[150px] px-2 border-r">Content Title</TableHead>
                                 <TableHead className="min-w-[200px] px-2 border-r">Content Description</TableHead>
                                 <TableHead className="w-[120px] px-2 border-r">Type</TableHead>
@@ -290,7 +284,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                    {showAssigneeColumn && <TableCell className="p-1 border-r font-medium">{client?.name || '-'}</TableCell>}
+                                    {showClientColumn && <TableCell className="p-1 border-r font-medium">{client?.name || '-'}</TableCell>}
                                     <TableCell className="p-1 border-r">
                                         <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} />
                                     </TableCell>
