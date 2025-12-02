@@ -64,7 +64,13 @@ const priorityMap: Record<Task['priority'], number> = {
     'Low': 3
 };
 
-const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea' }> = ({ value, onSave, type = 'text' }) => {
+const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea', placeholder?: string }> = ({ value, onSave, type = 'text', placeholder }) => {
+    const [currentValue, setCurrentValue] = useState(value);
+
+    useEffect(() => {
+        setCurrentValue(value);
+    }, [value]);
+    
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         onSave(e.target.value);
     };
@@ -77,11 +83,13 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
         }
     };
     
+    const commonClasses = "bg-transparent border-0 focus-visible:ring-1 text-xs p-1 h-8 placeholder:text-muted-foreground/70";
+
     if (type === 'textarea') {
-         return <Textarea defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 text-xs p-1 h-auto" />;
+         return <Textarea value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={cn(commonClasses, "h-auto")} placeholder={placeholder} />;
     }
 
-    return <Input defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 text-xs p-1 h-8" />;
+    return <Input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={commonClasses} placeholder={placeholder} />;
 };
 
 const AssigneeSelect = ({
@@ -340,10 +348,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                     </TableCell>
                                     <TableCell className="p-1 border-r font-medium">{client?.name || '-'}</TableCell>
                                     <TableCell className="p-1 border-r">
-                                        <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} />
+                                        <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Content Title"/>
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
-                                        <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" />
+                                        <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" placeholder="A brief description..."/>
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
                                         <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>

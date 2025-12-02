@@ -108,8 +108,8 @@ export default function ClientsPage() {
         if (!currentUser) return;
 
         const newTask: Omit<Task, 'id' | 'createdAt'> = {
-            title: 'New Content Title',
-            description: 'A brief description of the content.',
+            title: '',
+            description: '',
             status: 'Scheduled',
             priority: 'Medium',
             contentType: 'Image Ad',
