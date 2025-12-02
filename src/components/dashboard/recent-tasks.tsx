@@ -20,6 +20,8 @@ import { useTasks } from '@/hooks/use-tasks';
 import { useEffect, useState, useMemo } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
+import { useToast } from '@/hooks/use-toast';
+
 
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
@@ -34,6 +36,8 @@ interface RecentTasksProps {
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
 const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
+
+const MAX_IMAGE_SIZE_BYTES = 700 * 1024; // 700KB
 
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -60,6 +64,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
   const { user: currentUser } = useAuth();
   const [clients, setClients] = useState<ClientWithId[]>([]);
   const [noteInput, setNoteInput] = useState('');
+  const { toast } = useToast();
   
   useEffect(() => {
     const clientsQuery = collection(db, "clients");
@@ -86,7 +91,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     }
   }
 
-    const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
+    const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
         if (!currentUser || !onTaskUpdate) return;
         
         const newNote: Partial<ProgressNote> & { date: string, authorId: string, authorName: string } = { 
@@ -110,6 +115,16 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                 const file = items[i].getAsFile();
                 if (!file) return;
 
+                if (file.size > MAX_IMAGE_SIZE_BYTES) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Image too large',
+                        description: 'Please paste an image smaller than 700KB.'
+                    });
+                    e.preventDefault();
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     if(event.target && typeof event.target.result === 'string') {
@@ -128,11 +143,8 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
         e.preventDefault();
         const noteText = noteInput.trim();
         if(noteText){
-            const newNote: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>> = { note: noteText };
-             if (noteInput.trim()) {
-                addNote(task, newNote);
-                setNoteInput('');
-            }
+            addNote(task, { note: noteText });
+            setNoteInput('');
         }
     }
   }
@@ -179,11 +191,11 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                 const isCompleted = completedStatuses.includes(task.status);
                 
                 const statusOptions = useMemo(() => {
-                  const options: TaskStatus[] = [...employeeAllowedStatuses];
-                  if (!options.includes(task.status)) {
-                    options.unshift(task.status);
-                  }
-                  return options;
+                    const options: TaskStatus[] = ['In Progress', 'For Approval'];
+                    if (!options.includes(task.status)) {
+                        options.unshift(task.status);
+                    }
+                    return options;
                 }, [task.status]);
 
                 return (
@@ -245,7 +257,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                 <SelectItem 
                                                     key={status} 
                                                     value={status}
-                                                    disabled={!employeeAllowedStatuses.includes(status) && status !== task.status}
+                                                    disabled={!employeeAllowedStatuses.includes(status)}
                                                 >
                                                     <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
                                                 </SelectItem>

@@ -20,6 +20,8 @@ import { Badge } from '../ui/badge';
 import { useMemo } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+
 
 type UserWithId = User & { id: string };
 
@@ -39,6 +41,7 @@ const employeeStatuses: TaskStatus[] = ['Scheduled', 'In Progress', 'For Approva
 const priorities: TaskPriority[] = ['Low', 'Medium', 'High'];
 const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
 
+const MAX_IMAGE_SIZE_BYTES = 700 * 1024; // 700KB
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
@@ -57,13 +60,13 @@ const statusColors: Record<TaskStatus, string> = {
 
 const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea' }> = ({ value, onSave, type = 'text' }) => {
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        onSave(e.target.value || '');
+        onSave(e.target.value);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            onSave(e.currentTarget.value || '');
+            onSave(e.currentTarget.value);
             e.currentTarget.blur();
         }
     };
@@ -123,6 +126,7 @@ const AssigneeSelect = ({
 export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentScheduleProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
+    const { toast } = useToast();
     
     const handleFieldChange = (taskId: string, field: keyof Task, value: any) => {
         onTaskUpdate({ id: taskId, [field]: value });
@@ -162,6 +166,16 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                 const file = items[i].getAsFile();
                 if (!file) return;
 
+                if (file.size > MAX_IMAGE_SIZE_BYTES) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Image too large',
+                        description: 'Please paste an image smaller than 700KB.'
+                    });
+                    e.preventDefault();
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     if(event.target && typeof event.target.result === 'string') {
@@ -180,11 +194,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
             e.preventDefault();
             const noteText = noteInput.trim();
             if(noteText){
-                const newNote: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>> = { note: noteText };
-                if (noteInput.trim()) {
-                    addNote(task, newNote);
-                    setNoteInput('');
-                }
+                addNote(task, { note: noteText });
+                setNoteInput('');
             }
         }
     }
@@ -354,7 +365,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                                                                     <img src={note.imageUrl} alt="remark" className="mt-2 rounded-md max-w-full h-auto cursor-pointer" />
                                                                                 </DialogTrigger>
                                                                                 <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
-                                                                                     <DialogHeader className="sr-only">
+                                                                                    <DialogHeader className="sr-only">
                                                                                         <DialogTitle>Image Preview</DialogTitle>
                                                                                         <DialogDescription>A full-screen view of the image attached to the remark.</DialogDescription>
                                                                                     </DialogHeader>
