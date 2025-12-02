@@ -18,6 +18,7 @@ export type ProgressNote = {
     authorId: string;
     authorName: string;
     readBy: string[];
+    imageUrl?: string;
 };
 
 export type Task = {

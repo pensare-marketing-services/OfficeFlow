@@ -2,7 +2,7 @@
 
 'use client';
 
-import type { Task, UserProfile as User, ProgressNote, Client } from '@/lib/data';
+import type { Task, UserProfile as User, ProgressNote, Client, TaskStatus } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,14 +10,14 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Paperclip } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useTasks } from '@/hooks/use-tasks';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 
@@ -33,8 +33,7 @@ interface RecentTasksProps {
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
-const baseEmployeeStatuses: Task['status'][] = ['In Progress', 'For Approval'];
-const completedStatuses: Task['status'][] = ['Done', 'Approved', 'Posted'];
+const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
 
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -60,6 +59,7 @@ const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 
 export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
   const [clients, setClients] = useState<ClientWithId[]>([]);
+  const [noteInput, setNoteInput] = useState('');
   
   useEffect(() => {
     const clientsQuery = collection(db, "clients");
@@ -86,20 +86,48 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     }
   }
 
+  const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
+        if (!currentUser || !onTaskUpdate) return;
+        
+        const newNote: ProgressNote = { 
+            note: note.note || '',
+            imageUrl: note.imageUrl,
+            date: new Date().toISOString(),
+            authorId: currentUser.uid,
+            authorName: currentUser.name,
+            readBy: [currentUser.uid],
+        };
+
+        onTaskUpdate(task.id, { progressNotes: [...(task.progressNotes || []), newNote] });
+    }
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>, task: Task & { id: string }) => {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    if(event.target && typeof event.target.result === 'string') {
+                       addNote(task, { imageUrl: event.target.result });
+                    }
+                };
+                reader.readAsDataURL(file);
+                e.preventDefault();
+                return;
+            }
+        }
+    };
+
   const handleNewNote = (e: React.KeyboardEvent<HTMLTextAreaElement>, task: Task & { id: string }) => {
-    if (e.key === 'Enter' && !e.shiftKey && currentUser && onTaskUpdate) {
+    if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        const noteText = e.currentTarget.value.trim();
+        const noteText = noteInput.trim();
         if(noteText){
-            const newNote: ProgressNote = { 
-                note: noteText, 
-                date: new Date().toISOString(),
-                authorId: currentUser.uid,
-                authorName: currentUser.name,
-                readBy: [currentUser.uid],
-            };
-            onTaskUpdate(task.id, { progressNotes: [...(task.progressNotes || []), newNote] });
-            e.currentTarget.value = '';
+            addNote(task, { note: noteText });
+            setNoteInput('');
         }
     }
   }
@@ -150,8 +178,16 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                 const descriptionPreview = descriptionWords.slice(0, 2).join(' ');
 
                 const isCompleted = completedStatuses.includes(task.status);
-                
-                const availableStatuses: Task['status'][] = baseEmployeeStatuses;
+
+                const availableStatusesForEmployee: TaskStatus[] = useMemo(() => {
+                    const base = ['In Progress', 'For Approval'];
+                    // If the current status is something else (like 'To Do' or 'Hold')
+                    // and not one of the base statuses, add it to the list so it can be displayed.
+                    if (!base.includes(task.status) && !completedStatuses.includes(task.status)) {
+                        return [...base, task.status];
+                    }
+                    return base;
+                }, [task.status]);
 
 
                 return (
@@ -209,16 +245,15 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                                {!availableStatuses.includes(task.status) && (
-                                                    <SelectItem value={task.status} disabled>
-                                                        <Badge variant={statusVariant[task.status] || 'default'} className="capitalize w-full justify-start">{task.status}</Badge>
-                                                    </SelectItem>
-                                                )}
-                                                 {availableStatuses.map(status => (
-                                                    <SelectItem key={status} value={status}>
-                                                        <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
-                                                    </SelectItem>
-                                                 ))}
+                                             {availableStatusesForEmployee.map(status => (
+                                                <SelectItem 
+                                                    key={status} 
+                                                    value={status} 
+                                                    disabled={status !== 'In Progress' && status !== 'For Approval'}
+                                                >
+                                                    <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
+                                                </SelectItem>
+                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -231,7 +266,12 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                         </TableCell>
                         {isEmployeeView && (
                             <TableCell className="text-center">
-                                <Popover onOpenChange={(open) => open && handleMarkAsRead(task)}>
+                                <Popover onOpenChange={(open) => {
+                                    if (open) {
+                                        setNoteInput('');
+                                        handleMarkAsRead(task);
+                                    }
+                                }}>
                                     <PopoverTrigger asChild>
                                         <Button variant="ghost" size="icon" className="relative">
                                             <MessageSquare className="h-5 w-5" />
@@ -256,7 +296,17 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                             )}
                                                             <div className={cn("max-w-[75%] rounded-lg p-3", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                 <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                <p>{note.note}</p>
+                                                                {note.note && <p>{note.note}</p>}
+                                                                {note.imageUrl && (
+                                                                    <Dialog>
+                                                                        <DialogTrigger asChild>
+                                                                            <img src={note.imageUrl} alt="remark" className="mt-2 rounded-md max-w-full h-auto cursor-pointer" />
+                                                                        </DialogTrigger>
+                                                                        <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+                                                                            <img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain" />
+                                                                        </DialogContent>
+                                                                    </Dialog>
+                                                                )}
                                                                 <p className={cn("text-right text-[10px] mt-2 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
                                                             </div>
                                                                 {note.authorId === currentUser?.uid && (
@@ -269,10 +319,19 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                     )
                                                 })}
                                             </div>
-                                            <Textarea 
-                                                placeholder="Add a new remark..."
-                                                onKeyDown={(e) => handleNewNote(e, task)}
-                                            />
+                                            <div className="relative">
+                                                <Textarea 
+                                                    placeholder="Add a remark or paste an image..."
+                                                    value={noteInput}
+                                                    onChange={(e) => setNoteInput(e.target.value)}
+                                                    onKeyDown={(e) => handleNewNote(e, task)}
+                                                    onPaste={(e) => handlePaste(e, task)}
+                                                    className="pr-10"
+                                                />
+                                                 <Button size="icon" variant="ghost" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
+                                                    <Paperclip className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </PopoverContent>
                                 </Popover>
