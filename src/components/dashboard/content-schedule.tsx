@@ -106,11 +106,25 @@ const AssigneeSelect = ({
     isEditable?: boolean;
 }) => {
     const selectedUser = employeeUsers.find(u => u.id === assigneeId);
+
+    if (!isEditable) {
+        return selectedUser ? (
+             <div className="flex items-center gap-1 truncate w-[120px] p-2 h-8 text-xs">
+                <Avatar className="h-5 w-5">
+                    <AvatarImage src={selectedUser.avatar} />
+                    <AvatarFallback>{getInitials(selectedUser.name)}</AvatarFallback>
+                </Avatar>
+                <span className="truncate">{selectedUser.name}</span>
+            </div>
+        ) : (
+             <div className="w-[120px] p-2 h-8 text-xs text-muted-foreground">-</div>
+        )
+    }
+
     return (
         <Select
             value={assigneeId || 'unassigned'}
             onValueChange={(value) => onAssigneeChange(value === 'unassigned' ? '' : value)}
-            disabled={!isEditable}
         >
             <SelectTrigger className={cn("w-[120px] h-8 text-xs p-2", isActive && "ring-2 ring-accent")}>
                 {selectedUser ? (
@@ -358,18 +372,18 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         {isEditable ? (
                                             <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Content Title"/>
                                         ) : (
-                                            <div className="text-xs p-1 h-8 flex items-center truncate max-w-xs" title={task.title}>{task.title || '-'}</div>
+                                            <div className="text-xs p-1 h-8 flex items-center truncate max-w-[150px]" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
                                         {isEditable ? (
                                             <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" placeholder="A brief description..."/>
                                         ) : (
-                                            wordCount > 10 ? (
+                                            (task.description?.length || 0) > 60 ? (
                                                 <Dialog>
                                                     <DialogTrigger asChild>
                                                         <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1">
-                                                          {descriptionPreview}... <span className="underline">Read more</span>
+                                                          {(task.description || '').substring(0, 60)}... <span className="underline">Read more</span>
                                                         </p>
                                                     </DialogTrigger>
                                                     <DialogContent className="sm:max-w-[60vw]">
@@ -389,12 +403,16 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         )}
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
-                                        <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)} disabled={!isEditable}>
-                                            <SelectTrigger className="h-8 text-xs p-2"><SelectValue /></SelectTrigger>
-                                            <SelectContent>
-                                                {contentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
+                                        {isEditable ? (
+                                            <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)} disabled={!isEditable}>
+                                                <SelectTrigger className="h-8 text-xs p-2"><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    {contentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        ) : (
+                                            <div className="text-xs p-2 h-8 flex items-center">{task.contentType || '-'}</div>
+                                        )}
                                     </TableCell>
                                      <TableCell className="p-1 border-r">
                                         <div className="flex items-center gap-1">
@@ -411,22 +429,25 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         </div>
                                     </TableCell>
                                     <TableCell className="p-1 border-r text-center font-bold text-base">
-                                      <Select
-                                        value={task.priority}
-                                        onValueChange={(value: Task['priority']) => handleFieldChange(task.id, 'priority', value)}
-                                        disabled={!isEditable}
-                                      >
-                                        <SelectTrigger className="h-8 text-xs p-2 font-bold focus:bg-accent">
-                                            <SelectValue>
-                                                <span className="font-bold text-base">{priorityMap[task.priority]}</span>
-                                            </SelectValue>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {priorities.map(p => (
-                                                <SelectItem key={p} value={p}>{p} ({priorityMap[p]})</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                      </Select>
+                                      {isEditable ? (
+                                        <Select
+                                          value={task.priority}
+                                          onValueChange={(value: Task['priority']) => handleFieldChange(task.id, 'priority', value)}
+                                        >
+                                          <SelectTrigger className="h-8 text-xs p-2 font-bold focus:bg-accent">
+                                              <SelectValue>
+                                                  <span className="font-bold text-base">{priorityMap[task.priority]}</span>
+                                              </SelectValue>
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                              {priorities.map(p => (
+                                                  <SelectItem key={p} value={p}>{p} ({priorityMap[p]})</SelectItem>
+                                              ))}
+                                          </SelectContent>
+                                        </Select>
+                                       ) : (
+                                        <div className="font-bold text-base flex items-center justify-center h-8">{priorityMap[task.priority]}</div>
+                                       )}
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
                                         <Select 
@@ -550,3 +571,4 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
