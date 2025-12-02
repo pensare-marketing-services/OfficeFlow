@@ -43,7 +43,7 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
     };
 
     return (
-        <Card className="shadow-md">
+        <Card className="shadow-md bg-green-100">
             <CardContent className="p-0">
                 <Table>
                     <TableBody>

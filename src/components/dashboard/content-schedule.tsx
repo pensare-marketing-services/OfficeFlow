@@ -227,13 +227,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                 <TableHead colSpan={8} className="text-center font-bold text-black">Regular Contents</TableHead>
                             </TableRow>
                             <TableRow>
-                                <TableHead className="w-[50px] px-2">Sl No.</TableHead>
-                                <TableHead className="w-[90px] px-2">Date</TableHead>
-                                <TableHead className="min-w-[150px] px-2">Content Title</TableHead>
-                                <TableHead className="min-w-[200px] px-2">Content Description</TableHead>
-                                <TableHead className="w-[120px] px-2">Type</TableHead>
-                                <TableHead className="w-[130px] px-2">Status</TableHead>
-                                <TableHead className="w-[250px] px-2">Assigned To</TableHead>
+                                <TableHead className="w-[50px] px-2 border-r">Sl No.</TableHead>
+                                <TableHead className="w-[90px] px-2 border-r">Date</TableHead>
+                                <TableHead className="min-w-[150px] px-2 border-r">Content Title</TableHead>
+                                <TableHead className="min-w-[200px] px-2 border-r">Content Description</TableHead>
+                                <TableHead className="w-[120px] px-2 border-r">Type</TableHead>
+                                <TableHead className="w-[130px] px-2 border-r">Status</TableHead>
+                                <TableHead className="w-[250px] px-2 border-r">Assigned To</TableHead>
                                 <TableHead className="w-[80px] px-2 text-center">Remarks</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -243,8 +243,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                 
                                 return (
                                 <TableRow key={task.id} className="border-b">
-                                    <TableCell className="p-2 text-center">{index + 1}</TableCell>
-                                    <TableCell className="p-1">
+                                    <TableCell className="p-2 text-center border-r">{index + 1}</TableCell>
+                                    <TableCell className="p-1 border-r">
                                         <Popover>
                                             <PopoverTrigger asChild>
                                                 <Button
@@ -266,13 +266,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                    <TableCell className="p-1">
+                                    <TableCell className="p-1 border-r">
                                         <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} />
                                     </TableCell>
-                                    <TableCell className="p-1">
+                                    <TableCell className="p-1 border-r">
                                         <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" />
                                     </TableCell>
-                                    <TableCell className="p-1">
+                                    <TableCell className="p-1 border-r">
                                         <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                             <SelectTrigger className="h-8 text-xs p-2"><SelectValue /></SelectTrigger>
                                             <SelectContent>
@@ -280,7 +280,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                    <TableCell className="p-1">
+                                    <TableCell className="p-1 border-r">
                                         <Select value={task.status as TaskStatus} onValueChange={(value: TaskStatus) => handleFieldChange(task.id, 'status', value)} disabled={isCompleted && currentUser?.role === 'employee'}>
                                             <SelectTrigger className="h-8 text-xs p-2">
                                                 <div className="flex items-center gap-2">
@@ -300,7 +300,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                     <TableCell className="p-1">
+                                     <TableCell className="p-1 border-r">
                                         <div className="flex items-center gap-1">
                                             <AssigneeSelect 
                                                 assigneeId={task.assigneeIds ? task.assigneeIds[0] : ''}
