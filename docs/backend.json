@@ -69,15 +69,7 @@
         "progressNotes": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "note": {"type": "string"},
-              "date": {"type": "string", "format": "date-time"},
-              "authorId": { "type": "string" },
-              "authorName": { "type": "string" },
-              "readBy": { "type": "array", "items": { "type": "string" } },
-              "imageUrl": { "type": "string", "format": "uri" }
-            }
+            "$ref": "#/entities/ProgressNote"
           }
         }
       },
@@ -93,6 +85,19 @@
             }
         },
         "required": ["name"]
+    },
+    "ProgressNote": {
+      "title": "Progress Note",
+      "description": "A single note or remark on a task, which can include text or an image.",
+      "type": "object",
+      "properties": {
+        "note": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "readBy": { "type": "array", "items": { "type": "string" } },
+        "imageUrl": { "type": "string", "format": "uri" }
+      }
     }
   },
   "auth": {
