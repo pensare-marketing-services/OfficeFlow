@@ -19,6 +19,7 @@ import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
 import { Input } from '@/components/ui/input';
+import { Pen } from 'lucide-react';
 
 
 type UserWithId = User & { id: string };
@@ -38,7 +39,17 @@ const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }
         }
     };
     
-    return <Input defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 h-auto p-0 text-2xl font-semibold tracking-tight font-headline" />;
+    return (
+      <div className="relative group flex items-center gap-2">
+        <Input 
+          defaultValue={value} 
+          onBlur={handleBlur} 
+          onKeyDown={handleKeyDown} 
+          className="bg-transparent border-0 focus-visible:ring-1 h-auto p-0 text-2xl font-semibold tracking-tight font-headline" 
+        />
+        <Pen className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+    );
 };
 
 export default function ClientsPage() {
