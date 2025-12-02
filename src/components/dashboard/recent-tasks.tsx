@@ -132,6 +132,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
             <TableRow>
               <TableHead>Task</TableHead>
                <TableHead>Client</TableHead>
+               {currentUser?.role === 'admin' && <TableHead>Assigned To</TableHead>}
               <TableHead>Status</TableHead>
               <TableHead>Priority</TableHead>
               {currentUser?.role === 'employee' && <TableHead>Remarks</TableHead>}
@@ -139,7 +140,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
           </TableHeader>
           <TableBody>
             {tasks.map(task => {
-                const assignee = getAssignee(task.assigneeId);
+                const assignees = (task.assigneeIds || []).map(id => getAssignee(id)).filter(Boolean) as UserWithId[];
                 const client = getClient(task.clientId);
                 const isEmployeeView = currentUser?.role === 'employee';
                 const unreadCount = currentUser ? (task.progressNotes || []).filter(n => n.readBy && !n.readBy.includes(currentUser.uid)).length : 0;
@@ -184,6 +185,18 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                 <span className="text-sm text-muted-foreground">-</span>
                             )}
                         </TableCell>
+                         {currentUser?.role === 'admin' && (
+                          <TableCell>
+                            <div className="flex -space-x-2">
+                              {assignees.map(assignee => (
+                                <Avatar key={assignee.id} className="h-8 w-8 border-2 border-background">
+                                  <AvatarImage src={assignee.avatar} />
+                                  <AvatarFallback>{getInitials(assignee.name)}</AvatarFallback>
+                                </Avatar>
+                              ))}
+                            </div>
+                          </TableCell>
+                        )}
                         <TableCell>
                             {onTaskUpdate && isEmployeeView ? (
                                 <div className="flex items-center gap-2">

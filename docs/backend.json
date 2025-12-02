@@ -50,9 +50,10 @@
           "type": "string",
           "format": "date-time"
         },
-        "assigneeId": {
-          "type": "string",
-          "description": "The UID of the user this task is assigned to."
+        "assigneeIds": {
+          "type": "array",
+          "items": { "type": "string"},
+          "description": "The UIDs of the users this task is assigned to. Can have up to 2 assignees."
         },
         "clientId": {
           "type": "string",

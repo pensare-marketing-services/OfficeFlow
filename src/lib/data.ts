@@ -27,7 +27,7 @@ export type Task = {
   status: TaskStatus;
   priority: 'Low' | 'Medium' | 'High';
   deadline: string; 
-  assigneeId: string; 
+  assigneeIds: string[]; 
   progressNotes: ProgressNote[];
   clientId?: string;
   date?: string; 
@@ -118,7 +118,7 @@ export const tasks: Task[] = [
     status: 'For Approval',
     priority: 'High',
     deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-    assigneeId: 'yaseen@officeflow.com',
+    assigneeIds: ['yaseen@officeflow.com'],
     clientId: 'client-1',
     contentType: 'Video Ad',
     progressNotes: [{ note: 'First draft is ready for review.', date: new Date().toISOString(), authorId: 'admin@officeflow.com', authorName: 'Admin User', readBy: ['admin@officeflow.com'] }],
@@ -130,7 +130,7 @@ export const tasks: Task[] = [
     status: 'On Work',
     priority: 'Medium',
     deadline: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-    assigneeId: 'issec@officeflow.com',
+    assigneeIds: ['issec@officeflow.com'],
     clientId: 'client-2',
     contentType: 'Image Ad',
     progressNotes: [],
@@ -142,7 +142,7 @@ export const tasks: Task[] = [
     status: 'Approved',
     priority: 'Medium',
     deadline: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    assigneeId: 'zeenath@officeflow.com',
+    assigneeIds: ['zeenath@officeflow.com'],
     clientId: 'client-3',
     contentType: 'Backend Ad',
     progressNotes: [{note: 'Report is complete and has been sent to the client.', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), authorId: 'zeenath@officeflow.com', authorName: 'Zeenath', readBy: ['zeenath@officeflow.com']}],
@@ -154,7 +154,7 @@ export const tasks: Task[] = [
     status: 'Scheduled',
     priority: 'Low',
     deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    assigneeId: 'jasnas@officeflow.com',
+    assigneeIds: ['jasnas@officeflow.com'],
     clientId: 'client-1',
     contentType: 'Web Blogs',
     progressNotes: [],
@@ -166,7 +166,7 @@ export const tasks: Task[] = [
     status: 'Posted',
     priority: 'Medium',
     deadline: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    assigneeId: 'yaseen@officeflow.com',
+    assigneeIds: ['yaseen@officeflow.com'],
     clientId: 'client-4',
     contentType: 'Story',
     progressNotes: [],
@@ -178,7 +178,7 @@ export const tasks: Task[] = [
     status: 'On Work',
     priority: 'High',
     deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-    assigneeId: 'issec@officeflow.com',
+    assigneeIds: ['issec@officeflow.com'],
     clientId: 'client-5',
     contentType: 'Carousel',
     progressNotes: [{note: 'Wireframes are done.', date: new Date().toISOString(), authorId: 'issec@officeflow.com', authorName: 'Issec', readBy: ['issec@officeflow.com']}],
@@ -190,7 +190,7 @@ export const tasks: Task[] = [
     status: 'On Work',
     priority: 'High',
     deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    assigneeId: 'zeenath@officeflow.com',
+    assigneeIds: ['zeenath@officeflow.com'],
     clientId: 'client-2',
     contentType: 'Image Ad',
     progressNotes: [],

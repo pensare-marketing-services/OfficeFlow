@@ -63,7 +63,7 @@ export default function ClientsPage() {
             priority: 'Medium',
             contentType: 'Image Ad',
             deadline: new Date().toISOString(),
-            assigneeId: '',
+            assigneeIds: [],
             progressNotes: [],
             clientId: client.id,
         };

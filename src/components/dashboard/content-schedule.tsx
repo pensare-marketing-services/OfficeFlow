@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, MessageSquare, Trash2 } from 'lucide-react';
+import { CalendarIcon, MessageSquare, Trash2, UserPlus, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -73,11 +73,66 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
     return <Input defaultValue={value} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-transparent border-0 focus-visible:ring-1 text-xs" />;
 };
 
+const AssigneeSelect = ({
+    assigneeId,
+    onAssigneeChange,
+    employeeUsers
+}: {
+    assigneeId: string | undefined;
+    onAssigneeChange: (newId: string) => void;
+    employeeUsers: UserWithId[];
+}) => {
+    const selectedUser = employeeUsers.find(u => u.id === assigneeId);
+    return (
+        <Select
+            value={assigneeId || 'unassigned'}
+            onValueChange={(value) => onAssigneeChange(value === 'unassigned' ? '' : value)}
+        >
+            <SelectTrigger className="w-[150px]">
+                {selectedUser ? (
+                    <div className="flex items-center gap-2 truncate">
+                        <Avatar className="h-6 w-6">
+                            <AvatarImage src={selectedUser.avatar} />
+                            <AvatarFallback>{getInitials(selectedUser.name)}</AvatarFallback>
+                        </Avatar>
+                        <span className="truncate">{selectedUser.name}</span>
+                    </div>
+                ) : <SelectValue placeholder="Assign..." />}
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {employeeUsers.map(user => (
+                    <SelectItem key={user.id} value={user.id}>
+                        <div className="flex items-center gap-3">
+                                <Avatar className="h-6 w-6">
+                                <AvatarImage src={user.avatar} />
+                                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                            </Avatar>
+                            <span>{user.name}</span>
+                        </div>
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+    );
+};
+
+
 export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentScheduleProps) {
     const { user: currentUser } = useAuth();
     
     const handleFieldChange = (taskId: string, field: keyof Task, value: any) => {
         onTaskUpdate({ id: taskId, [field]: value });
+    };
+
+    const handleAssigneeChange = (taskId: string, index: number, newId: string) => {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+        const newAssigneeIds = [...(task.assigneeIds || [])];
+        newAssigneeIds[index] = newId;
+        // Filter out empty strings and duplicates
+        const finalAssignees = [...new Set(newAssigneeIds.filter(id => id))];
+        onTaskUpdate({ id: taskId, assigneeIds: finalAssignees });
     };
 
     const handleNewNote = (e: React.KeyboardEvent<HTMLTextAreaElement>, task: Task & { id: string }) => {
@@ -147,7 +202,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                 <TableHead className="w-[130px]">Type</TableHead>
                                 <TableHead className="w-[120px]">Priority</TableHead>
                                 <TableHead className="w-[140px]">Status</TableHead>
-                                <TableHead className="w-[150px]">Assigned To</TableHead>
+                                <TableHead className="w-[320px]">Assigned To</TableHead>
                                 <TableHead className="w-[80px]">Remarks</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -221,41 +276,23 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate }: ContentS
                                         </Select>
                                     </TableCell>
                                      <TableCell>
-                                        <Select
-                                            value={task.assigneeId || 'unassigned'}
-                                            onValueChange={(value) => handleFieldChange(task.id, 'assigneeId', value === 'unassigned' ? '' : value)}
-                                        >
-                                            <SelectTrigger>
-                                                {task.assigneeId && users.find(u => u.id === task.assigneeId) ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <Avatar className="h-6 w-6">
-                                                            <AvatarImage src={users.find(u => u.id === task.assigneeId)?.avatar} />
-                                                            <AvatarFallback>{getInitials(users.find(u => u.id === task.assigneeId)?.name || '')}</AvatarFallback>
-                                                        </Avatar>
-                                                        <span className="truncate">{users.find(u => u.id === task.assigneeId)?.name}</span>
-                                                    </div>
-                                                ) : <SelectValue placeholder="Assign..." />}
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="unassigned">Unassigned</SelectItem>
-                                                {employeeUsers.map(user => (
-                                                    <SelectItem key={user.id} value={user.id}>
-                                                        <div className="flex items-center gap-3">
-                                                             <Avatar className="h-6 w-6">
-                                                                <AvatarImage src={user.avatar} />
-                                                                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                                                            </Avatar>
-                                                            <span>{user.name}</span>
-                                                        </div>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <div className="flex items-center gap-2">
+                                            <AssigneeSelect 
+                                                assigneeId={task.assigneeIds ? task.assigneeIds[0] : ''}
+                                                onAssigneeChange={(newId) => handleAssigneeChange(task.id, 0, newId)}
+                                                employeeUsers={employeeUsers}
+                                            />
+                                            <AssigneeSelect
+                                                assigneeId={task.assigneeIds ? task.assigneeIds[1] : ''}
+                                                onAssigneeChange={(newId) => handleAssigneeChange(task.id, 1, newId)}
+                                                employeeUsers={employeeUsers.filter(u => u.id !== (task.assigneeIds ? task.assigneeIds[0] : ''))}
+                                            />
+                                        </div>
                                     </TableCell>
                                     <TableCell className="text-center">
                                          <Popover onOpenChange={(open) => open && handleMarkAsRead(task)}>
                                             <PopoverTrigger asChild>
-                                                <Button variant="ghost" size="icon" disabled={!task.assigneeId} className="relative">
+                                                <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative">
                                                     <MessageSquare className="h-5 w-5" />
                                                     {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-2 -right-2 h-4 w-4 justify-center p-0">{unreadCount}</Badge>}
                                                 </Button>

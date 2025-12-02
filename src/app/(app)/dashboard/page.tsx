@@ -20,7 +20,7 @@ export default function DashboardPage() {
 
   const employeeTasks = useMemo(() => {
     if (!tasks || !user?.uid) return [];
-    return tasks.filter(task => task.assigneeId === user.uid);
+    return tasks.filter(task => task.assigneeIds.includes(user.uid));
   }, [tasks, user]);
 
 

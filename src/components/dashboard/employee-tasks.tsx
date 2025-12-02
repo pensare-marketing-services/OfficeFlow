@@ -46,9 +46,11 @@ export default function EmployeeTasks({ tasks, users }: EmployeeTasksProps) {
     });
 
     tasks.forEach(task => {
-      if (task.assigneeId && employeeMap.has(task.assigneeId)) {
-        employeeMap.get(task.assigneeId)!.tasks.push(task);
-      }
+      task.assigneeIds.forEach(assigneeId => {
+        if (assigneeId && employeeMap.has(assigneeId)) {
+          employeeMap.get(assigneeId)!.tasks.push(task);
+        }
+      });
     });
 
     return Array.from(employeeMap.values());
