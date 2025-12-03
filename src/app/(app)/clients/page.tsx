@@ -74,13 +74,6 @@ export default function ClientsPage() {
         const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
             const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
             setClients(clientsData);
-            
-            setSelectedClientId(prevId => {
-                if (clientsData.length === 0) return null;
-                const currentClientExists = clientsData.some(c => c.id === prevId);
-                return currentClientExists ? prevId : clientsData[0].id;
-            });
-
             setLoading(false);
         }, (error) => {
             console.error("Error fetching clients: ", error);
@@ -89,6 +82,17 @@ export default function ClientsPage() {
 
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        // Set the initial selected client only when clients are loaded for the first time
+        if (clients.length > 0 && selectedClientId === null) {
+            setSelectedClientId(clients[0].id);
+        }
+        // If the selected client is deleted, select the first one in the list
+        if (selectedClientId && !clients.some(c => c.id === selectedClientId)) {
+            setSelectedClientId(clients.length > 0 ? clients[0].id : null);
+        }
+    }, [clients, selectedClientId]);
 
     const selectedClient = useMemo(() => {
         if (!selectedClientId) return null;
