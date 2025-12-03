@@ -82,16 +82,6 @@ export function SidebarNav() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className='p-2 mt-auto'>
-         <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            onClick={toggleSidebar}
-          >
-            {state === 'expanded' ? <PanelLeftClose /> : <PanelRightClose />}
-            <span className="group-data-[collapsible=icon]:hidden">{state === 'expanded' ? 'Collapse' : 'Expand'}</span>
-          </Button>
-      </SidebarFooter>
     </>
   );
 }

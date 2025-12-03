@@ -21,6 +21,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-10 flex h-10 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-sm print:hidden sm:px-6">
+      <SidebarTrigger className="md:flex hidden" />
       <SidebarTrigger className="md:hidden" />
       <h1 className="font-headline text-xl font-semibold text-foreground">
         {title}
