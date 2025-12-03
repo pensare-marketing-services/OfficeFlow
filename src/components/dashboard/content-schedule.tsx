@@ -465,24 +465,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             <SelectContent>
                                                 {isEditable && assigneeIds.length > 0 && (
                                                     <SelectGroup>
-                                                        <SelectLabel>Reschedule</SelectLabel>
-                                                        <SelectItem value="reschedule_all">
+                                                        <SelectLabel>Actions</SelectLabel>
+                                                        <SelectItem value="Reschedule">
                                                             <div className="flex items-center gap-2">
                                                                 <div className={cn("h-2 w-2 rounded-full", statusColors['Reschedule'])} />
-                                                                Reschedule All
+                                                                Reschedule
                                                             </div>
                                                         </SelectItem>
-                                                        {assigneeIds.map((id, idx) => {
-                                                            const assignee = users.find(u => u.id === id);
-                                                            return assignee ? (
-                                                                <SelectItem key={id} value={`reschedule_${idx}`}>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className={cn("h-2 w-2 rounded-full", statusColors['Reschedule'])} />
-                                                                        To {assignee.name}
-                                                                    </div>
-                                                                </SelectItem>
-                                                            ) : null;
-                                                        })}
                                                     </SelectGroup>
                                                 )}
                                                 <SelectGroup>

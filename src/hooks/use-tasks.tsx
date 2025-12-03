@@ -98,30 +98,10 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         let updateData: Partial<Task> = {};
         
-        // --- Start of Optimistic Update Logic ---
-        const originalTasks = tasks;
-        
-        const applyOptimisticUpdate = (update: Partial<Task>) => {
-            setTasks(prevTasks => 
-                prevTasks.map(t => t.id === id ? { ...t, ...update } : t)
-            );
-        };
-        // --- End of Optimistic Update Logic ---
-
-
         // Admin workflow for rescheduling
-        if (currentUser?.role === 'admin' && newStatus.startsWith('reschedule_')) {
-            const rescheduleValue = newStatus.split('_')[1];
+        if (currentUser?.role === 'admin' && newStatus === 'Reschedule') {
             updateData.status = 'Scheduled';
-
-            if (rescheduleValue === 'all') {
-                updateData.activeAssigneeIndex = 0;
-            } else {
-                const assigneeIndex = parseInt(rescheduleValue, 10);
-                if (!isNaN(assigneeIndex)) {
-                    updateData.activeAssigneeIndex = assigneeIndex;
-                }
-            }
+            updateData.activeAssigneeIndex = 0;
         } 
         // Employee handoff workflow
         else if (currentUser?.role === 'employee') {
@@ -148,7 +128,12 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
 
         // Apply the optimistic update to the UI immediately
-        applyOptimisticUpdate(updateData);
+        // This makes the UI feel responsive and prevents loops with the Select component
+        setTasks(prevTasks =>
+            prevTasks.map(t =>
+                t.id === id ? { ...t, ...updateData } : t
+            )
+        );
         
         // Update Firestore in the background
         try {
@@ -157,8 +142,8 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (e) {
             console.error("Error updating task status:", e);
             setError(new Error('Failed to update task status.'));
-            // Revert the optimistic update on error
-            setTasks(originalTasks);
+             // Revert the optimistic update on error by re-fetching (snapshot will do this)
+             // For a more robust solution, we could store the original task state and revert to it
         }
 
     }, [currentUser, tasks]);
