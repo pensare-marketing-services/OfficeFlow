@@ -5,7 +5,7 @@ import type { Task, UserProfile as User, ProgressNote, TaskStatus, Client } from
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSub, SelectSubTrigger, SelectSubContent } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSubTrigger, SelectSubContent } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -464,24 +464,22 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {isEditable && (
-                                                    <SelectSub>
-                                                        <SelectSubTrigger>
-                                                            <div className="flex items-center gap-2">
-                                                                <div className={cn("h-2 w-2 rounded-full", statusColors['Reschedule'])} />
-                                                                Reschedule
-                                                            </div>
-                                                        </SelectSubTrigger>
-                                                        <SelectSubContent>
-                                                            <SelectItem value="reschedule_all">Reschedule All</SelectItem>
-                                                            {assigneeIds.map((id, idx) => {
-                                                                const assignee = users.find(u => u.id === id);
-                                                                return assignee ? (
-                                                                    <SelectItem key={id} value={`reschedule_${idx}`}>To {assignee.name}</SelectItem>
-                                                                ) : null;
-                                                            })}
-                                                        </SelectSubContent>
-                                                    </SelectSub>
+                                                    <SelectSubTrigger>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className={cn("h-2 w-2 rounded-full", statusColors['Reschedule'])} />
+                                                            Reschedule
+                                                        </div>
+                                                    </SelectSubTrigger>
                                                 )}
+                                                <SelectSubContent>
+                                                    <SelectItem value="reschedule_all">Reschedule All</SelectItem>
+                                                    {assigneeIds.map((id, idx) => {
+                                                        const assignee = users.find(u => u.id === id);
+                                                        return assignee ? (
+                                                            <SelectItem key={id} value={`reschedule_${idx}`}>To {assignee.name}</SelectItem>
+                                                        ) : null;
+                                                    })}
+                                                </SelectSubContent>
 
                                                 {availableStatuses.map(status => (
                                                     <SelectItem key={status} value={status}>
