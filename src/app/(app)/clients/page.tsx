@@ -65,7 +65,7 @@ export default function ClientsPage() {
     const { user: currentUser } = useAuth();
     const { tasks, users, addTask, updateTask, loading: tasksLoading } = useTasks();
     const [clients, setClients] = useState<ClientWithId[]>([]);
-    const [selectedClient, setSelectedClient] = useState<ClientWithId | null>(null);
+    const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -74,14 +74,13 @@ export default function ClientsPage() {
         const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
             const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
             setClients(clientsData);
-            if (clientsData.length > 0 && !selectedClient) {
-                setSelectedClient(clientsData[0]);
-            } else if (clientsData.length > 0 && selectedClient) {
-                // If there's a selected client, make sure it's up-to-date
-                setSelectedClient(prev => clientsData.find(c => c.id === prev?.id) || clientsData[0]);
-            } else if (clientsData.length === 0) {
-                setSelectedClient(null);
-            }
+            
+            setSelectedClientId(prevId => {
+                if (clientsData.length === 0) return null;
+                const currentClientExists = clientsData.some(c => c.id === prevId);
+                return currentClientExists ? prevId : clientsData[0].id;
+            });
+
             setLoading(false);
         }, (error) => {
             console.error("Error fetching clients: ", error);
@@ -90,6 +89,11 @@ export default function ClientsPage() {
 
         return () => unsubscribe();
     }, []);
+
+    const selectedClient = useMemo(() => {
+        if (!selectedClientId) return null;
+        return clients.find(c => c.id === selectedClientId) || null;
+    }, [selectedClientId, clients]);
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
         updateTask(updatedTask.id, updatedTask);
@@ -144,8 +148,8 @@ export default function ClientsPage() {
                         <div className="flex items-center gap-4">
                             {loading ? <Skeleton className="h-10 w-[180px]" /> :
                                 <Select
-                                    value={selectedClient?.id}
-                                    onValueChange={(clientId) => setSelectedClient(clients.find(c => c.id === clientId) || null)}
+                                    value={selectedClientId || ''}
+                                    onValueChange={(clientId) => setSelectedClientId(clientId)}
                                     disabled={clients.length === 0}
                                 >
                                     <SelectTrigger className="w-[180px]">
