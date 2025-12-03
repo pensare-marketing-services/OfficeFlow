@@ -29,7 +29,9 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
-        if (!currentUser) {
+        if (!currentUser?.uid) {
+            setTasks([]);
+            setUsers([]);
             setLoading(false);
             return;
         }
@@ -44,7 +46,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const tasksData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as TaskWithId));
             setTasks(tasksData);
             setError(null); // Clear error on successful fetch
-            if (loading) setLoading(false);
+            setLoading(false);
         }, (err: any) => {
             console.error("Task subscription error:", err);
             setError(new Error('Failed to load tasks. A browser extension (like an ad blocker) might be blocking network requests to Firebase. Please disable it for this site and refresh the page.'));
@@ -65,7 +67,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             unsubUsers();
         };
 
-    }, [currentUser]);
+    }, [currentUser?.uid]);
 
 
     const addTask = useCallback(async (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => {
