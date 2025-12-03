@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGr
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, MessageSquare, Trash2, Paperclip } from 'lucide-react';
+import { CalendarIcon, MessageSquare, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -343,7 +343,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
-                                    <TableCell className="p-2 border-r">
+                                    <TableCell className="p-1 border-r">
                                         <Popover>
                                             <PopoverTrigger asChild>
                                                 <Button
@@ -366,15 +366,15 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                    {showClient && <TableCell className="p-2 border-r font-medium">{client?.name || '-'}</TableCell>}
-                                    <TableCell className="p-2 border-r">
+                                    {showClient && <TableCell className="p-1 border-r font-medium">{client?.name || '-'}</TableCell>}
+                                    <TableCell className="p-1 border-r">
                                         {isEditable ? (
                                             <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Content Title"/>
                                         ) : (
                                             <div className="text-xs p-1 h-8 flex items-center truncate max-w-[150px]" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
-                                    <TableCell className="p-2 border-r">
+                                    <TableCell className="p-1 border-r max-w-[200px] truncate">
                                         {wordCount > 10 ? (
                                             <Dialog>
                                                 <DialogTrigger asChild>
@@ -386,18 +386,36 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                     <DialogHeader>
                                                         <DialogTitle>{task.title}</DialogTitle>
                                                     </DialogHeader>
-                                                    <DialogDescription asChild>
-                                                        <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
-                                                            {task.description}
-                                                        </div>
-                                                    </DialogDescription>
+                                                     {isEditable ? (
+                                                        <EditableTableCell 
+                                                            value={task.description} 
+                                                            onSave={(value) => handleFieldChange(task.id, 'description', value)} 
+                                                            type="textarea"
+                                                            placeholder="Add a detailed description..."
+                                                        />
+                                                    ) : (
+                                                        <DialogDescription asChild>
+                                                            <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
+                                                                {task.description}
+                                                            </div>
+                                                        </DialogDescription>
+                                                    )}
                                                 </DialogContent>
                                             </Dialog>
                                         ) : (
-                                            <p className="text-xs text-muted-foreground p-1">{task.description || '-'}</p>
+                                             isEditable ? (
+                                                <EditableTableCell 
+                                                    value={task.description} 
+                                                    onSave={(value) => handleFieldChange(task.id, 'description', value)}
+                                                    type="textarea"
+                                                    placeholder="Add a description..."
+                                                />
+                                            ) : (
+                                                <p className="text-xs text-muted-foreground p-1">{task.description || '-'}</p>
+                                            )
                                         )}
                                     </TableCell>
-                                    <TableCell className="p-2 border-r">
+                                    <TableCell className="p-1 border-r">
                                         {isEditable ? (
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                                 <SelectTrigger className="h-8 text-xs p-2"><SelectValue /></SelectTrigger>
@@ -409,7 +427,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             <div className="text-xs p-2 h-8 flex items-center">{task.contentType || '-'}</div>
                                         )}
                                     </TableCell>
-                                     <TableCell className="p-2 border-r">
+                                     <TableCell className="p-1 border-r">
                                         <div className="flex items-center gap-1">
                                             {[0, 1].map(i => (
                                                 <AssigneeSelect 
@@ -423,7 +441,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             ))}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="p-2 border-r text-center font-bold text-base">
+                                    <TableCell className="p-1 border-r text-center font-bold text-base">
                                       {isEditable ? (
                                         <Select
                                           value={task.priority}
@@ -444,7 +462,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         <div className="font-bold text-base flex items-center justify-center h-8">{priorityMap[task.priority]}</div>
                                        )}
                                     </TableCell>
-                                    <TableCell className="p-2 border-r">
+                                    <TableCell className="p-1 border-r">
                                         <Select 
                                             value={displayedStatus} 
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
@@ -490,7 +508,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                    <TableCell className="p-2 text-center">
+                                    <TableCell className="p-1 text-center">
                                          <Popover onOpenChange={(open) => { if (!open) setNoteInput(''); }}>
                                             <PopoverTrigger asChild>
                                                 <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-8 w-8">
