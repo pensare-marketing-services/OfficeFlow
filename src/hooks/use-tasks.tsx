@@ -98,52 +98,41 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         let updateData: Partial<Task> = {};
         
-        // Admin workflow for rescheduling
         if (currentUser?.role === 'admin' && newStatus === 'Reschedule') {
             updateData.status = 'Scheduled';
             updateData.activeAssigneeIndex = 0;
         } 
-        // Employee handoff workflow
         else if (currentUser?.role === 'employee') {
             const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser?.uid;
-            if (!isMyTurn) return; // Not my turn, do nothing.
+            if (!isMyTurn) return;
 
             const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
 
             if (newStatus === 'Ready for Next' && !isLastAssignee) {
-                // Hand off to the next person
                 updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
-                updateData.status = 'In Progress'; // Set status for the next person
+                updateData.status = 'In Progress';
             } else if (newStatus === 'For Approval' && isLastAssignee) {
-                // Final step, send for approval
                 updateData.status = 'For Approval';
             } else {
-                // Just a regular status update for the current assignee
                 updateData.status = newStatus as TaskStatus;
             }
         }
-        // Default status update for admin (non-reschedule) or other cases
         else {
              updateData.status = newStatus as TaskStatus;
         }
 
-        // Apply the optimistic update to the UI immediately
-        // This makes the UI feel responsive and prevents loops with the Select component
         setTasks(prevTasks =>
             prevTasks.map(t =>
                 t.id === id ? { ...t, ...updateData } : t
             )
         );
         
-        // Update Firestore in the background
         try {
             const taskRef = doc(db, 'tasks', id);
             await updateDoc(taskRef, updateData);
         } catch (e) {
             console.error("Error updating task status:", e);
             setError(new Error('Failed to update task status.'));
-             // Revert the optimistic update on error by re-fetching (snapshot will do this)
-             // For a more robust solution, we could store the original task state and revert to it
         }
 
     }, [currentUser]);

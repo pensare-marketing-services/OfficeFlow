@@ -27,7 +27,6 @@ type ClientWithId = Client & { id: string };
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 
 const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
-const employeeHandoffStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Ready for Next'];
 const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
 const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
 
@@ -330,7 +329,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 const availableStatuses = getAvailableStatuses(task);
                                 
                                 const getDisplayedStatus = (): TaskStatus => {
-                                    if (isEmployee && !isMyTurn && task.status !== 'For Approval' && !isCompleted) {
+                                    if (isEmployee && !isMyTurn && task.status !== 'For Approval' && !isCompleted && task.status !== 'Scheduled') {
                                         return 'On Work';
                                     }
                                     return task.status;
