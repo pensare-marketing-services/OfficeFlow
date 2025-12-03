@@ -5,7 +5,7 @@ import type { Task, UserProfile as User, ProgressNote, TaskStatus, Client } from
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSubTrigger, SelectSubContent, SelectSub } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSub, SelectSubTrigger, SelectSubContent } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ type ClientWithId = Client & { id: string };
 
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 
-const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Reschedule'];
+const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 const employeeHandoffStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Ready for Next'];
 const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
 const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
