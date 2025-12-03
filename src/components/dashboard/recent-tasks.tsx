@@ -203,15 +203,17 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
-                                          {descriptionPreview}... <span className="underline">Read description...</span>
+                                          {descriptionPreview}... <span className="underline">Read more</span>
                                         </p>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[60vw]">
                                         <DialogHeader>
                                             <DialogTitle>{task.title}</DialogTitle>
                                         </DialogHeader>
-                                        <DialogDescription className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto">
+                                        <DialogDescription asChild>
+                                          <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
                                             {task.description}
+                                          </div>
                                         </DialogDescription>
                                     </DialogContent>
                                 </Dialog>

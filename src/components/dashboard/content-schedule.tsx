@@ -47,7 +47,7 @@ const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).jo
 const statusColors: Record<TaskStatus, string> = {
     'To Do': 'bg-gray-500',
     'In Progress': 'bg-blue-500',
-    Scheduled: 'bg-blue-500',
+    Scheduled: 'bg-cyan-500',
     'On Work': 'bg-yellow-500',
     'For Approval': 'bg-orange-500',
     Approved: 'bg-green-500',
@@ -55,7 +55,7 @@ const statusColors: Record<TaskStatus, string> = {
     Posted: 'bg-purple-500',
     Hold: 'bg-gray-500',
     Overdue: 'bg-red-500',
-    'Ready for Next': 'bg-cyan-500',
+    'Ready for Next': 'bg-teal-500',
     'Reschedule': 'bg-rose-500',
 };
 
@@ -203,16 +203,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
         if (!currentUser) return;
 
-        const newNote: Partial<ProgressNote> & { date: string; authorId: string; authorName: string } = {
-            note: note.note,
+        const newNote: ProgressNote = {
+            note: note.note || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.name,
+            imageUrl: note.imageUrl,
         };
-
-        if (note.imageUrl) {
-            newNote.imageUrl = note.imageUrl;
-        }
 
         handleFieldChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
     }
@@ -329,9 +326,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 const availableStatuses = getAvailableStatuses(task);
                                 
                                 const getDisplayedStatus = (): TaskStatus => {
-                                    if (isEmployee && !isMyTurn && task.status === 'In Progress') {
-                                        return 'On Work';
-                                    }
                                     if(task.status === 'Scheduled') {
                                         return 'Scheduled';
                                     }
@@ -382,30 +376,28 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         )}
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
-                                        {isEditable ? (
+                                         {wordCount > 10 ? (
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1">
+                                                        {descriptionPreview}... <span className="underline">Read more</span>
+                                                    </p>
+                                                </DialogTrigger>
+                                                <DialogContent className="sm:max-w-[60vw]">
+                                                    <DialogHeader>
+                                                        <DialogTitle>{task.title}</DialogTitle>
+                                                    </DialogHeader>
+                                                    <DialogDescription asChild>
+                                                        <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
+                                                        {task.description}
+                                                        </div>
+                                                    </DialogDescription>
+                                                </DialogContent>
+                                            </Dialog>
+                                        ) : isEditable ? (
                                             <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" placeholder="A brief description..."/>
                                         ) : (
-                                            wordCount > 10 ? (
-                                                <Dialog>
-                                                    <DialogTrigger asChild>
-                                                        <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1">
-                                                          {descriptionPreview}... <span className="underline">Read more</span>
-                                                        </p>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="sm:max-w-[60vw]">
-                                                        <DialogHeader>
-                                                            <DialogTitle>{task.title}</DialogTitle>
-                                                        </DialogHeader>
-                                                        <DialogDescription asChild>
-                                                          <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
-                                                            {task.description}
-                                                          </div>
-                                                        </DialogDescription>
-                                                    </DialogContent>
-                                                </Dialog>
-                                            ) : (
-                                                <p className="text-xs text-muted-foreground p-1">{task.description || '-'}</p>
-                                            )
+                                            <p className="text-xs text-muted-foreground p-1">{task.description || '-'}</p>
                                         )}
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
@@ -484,7 +476,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                     {allStatuses.map(status => (
                                                         <SelectItem key={status} value={status} disabled={isEmployee && !availableStatuses.includes(status)}>
                                                              <div className="flex items-center gap-2">
-                                                                <div className={cn("h-2 w-2 rounded-full", statusColors[status])} />
+                                                                <div className={cn("h-2 w-2 rounded-full", statusColors[status as TaskStatus])} />
                                                                 {status}
                                                             </div>
                                                         </SelectItem>
