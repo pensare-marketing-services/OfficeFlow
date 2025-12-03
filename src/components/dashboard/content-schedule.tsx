@@ -326,10 +326,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 const availableStatuses = getAvailableStatuses(task);
                                 
                                 const getDisplayedStatus = (): TaskStatus => {
-                                    if(task.status === 'Scheduled') {
-                                        return 'Scheduled';
+                                    if(task.status === 'Scheduled' && isEmployee && assigneeIds[0] !== currentUser?.uid) {
+                                       return 'Scheduled';
                                     }
-                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval') {
+                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' && task.status !== 'Scheduled') {
                                        return 'On Work';
                                     }
                                     return task.status;
@@ -460,7 +460,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                 </div>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {isEditable && assigneeIds.length > 0 && (
+                                                {isEditable && (
                                                     <SelectGroup>
                                                         <SelectLabel>Actions</SelectLabel>
                                                         <SelectItem value="Reschedule">
