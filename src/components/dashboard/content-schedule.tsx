@@ -329,9 +329,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 const availableStatuses = getAvailableStatuses(task);
                                 
                                 const getDisplayedStatus = (): TaskStatus => {
-                                    if(task.status === 'Scheduled' && isEmployee && !isMyTurn) {
-                                       return 'Scheduled';
-                                    }
                                     if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' && task.status !== 'Scheduled') {
                                        return 'On Work';
                                     }
@@ -563,11 +560,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                             onChange={(e) => setNoteInput(e.target.value)}
                                                             onKeyDown={(e) => handleNewNote(e, task)}
                                                             onPaste={(e) => handlePaste(e, task)}
-                                                            className="pr-10"
+                                                            className="pr-2"
                                                         />
-                                                         <Button size="icon" variant="ghost" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
-                                                            <Paperclip className="h-4 w-4" />
-                                                        </Button>
                                                     </div>
                                                 </div>
                                             </PopoverContent>
