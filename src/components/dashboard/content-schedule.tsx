@@ -187,7 +187,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         if (onStatusChange) {
             onStatusChange(task, newStatus);
         } else {
-            handleFieldChange(task.id, 'status', newStatus);
+            handleFieldChange(task.id, 'status', newStatus as TaskStatus);
         }
     }
 
@@ -487,8 +487,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                 )}
                                                 <SelectGroup>
                                                     <SelectLabel>Statuses</SelectLabel>
-                                                    {availableStatuses.map(status => (
-                                                        <SelectItem key={status} value={status}>
+                                                    {allStatuses.map(status => (
+                                                        <SelectItem key={status} value={status} disabled={isEmployee && !availableStatuses.includes(status)}>
                                                              <div className="flex items-center gap-2">
                                                                 <div className={cn("h-2 w-2 rounded-full", statusColors[status])} />
                                                                 {status}
@@ -496,7 +496,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                         </SelectItem>
                                                     ))}
                                                 </SelectGroup>
-                                                {!availableStatuses.includes(displayedStatus) && (
+                                                {!availableStatuses.includes(displayedStatus) && !allStatuses.includes(displayedStatus) && (
                                                     <SelectItem value={displayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
                                                             <div className={cn("h-2 w-2 rounded-full", statusColors[displayedStatus])} />
