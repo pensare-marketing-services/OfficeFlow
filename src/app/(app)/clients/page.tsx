@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -68,25 +69,13 @@ export default function ClientsPage() {
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Effect to fetch clients
     useEffect(() => {
+        setLoading(true);
         const clientsQuery = collection(db, "clients");
         const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
             const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
             setClients(clientsData);
-
-            if (querySnapshot.docs.length > 0) {
-              // Set initial selection or if current selection is removed
-              setSelectedClientId(prevId => {
-                  const currentClientExists = clientsData.some(c => c.id === prevId);
-                  if (!prevId || !currentClientExists) {
-                      return clientsData[0].id;
-                  }
-                  return prevId;
-              });
-            } else {
-              setSelectedClientId(null);
-            }
-            
             setLoading(false);
         }, (error) => {
             console.error("Error fetching clients: ", error);
@@ -95,6 +84,21 @@ export default function ClientsPage() {
 
         return () => unsubscribe();
     }, []);
+
+    // Effect to manage the selected client ID
+    useEffect(() => {
+        if (loading) return; // Wait until clients are loaded
+
+        const clientExists = clients.some(c => c.id === selectedClientId);
+
+        if (!selectedClientId || !clientExists) {
+            if (clients.length > 0) {
+                setSelectedClientId(clients[0].id);
+            } else {
+                setSelectedClientId(null);
+            }
+        }
+    }, [clients, selectedClientId, loading]);
 
     const selectedClient = useMemo(() => {
         if (!selectedClientId) return null;
