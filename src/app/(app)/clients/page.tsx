@@ -69,28 +69,23 @@ export default function ClientsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setLoading(true);
         const clientsQuery = collection(db, "clients");
         const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
             const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
             setClients(clientsData);
 
-            // This is the stable way to set the initial or fallback client.
-            // It only runs when the data from Firebase changes.
-            setSelectedClientId(prevId => {
-                if (clientsData.length > 0) {
-                    const currentClientExists = clientsData.some(c => c.id === prevId);
-                    // If no client is selected or the selected one was deleted, select the first one.
-                    if (!prevId || !currentClientExists) {
-                        return clientsData[0].id;
-                    }
-                } else {
-                    // No clients, so no selection.
-                    return null;
-                }
-                // Otherwise, keep the current selection.
-                return prevId;
-            });
+            if (querySnapshot.docs.length > 0) {
+              // Set initial selection or if current selection is removed
+              setSelectedClientId(prevId => {
+                  const currentClientExists = clientsData.some(c => c.id === prevId);
+                  if (!prevId || !currentClientExists) {
+                      return clientsData[0].id;
+                  }
+                  return prevId;
+              });
+            } else {
+              setSelectedClientId(null);
+            }
             
             setLoading(false);
         }, (error) => {
