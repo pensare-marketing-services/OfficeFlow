@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -203,13 +204,16 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
         if (!currentUser) return;
 
-        const newNote: ProgressNote = {
+        const newNote: Partial<ProgressNote> = {
             note: note.note || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.name,
-            imageUrl: note.imageUrl,
         };
+
+        if (note.imageUrl) {
+            newNote.imageUrl = note.imageUrl;
+        }
 
         handleFieldChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
     }
@@ -321,12 +325,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 const isMyTurn = currentWorkerId === currentUser?.uid;
                                 const isEmployee = currentUser?.role === 'employee';
                                 const isEditable = currentUser?.role === 'admin';
-                                const isReadOnly = isEmployee && !isMyTurn;
                                 
                                 const availableStatuses = getAvailableStatuses(task);
                                 
                                 const getDisplayedStatus = (): TaskStatus => {
-                                    if(task.status === 'Scheduled' && isEmployee && !isMyTurn) {
+                                    if(task.status === 'Scheduled' && isEmployee) {
                                        return 'Scheduled';
                                     }
                                     if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' && task.status !== 'Scheduled') {
@@ -451,7 +454,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         <Select 
                                             value={displayedStatus} 
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={isReadOnly || (isCompleted && isEmployee)}
+                                            disabled={isEmployee && !isMyTurn && !isCompleted}
                                         >
                                             <SelectTrigger className="h-8 text-xs p-2">
                                                 <div className="flex items-center gap-2">
@@ -579,3 +582,5 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         </Card>
     );
 }
+
+    
