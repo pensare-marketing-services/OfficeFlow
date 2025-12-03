@@ -89,7 +89,7 @@ export function SidebarNav() {
             onClick={toggleSidebar}
           >
             {state === 'expanded' ? <PanelLeftClose /> : <PanelRightClose />}
-            <span className="group-data-[collapsible=icon]:hidden">Collapse</span>
+            <span className="group-data-[collapsible=icon]:hidden">{state === 'expanded' ? 'Collapse' : 'Expand'}</span>
           </Button>
       </SidebarFooter>
     </>
