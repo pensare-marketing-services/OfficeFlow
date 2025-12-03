@@ -84,15 +84,15 @@ export default function ClientsPage() {
     }, []);
 
     useEffect(() => {
-        // Set the initial selected client only when clients are loaded for the first time
-        if (clients.length > 0 && selectedClientId === null) {
+        // This effect ensures a client is always selected if possible, preventing infinite loops.
+        if (loading || clients.length === 0) return;
+
+        const currentClientExists = clients.some(c => c.id === selectedClientId);
+
+        if (!selectedClientId || !currentClientExists) {
             setSelectedClientId(clients[0].id);
         }
-        // If the selected client is deleted, select the first one in the list
-        if (selectedClientId && !clients.some(c => c.id === selectedClientId)) {
-            setSelectedClientId(clients.length > 0 ? clients[0].id : null);
-        }
-    }, [clients, selectedClientId]);
+    }, [clients, selectedClientId, loading]);
 
     const selectedClient = useMemo(() => {
         if (!selectedClientId) return null;
