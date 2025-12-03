@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGr
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, MessageSquare, Trash2 } from 'lucide-react';
+import { CalendarIcon, MessageSquare, Trash2, ArrowUpDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -162,6 +162,38 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     const [noteInput, setNoteInput] = useState('');
     const { toast } = useToast();
     const [clients, setClients] = useState<ClientWithId[]>([]);
+    const [sortConfig, setSortConfig] = useState<{ key: 'priority'; direction: 'ascending' | 'descending' } | null>(null);
+
+    const sortedTasks = useMemo(() => {
+        let sortableTasks = [...tasks];
+        if (sortConfig !== null) {
+            sortableTasks.sort((a, b) => {
+                if (sortConfig.key === 'priority') {
+                    const aValue = priorityMap[a.priority];
+                    const bValue = priorityMap[b.priority];
+                    if (aValue < bValue) {
+                        return sortConfig.direction === 'ascending' ? -1 : 1;
+                    }
+                    if (aValue > bValue) {
+                        return sortConfig.direction === 'ascending' ? 1 : -1;
+                    }
+                }
+                return 0;
+            });
+        }
+        return sortableTasks;
+    }, [tasks, sortConfig]);
+
+    const requestSort = (key: 'priority') => {
+        let direction: 'ascending' | 'descending' = 'ascending';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        } else if (sortConfig && sortConfig.key === key && sortConfig.direction === 'descending') {
+            setSortConfig(null);
+            return;
+        }
+        setSortConfig({ key, direction });
+    };
 
     useEffect(() => {
         const clientsQuery = collection(db, "clients");
@@ -308,13 +340,18 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 <TableHead className="min-w-[200px] px-1 border-r">Content Description</TableHead>
                                 <TableHead className="w-[120px] px-1 border-r">Type</TableHead>
                                 <TableHead className="w-[250px] px-1 border-r">Assigned To</TableHead>
-                                <TableHead className="w-[120px] px-1 border-r text-center">Priority</TableHead>
+                                <TableHead className="w-[120px] px-1 border-r text-center">
+                                    <Button variant="ghost" onClick={() => requestSort('priority')} className="p-1 h-auto text-muted-foreground hover:bg-transparent">
+                                        Priority
+                                        <ArrowUpDown className="ml-2 h-3 w-3" />
+                                    </Button>
+                                </TableHead>
                                 <TableHead className="w-[130px] px-1 border-r">Status</TableHead>
                                 <TableHead className="w-[80px] px-1 text-center">Remarks</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {tasks.map((task, index) => {
+                            {sortedTasks.map((task) => {
                                 const isCompleted = completedStatuses.includes(task.status);
                                 const client = getClient(task.clientId);
                                 const { assigneeIds = [], activeAssigneeIndex = 0 } = task;
@@ -591,3 +628,5 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         </Card>
     );
 }
+
+    
