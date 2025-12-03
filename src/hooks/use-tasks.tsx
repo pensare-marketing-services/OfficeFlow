@@ -86,7 +86,14 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const updateTask = useCallback(async (taskId: string, taskUpdate: Partial<Task>) => {
         try {
             const taskRef = doc(db, 'tasks', taskId);
-            await updateDoc(taskRef, taskUpdate);
+            const dataToUpdate = { ...taskUpdate };
+            
+            // Firestore doesn't support `undefined` values.
+            if (dataToUpdate.description === undefined) {
+                dataToUpdate.description = '';
+            }
+
+            await updateDoc(taskRef, dataToUpdate);
         } catch (e) {
             console.error("Error updating document: ", e);
             setError(new Error('Failed to update task. Please check your network connection.'));
@@ -107,20 +114,24 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (!isMyTurn) return;
 
             const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
-
+            
             if (newStatus === 'Ready for Next' && !isLastAssignee) {
                 updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
-                updateData.status = 'In Progress';
-            } else if (newStatus === 'For Approval' && isLastAssignee) {
+                updateData.status = 'In Progress'; // Or keep it as is, depending on desired flow
+            } else if ((newStatus === 'For Approval' || newStatus === 'Ready for Next') && isLastAssignee) {
                 updateData.status = 'For Approval';
-            } else {
-                updateData.status = newStatus as TaskStatus;
+            } else if (newStatus === 'In Progress') {
+                 updateData.status = 'In Progress';
             }
         }
-        else {
+        else if (currentUser?.role === 'admin') {
              updateData.status = newStatus as TaskStatus;
         }
 
+        if (Object.keys(updateData).length === 0) return;
+
+
+        // Optimistic update
         setTasks(prevTasks =>
             prevTasks.map(t =>
                 t.id === id ? { ...t, ...updateData } : t
@@ -132,10 +143,15 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             await updateDoc(taskRef, updateData);
         } catch (e) {
             console.error("Error updating task status:", e);
+             // Revert optimistic update on error
+            setTasks(prevTasks => {
+                const originalTask = tasks.find(t => t.id === id);
+                return prevTasks.map(t => t.id === id ? originalTask || t : t);
+            });
             setError(new Error('Failed to update task status.'));
         }
 
-    }, [currentUser]);
+    }, [currentUser, tasks]);
 
 
     const value = {
