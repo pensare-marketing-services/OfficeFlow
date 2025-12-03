@@ -185,13 +185,10 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
 
                 const isCompleted = completedStatuses.includes(task.status);
                 
-                const statusOptions = useMemo(() => {
-                    const options: TaskStatus[] = ['In Progress', 'For Approval'];
-                    if (!options.includes(task.status)) {
-                        options.unshift(task.status);
-                    }
-                    return options;
-                }, [task.status]);
+                const statusOptions: TaskStatus[] = ['In Progress', 'For Approval'];
+                if (!statusOptions.includes(task.status)) {
+                    statusOptions.unshift(task.status);
+                }
 
                 return (
                     <TableRow key={task.id}>
@@ -341,7 +338,6 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                     onChange={(e) => setNoteInput(e.target.value)}
                                                     onKeyDown={(e) => handleNewNote(e, task)}
                                                     onPaste={(e) => handlePaste(e, task)}
-                                                    className="pr-2"
                                                 />
                                             </div>
                                         </div>
