@@ -53,7 +53,7 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
                                 <EditableField value={client.plan || ''} onSave={(value) => handleSave('plan', value)} />
                             </TableCell>
                              <TableCell className="font-bold">Bill Duration</TableCell>
-                            <TableCell className="w-48">
+                            <TableCell>
                                 <EditableField value={client.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
                             </TableCell>
                         </TableRow>

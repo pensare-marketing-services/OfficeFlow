@@ -26,7 +26,7 @@ type ClientWithId = Client & { id: string };
 
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 
-const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
+const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Reschedule'];
 const employeeHandoffStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Ready for Next'];
 const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
 const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
@@ -56,7 +56,8 @@ const statusColors: Record<TaskStatus, string> = {
     Posted: 'bg-purple-500',
     Hold: 'bg-gray-500',
     Overdue: 'bg-red-500',
-    'Ready for Next': 'bg-cyan-500'
+    'Ready for Next': 'bg-cyan-500',
+    'Reschedule': 'bg-rose-500',
 };
 
 const priorityMap: Record<Task['priority'], number> = {
@@ -163,7 +164,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     const { toast } = useToast();
     const [clients, setClients] = useState<ClientWithId[]>([]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const clientsQuery = collection(db, "clients");
         const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
             const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
@@ -405,7 +406,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
                                         {isEditable ? (
-                                            <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)} disabled={!isEditable}>
+                                            <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                                 <SelectTrigger className="h-8 text-xs p-2"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
                                                     {contentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
@@ -572,5 +573,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
 

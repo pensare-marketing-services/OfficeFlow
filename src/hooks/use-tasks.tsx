@@ -99,6 +99,10 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         // Admin workflow
         if (currentUser?.role === 'admin') {
+             if (newStatus === 'Reschedule') {
+                updateData.status = 'Scheduled';
+                updateData.activeAssigneeIndex = 0;
+            }
             await updateDoc(taskRef, updateData);
             return;
         }

@@ -11,7 +11,7 @@ export type User = UserProfile & { id: string };
 
 export type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 export type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold';
-export type TaskStatus = 'To Do' | 'In Progress' | 'Done' | 'Overdue' | ContentStatus | 'Ready for Next';
+export type TaskStatus = 'To Do' | 'In Progress' | 'Done' | 'Overdue' | ContentStatus | 'Ready for Next' | 'Reschedule';
 export type ProgressNote = {
     note: string;
     date: string;
