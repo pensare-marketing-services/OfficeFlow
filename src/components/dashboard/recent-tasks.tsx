@@ -94,16 +94,13 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
         if (!currentUser || !onTaskUpdate) return;
         
-        const newNote: Partial<ProgressNote> & { date: string, authorId: string, authorName: string } = { 
+        const newNote: ProgressNote = { 
             note: note.note || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.name,
+            imageUrl: note.imageUrl,
         };
-        
-        if (note.imageUrl) {
-            newNote.imageUrl = note.imageUrl;
-        }
 
         onTaskUpdate(task.id, { progressNotes: [...(task.progressNotes || []), newNote] });
     }
