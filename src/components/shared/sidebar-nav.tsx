@@ -7,10 +7,13 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Briefcase } from 'lucide-react';
+import { LayoutDashboard, Settings, Briefcase, PanelLeftClose, PanelRightClose } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
+import { useSidebar } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
@@ -40,6 +43,7 @@ function OfficeIcon(props: React.SVGProps<SVGSVGElement>) {
 export function SidebarNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { toggleSidebar, state } = useSidebar();
 
   const filteredNavItems = navItems.filter(item => {
     if (!item.adminOnly) return true;
@@ -78,6 +82,16 @@ export function SidebarNav() {
           ))}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter className='p-2 mt-auto'>
+         <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            onClick={toggleSidebar}
+          >
+            {state === 'expanded' ? <PanelLeftClose /> : <PanelRightClose />}
+            <span className="group-data-[collapsible=icon]:hidden">Collapse</span>
+          </Button>
+      </SidebarFooter>
     </>
   );
 }
