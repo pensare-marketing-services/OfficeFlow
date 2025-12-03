@@ -74,6 +74,24 @@ export default function ClientsPage() {
         const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
             const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
             setClients(clientsData);
+
+            // This is the stable way to set the initial or fallback client.
+            // It only runs when the data from Firebase changes.
+            setSelectedClientId(prevId => {
+                if (clientsData.length > 0) {
+                    const currentClientExists = clientsData.some(c => c.id === prevId);
+                    // If no client is selected or the selected one was deleted, select the first one.
+                    if (!prevId || !currentClientExists) {
+                        return clientsData[0].id;
+                    }
+                } else {
+                    // No clients, so no selection.
+                    return null;
+                }
+                // Otherwise, keep the current selection.
+                return prevId;
+            });
+            
             setLoading(false);
         }, (error) => {
             console.error("Error fetching clients: ", error);
@@ -82,17 +100,6 @@ export default function ClientsPage() {
 
         return () => unsubscribe();
     }, []);
-
-    useEffect(() => {
-        // This effect ensures a client is always selected if possible, preventing infinite loops.
-        if (loading || clients.length === 0) return;
-
-        const currentClientExists = clients.some(c => c.id === selectedClientId);
-
-        if (!selectedClientId || !currentClientExists) {
-            setSelectedClientId(clients[0].id);
-        }
-    }, [clients, selectedClientId, loading]);
 
     const selectedClient = useMemo(() => {
         if (!selectedClientId) return null;
