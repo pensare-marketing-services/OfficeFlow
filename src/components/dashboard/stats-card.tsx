@@ -34,13 +34,13 @@ export function StatsCard({ title, value, icon: Icon, variant = 'default', onCli
   });
 
   return (
-    <Card className={cardClasses} onClick={onClick}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className={cardClasses} onClick={onClick} >
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 px-4 py-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className={iconClasses} />
       </CardHeader>
-      <CardContent>
-        <div className="font-headline text-2xl font-bold">{value}</div>
+      <CardContent  className='p-1'>
+        <div className="font-headline text-1xl font-bold  px-4 py-0">{value}</div>
       </CardContent>
     </Card>
   );

@@ -143,7 +143,7 @@ export default function ClientsPage() {
     const pageLoading = loading || tasksLoading;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-0">
             <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
@@ -173,14 +173,14 @@ export default function ClientsPage() {
                                 </Select>
                             }
                             {selectedClient && (
-                                <Button onClick={() => handleAddTask(selectedClient)} disabled={tasksLoading}>Schedule</Button>
+                                <Button onClick={() => handleAddTask(selectedClient)} disabled={tasksLoading}>Add Task</Button>
                             )}
                         </div>
                     </div>
                 </CardHeader>
             </Card>
 
-            <div className="space-y-2">
+            <div className="space-y-0">
                 {pageLoading ? <Skeleton className="h-96 w-full" /> : selectedClient ? (
                     <>
                         <ClientPlanSummary 

@@ -95,51 +95,73 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     const updateTaskStatus = useCallback(async (task: TaskWithId, newStatus: string) => {
         const { id, assigneeIds = [], activeAssigneeIndex = 0 } = task;
-        const taskRef = doc(db, 'tasks', id);
 
-        let updateData: Partial<Task> = { status: newStatus as TaskStatus };
+        let updateData: Partial<Task> = {};
+        
+        // --- Start of Optimistic Update Logic ---
+        const originalTasks = tasks;
+        
+        const applyOptimisticUpdate = (update: Partial<Task>) => {
+            setTasks(prevTasks => 
+                prevTasks.map(t => t.id === id ? { ...t, ...update } : t)
+            );
+        };
+        // --- End of Optimistic Update Logic ---
 
-        // Admin workflow
-        if (currentUser?.role === 'admin') {
-             if (newStatus.startsWith('reschedule_')) {
-                const rescheduleValue = newStatus.split('_')[1];
-                updateData.status = 'Scheduled';
-                if(rescheduleValue === 'all') {
-                    updateData.activeAssigneeIndex = 0;
-                } else {
-                    const assigneeIndex = parseInt(rescheduleValue, 10);
-                    if (!isNaN(assigneeIndex)) {
-                        updateData.activeAssigneeIndex = assigneeIndex;
-                    }
-                }
+
+        // Admin workflow for rescheduling
+        if (currentUser?.role === 'admin' && newStatus.startsWith('reschedule_')) {
+            const rescheduleValue = newStatus.split('_')[1];
+            updateData.status = 'Scheduled';
+
+            if (rescheduleValue === 'all') {
+                updateData.activeAssigneeIndex = 0;
             } else {
+                const assigneeIndex = parseInt(rescheduleValue, 10);
+                if (!isNaN(assigneeIndex)) {
+                    updateData.activeAssigneeIndex = assigneeIndex;
+                }
+            }
+        } 
+        // Employee handoff workflow
+        else if (currentUser?.role === 'employee') {
+            const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser?.uid;
+            if (!isMyTurn) return; // Not my turn, do nothing.
+
+            const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
+
+            if (newStatus === 'Ready for Next' && !isLastAssignee) {
+                // Hand off to the next person
+                updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
+                updateData.status = 'In Progress'; // Set status for the next person
+            } else if (newStatus === 'For Approval' && isLastAssignee) {
+                // Final step, send for approval
+                updateData.status = 'For Approval';
+            } else {
+                // Just a regular status update for the current assignee
                 updateData.status = newStatus as TaskStatus;
             }
-            await updateDoc(taskRef, updateData);
-            return;
+        }
+        // Default status update for admin (non-reschedule) or other cases
+        else {
+             updateData.status = newStatus as TaskStatus;
         }
 
-        // Employee workflow
-        const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser?.uid;
-        if (!isMyTurn) return; // Not my turn, do nothing.
-
-        const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
-
-        if (newStatus === 'Ready for Next' && !isLastAssignee) {
-            // Hand off to the next person
-            updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
-            updateData.status = 'In Progress'; // Set status for the next person
-        } else if (newStatus === 'For Approval' && isLastAssignee) {
-            // Final step, send for approval
-            updateData.status = 'For Approval';
-        } else {
-            // Just a regular status update for the current assignee
-            updateData.status = newStatus as TaskStatus;
-        }
+        // Apply the optimistic update to the UI immediately
+        applyOptimisticUpdate(updateData);
         
-        await updateDoc(taskRef, updateData);
+        // Update Firestore in the background
+        try {
+            const taskRef = doc(db, 'tasks', id);
+            await updateDoc(taskRef, updateData);
+        } catch (e) {
+            console.error("Error updating task status:", e);
+            setError(new Error('Failed to update task status.'));
+            // Revert the optimistic update on error
+            setTasks(originalTasks);
+        }
 
-    }, [currentUser]);
+    }, [currentUser, tasks]);
 
 
     const value = {

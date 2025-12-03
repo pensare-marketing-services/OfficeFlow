@@ -65,10 +65,10 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
 
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="space-y-1">
+      <div className="grid gap-6 grid-cols-2 lg:grid-cols-4">
         <StatsCard 
-            title="My Active Tasks" 
+            title="My Tasks" 
             value={activeTasksCount} 
             icon={ClipboardList} 
             onClick={() => setTaskFilter('active')}
