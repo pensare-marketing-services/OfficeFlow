@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
 import { StatsCard } from './stats-card';
-import { ClipboardList, Users, CheckCircle2, Clock } from 'lucide-react';
+import { ClipboardList, Users, CheckCircle2 } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 import type { Task, UserProfile as User } from '@/lib/data';
 import EmployeeTasks from './employee-tasks';
@@ -14,7 +15,7 @@ interface AdminDashboardProps {
   users: UserWithId[];
 }
 
-type TaskFilter = 'total' | 'completed' | 'overdue';
+type TaskFilter = 'total' | 'completed';
 type ViewMode = 'tasks' | 'employees';
 
 export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
@@ -24,15 +25,12 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
   const totalTasks = tasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
   const completedTasks = tasks.filter(t => t.status === 'Done' || t.status === 'Approved' || t.status === 'Posted').length;
-  const overdueTasks = tasks.filter(t => new Date(t.deadline) < new Date() && t.status !== 'Done' && t.status !== 'Approved' && t.status !== 'Posted').length;
   
   const filteredTasks = useMemo(() => {
     if (viewMode !== 'tasks') return [];
     switch (taskFilter) {
       case 'completed':
         return tasks.filter(t => t.status === 'Done' || t.status === 'Approved' || t.status === 'Posted');
-      case 'overdue':
-        return tasks.filter(t => new Date(t.deadline) < new Date() && t.status !== 'Done' && t.status !== 'Approved' && t.status !== 'Posted');
       case 'total':
       default:
         return tasks;
@@ -42,7 +40,6 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
   const filterTitles: Record<TaskFilter, string> = {
     total: "All Recent Tasks",
     completed: "Completed Tasks",
-    overdue: "Overdue Tasks"
   };
 
   const handleTaskFilterClick = (filter: TaskFilter) => {
@@ -56,7 +53,7 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatsCard 
             title="Total Tasks" 
             value={totalTasks} 
@@ -78,14 +75,6 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
             variant="success"
             onClick={() => handleTaskFilterClick('completed')}
             isActive={viewMode === 'tasks' && taskFilter === 'completed'}
-        />
-        <StatsCard 
-            title="Overdue Tasks" 
-            value={overdueTasks} 
-            icon={Clock} 
-            variant="destructive" 
-            onClick={() => handleTaskFilterClick('overdue')}
-            isActive={viewMode === 'tasks' && taskFilter === 'overdue'}
         />
       </div>
       

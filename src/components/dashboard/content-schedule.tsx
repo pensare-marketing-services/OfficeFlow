@@ -27,7 +27,7 @@ type ClientWithId = Client & { id: string };
 
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 
-const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Overdue', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
+const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
 const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
 
@@ -45,7 +45,7 @@ const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
-const statusColors: Record<TaskStatus, string> = {
+const statusColors: Record<string, string> = {
     'To Do': 'bg-gray-500',
     'In Progress': 'bg-blue-500',
     Scheduled: 'bg-cyan-500',
@@ -55,7 +55,6 @@ const statusColors: Record<TaskStatus, string> = {
     Done: 'bg-green-500',
     Posted: 'bg-purple-500',
     Hold: 'bg-gray-500',
-    Overdue: 'bg-red-500',
     'Ready for Next': 'bg-teal-500',
     'Reschedule': 'bg-rose-500',
 };
@@ -389,13 +388,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                     </DialogHeader>
                                                     <DialogDescription asChild>
                                                         <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
-                                                        {task.description}
+                                                            {task.description}
                                                         </div>
                                                     </DialogDescription>
                                                 </DialogContent>
                                             </Dialog>
-                                        ) : isEditable ? (
-                                            <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" placeholder="A brief description..."/>
                                         ) : (
                                             <p className="text-xs text-muted-foreground p-1">{task.description || '-'}</p>
                                         )}
@@ -474,7 +471,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                 <SelectGroup>
                                                     <SelectLabel>Statuses</SelectLabel>
                                                     {allStatuses.map(status => (
-                                                        <SelectItem key={status} value={status} disabled={isEmployee && !availableStatuses.includes(status)}>
+                                                        <SelectItem key={status} value={status} disabled={isEmployee && !availableStatuses.includes(status as TaskStatus)}>
                                                              <div className="flex items-center gap-2">
                                                                 <div className={cn("h-2 w-2 rounded-full", statusColors[status as TaskStatus])} />
                                                                 {status}
@@ -482,7 +479,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                         </SelectItem>
                                                     ))}
                                                 </SelectGroup>
-                                                {!availableStatuses.includes(displayedStatus) && !allStatuses.includes(displayedStatus) && (
+                                                {!availableStatuses.includes(displayedStatus as TaskStatus) && !allStatuses.includes(displayedStatus as TaskStatus) && (
                                                     <SelectItem value={displayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
                                                             <div className={cn("h-2 w-2 rounded-full", statusColors[displayedStatus])} />
@@ -555,7 +552,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                     </div>
                                                     <div className="relative">
                                                         <Textarea 
-                                                            placeholder="Add a remark..."
+                                                            placeholder="Add a remark or paste an image..."
                                                             value={noteInput}
                                                             onChange={(e) => setNoteInput(e.target.value)}
                                                             onKeyDown={(e) => handleNewNote(e, task)}
@@ -576,7 +573,3 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         </Card>
     );
 }
-
-    
-
-    

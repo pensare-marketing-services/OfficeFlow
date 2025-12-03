@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import type { Task, UserProfile as User } from '@/lib/data';
 import { StatsCard } from './stats-card';
-import { ClipboardList, CheckCircle2, Clock, Hourglass } from 'lucide-react';
+import { ClipboardList, CheckCircle2, Hourglass } from 'lucide-react';
 import ContentSchedule from './content-schedule';
 import { useTasks } from '@/hooks/use-tasks';
 
@@ -16,7 +17,7 @@ interface EmployeeDashboardProps {
   onTaskUpdate: (taskId: string, updatedData: Partial<Task>) => void;
 }
 
-type TaskFilter = 'active' | 'inProgress' | 'completed' | 'overdue';
+type TaskFilter = 'active' | 'inProgress' | 'completed';
 
 export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }: EmployeeDashboardProps) {
   const { user } = useAuth();
@@ -32,7 +33,6 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
   const completedTasksCount = employeeTasks.filter(t => completedStatuses.includes(t.status)).length;
   const activeTasksCount = totalTasks - completedTasksCount;
   const inProgressTasksCount = employeeTasks.filter(t => t.status === 'In Progress' || t.status === 'On Work').length;
-  const overdueTasksCount = employeeTasks.filter(t => new Date(t.deadline) < new Date() && !completedStatuses.includes(t.status)).length;
   
   const filteredTasks = useMemo(() => {
     switch (taskFilter) {
@@ -40,8 +40,6 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
         return employeeTasks.filter(t => t.status === 'In Progress' || t.status === 'On Work');
       case 'completed':
         return employeeTasks.filter(t => completedStatuses.includes(t.status));
-      case 'overdue':
-        return employeeTasks.filter(t => new Date(t.deadline) < new Date() && !completedStatuses.includes(t.status));
       case 'active':
       default:
         return employeeTasks.filter(t => !completedStatuses.includes(t.status));
@@ -52,7 +50,6 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
     active: "My Active Tasks",
     inProgress: "My In Progress Tasks",
     completed: "My Completed Tasks",
-    overdue: "My Overdue Tasks"
   };
 
   const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
@@ -66,7 +63,7 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
 
   return (
     <div className="space-y-1">
-      <div className="grid gap-6 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 grid-cols-2 lg:grid-cols-3">
         <StatsCard 
             title="My Tasks" 
             value={activeTasksCount} 
@@ -89,14 +86,6 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
             variant="success"
             onClick={() => setTaskFilter('completed')}
             isActive={taskFilter === 'completed'}
-        />
-        <StatsCard 
-            title="Overdue" 
-            value={overdueTasksCount} 
-            icon={Clock} 
-            variant="destructive"
-            onClick={() => setTaskFilter('overdue')}
-            isActive={taskFilter === 'overdue'}
         />
       </div>
 

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { Task, UserProfile as User, ProgressNote, Client, TaskStatus } from '@/lib/data';
@@ -10,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Paperclip, Trash2 } from 'lucide-react';
+import { MessageSquare, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -50,7 +49,6 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'o
     'To Do': 'outline',
     'Scheduled': 'outline',
     'Hold': 'outline',
-    'Overdue': 'destructive'
 }
 
 const priorityMap: Record<Task['priority'], number> = {
@@ -364,5 +362,3 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     </>
   );
 }
-
-    

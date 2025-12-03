@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Task, UserProfile as User } from '@/lib/data';
@@ -28,7 +29,6 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'o
     'To Do': 'outline',
     'Scheduled': 'outline',
     'Hold': 'outline',
-    'Overdue': 'destructive'
 }
 
 const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -73,7 +73,6 @@ export default function EmployeeTasks({ tasks, users }: EmployeeTasksProps) {
                 </div>
                 <div className="flex items-center gap-4 pr-4">
                     <Badge variant="outline">{employeeTasks.length} Task{employeeTasks.length !== 1 && 's'}</Badge>
-                    <Badge variant="destructive">{employeeTasks.filter(t => new Date(t.deadline) < new Date() && t.status !== 'Done').length} Overdue</Badge>
                 </div>
               </div>
             </AccordionTrigger>

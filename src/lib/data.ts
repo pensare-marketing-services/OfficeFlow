@@ -11,7 +11,7 @@ export type User = UserProfile & { id: string };
 
 export type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 export type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold';
-export type TaskStatus = 'To Do' | 'In Progress' | 'Done' | 'Overdue' | ContentStatus | 'Ready for Next' | 'Reschedule';
+export type TaskStatus = 'To Do' | 'In Progress' | 'Done' | ContentStatus | 'Ready for Next' | 'Reschedule';
 export type ProgressNote = {
     note: string;
     date: string;
@@ -194,17 +194,4 @@ export const tasks: Task[] = [
     progressNotes: [{note: 'Wireframes are done.', date: new Date().toISOString(), authorId: 'issec@officeflow.com', authorName: 'Issec'}],
     activeAssigneeIndex: 1,
   },
-  {
-    id: 'task-7',
-    title: 'Overdue Task Example',
-    description: 'This task is intentionally overdue for demonstration.',
-    status: 'On Work',
-    priority: 'High',
-    deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    assigneeIds: ['zeenath@officeflow.com'],
-    clientId: 'client-2',
-    contentType: 'Image Ad',
-    progressNotes: [],
-    activeAssigneeIndex: 0,
-  }
 ];
