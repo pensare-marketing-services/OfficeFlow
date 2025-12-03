@@ -37,7 +37,7 @@ const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).jo
 
 const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
 
-const MAX_IMAGE_SIZE_BYTES = 700 * 1024; // 700KB
+const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -116,7 +116,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                     toast({
                         variant: 'destructive',
                         title: 'Image too large',
-                        description: 'Please paste an image smaller than 700KB.'
+                        description: `Please paste an image smaller than ${MAX_IMAGE_SIZE_BYTES / 1024 / 1024}MB.`
                     });
                     e.preventDefault();
                     return;
@@ -367,3 +367,5 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     </>
   );
 }
+
+    
