@@ -177,6 +177,7 @@ export default function ClientsPage() {
                             tasks={filteredTasks} 
                             users={users as UserWithId[]} 
                             onTaskUpdate={handleTaskUpdate}
+                            showClient={false}
                         />
                     </>
                 ) : (

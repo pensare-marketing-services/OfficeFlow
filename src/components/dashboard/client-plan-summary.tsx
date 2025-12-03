@@ -48,11 +48,11 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
                 <Table>
                     <TableBody>
                         <TableRow className="border-b">
-                             <TableCell className="font-bold w-32">PLAN</TableCell>
+                             <TableCell className="font-bold">PLAN</TableCell>
                             <TableCell>
                                 <EditableField value={client.plan || ''} onSave={(value) => handleSave('plan', value)} />
                             </TableCell>
-                             <TableCell className="font-bold w-32">Bill Duration</TableCell>
+                             <TableCell className="font-bold">Bill Duration</TableCell>
                             <TableCell className="w-48">
                                 <EditableField value={client.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
                             </TableCell>

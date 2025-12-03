@@ -36,6 +36,7 @@ interface ContentScheduleProps {
     users: UserWithId[];
     onTaskUpdate: (task: Partial<Task> & { id: string }) => void;
     onStatusChange?: (task: Task & {id: string}, newStatus: TaskStatus) => void;
+    showClient?: boolean;
 }
 
 const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs'];
@@ -156,7 +157,7 @@ const AssigneeSelect = ({
 };
 
 
-export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusChange }: ContentScheduleProps) {
+export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusChange, showClient = true }: ContentScheduleProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const { toast } = useToast();
@@ -302,7 +303,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[90px] px-1 border-r">Date</TableHead>
-                                <TableHead className="min-w-[150px] px-1 border-r">Client</TableHead>
+                                {showClient && <TableHead className="min-w-[150px] px-1 border-r">Client</TableHead>}
                                 <TableHead className="min-w-[150px] px-1 border-r">Content Title</TableHead>
                                 <TableHead className="min-w-[200px] px-1 border-r">Content Description</TableHead>
                                 <TableHead className="w-[120px] px-1 border-r">Type</TableHead>
@@ -367,7 +368,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                    <TableCell className="p-1 border-r font-medium">{client?.name || '-'}</TableCell>
+                                    {showClient && <TableCell className="p-1 border-r font-medium">{client?.name || '-'}</TableCell>}
                                     <TableCell className="p-1 border-r">
                                         {isEditable ? (
                                             <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Content Title"/>
@@ -379,11 +380,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         {isEditable ? (
                                             <EditableTableCell value={task.description || ''} onSave={(value) => handleFieldChange(task.id, 'description', value)} type="textarea" placeholder="A brief description..."/>
                                         ) : (
-                                            (task.description?.length || 0) > 60 ? (
+                                            wordCount > 10 ? (
                                                 <Dialog>
                                                     <DialogTrigger asChild>
                                                         <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1">
-                                                          {(task.description || '').substring(0, 60)}... <span className="underline">Read more</span>
+                                                          {descriptionPreview}... <span className="underline">Read more</span>
                                                         </p>
                                                     </DialogTrigger>
                                                     <DialogContent className="sm:max-w-[60vw]">
@@ -474,7 +475,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                     <SelectItem value={displayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
                                                             <div className={cn("h-2 w-2 rounded-full", statusColors[displayedStatus])} />
-                                                            {displayedStatus} {displayedStatus === 'On Work' && `(by ${users.find(u => u.id === currentWorkerId)?.name.split(' ')[0] || '...'})`}
+                                                            {displayedStatus} {displayedStatus === 'On Work' && `(${users.find(u => u.id === currentWorkerId)?.name.split(' ')[0] || '...'})`}
                                                         </div>
                                                     </SelectItem>
                                                 )}
@@ -571,4 +572,5 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
