@@ -329,8 +329,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 const availableStatuses = getAvailableStatuses(task);
                                 
                                 const getDisplayedStatus = (): TaskStatus => {
-                                    if (isEmployee && !isMyTurn && task.status !== 'For Approval' && !isCompleted && task.status !== 'Scheduled') {
+                                    if (isEmployee && !isMyTurn && task.status === 'In Progress') {
                                         return 'On Work';
+                                    }
+                                    if(task.status === 'Scheduled') {
+                                        return 'Scheduled';
+                                    }
+                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval') {
+                                       return 'On Work';
                                     }
                                     return task.status;
                                 }
