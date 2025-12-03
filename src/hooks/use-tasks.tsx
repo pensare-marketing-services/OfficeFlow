@@ -146,7 +146,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
              // For a more robust solution, we could store the original task state and revert to it
         }
 
-    }, [currentUser, tasks]);
+    }, [currentUser]);
 
 
     const value = {
