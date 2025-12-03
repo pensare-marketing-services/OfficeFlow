@@ -5,7 +5,7 @@ import type { Task, UserProfile as User, ProgressNote, TaskStatus, Client } from
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSub, SelectSubTrigger, SelectSubContent } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,7 @@ interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
     users: UserWithId[];
     onTaskUpdate: (task: Partial<Task> & { id: string }) => void;
-    onStatusChange?: (task: Task & {id: string}, newStatus: TaskStatus) => void;
+    onStatusChange?: (task: Task & {id: string}, newStatus: string) => void;
     showClient?: boolean;
 }
 
@@ -183,7 +183,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         onTaskUpdate({ id: taskId, [field]: value });
     };
     
-    const handleLocalStatusChange = (task: Task & { id: string }, newStatus: TaskStatus) => {
+    const handleLocalStatusChange = (task: Task & { id: string }, newStatus: string) => {
         if (onStatusChange) {
             onStatusChange(task, newStatus);
         } else {
@@ -331,7 +331,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 
                                 const getDisplayedStatus = (): TaskStatus => {
                                     if (isEmployee && !isMyTurn && task.status !== 'For Approval' && !isCompleted) {
-                                        const worker = users.find(u => u.id === currentWorkerId);
                                         return 'On Work';
                                     }
                                     return task.status;
@@ -454,7 +453,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                     <TableCell className="p-1 border-r">
                                         <Select 
                                             value={displayedStatus} 
-                                            onValueChange={(value: TaskStatus) => handleLocalStatusChange(task, value)} 
+                                            onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
                                             disabled={isReadOnly || (isCompleted && isEmployee)}
                                         >
                                             <SelectTrigger className="h-8 text-xs p-2">
@@ -464,6 +463,26 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                 </div>
                                             </SelectTrigger>
                                             <SelectContent>
+                                                {isEditable && (
+                                                    <SelectSub>
+                                                        <SelectSubTrigger>
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={cn("h-2 w-2 rounded-full", statusColors['Reschedule'])} />
+                                                                Reschedule
+                                                            </div>
+                                                        </SelectSubTrigger>
+                                                        <SelectSubContent>
+                                                            <SelectItem value="reschedule_all">Reschedule All</SelectItem>
+                                                            {assigneeIds.map((id, idx) => {
+                                                                const assignee = users.find(u => u.id === id);
+                                                                return assignee ? (
+                                                                    <SelectItem key={id} value={`reschedule_${idx}`}>To {assignee.name}</SelectItem>
+                                                                ) : null;
+                                                            })}
+                                                        </SelectSubContent>
+                                                    </SelectSub>
+                                                )}
+
                                                 {availableStatuses.map(status => (
                                                     <SelectItem key={status} value={status}>
                                                          <div className="flex items-center gap-2">
@@ -484,7 +503,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         </Select>
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
-                                         <Popover onOpenChange={(open) => !open && setNoteInput('')}>
+                                         <Popover onOpenChange={(open) => { if (!open) setNoteInput(''); }}>
                                             <PopoverTrigger asChild>
                                                 <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-8 w-8">
                                                     <MessageSquare className="h-4 w-4" />
@@ -569,10 +588,3 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         </Card>
     );
 }
-
-    
-
-    
-
-
-

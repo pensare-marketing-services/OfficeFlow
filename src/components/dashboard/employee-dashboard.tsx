@@ -59,7 +59,7 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
     onTaskUpdate(updatedTask.id, updatedTask);
   };
   
-  const handleStatusChange = (task: Task & {id: string}, newStatus: Task['status']) => {
+  const handleStatusChange = (task: Task & {id: string}, newStatus: string) => {
     updateTaskStatus(task, newStatus);
   };
 
@@ -107,6 +107,7 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
             users={users}
             onTaskUpdate={handleTaskUpdate}
             onStatusChange={handleStatusChange}
+            showClient={true}
         />
       </div>
     </div>

@@ -16,7 +16,7 @@ interface TaskContextType {
     error: Error | null;
     addTask: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
     updateTask: (taskId: string, task: Partial<Task>) => void;
-    updateTaskStatus: (task: TaskWithId, newStatus: TaskStatus) => void;
+    updateTaskStatus: (task: TaskWithId, newStatus: string) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -91,17 +91,27 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, []);
     
-    const updateTaskStatus = useCallback(async (task: TaskWithId, newStatus: TaskStatus) => {
+    const updateTaskStatus = useCallback(async (task: TaskWithId, newStatus: string) => {
         const { id, assigneeIds = [], activeAssigneeIndex = 0 } = task;
         const taskRef = doc(db, 'tasks', id);
 
-        let updateData: Partial<Task> = { status: newStatus };
+        let updateData: Partial<Task> = { status: newStatus as TaskStatus };
 
         // Admin workflow
         if (currentUser?.role === 'admin') {
-             if (newStatus === 'Reschedule') {
+             if (newStatus.startsWith('reschedule_')) {
+                const rescheduleValue = newStatus.split('_')[1];
                 updateData.status = 'Scheduled';
-                updateData.activeAssigneeIndex = 0;
+                if(rescheduleValue === 'all') {
+                    updateData.activeAssigneeIndex = 0;
+                } else {
+                    const assigneeIndex = parseInt(rescheduleValue, 10);
+                    if (!isNaN(assigneeIndex)) {
+                        updateData.activeAssigneeIndex = assigneeIndex;
+                    }
+                }
+            } else {
+                updateData.status = newStatus as TaskStatus;
             }
             await updateDoc(taskRef, updateData);
             return;
@@ -122,7 +132,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             updateData.status = 'For Approval';
         } else {
             // Just a regular status update for the current assignee
-            updateData.status = newStatus;
+            updateData.status = newStatus as TaskStatus;
         }
         
         await updateDoc(taskRef, updateData);

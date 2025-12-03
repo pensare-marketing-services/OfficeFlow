@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { Check, ChevronDown, ChevronUp } from "lucide-react"
+import { Check, ChevronDown, ChevronUp, ChevronRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -146,6 +146,45 @@ const SelectSeparator = React.forwardRef<
 ))
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName
 
+const SelectSub = SelectPrimitive.Sub
+
+const SelectSubTrigger = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.SubTrigger>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.SubTrigger>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.SubTrigger
+    ref={ref}
+    className={cn(
+      "flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-2 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <ChevronRight className="ml-auto h-4 w-4" />
+  </SelectPrimitive.SubTrigger>
+))
+SelectSubTrigger.displayName = SelectPrimitive.SubTrigger.displayName
+
+
+const SelectSubContent = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.SubContent>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.SubContent>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.SubContent
+    ref={ref}
+    className={cn(
+      "relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+      className
+    )}
+    {...props}
+  >
+    {children}
+  </SelectPrimitive.SubContent>
+))
+SelectSubContent.displayName = SelectPrimitive.SubContent.displayName
+
+
 export {
   Select,
   SelectGroup,
@@ -157,4 +196,7 @@ export {
   SelectSeparator,
   SelectScrollUpButton,
   SelectScrollDownButton,
+  SelectSub,
+  SelectSubTrigger,
+  SelectSubContent,
 }
