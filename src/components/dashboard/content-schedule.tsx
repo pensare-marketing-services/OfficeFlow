@@ -326,7 +326,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 const availableStatuses = getAvailableStatuses(task);
                                 
                                 const getDisplayedStatus = (): TaskStatus => {
-                                    if(task.status === 'Scheduled' && isEmployee && assigneeIds[0] !== currentUser?.uid) {
+                                    if(task.status === 'Scheduled' && isEmployee && !isMyTurn) {
                                        return 'Scheduled';
                                     }
                                     if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' && task.status !== 'Scheduled') {
@@ -376,7 +376,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         )}
                                     </TableCell>
                                     <TableCell className="p-1 border-r">
-                                         {wordCount > 10 ? (
+                                        {wordCount > 10 ? (
                                             <Dialog>
                                                 <DialogTrigger asChild>
                                                     <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1">
