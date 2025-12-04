@@ -251,12 +251,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         if (!currentUser) return;
 
         const newNote: Partial<ProgressNote> = {
-            note: note.note || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.name,
         };
 
+        if (note.note) {
+            newNote.note = note.note;
+        }
         if (note.imageUrl) {
             newNote.imageUrl = note.imageUrl;
         }
@@ -430,9 +432,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         {wordCount > 10 ? (
                                             <Dialog>
                                                 <DialogTrigger asChild>
-                                                    <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1">
-                                                        {descriptionPreview}... <span className="underline">Read more</span>
-                                                    </p>
+                                                    <div className="max-w-[200px]">
+                                                        <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1 truncate">
+                                                            {descriptionPreview}... <span className="underline">Read more</span>
+                                                        </p>
+                                                    </div>
                                                 </DialogTrigger>
                                                 <DialogContent className="sm:max-w-[60vw]">
                                                     <DialogHeader>
@@ -461,7 +465,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                     placeholder="Add a description..."
                                                 />
                                             ) : (
-                                                <p className="text-xs text-muted-foreground p-1">{task.description || '-'}</p>
+                                                 <div className="max-w-[200px]"><p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p></div>
                                             )
                                         )}
                                     </TableCell>
@@ -642,6 +646,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
 
 
