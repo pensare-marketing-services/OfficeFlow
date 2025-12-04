@@ -544,7 +544,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                         </SelectItem>
                                                     ))}
                                                 </SelectGroup>
-                                                {!availableStatuses.includes(displayedStatus as TaskStatus) && !allStatuses.includes(displayedStatus as TaskStatus) && (
+                                                {!availableStatuses.includes(displayedStatus as TaskStatus) && !allStatuses.includes(displayedStatus as TaskStatus) && displayedStatus !== 'Reschedule' &&(
                                                     <SelectItem value={displayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
                                                             <div className={cn("h-2 w-2 rounded-full", statusDotColors[displayedStatus])} />
@@ -642,6 +642,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
 
 
