@@ -429,45 +429,45 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         )}
                                     </TableCell>
                                      <TableCell className="p-2 border-r">
-                                        {wordCount > 10 ? (
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <div className="max-w-[200px]">
+                                        <div className="max-w-[200px]">
+                                            {wordCount > 10 ? (
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
                                                         <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1 truncate">
                                                             {descriptionPreview}... <span className="underline">Read more</span>
                                                         </p>
-                                                    </div>
-                                                </DialogTrigger>
-                                                <DialogContent className="sm:max-w-[60vw]">
-                                                    <DialogHeader>
-                                                        <DialogTitle>{task.title}</DialogTitle>
-                                                    </DialogHeader>
-                                                    {isEditable ? (
-                                                        <Textarea 
-                                                            defaultValue={task.description} 
-                                                            onBlur={(e) => handleFieldChange(task.id, 'description', e.target.value)} 
-                                                            className="h-48"
-                                                            placeholder="Add a detailed description..."
-                                                        />
-                                                    ) : (
-                                                        <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4 text-sm">
-                                                            {task.description}
-                                                        </div>
-                                                    )}
-                                                </DialogContent>
-                                            </Dialog>
-                                        ) : (
-                                            isEditable ? (
-                                                <EditableTableCell 
-                                                    value={task.description || ''} 
-                                                    onSave={(value) => handleFieldChange(task.id, 'description', value)}
-                                                    type="textarea"
-                                                    placeholder="Add a description..."
-                                                />
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-[60vw]">
+                                                        <DialogHeader>
+                                                            <DialogTitle>{task.title}</DialogTitle>
+                                                        </DialogHeader>
+                                                        {isEditable ? (
+                                                            <Textarea 
+                                                                defaultValue={task.description} 
+                                                                onBlur={(e) => handleFieldChange(task.id, 'description', e.target.value)} 
+                                                                className="h-48"
+                                                                placeholder="Add a detailed description..."
+                                                            />
+                                                        ) : (
+                                                            <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4 text-sm">
+                                                                {task.description}
+                                                            </div>
+                                                        )}
+                                                    </DialogContent>
+                                                </Dialog>
                                             ) : (
-                                                 <div className="max-w-[200px]"><p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p></div>
-                                            )
-                                        )}
+                                                isEditable ? (
+                                                    <EditableTableCell 
+                                                        value={task.description || ''} 
+                                                        onSave={(value) => handleFieldChange(task.id, 'description', value)}
+                                                        type="textarea"
+                                                        placeholder="Add a description..."
+                                                    />
+                                                ) : (
+                                                    <p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p>
+                                                )
+                                            )}
+                                        </div>
                                     </TableCell>
                                     <TableCell className="p-2 border-r">
                                         {isEditable ? (
@@ -646,6 +646,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
 
 
