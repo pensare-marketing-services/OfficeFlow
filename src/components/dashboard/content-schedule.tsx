@@ -426,7 +426,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             <div className="text-xs p-1 h-8 flex items-center truncate max-w-[150px]" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
-                                    <TableCell className="p-2 border-r">
+                                     <TableCell className="p-2 border-r">
                                         {wordCount > 10 ? (
                                             <Dialog>
                                                 <DialogTrigger asChild>
@@ -642,6 +642,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
 
 
