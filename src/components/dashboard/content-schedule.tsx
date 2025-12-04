@@ -427,7 +427,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         )}
                                     </TableCell>
                                     <TableCell className="p-2 border-r">
-                                        <div className="max-w-[200px] truncate whitespace-nowrap">
                                         {wordCount > 10 ? (
                                             <Dialog>
                                                 <DialogTrigger asChild>
@@ -447,11 +446,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                             placeholder="Add a detailed description..."
                                                         />
                                                     ) : (
-                                                        <DialogDescription asChild>
-                                                            <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
-                                                                {task.description}
-                                                            </div>
-                                                        </DialogDescription>
+                                                        <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4 text-sm">
+                                                            {task.description}
+                                                        </div>
                                                     )}
                                                 </DialogContent>
                                             </Dialog>
@@ -467,7 +464,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                 <p className="text-xs text-muted-foreground p-1">{task.description || '-'}</p>
                                             )
                                         )}
-                                        </div>
                                     </TableCell>
                                     <TableCell className="p-2 border-r">
                                         {isEditable ? (
@@ -646,4 +642,5 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
