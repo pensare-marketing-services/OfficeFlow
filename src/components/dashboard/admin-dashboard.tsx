@@ -24,13 +24,13 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
 
   const totalTasks = tasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
-  const completedTasks = tasks.filter(t => t.status === 'Done' || t.status === 'Approved' || t.status === 'Posted').length;
+  const completedTasks = tasks.filter(t => t.status === 'Approved' || t.status === 'Posted').length;
   
   const filteredTasks = useMemo(() => {
     if (viewMode !== 'tasks') return [];
     switch (taskFilter) {
       case 'completed':
-        return tasks.filter(t => t.status === 'Done' || t.status === 'Approved' || t.status === 'Posted');
+        return tasks.filter(t => t.status === 'Approved' || t.status === 'Posted');
       case 'total':
       default:
         return tasks;

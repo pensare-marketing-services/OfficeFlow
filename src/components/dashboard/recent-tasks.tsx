@@ -34,16 +34,14 @@ interface RecentTasksProps {
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
-const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
+const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    'Done': 'default',
     'Approved': 'default',
     'Posted': 'default',
-    'In Progress': 'secondary',
     'On Work': 'secondary',
     'For Approval': 'secondary',
     'To Do': 'outline',
@@ -150,7 +148,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
         }
     }
 
-  const employeeAllowedStatuses: TaskStatus[] = ['In Progress', 'For Approval'];
+  const employeeAllowedStatuses: TaskStatus[] = ['On Work', 'For Approval'];
 
   return (
     <>
@@ -185,7 +183,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
 
                 const isCompleted = completedStatuses.includes(task.status);
                 
-                const statusOptions: TaskStatus[] = ['In Progress', 'For Approval'];
+                const statusOptions: TaskStatus[] = ['On Work', 'For Approval'];
                 if (!statusOptions.includes(task.status)) {
                     statusOptions.unshift(task.status);
                 }

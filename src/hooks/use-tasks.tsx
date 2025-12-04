@@ -117,11 +117,11 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             
             if (newStatus === 'Ready for Next' && !isLastAssignee) {
                 updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
-                updateData.status = 'In Progress'; // Or keep it as is, depending on desired flow
+                updateData.status = 'On Work';
             } else if ((newStatus === 'For Approval' || newStatus === 'Ready for Next') && isLastAssignee) {
                 updateData.status = 'For Approval';
-            } else if (newStatus === 'In Progress') {
-                 updateData.status = 'In Progress';
+            } else if (newStatus === 'On Work') {
+                 updateData.status = 'On Work';
             }
         }
         else if (currentUser?.role === 'admin') {

@@ -27,17 +27,17 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
 
   if (!user) return null;
 
-  const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
+  const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
   
   const totalTasks = employeeTasks.length;
   const completedTasksCount = employeeTasks.filter(t => completedStatuses.includes(t.status)).length;
   const activeTasksCount = totalTasks - completedTasksCount;
-  const inProgressTasksCount = employeeTasks.filter(t => t.status === 'In Progress' || t.status === 'On Work').length;
+  const inProgressTasksCount = employeeTasks.filter(t => t.status === 'On Work').length;
   
   const filteredTasks = useMemo(() => {
     switch (taskFilter) {
       case 'inProgress':
-        return employeeTasks.filter(t => t.status === 'In Progress' || t.status === 'On Work');
+        return employeeTasks.filter(t => t.status === 'On Work');
       case 'completed':
         return employeeTasks.filter(t => completedStatuses.includes(t.status));
       case 'active':
@@ -72,7 +72,7 @@ export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }
             isActive={taskFilter === 'active'}
         />
         <StatsCard 
-            title="In Progress" 
+            title="On Work" 
             value={inProgressTasksCount} 
             icon={Hourglass} 
             variant="warning"

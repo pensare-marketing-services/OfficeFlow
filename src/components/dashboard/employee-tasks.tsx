@@ -20,10 +20,8 @@ interface EmployeeTasksProps {
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    'Done': 'default',
     'Approved': 'default',
     'Posted': 'default',
-    'In Progress': 'secondary',
     'On Work': 'secondary',
     'For Approval': 'secondary',
     'To Do': 'outline',
@@ -46,7 +44,7 @@ export default function EmployeeTasks({ tasks, users }: EmployeeTasksProps) {
     });
 
     tasks.forEach(task => {
-      task.assigneeIds.forEach(assigneeId => {
+      (task.assigneeIds || []).forEach(assigneeId => {
         if (assigneeId && employeeMap.has(assigneeId)) {
           employeeMap.get(assigneeId)!.tasks.push(task);
         }

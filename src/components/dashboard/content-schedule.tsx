@@ -28,8 +28,8 @@ type ClientWithId = Client & { id: string };
 
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 
-const allStatuses: TaskStatus[] = ['To Do', 'In Progress', 'Done', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
-const completedStatuses: Task['status'][] = ['Done', 'Posted', 'Approved'];
+const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
+const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
 const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
 
 interface ContentScheduleProps {
@@ -48,12 +48,10 @@ const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).jo
 
 const statusColors: Record<string, string> = {
     'To Do': 'bg-gray-500 text-white',
-    'In Progress': 'bg-blue-500 text-white',
     Scheduled: 'bg-cyan-500 text-white',
     'On Work': 'bg-yellow-500 text-black',
     'For Approval': 'bg-orange-500 text-white',
     Approved: 'bg-green-500 text-white',
-    Done: 'bg-green-500 text-white',
     Posted: 'bg-purple-500 text-white',
     Hold: 'bg-gray-500 text-white',
     'Ready for Next': 'bg-teal-500 text-white',
@@ -62,12 +60,10 @@ const statusColors: Record<string, string> = {
 
 const statusDotColors: Record<string, string> = {
     'To Do': 'bg-gray-500',
-    'In Progress': 'bg-blue-500',
     Scheduled: 'bg-cyan-500',
     'On Work': 'bg-yellow-500',
     'For Approval': 'bg-orange-500',
     Approved: 'bg-green-500',
-    Done: 'bg-green-500',
     Posted: 'bg-purple-500',
     Hold: 'bg-gray-500',
     'Ready for Next': 'bg-teal-500',
@@ -326,10 +322,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
 
         const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
         if (isLastAssignee) {
-            return ['In Progress', 'For Approval'];
+            return ['On Work', 'For Approval'];
         }
         
-        return ['In Progress', 'Ready for Next'];
+        return ['On Work', 'Ready for Next'];
     };
 
 
@@ -646,6 +642,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
 
 
