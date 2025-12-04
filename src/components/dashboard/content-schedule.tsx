@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -46,6 +47,20 @@ const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
 
 const statusColors: Record<string, string> = {
+    'To Do': 'bg-gray-500 text-white',
+    'In Progress': 'bg-blue-500 text-white',
+    Scheduled: 'bg-cyan-500 text-white',
+    'On Work': 'bg-yellow-500 text-black',
+    'For Approval': 'bg-orange-500 text-white',
+    Approved: 'bg-green-500 text-white',
+    Done: 'bg-green-500 text-white',
+    Posted: 'bg-purple-500 text-white',
+    Hold: 'bg-gray-500 text-white',
+    'Ready for Next': 'bg-teal-500 text-white',
+    'Reschedule': 'bg-rose-500 text-white',
+};
+
+const statusDotColors: Record<string, string> = {
     'To Do': 'bg-gray-500',
     'In Progress': 'bg-blue-500',
     Scheduled: 'bg-cyan-500',
@@ -380,7 +395,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
-                                    <TableCell className="p-1 border-r">
+                                    <TableCell className="p-2 border-r">
                                         <Popover>
                                             <PopoverTrigger asChild>
                                                 <Button
@@ -403,16 +418,16 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                    {showClient && <TableCell className="p-1 border-r font-medium">{client?.name || '-'}</TableCell>}
-                                    <TableCell className="p-1 border-r">
+                                    {showClient && <TableCell className="p-2 border-r font-medium">{client?.name || '-'}</TableCell>}
+                                    <TableCell className="p-2 border-r">
                                         {isEditable ? (
                                             <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Content Title"/>
                                         ) : (
                                             <div className="text-xs p-1 h-8 flex items-center truncate max-w-[150px]" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
-                                    <TableCell className="p-1 border-r max-w-[200px] truncate">
-                                        {wordCount > 10 ? (
+                                    <TableCell className="p-2 border-r max-w-[200px] truncate">
+                                         {wordCount > 10 ? (
                                             <Dialog>
                                                 <DialogTrigger asChild>
                                                     <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1">
@@ -424,10 +439,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                         <DialogTitle>{task.title}</DialogTitle>
                                                     </DialogHeader>
                                                      {isEditable ? (
-                                                        <EditableTableCell 
-                                                            value={task.description} 
-                                                            onSave={(value) => handleFieldChange(task.id, 'description', value)} 
-                                                            type="textarea"
+                                                         <Textarea 
+                                                            defaultValue={task.description} 
+                                                            onBlur={(e) => handleFieldChange(task.id, 'description', e.target.value)} 
+                                                            className="h-48"
                                                             placeholder="Add a detailed description..."
                                                         />
                                                     ) : (
@@ -452,7 +467,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             )
                                         )}
                                     </TableCell>
-                                    <TableCell className="p-1 border-r">
+                                    <TableCell className="p-2 border-r">
                                         {isEditable ? (
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                                 <SelectTrigger className="h-8 text-xs p-2"><SelectValue /></SelectTrigger>
@@ -464,7 +479,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             <div className="text-xs p-2 h-8 flex items-center">{task.contentType || '-'}</div>
                                         )}
                                     </TableCell>
-                                     <TableCell className="p-1 border-r">
+                                     <TableCell className="p-2 border-r">
                                         <div className="flex items-center gap-1">
                                             {[0, 1].map(i => (
                                                 <AssigneeSelect 
@@ -478,7 +493,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             ))}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="p-1 border-r text-center font-bold text-base">
+                                    <TableCell className="p-2 border-r text-center font-bold text-base">
                                       {isEditable ? (
                                         <Select
                                           value={task.priority}
@@ -499,17 +514,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         <div className="font-bold text-base flex items-center justify-center h-8">{priorityMap[task.priority]}</div>
                                        )}
                                     </TableCell>
-                                    <TableCell className="p-1 border-r">
+                                    <TableCell className="p-2 border-r">
                                         <Select 
                                             value={displayedStatus} 
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
                                             disabled={isEmployee && !isMyTurn && !isCompleted}
                                         >
-                                            <SelectTrigger className="h-8 text-xs p-2">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={cn("h-2 w-2 rounded-full", statusColors[displayedStatus])} />
-                                                    <SelectValue />
-                                                </div>
+                                            <SelectTrigger className={cn("h-8 text-xs p-2 border-0 focus:ring-0", statusColors[displayedStatus])}>
+                                                <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {isEditable && (
@@ -517,7 +529,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                         <SelectLabel>Actions</SelectLabel>
                                                         <SelectItem value="Reschedule">
                                                             <div className="flex items-center gap-2">
-                                                                <div className={cn("h-2 w-2 rounded-full", statusColors['Reschedule'])} />
+                                                                <div className={cn("h-2 w-2 rounded-full", statusDotColors['Reschedule'])} />
                                                                 Reschedule
                                                             </div>
                                                         </SelectItem>
@@ -528,7 +540,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                     {allStatuses.map(status => (
                                                         <SelectItem key={status} value={status} disabled={isEmployee && !availableStatuses.includes(status as TaskStatus)}>
                                                              <div className="flex items-center gap-2">
-                                                                <div className={cn("h-2 w-2 rounded-full", statusColors[status as TaskStatus])} />
+                                                                <div className={cn("h-2 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
                                                                 {status}
                                                             </div>
                                                         </SelectItem>
@@ -537,7 +549,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                 {!availableStatuses.includes(displayedStatus as TaskStatus) && !allStatuses.includes(displayedStatus as TaskStatus) && (
                                                     <SelectItem value={displayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
-                                                            <div className={cn("h-2 w-2 rounded-full", statusColors[displayedStatus])} />
+                                                            <div className={cn("h-2 w-2 rounded-full", statusDotColors[displayedStatus])} />
                                                             {displayedStatus} {displayedStatus === 'On Work' && `(${users.find(u => u.id === currentWorkerId)?.name.split(' ')[0] || '...'})`}
                                                         </div>
                                                     </SelectItem>
@@ -545,7 +557,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                    <TableCell className="p-1 text-center">
+                                    <TableCell className="p-2 text-center">
                                          <Popover onOpenChange={(open) => { if (!open) setNoteInput(''); }}>
                                             <PopoverTrigger asChild>
                                                 <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-8 w-8">
@@ -628,5 +640,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         </Card>
     );
 }
+
+    
 
     
