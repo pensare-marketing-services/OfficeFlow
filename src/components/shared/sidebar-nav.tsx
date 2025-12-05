@@ -96,10 +96,10 @@ export function SidebarNav() {
                                 <SidebarMenuItem key={client.id}>
                                     <Link href={`/clients/${client.id}`}>
                                         <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
-                                            <a>
+                                            <>
                                                 <Building />
                                                 <span>{client.name}</span>
-                                            </a>
+                                            </>
                                         </SidebarMenuSubButton>
                                     </Link>
                                 </SidebarMenuItem>
