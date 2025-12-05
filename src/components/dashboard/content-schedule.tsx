@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -21,6 +19,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, Dialog
 import { useToast } from '@/hooks/use-toast';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
+import { useTasks } from '@/hooks/use-tasks';
 
 
 type UserWithId = User & { id: string };
@@ -652,6 +651,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
 
 
