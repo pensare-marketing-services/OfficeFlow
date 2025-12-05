@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -399,6 +400,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 const wordCount = descriptionWords.length;
                                 const descriptionPreview = descriptionWords.slice(0, 10).join(' ');
 
+                                const hasUnreadMessage = (task.progressNotes?.length ?? 0) > 0 && task.progressNotes?.[task.progressNotes.length - 1].authorId !== currentUser?.uid;
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
@@ -569,6 +571,12 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             <PopoverTrigger asChild>
                                                 <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-8 w-8">
                                                     <MessageSquare className="h-4 w-4" />
+                                                     {hasUnreadMessage && (
+                                                        <span className="absolute top-1 right-1 flex h-2 w-2">
+                                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                                        </span>
+                                                     )}
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-80" side="left" align="end">
@@ -663,3 +671,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
 
 
 
+
+
+    
