@@ -84,7 +84,9 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
     }, [value]);
     
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        onSave(e.target.value);
+        if(e.target.value !== value) {
+            onSave(e.target.value);
+        }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -226,6 +228,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     };
     
     const handleLocalStatusChange = (task: Task & { id: string }, newStatus: string) => {
+        if (newStatus === 'Reschedule') {
+             if (currentUser?.role === 'admin') {
+                updateTaskStatus(task, newStatus);
+             }
+             return;
+        }
+
         if (onStatusChange) {
             onStatusChange(task, newStatus);
         } else {
@@ -328,6 +337,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         return ['On Work', 'Ready for Next'];
     };
 
+    const { updateTaskStatus } = useTasks();
 
     if (tasks.length === 0) {
         return (
@@ -544,7 +554,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                         </SelectItem>
                                                     ))}
                                                 </SelectGroup>
-                                                {!availableStatuses.includes(displayedStatus as TaskStatus) && !allStatuses.includes(displayedStatus as TaskStatus) && displayedStatus !== 'Reschedule' &&(
+                                                {![...allStatuses, "Reschedule"].includes(displayedStatus as TaskStatus) && (
                                                     <SelectItem value={displayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
                                                             <div className={cn("h-2 w-2 rounded-full", statusDotColors[displayedStatus])} />
@@ -642,6 +652,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
 
 
