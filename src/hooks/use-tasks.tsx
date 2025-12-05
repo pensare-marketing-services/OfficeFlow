@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import type { Task, UserProfile, TaskStatus } from '@/lib/data';
-import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query, orderBy, getDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
 
@@ -71,14 +72,24 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const updateTask = useCallback(async (taskId: string, taskUpdate: Partial<Task>) => {
         try {
             const taskRef = doc(db, 'tasks', taskId);
-            const dataToUpdate = { ...taskUpdate };
             
-            // Firestore doesn't support `undefined` values.
-            if (dataToUpdate.description === undefined) {
-                dataToUpdate.description = '';
+            // To prevent overwriting data, fetch the latest document first
+            const docSnap = await getDoc(taskRef);
+            if (docSnap.exists()) {
+                const existingData = docSnap.data();
+                const dataToUpdate = { ...existingData, ...taskUpdate };
+
+                 // Firestore doesn't support `undefined` values.
+                if (dataToUpdate.description === undefined) {
+                    dataToUpdate.description = existingData.description || '';
+                }
+                
+                await updateDoc(taskRef, dataToUpdate);
+
+            } else {
+                 await updateDoc(taskRef, taskUpdate);
             }
 
-            await updateDoc(taskRef, dataToUpdate);
         } catch (e) {
             console.error("Error updating document: ", e);
             setError(new Error('Failed to update task. Please check your network connection.'));

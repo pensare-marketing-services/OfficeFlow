@@ -176,6 +176,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     const { toast } = useToast();
     const [clients, setClients] = useState<ClientWithId[]>([]);
     const [sortConfig, setSortConfig] = useState<{ key: 'priority'; direction: 'ascending' | 'descending' } | null>(null);
+    const [openedChats, setOpenedChats] = useState<Set<string>>(new Set());
 
     const sortedTasks = useMemo(() => {
         let sortableTasks = [...tasks];
@@ -267,6 +268,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
         if (note.imageUrl) {
             newNote.imageUrl = note.imageUrl;
         }
+        
+        // Reset opened state for all users except sender
+        setOpenedChats(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(task.id);
+            return newSet;
+        });
 
         handleFieldChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
     }
@@ -314,6 +322,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
 
     const handleClearChat = (taskId: string) => {
         handleFieldChange(taskId, 'progressNotes', []);
+    }
+
+    const handlePopoverOpen = (taskId: string) => {
+        setOpenedChats(prev => new Set(prev.add(taskId)));
+        setNoteInput('');
     }
 
     const employeeUsers = useMemo(() => {
@@ -400,7 +413,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                 const wordCount = descriptionWords.length;
                                 const descriptionPreview = descriptionWords.slice(0, 10).join(' ');
 
-                                const hasUnreadMessage = (task.progressNotes?.length ?? 0) > 0 && task.progressNotes?.[task.progressNotes.length - 1].authorId !== currentUser?.uid;
+                                const lastNote = (task.progressNotes?.length ?? 0) > 0 ? task.progressNotes![task.progressNotes!.length - 1] : null;
+                                const hasUnreadMessage = lastNote && lastNote.authorId !== currentUser?.uid && !openedChats.has(task.id);
+
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
@@ -567,7 +582,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         </Select>
                                     </TableCell>
                                     <TableCell className="p-2 text-center">
-                                         <Popover onOpenChange={(open) => { if (!open) setNoteInput(''); }}>
+                                         <Popover onOpenChange={(open) => { if (open) handlePopoverOpen(task.id); }}>
                                             <PopoverTrigger asChild>
                                                 <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-8 w-8">
                                                     <MessageSquare className="h-4 w-4" />
