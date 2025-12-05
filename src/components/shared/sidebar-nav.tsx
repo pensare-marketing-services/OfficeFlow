@@ -43,9 +43,13 @@ export function SidebarNav() {
   return (
     <>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
             <AppLogo />
             <span className="font-headline text-lg font-semibold text-sidebar-foreground">OfficeFlow</span>
+        </div> */}
+         <div className="items-center">
+            <AppLogo />
+           
         </div>
       </SidebarHeader>
       <SidebarContent className="p-2">
@@ -58,7 +62,7 @@ export function SidebarNav() {
                        <CollapsibleTrigger asChild>
                            <SidebarMenuButton isActive={pathname.startsWith('/clients')} className="group justify-between">
                               <span className='flex items-center gap-2'>
-                                <item.icon />
+                                <item.icon className="h-4 w-4"/>
                                 <span>{item.label}</span>
                               </span>
                               <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />

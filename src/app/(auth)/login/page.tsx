@@ -27,7 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
-import { AppLogo } from '@/components/shared/app-logo';
+import { AppLogo, AppLogoBlack } from '@/components/shared/app-logo';
 
 
 const loginSchema = z.object({
@@ -67,8 +67,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
        <div className="absolute top-8 left-8 flex items-center gap-2">
-            <AppLogo />
-            <span className="font-headline text-lg font-semibold text-foreground">OfficeFlow</span>
+       <AppLogoBlack />
+            {/* <span className="font-headline text-lg font-semibold text-foreground">OfficeFlow</span> */}
         </div>
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader>
