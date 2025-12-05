@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TaskProvider } from '@/hooks/use-tasks';
+import { UserProvider } from '@/hooks/use-users';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -34,16 +35,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <TaskProvider>
-      <SidebarProvider>
-        <Sidebar>
-          <SidebarNav />
-        </Sidebar>
-        <SidebarInset>
-          <Header />
-          <main className="p-4 sm:p-6 lg:p-8">{children}</main>
-        </SidebarInset>
-      </SidebarProvider>
-    </TaskProvider>
+    <UserProvider>
+      <TaskProvider>
+        <SidebarProvider>
+          <Sidebar>
+            <SidebarNav />
+          </Sidebar>
+          <SidebarInset>
+            <Header />
+            <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+          </SidebarInset>
+        </SidebarProvider>
+      </TaskProvider>
+    </UserProvider>
   );
 }

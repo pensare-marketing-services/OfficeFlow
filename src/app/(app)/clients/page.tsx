@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
 import { Input } from '@/components/ui/input';
 import { Pen } from 'lucide-react';
+import { useUsers } from '@/hooks/use-users';
 
 
 type UserWithId = User & { id: string };
@@ -64,7 +65,8 @@ const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }
 
 export default function ClientsPage() {
     const { user: currentUser } = useAuth();
-    const { tasks, users, addTask, updateTask, loading: tasksLoading } = useTasks();
+    const { tasks, addTask, updateTask, loading: tasksLoading } = useTasks();
+    const { users, loading: usersLoading } = useUsers();
     const [clients, setClients] = useState<ClientWithId[]>([]);
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -96,7 +98,7 @@ export default function ClientsPage() {
         } else if (clients.length === 0) {
             setSelectedClientId(null);
         }
-    }, [clients, loading]);
+    }, [clients, selectedClientId, loading]);
 
     const selectedClient = useMemo(() => {
         if (!selectedClientId) return null;
@@ -138,7 +140,7 @@ export default function ClientsPage() {
         return tasks.filter(task => task.clientId === selectedClient.id);
     }, [tasks, selectedClient]);
 
-    const pageLoading = loading || tasksLoading;
+    const pageLoading = loading || tasksLoading || usersLoading;
 
     return (
         <div className="space-y-0">

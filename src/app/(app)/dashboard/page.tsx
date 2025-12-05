@@ -7,12 +7,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
 import { useTasks } from '@/hooks/use-tasks';
 import type { Task, UserProfile } from '@/lib/data';
+import { useUsers } from '@/hooks/use-users';
 
 export default function DashboardPage() {
   const { user, loading: userLoading } = useAuth();
-  const { tasks, users, loading: tasksLoading, updateTask } = useTasks();
+  const { tasks, loading: tasksLoading, updateTask } = useTasks();
+  const { users, loading: usersLoading } = useUsers();
   
-  const finalLoading = userLoading || tasksLoading;
+  const finalLoading = userLoading || tasksLoading || usersLoading;
 
   const handleTaskUpdate = (taskId: string, updatedData: Partial<Task>) => {
     updateTask(taskId, updatedData);

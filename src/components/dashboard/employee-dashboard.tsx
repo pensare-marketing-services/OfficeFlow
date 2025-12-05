@@ -8,6 +8,7 @@ import { StatsCard } from './stats-card';
 import { ClipboardList, CheckCircle2, Hourglass } from 'lucide-react';
 import ContentSchedule from './content-schedule';
 import { useTasks } from '@/hooks/use-tasks';
+import { useUsers } from '@/hooks/use-users';
 
 type UserWithId = User & { id: string };
 
@@ -19,10 +20,11 @@ interface EmployeeDashboardProps {
 
 type TaskFilter = 'active' | 'inProgress' | 'completed';
 
-export default function EmployeeDashboard({ employeeTasks, users, onTaskUpdate }: EmployeeDashboardProps) {
+export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: EmployeeDashboardProps) {
   const { user } = useAuth();
   const [taskFilter, setTaskFilter] = useState<TaskFilter>('active');
   const { updateTaskStatus } = useTasks();
+  const { users } = useUsers();
 
 
   if (!user) return null;

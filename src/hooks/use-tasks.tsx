@@ -6,12 +6,10 @@ import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query,
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
 
-type UserWithId = UserProfile & { id: string };
 type TaskWithId = Task & { id: string };
 
 interface TaskContextType {
     tasks: TaskWithId[];
-    users: UserWithId[];
     loading: boolean;
     error: Error | null;
     addTask: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
@@ -24,14 +22,12 @@ const TaskContext = createContext<TaskContextType | undefined>(undefined);
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { user: currentUser } = useAuth();
     const [tasks, setTasks] = useState<TaskWithId[]>([]);
-    const [users, setUsers] = useState<UserWithId[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
         if (!currentUser?.uid) {
             setTasks([]);
-            setUsers([]);
             setLoading(false);
             return;
         }
@@ -40,7 +36,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setError(null);
         
         const tasksQuery = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'));
-        const usersQuery = query(collection(db, 'users'), orderBy('name', 'asc'));
 
         const unsubTasks = onSnapshot(tasksQuery, (snapshot) => {
             const tasksData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as TaskWithId));
@@ -53,18 +48,8 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setLoading(false);
         });
 
-        const unsubUsers = onSnapshot(usersQuery, (snapshot) => {
-            const usersData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as UserWithId));
-            setUsers(usersData);
-        }, (err: any) => {
-            console.error("Users subscription error:", err);
-             setError(new Error('Failed to load users. A browser extension (like an ad blocker) might be blocking network requests to Firebase. Please disable it for this site and refresh the page.'));
-            setLoading(false);
-        });
-
         return () => {
             unsubTasks();
-            unsubUsers();
         };
 
     }, [currentUser?.uid]);
@@ -156,7 +141,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const value = {
         tasks,
-        users,
         loading,
         error,
         addTask,

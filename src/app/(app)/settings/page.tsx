@@ -6,7 +6,7 @@ import AddEmployeeForm from '@/components/settings/add-employee-form';
 import AddClientForm from '@/components/settings/add-client-form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useTasks } from '@/hooks/use-tasks';
+import { useUsers } from '@/hooks/use-users';
 import { Skeleton } from '@/components/ui/skeleton';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
@@ -17,7 +17,7 @@ const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).jo
 type ClientWithId = Client & { id: string };
 
 export default function SettingsPage() {
-    const { users, loading: usersLoading, error } = useTasks();
+    const { users, loading: usersLoading, error } = useUsers();
     const [clients, setClients] = useState<ClientWithId[]>([]);
     const [clientsLoading, setClientsLoading] = useState(true);
 
