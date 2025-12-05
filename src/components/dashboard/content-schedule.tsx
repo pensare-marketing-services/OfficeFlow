@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -419,7 +420,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
-                                    <TableCell className="p-2 border-r">
+                                    <TableCell className="py-1 px-2 border-r">
                                         <Popover>
                                             <PopoverTrigger asChild>
                                                 <Button
@@ -442,15 +443,15 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                    {showClient && <TableCell className="p-2 border-r font-medium">{client?.name || '-'}</TableCell>}
-                                    <TableCell className="p-2 border-r">
+                                    {showClient && <TableCell className="py-1 px-2 border-r font-medium">{client?.name || '-'}</TableCell>}
+                                    <TableCell className="py-1 px-2 border-r">
                                         {isEditable ? (
                                             <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Content Title"/>
                                         ) : (
                                             <div className="text-xs p-1 h-8 flex items-center truncate max-w-[150px]" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
-                                     <TableCell className="p-2 border-r">
+                                     <TableCell className="py-1 px-2 border-r">
                                         <div className="max-w-[200px]">
                                             {wordCount > 10 ? (
                                                 <Dialog>
@@ -491,7 +492,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             )}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="p-2 border-r">
+                                    <TableCell className="py-1 px-2 border-r">
                                         {isEditable ? (
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                                 <SelectTrigger className="h-8 text-xs p-2"><SelectValue /></SelectTrigger>
@@ -503,7 +504,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             <div className="text-xs p-2 h-8 flex items-center">{task.contentType || '-'}</div>
                                         )}
                                     </TableCell>
-                                     <TableCell className="p-2 border-r">
+                                     <TableCell className="py-1 px-2 border-r">
                                         <div className="flex items-center gap-1">
                                             {[0, 1].map(i => (
                                                 <AssigneeSelect 
@@ -517,7 +518,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             ))}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="p-2 border-r text-center font-bold text-base">
+                                    <TableCell className="py-1 px-2 border-r text-center font-bold text-base">
                                       {isEditable ? (
                                         <Select
                                           value={task.priority}
@@ -538,7 +539,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         <div className="font-bold text-base flex items-center justify-center h-8">{priorityMap[task.priority]}</div>
                                        )}
                                     </TableCell>
-                                    <TableCell className="p-2 border-r">
+                                    <TableCell className="py-1 px-2 border-r">
                                         <Select 
                                             value={displayedStatus} 
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
@@ -581,7 +582,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                    <TableCell className="p-2 text-center">
+                                    <TableCell className="py-1 px-2 text-center">
                                          <Popover onOpenChange={(open) => { if (open) handlePopoverOpen(task.id); }}>
                                             <PopoverTrigger asChild>
                                                 <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-8 w-8">
@@ -689,3 +690,4 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
 
 
     
+
