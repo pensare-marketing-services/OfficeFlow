@@ -11,7 +11,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Briefcase, PanelLeftClose, PanelRightClose, Building } from 'lucide-react';
+import { LayoutDashboard, Settings, Briefcase, PanelLeftClose, PanelRightClose, Building, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { useClients } from '@/hooks/use-clients';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { Skeleton } from '../ui/skeleton';
+import { cn } from '@/lib/utils';
 
 
 const navItems = [
@@ -73,12 +74,13 @@ export function SidebarNav() {
               return (
                  <Collapsible key={item.name} className="w-full">
                     <SidebarMenuItem>
-                       <CollapsibleTrigger className="w-full">
-                           <SidebarMenuButton asChild isActive={pathname.startsWith('/clients')} className="justify-between">
-                              <span>
+                       <CollapsibleTrigger asChild>
+                           <SidebarMenuButton isActive={pathname.startsWith('/clients')} className="justify-between">
+                              <span className='flex items-center gap-2'>
                                 <item.icon />
                                 <span>{item.label}</span>
                               </span>
+                              <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
                            </SidebarMenuButton>
                         </CollapsibleTrigger>
                     </SidebarMenuItem>
@@ -92,12 +94,12 @@ export function SidebarNav() {
                             )}
                             {clients.map(client => (
                                 <SidebarMenuItem key={client.id}>
-                                    <Link href={`/clients/${client.id}`} legacyBehavior={false} passHref>
+                                    <Link href={`/clients/${client.id}`} passHref>
                                         <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
-                                            <span>
+                                            <a>
                                                 <Building />
                                                 <span>{client.name}</span>
-                                            </span>
+                                            </a>
                                         </SidebarMenuSubButton>
                                     </Link>
                                 </SidebarMenuItem>
