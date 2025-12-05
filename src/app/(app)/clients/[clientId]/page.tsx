@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
@@ -55,14 +56,15 @@ const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }
     );
 };
 
-export default function ClientIdPage({ params }: { params: { clientId: string } }) {
+export default function ClientIdPage() {
     const { user: currentUser } = useAuth();
     const { tasks, addTask, updateTask, loading: tasksLoading } = useTasks();
     const { users, loading: usersLoading } = useUsers();
     const [client, setClient] = useState<ClientWithId | null>(null);
     const [loading, setLoading] = useState(true);
     
-    const { clientId } = params;
+    const params = useParams();
+    const clientId = params.clientId as string;
 
     useEffect(() => {
         if (!clientId) return;
