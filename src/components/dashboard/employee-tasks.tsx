@@ -62,7 +62,7 @@ export default function EmployeeTasks({ tasks, users }: EmployeeTasksProps) {
             <AccordionTrigger className="hover:no-underline px-6">
               <div className="flex items-center gap-4 w-full">
                 <Avatar>
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  
                   <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left">

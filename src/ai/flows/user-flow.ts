@@ -68,7 +68,7 @@ export async function createUser(data: CreateUserInput): Promise<{ uid: string }
     name: { stringValue: name },
     email: { stringValue: email },
     role: { stringValue: role },
-    avatar: { stringValue: `https://picsum.photos/seed/${uid}/200/200` },
+    
   };
 
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;

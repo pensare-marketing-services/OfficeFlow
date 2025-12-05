@@ -79,7 +79,7 @@ export default function SettingsPage() {
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-8 w-8">
-                                                        <AvatarImage src={employee.avatar} />
+                                                        
                                                         <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
                                                     </Avatar>
                                                     <span className="font-medium">{employee.name}</span>

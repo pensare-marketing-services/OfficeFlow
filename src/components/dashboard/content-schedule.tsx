@@ -124,7 +124,7 @@ const AssigneeSelect = ({
         return selectedUser ? (
              <div className="flex items-center gap-1 truncate w-[120px] p-2 h-8 text-xs">
                 <Avatar className="h-5 w-5">
-                    <AvatarImage src={selectedUser.avatar} />
+                    
                     <AvatarFallback>{getInitials(selectedUser.name)}</AvatarFallback>
                 </Avatar>
                 <span className="truncate">{selectedUser.name}</span>
@@ -143,7 +143,7 @@ const AssigneeSelect = ({
                 {selectedUser ? (
                     <div className="flex items-center gap-1 truncate">
                         <Avatar className="h-5 w-5">
-                            <AvatarImage src={selectedUser.avatar} />
+                            
                             <AvatarFallback>{getInitials(selectedUser.name)}</AvatarFallback>
                         </Avatar>
                         <span className="truncate">{selectedUser.name}</span>
@@ -156,7 +156,7 @@ const AssigneeSelect = ({
                     <SelectItem key={user.id} value={user.id}>
                         <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6">
-                                <AvatarImage src={user.avatar} />
+                                
                                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                             </Avatar>
                             <span className="text-xs">{user.name}</span>
@@ -586,12 +586,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                         {(task.progressNotes || []).map((note, i) => {
                                                             const author = users.find(u => u.id === note.authorId);
                                                             const authorName = author ? author.name : note.authorName;
-                                                            const authorAvatar = author ? author.avatar : '';
                                                             return (
                                                                 <div key={i} className={cn("flex items-start gap-2 text-xs", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                     {note.authorId !== currentUser?.uid && (
                                                                         <Avatar className="h-6 w-6 border">
-                                                                            <AvatarImage src={authorAvatar} />
+                                                                            
                                                                             <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
                                                                         </Avatar>
                                                                     )}
@@ -616,7 +615,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                                     </div>
                                                                     {note.authorId === currentUser?.uid && (
                                                                         <Avatar className="h-6 w-6 border">
-                                                                            <AvatarImage src={currentUser?.avatar} />
+                                                                            
                                                                             <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
                                                                         </Avatar>
                                                                     )}
@@ -651,6 +650,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     
 
     
+
 
 
 

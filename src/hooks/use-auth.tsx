@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     name: firebaseUser.displayName || firebaseUser.email || 'New User',
                     email: firebaseUser.email!,
                     role: 'employee', // Default role
-                    avatar: firebaseUser.photoURL || `https://picsum.photos/seed/${firebaseUser.uid}/200/200`
+                    
                 };
 
                 try {

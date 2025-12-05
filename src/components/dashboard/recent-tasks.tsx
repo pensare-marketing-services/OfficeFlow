@@ -226,7 +226,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                             <div className="flex -space-x-2">
                               {assignees.map(assignee => (
                                 <Avatar key={assignee.id} className="h-8 w-8 border-2 border-background">
-                                  <AvatarImage src={assignee.avatar} />
+                                  
                                   <AvatarFallback>{getInitials(assignee.name)}</AvatarFallback>
                                 </Avatar>
                               ))}
@@ -291,12 +291,11 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                 {(task.progressNotes || []).map((note, i) => {
                                                     const author = users.find(u => u.id === note.authorId);
                                                     const authorName = author ? author.name : (note.authorName || '');
-                                                    const authorAvatar = author ? author.avatar : '';
                                                     return (
                                                         <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                             {note.authorId !== currentUser?.uid && (
                                                                     <Avatar className="h-8 w-8 border">
-                                                                    <AvatarImage src={authorAvatar} />
+                                                                    
                                                                     <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
                                                                 </Avatar>
                                                             )}
@@ -321,7 +320,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                                                             </div>
                                                                 {note.authorId === currentUser?.uid && (
                                                                     <Avatar className="h-8 w-8 border">
-                                                                    <AvatarImage src={currentUser?.avatar} />
+                                                                    
                                                                     <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
                                                                 </Avatar>
                                                             )}

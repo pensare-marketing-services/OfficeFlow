@@ -21,11 +21,6 @@
             "employee"
           ],
           "description": "The user's role in the system."
-        },
-        "avatar": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL to the user's profile picture."
         }
       },
       "required": [
