@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['"Montserrat"', 'sans-serif'],
+        body: ['"Giga Sans"', 'sans-serif'],
         headline: ['"Poppins"', 'sans-serif'],
         code: ['monospace'],
       },

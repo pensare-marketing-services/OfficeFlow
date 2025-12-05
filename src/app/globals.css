@@ -3,6 +3,35 @@
 @tailwind utilities;
 
 @layer base {
+  @font-face {
+    font-family: 'Giga Sans';
+    src: url('/fonts/GigaSans-Regular.woff2') format('woff2'),
+         url('/fonts/GigaSans-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Giga Sans';
+    src: url('/fonts/GigaSans-SemiBold.woff2') format('woff2'),
+         url('/fonts/GigaSans-SemiBold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: 'Giga Sans';
+    src: url('/fonts/GigaSans-Bold.woff2') format('woff2'),
+         url('/fonts/GigaSans-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+}
+
+@layer base {
   :root {
     --background: 180 8% 97%;
     --foreground: 210 25% 15%;
