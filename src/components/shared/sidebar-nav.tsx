@@ -56,7 +56,7 @@ export function SidebarNav() {
                  <Collapsible key={item.name} className="w-full">
                     <SidebarMenuItem>
                        <CollapsibleTrigger asChild>
-                           <SidebarMenuButton isActive={pathname.startsWith('/clients')} className="justify-between">
+                           <SidebarMenuButton isActive={pathname.startsWith('/clients')} className="group justify-between">
                               <span className='flex items-center gap-2'>
                                 <item.icon />
                                 <span>{item.label}</span>
@@ -75,8 +75,8 @@ export function SidebarNav() {
                             )}
                             {clients.map(client => (
                                 <SidebarMenuItem key={client.id}>
-                                    <Link href={`/clients/${client.id}`} legacyBehavior passHref>
-                                        <SidebarMenuSubButton as="a" isActive={pathname === `/clients/${client.id}`}>
+                                    <Link href={`/clients/${client.id}`}>
+                                        <SidebarMenuSubButton isActive={pathname === `/clients/${client.id}`}>
                                             <Building />
                                             <span>{client.name}</span>
                                         </SidebarMenuSubButton>

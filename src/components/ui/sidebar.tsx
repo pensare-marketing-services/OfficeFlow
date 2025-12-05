@@ -708,13 +708,13 @@ SidebarMenuSubItem.displayName = "SidebarMenuSubItem"
 
 const SidebarMenuSubButton = React.forwardRef<
   HTMLAnchorElement,
-  React.ComponentProps<typeof Link> & {
+  React.ComponentProps<"a"> & {
     size?: "sm" | "md"
     isActive?: boolean
   }
 >(({ size = "md", isActive, className, children, ...props }, ref) => {
   return (
-    <Link
+    <a
       ref={ref}
       data-sidebar="menu-sub-button"
       data-size={size}
@@ -730,7 +730,7 @@ const SidebarMenuSubButton = React.forwardRef<
       {...props}
     >
       {children}
-    </Link>
+    </a>
   )
 })
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton"
