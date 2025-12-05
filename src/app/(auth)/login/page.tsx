@@ -63,7 +63,7 @@ export default function LoginPage() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: 'admin@officeflow.com', password: 'password' },
+    defaultValues: { email: '', password: 'password' },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -111,7 +111,7 @@ export default function LoginPage() {
                             <FormItem>
                                 <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g., admin@officeflow.com" {...field} />
+                                    <Input placeholder="Enter your email" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
