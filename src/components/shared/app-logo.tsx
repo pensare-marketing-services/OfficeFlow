@@ -1,9 +1,9 @@
-import { Building2 } from 'lucide-react';
+import Image from 'next/image';
 
 export function AppLogo() {
     return (
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Building2 className="h-6 w-6" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+            <Image src="/app-logo.png" alt="OfficeFlow Logo" width={24} height={24} />
         </div>
     );
 }
