@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['"Merriweather"', 'serif'],
+        body: ['"Noto Sans Thaana"', 'serif'],
         headline: ['"Poppins"', 'sans-serif'],
         code: ['monospace'],
       },
