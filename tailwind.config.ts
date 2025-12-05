@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['"Noto Sans Thaana"', 'sans-serif'],
+        body: ['"Montserrat"', 'sans-serif'],
         headline: ['"Poppins"', 'sans-serif'],
         code: ['monospace'],
       },
