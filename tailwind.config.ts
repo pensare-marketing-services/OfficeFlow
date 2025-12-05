@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['"Ubuntu"', 'sans-serif'],
+        body: ['"Merriweather"', 'serif'],
         headline: ['"Poppins"', 'sans-serif'],
         code: ['monospace'],
       },
