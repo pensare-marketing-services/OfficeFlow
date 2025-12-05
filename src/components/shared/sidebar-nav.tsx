@@ -92,10 +92,12 @@ export function SidebarNav() {
                             )}
                             {clients.map(client => (
                                 <SidebarMenuItem key={client.id}>
-                                    <Link href={`/clients/${client.id}`}>
-                                        <SidebarMenuSubButton isActive={pathname === `/clients/${client.id}`}>
-                                            <Building />
-                                            <span>{client.name}</span>
+                                    <Link href={`/clients/${client.id}`} legacyBehavior={false} passHref>
+                                        <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
+                                            <span>
+                                                <Building />
+                                                <span>{client.name}</span>
+                                            </span>
                                         </SidebarMenuSubButton>
                                     </Link>
                                 </SidebarMenuItem>
