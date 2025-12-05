@@ -8,16 +8,22 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Briefcase, PanelLeftClose, PanelRightClose } from 'lucide-react';
+import { LayoutDashboard, Settings, Briefcase, PanelLeftClose, PanelRightClose, Building } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { useClients } from '@/hooks/use-clients';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { Skeleton } from '../ui/skeleton';
+
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { href: '/clients', label: 'Clients', icon: Briefcase, adminOnly: true },
+  { name: 'clients', label: 'Clients', icon: Briefcase, adminOnly: true },
   { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true },
 ];
 
@@ -43,7 +49,7 @@ function OfficeIcon(props: React.SVGProps<SVGSVGElement>) {
 export function SidebarNav() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { toggleSidebar, state } = useSidebar();
+  const { clients, loading: clientsLoading } = useClients();
 
   const filteredNavItems = navItems.filter(item => {
     if (!item.adminOnly) return true;
@@ -62,24 +68,65 @@ export function SidebarNav() {
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
-          {filteredNavItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <Link href={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith(item.href)}
-                    tooltip={{
-                      children: item.label,
-                    }}
-                  >
-                      <span>
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </span>
-                  </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          ))}
+          {filteredNavItems.map((item) => {
+            if (item.name === 'clients') {
+              return (
+                 <Collapsible key={item.name} className="w-full">
+                    <SidebarMenuItem>
+                       <CollapsibleTrigger className="w-full">
+                           <SidebarMenuButton asChild isActive={pathname.startsWith('/clients')} className="justify-between">
+                              <span>
+                                <item.icon />
+                                <span>{item.label}</span>
+                              </span>
+                           </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                    </SidebarMenuItem>
+                    <CollapsibleContent>
+                       <SidebarMenuSub>
+                           {clientsLoading && (
+                                <>
+                                    <Skeleton className="h-7 w-full" />
+                                    <Skeleton className="h-7 w-full" />
+                                </>
+                            )}
+                            {clients.map(client => (
+                                <SidebarMenuItem key={client.id}>
+                                    <Link href={`/clients/${client.id}`} legacyBehavior passHref>
+                                        <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
+                                            <a>
+                                                <Building />
+                                                <span>{client.name}</span>
+                                            </a>
+                                        </SidebarMenuSubButton>
+                                    </Link>
+                                </SidebarMenuItem>
+                            ))}
+                       </SidebarMenuSub>
+                    </CollapsibleContent>
+                 </Collapsible>
+              )
+            }
+            
+            return (
+              <SidebarMenuItem key={item.href}>
+                <Link href={item.href!}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith(item.href!)}
+                      tooltip={{
+                        children: item.label,
+                      }}
+                    >
+                        <span>
+                          <item.icon />
+                          <span>{item.label}</span>
+                        </span>
+                    </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
       </SidebarContent>
     </>
