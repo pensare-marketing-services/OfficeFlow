@@ -565,7 +565,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                                     {allStatuses.map(status => (
                                                         <SelectItem key={status} value={status} disabled={isEmployee && !availableStatuses.includes(status as TaskStatus)}>
                                                              <div className="flex items-center gap-2">
-                                                                <div className={cn("h-2 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
+                                                                <div className={cn("h-3 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
                                                                 {status}
                                                             </div>
                                                         </SelectItem>
