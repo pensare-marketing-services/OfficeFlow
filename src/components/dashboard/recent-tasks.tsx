@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { Task, UserProfile as User, ProgressNote, Client, TaskStatus } from '@/lib/data';
@@ -20,6 +21,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useToast } from '@/hooks/use-toast';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 
 type UserWithId = User & { id: string };
@@ -30,6 +33,7 @@ interface RecentTasksProps {
   users: UserWithId[];
   title: string;
   onTaskUpdate?: (taskId: string, updatedData: Partial<Task>) => void;
+  onTaskDelete?: (taskId: string) => void;
 }
 
 const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
@@ -56,7 +60,7 @@ const priorityMap: Record<Task['priority'], number> = {
 };
 
 
-export default function RecentTasks({ tasks, users, title, onTaskUpdate }: RecentTasksProps) {
+export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskDelete }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
   const [clients, setClients] = useState<ClientWithId[]>([]);
   const [noteInput, setNoteInput] = useState('');
@@ -149,6 +153,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
     }
 
   const employeeAllowedStatuses: TaskStatus[] = ['On Work', 'For Approval'];
+  const isAdmin = currentUser?.role === 'admin';
 
   return (
     <>
@@ -156,7 +161,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
       <CardHeader>
         <CardTitle className="font-headline">{title}</CardTitle>
         <CardDescription>
-            { currentUser?.role === 'admin' ? "An overview of the latest tasks across the company." : "Your most recent tasks."}
+            { isAdmin ? "An overview of the latest tasks across the company." : "Your most recent tasks."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -165,7 +170,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
             <TableRow>
               <TableHead>Task</TableHead>
                <TableHead>Client</TableHead>
-               {currentUser?.role === 'admin' && <TableHead>Assigned To</TableHead>}
+               {isAdmin && <TableHead>Assigned To</TableHead>}
               <TableHead>Priority</TableHead>
               <TableHead>Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead>Remarks</TableHead>}
@@ -189,160 +194,192 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate }: Recen
                 }
 
                 return (
-                    <TableRow key={task.id}>
-                        <TableCell>
-                            <div className="font-medium">{task.title}</div>
-                            {wordCount > 10 ? (
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
-                                          {descriptionPreview}... <span className="underline">Read more</span>
-                                        </p>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[60vw]">
-                                        <DialogHeader>
-                                            <DialogTitle>{task.title}</DialogTitle>
-                                        </DialogHeader>
-                                        <DialogDescription asChild>
-                                          <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
-                                            {task.description}
-                                          </div>
-                                        </DialogDescription>
-                                    </DialogContent>
-                                </Dialog>
-                            ) : (
-                                <p className="text-xs text-muted-foreground">{task.description}</p>
-                            )}
-                        </TableCell>
-                        <TableCell>
-                            {client ? (
-                                <span className="text-sm">{client.name}</span>
-                            ) : (
-                                <span className="text-sm text-muted-foreground">-</span>
-                            )}
-                        </TableCell>
-                         {currentUser?.role === 'admin' && (
-                          <TableCell>
-                            <div className="flex -space-x-2">
-                              {assignees.map(assignee => (
-                                <Avatar key={assignee.id} className="h-8 w-8 border-2 border-background">
-                                  
-                                  <AvatarFallback>{getInitials(assignee.name)}</AvatarFallback>
-                                </Avatar>
-                              ))}
-                            </div>
-                          </TableCell>
-                        )}
-                        <TableCell>
-                           <span className="font-bold text-lg">{priorityMap[task.priority]}</span>
-                        </TableCell>
-                        <TableCell>
-                            {onTaskUpdate && isEmployeeView ? (
-                                <div className="flex items-center gap-2">
-                                    <Select 
-                                        onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
-                                        value={task.status}
-                                        disabled={isCompleted}
-                                    >
-                                        <SelectTrigger className="w-[140px] text-xs focus:ring-accent">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {statusOptions.map(status => (
-                                                <SelectItem 
-                                                    key={status} 
-                                                    value={status}
-                                                    disabled={!employeeAllowedStatuses.includes(status)}
+                    <DropdownMenu key={task.id}>
+                        <AlertDialog>
+                            <DropdownMenuTrigger asChild>
+                                <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
+                                    <TableCell>
+                                        <div className="font-medium">{task.title}</div>
+                                        {wordCount > 10 ? (
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                                                    {descriptionPreview}... <span className="underline">Read more</span>
+                                                    </p>
+                                                </DialogTrigger>
+                                                <DialogContent className="sm:max-w-[60vw]">
+                                                    <DialogHeader>
+                                                        <DialogTitle>{task.title}</DialogTitle>
+                                                    </DialogHeader>
+                                                    <DialogDescription asChild>
+                                                    <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
+                                                        {task.description}
+                                                    </div>
+                                                    </DialogDescription>
+                                                </DialogContent>
+                                            </Dialog>
+                                        ) : (
+                                            <p className="text-xs text-muted-foreground">{task.description}</p>
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {client ? (
+                                            <span className="text-sm">{client.name}</span>
+                                        ) : (
+                                            <span className="text-sm text-muted-foreground">-</span>
+                                        )}
+                                    </TableCell>
+                                    {isAdmin && (
+                                    <TableCell>
+                                        <div className="flex -space-x-2">
+                                        {assignees.map(assignee => (
+                                            <Avatar key={assignee.id} className="h-8 w-8 border-2 border-background">
+                                            
+                                            <AvatarFallback>{getInitials(assignee.name)}</AvatarFallback>
+                                            </Avatar>
+                                        ))}
+                                        </div>
+                                    </TableCell>
+                                    )}
+                                    <TableCell>
+                                    <span className="font-bold text-lg">{priorityMap[task.priority]}</span>
+                                    </TableCell>
+                                    <TableCell>
+                                        {onTaskUpdate && isEmployeeView ? (
+                                            <div className="flex items-center gap-2">
+                                                <Select 
+                                                    onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
+                                                    value={task.status}
+                                                    disabled={isCompleted}
                                                 >
-                                                    <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
-                                                </SelectItem>
-                                             ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            ) : (
-                               <Badge variant={statusVariant[task.status] || 'default'} className="capitalize">{task.status}</Badge>
-                            )}
-                        </TableCell>
-                        {isEmployeeView && (
-                            <TableCell className="text-center">
-                                <Popover onOpenChange={(open) => {
-                                    if (open) {
-                                        setNoteInput('');
-                                    }
-                                }}>
-                                    <PopoverTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="relative">
-                                            <MessageSquare className="h-5 w-5" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-96" side="bottom" align="end">
-                                        <div className="space-y-4">
-                                            <div className="flex justify-between items-center">
-                                                <h4 className="font-medium leading-none">Remarks</h4>
-                                                {(task.progressNotes || []).length > 0 && (
-                                                    <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-xs text-muted-foreground">
-                                                        <Trash2 className="mr-1 h-3 w-3" />
-                                                        Clear Chat
-                                                    </Button>
-                                                )}
+                                                    <SelectTrigger className="w-[140px] text-xs focus:ring-accent">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {statusOptions.map(status => (
+                                                            <SelectItem 
+                                                                key={status} 
+                                                                value={status}
+                                                                disabled={!employeeAllowedStatuses.includes(status)}
+                                                            >
+                                                                <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
-                                                <div className="max-h-60 space-y-4 overflow-y-auto p-1">
-                                                {(task.progressNotes || []).map((note, i) => {
-                                                    const author = users.find(u => u.id === note.authorId);
-                                                    const authorName = author ? author.name : (note.authorName || '');
-                                                    return (
-                                                        <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
-                                                            {note.authorId !== currentUser?.uid && (
-                                                                    <Avatar className="h-8 w-8 border">
-                                                                    
-                                                                    <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
-                                                                </Avatar>
-                                                            )}
-                                                            <div className={cn("max-w-[75%] rounded-lg p-3", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                                                                <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                {note.note && <p>{note.note}</p>}
-                                                                {note.imageUrl && (
-                                                                    <Dialog>
-                                                                        <DialogTrigger asChild>
-                                                                            <img src={note.imageUrl} alt="remark" className="mt-2 rounded-md max-w-full h-auto cursor-pointer" />
-                                                                        </DialogTrigger>
-                                                                        <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
-                                                                            <DialogHeader className="sr-only">
-                                                                                <DialogTitle>Image Preview</DialogTitle>
-                                                                                <DialogDescription>A full-screen view of the image attached to the remark.</DialogDescription>
-                                                                            </DialogHeader>
-                                                                            <img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain" />
-                                                                        </DialogContent>
-                                                                    </Dialog>
-                                                                )}
-                                                                <p className={cn("text-right text-[10px] mt-2 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
-                                                            </div>
-                                                                {note.authorId === currentUser?.uid && (
-                                                                    <Avatar className="h-8 w-8 border">
-                                                                    
-                                                                    <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
-                                                                </Avatar>
+                                        ) : (
+                                        <Badge variant={statusVariant[task.status] || 'default'} className="capitalize">{task.status}</Badge>
+                                        )}
+                                    </TableCell>
+                                    {isEmployeeView && (
+                                        <TableCell className="text-center">
+                                            <Popover onOpenChange={(open) => {
+                                                if (open) {
+                                                    setNoteInput('');
+                                                }
+                                            }}>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="relative">
+                                                        <MessageSquare className="h-5 w-5" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-96" side="bottom" align="end">
+                                                    <div className="space-y-4">
+                                                        <div className="flex justify-between items-center">
+                                                            <h4 className="font-medium leading-none">Remarks</h4>
+                                                            {(task.progressNotes || []).length > 0 && (
+                                                                <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-xs text-muted-foreground">
+                                                                    <Trash2 className="mr-1 h-3 w-3" />
+                                                                    Clear Chat
+                                                                </Button>
                                                             )}
                                                         </div>
-                                                    )
-                                                })}
-                                            </div>
-                                            <div className="relative">
-                                                <Textarea 
-                                                    placeholder="Add a remark or paste an image..."
-                                                    value={noteInput}
-                                                    onChange={(e) => setNoteInput(e.target.value)}
-                                                    onKeyDown={(e) => handleNewNote(e, task)}
-                                                    onPaste={(e) => handlePaste(e, task)}
-                                                />
-                                            </div>
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
-                            </TableCell>
-                        )}
-                    </TableRow>
+                                                            <div className="max-h-60 space-y-4 overflow-y-auto p-1">
+                                                            {(task.progressNotes || []).map((note, i) => {
+                                                                const author = users.find(u => u.id === note.authorId);
+                                                                const authorName = author ? author.name : (note.authorName || '');
+                                                                return (
+                                                                    <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                                        {note.authorId !== currentUser?.uid && (
+                                                                                <Avatar className="h-8 w-8 border">
+                                                                                
+                                                                                <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
+                                                                            </Avatar>
+                                                                        )}
+                                                                        <div className={cn("max-w-[75%] rounded-lg p-3", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                            <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                                            {note.note && <p>{note.note}</p>}
+                                                                            {note.imageUrl && (
+                                                                                <Dialog>
+                                                                                    <DialogTrigger asChild>
+                                                                                        <img src={note.imageUrl} alt="remark" className="mt-2 rounded-md max-w-full h-auto cursor-pointer" />
+                                                                                    </DialogTrigger>
+                                                                                    <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+                                                                                        <DialogHeader className="sr-only">
+                                                                                            <DialogTitle>Image Preview</DialogTitle>
+                                                                                            <DialogDescription>A full-screen view of the image attached to the remark.</DialogDescription>
+                                                                                        </DialogHeader>
+                                                                                        <img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain" />
+                                                                                    </DialogContent>
+                                                                                </Dialog>
+                                                                            )}
+                                                                            <p className={cn("text-right text-[10px] mt-2 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
+                                                                        </div>
+                                                                            {note.authorId === currentUser?.uid && (
+                                                                                <Avatar className="h-8 w-8 border">
+                                                                                
+                                                                                <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
+                                                                            </Avatar>
+                                                                        )}
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                        <div className="relative">
+                                                            <Textarea 
+                                                                placeholder="Add a remark or paste an image..."
+                                                                value={noteInput}
+                                                                onChange={(e) => setNoteInput(e.target.value)}
+                                                                onKeyDown={(e) => handleNewNote(e, task)}
+                                                                onPaste={(e) => handlePaste(e, task)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </PopoverContent>
+                                            </Popover>
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            </DropdownMenuTrigger>
+                            
+                            {isAdmin && onTaskDelete && (
+                                <DropdownMenuContent>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Delete Task
+                                        </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                </DropdownMenuContent>
+                            )}
+
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the task "{task.title}".
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => onTaskDelete!(task.id)} className="bg-destructive hover:bg-destructive/90">
+                                        Delete
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </DropdownMenu>
                 )
             })}
           </TableBody>

@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import type { Task, UserProfile, TaskStatus } from '@/lib/data';
-import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query, orderBy, getDoc, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query, orderBy, getDoc, writeBatch, deleteDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
 import { useUsers } from './use-users';
@@ -17,6 +18,7 @@ interface TaskContextType {
     error: Error | null;
     addTask: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
     updateTask: (taskId: string, task: Partial<Task>) => void;
+    deleteTask: (taskId: string) => void;
     updateTaskStatus: (task: TaskWithId, newStatus: string) => void;
 }
 
@@ -156,6 +158,15 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, [currentUser?.role]);
     
+    const deleteTask = useCallback(async (taskId: string) => {
+        try {
+            await deleteDoc(doc(db, 'tasks', taskId));
+        } catch (e) {
+            console.error("Error deleting document: ", e);
+            setError(new Error('Failed to delete task. Please check your network connection.'));
+        }
+    }, []);
+
     const updateTaskStatus = useCallback(async (task: TaskWithId, newStatus: string) => {
         const { id, assigneeIds = [], activeAssigneeIndex = 0, title, clientId } = task;
         if (!currentUser || currentUser.role !== 'employee') return;
@@ -210,6 +221,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         error,
         addTask,
         updateTask,
+        deleteTask,
         updateTaskStatus,
     };
 

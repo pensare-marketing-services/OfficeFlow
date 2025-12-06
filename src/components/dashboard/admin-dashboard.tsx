@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -7,11 +8,12 @@ import { ClipboardList, Users, CheckCircle2 } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 import type { Task, UserProfile as User } from '@/lib/data';
 import EmployeeTasks from './employee-tasks';
+import { useTasks } from '@/hooks/use-tasks';
 
 type UserWithId = User & { id: string };
 
 interface AdminDashboardProps {
-  tasks: Task[];
+  tasks: (Task & { id: string })[];
   users: UserWithId[];
 }
 
@@ -21,6 +23,7 @@ type ViewMode = 'tasks' | 'employees';
 export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
   const [taskFilter, setTaskFilter] = useState<TaskFilter>('total');
   const [viewMode, setViewMode] = useState<ViewMode>('tasks');
+  const { deleteTask } = useTasks();
 
   const totalTasks = tasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
@@ -78,7 +81,7 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
         />
       </div>
       
-      {viewMode === 'tasks' && <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} />}
+      {viewMode === 'tasks' && <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskDelete={deleteTask} />}
       {viewMode === 'employees' && <EmployeeTasks tasks={tasks} users={users} />}
 
     </div>

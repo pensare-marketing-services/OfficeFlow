@@ -58,7 +58,7 @@ const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }
 
 export default function ClientIdPage() {
     const { user: currentUser } = useAuth();
-    const { tasks, addTask, updateTask, loading: tasksLoading } = useTasks();
+    const { tasks, addTask, updateTask, deleteTask, loading: tasksLoading } = useTasks();
     const { users, loading: usersLoading } = useUsers();
     const [client, setClient] = useState<ClientWithId | null>(null);
     const [loading, setLoading] = useState(true);
@@ -90,6 +90,10 @@ export default function ClientIdPage() {
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
         updateTask(updatedTask.id, updatedTask);
+    };
+
+    const handleTaskDelete = (taskId: string) => {
+        deleteTask(taskId);
     };
     
     const handleClientUpdate = async (updatedData: Partial<Client>) => {
@@ -160,6 +164,7 @@ export default function ClientIdPage() {
                             tasks={filteredTasks} 
                             users={users as UserWithId[]} 
                             onTaskUpdate={handleTaskUpdate}
+                            onTaskDelete={handleTaskDelete}
                             showClient={false}
                         />
                     </>
