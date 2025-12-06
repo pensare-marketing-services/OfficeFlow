@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
@@ -39,12 +40,19 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
         const notificationsQuery = query(
             collection(db, 'notifications'), 
-            where('userId', '==', currentUser.uid),
-            orderBy('createdAt', 'desc')
+            where('userId', '==', currentUser.uid)
         );
 
         const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
             const notificationsData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as NotificationWithId));
+            
+            // Sort on the client side
+            notificationsData.sort((a, b) => {
+                const dateA = a.createdAt?.toDate() || 0;
+                const dateB = b.createdAt?.toDate() || 0;
+                return dateB - dateA;
+            });
+            
             setNotifications(notificationsData);
             setLoading(false);
         }, (err: any) => {
