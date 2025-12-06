@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -23,7 +24,6 @@ type TaskFilter = 'active' | 'inProgress' | 'completed';
 export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: EmployeeDashboardProps) {
   const { user } = useAuth();
   const [taskFilter, setTaskFilter] = useState<TaskFilter>('active');
-  const { updateTaskStatus } = useTasks();
   const { users } = useUsers();
 
 
@@ -58,10 +58,6 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
     onTaskUpdate(updatedTask.id, updatedTask);
   };
   
-  const handleStatusChange = (task: Task & {id: string}, newStatus: string) => {
-    updateTaskStatus(task, newStatus);
-  };
-
 
   return (
     <div className="space-y-1">
@@ -97,10 +93,11 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
             tasks={filteredTasks}
             users={users}
             onTaskUpdate={handleTaskUpdate}
-            onStatusChange={handleStatusChange}
             showClient={true}
         />
       </div>
     </div>
   );
 }
+
+    

@@ -40,7 +40,6 @@ interface ContentScheduleProps {
     users: UserWithId[];
     onTaskUpdate: (task: Partial<Task> & { id: string }) => void;
     onTaskDelete?: (taskId: string) => void;
-    onStatusChange?: (task: Task & {id: string}, newStatus: string) => void;
     showClient?: boolean;
 }
 
@@ -174,13 +173,14 @@ const AssigneeSelect = ({
 };
 
 
-export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDelete, onStatusChange, showClient = true }: ContentScheduleProps) {
+export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDelete, showClient = true }: ContentScheduleProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const { toast } = useToast();
     const [clients, setClients] = useState<ClientWithId[]>([]);
     const [sortConfig, setSortConfig] = useState<{ key: 'priority'; direction: 'ascending' | 'descending' } | null>(null);
     const [openedChats, setOpenedChats] = useState<Set<string>>(new Set());
+    const { updateTaskStatus } = useTasks();
 
     const sortedTasks = useMemo(() => {
         let sortableTasks = [...tasks];
@@ -242,8 +242,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             return;
         }
 
-        if (onStatusChange) {
-            onStatusChange(task, newStatus);
+        if (currentUser?.role === 'employee') {
+            updateTaskStatus(task, newStatus);
         } else {
             handleFieldChange(task.id, 'status', newStatus as TaskStatus);
         }
@@ -707,3 +707,5 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
+
+    
