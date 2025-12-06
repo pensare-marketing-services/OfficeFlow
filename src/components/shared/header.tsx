@@ -92,7 +92,7 @@ export function Header() {
                       <div className="flex-1">
                           <p className="text-sm">{notif.message}</p>
                           <p className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
                           </p>
                       </div>
                   </div>
