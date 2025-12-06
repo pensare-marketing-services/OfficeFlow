@@ -230,10 +230,12 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
     };
     
     const handleLocalStatusChange = (task: Task & { id: string }, newStatus: string) => {
-        if (newStatus === 'Reschedule' && currentUser?.role === 'admin') {
-            if (onStatusChange) {
-                onStatusChange(task, newStatus);
-            }
+        if (currentUser?.role === 'admin' && newStatus === 'Reschedule') {
+            onTaskUpdate({ 
+                id: task.id, 
+                status: 'Scheduled', 
+                activeAssigneeIndex: 0 
+            });
             return;
         }
 
@@ -692,3 +694,4 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
 
 
     
+
