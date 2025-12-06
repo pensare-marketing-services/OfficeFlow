@@ -452,7 +452,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
                                         )}
                                     </TableCell>
                                      <TableCell className="py-0 px-2 border-r">
-                                        <div className="max-w-[200px]">
+                                        <div>
                                             {wordCount > 10 ? (
                                                 <Dialog>
                                                     <DialogTrigger asChild>
@@ -694,4 +694,5 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onStatusCh
 
 
     
+
 
