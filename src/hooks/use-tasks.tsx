@@ -154,6 +154,16 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (currentUser.role === 'admin' && newStatus === 'Reschedule') {
             updateData.status = 'Scheduled';
             updateData.activeAssigneeIndex = 0;
+
+            if (assigneeIds.length > 0) {
+                const firstAssigneeId = assigneeIds[0];
+                createNotification(
+                    firstAssigneeId,
+                    `Task "${title}" has been rescheduled and is back in your queue.`,
+                    `/clients/${clientId}`
+                );
+            }
+
         } else if (currentUser.role === 'employee') {
             const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser.uid;
             if (!isMyTurn) return;
