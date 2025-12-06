@@ -76,14 +76,10 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                     // Check if it's a reasonably new notification to avoid toasting old ones on login
                     const tenMinutes = 10 * 60 * 1000;
                     if (new Date().getTime() - new Date(notif.createdAt).getTime() < tenMinutes) {
-                        toast({
-                            title: 'New Notification',
-                            description: notif.message,
-                        });
                          if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification('OfficeFlow', {
                                 body: notif.message,
-                                icon: '/avatars/app-logo.png' 
+                                icon: '/avatars/app-logo-black.png' 
                             });
                         }
                     }
@@ -91,14 +87,15 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                 }
             });
 
-            // Update displayed notifications and mark all as "toasted"
-            serverNotifications.forEach(notif => displayedToastsRef.current.add(notif.id));
-
             setNotifications(serverNotifications);
             setLoading(false);
         }, (err: any) => {
             console.error("Notifications subscription error:", err);
-            setError(new Error('Failed to load notifications. Please check your connection or browser extensions.'));
+            if (err.code === 'failed-precondition' && err.message.includes('requires an index')) {
+                 setError(new Error('Firestore needs an index for notifications. Please check the console for a link to create it.'));
+            } else {
+                 setError(new Error('Failed to load notifications. Please check your connection or browser extensions.'));
+            }
             setLoading(false);
         });
 
