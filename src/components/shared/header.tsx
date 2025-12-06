@@ -10,6 +10,7 @@ import { Separator } from '../ui/separator';
 import { useNotifications } from '@/hooks/use-notifications';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { useEffect, useState } from 'react';
 
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/dashboard')) return 'Dashboard';
@@ -17,6 +18,20 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/settings')) return 'Settings';
   return 'OfficeFlow';
 }
+
+const NotificationTime = ({ date }: { date: string | Date }) => {
+  const [timeAgo, setTimeAgo] = useState('');
+
+  useEffect(() => {
+    setTimeAgo(formatDistanceToNow(new Date(date), { addSuffix: true }));
+  }, [date]);
+
+  if (!timeAgo) {
+    return null; // Render nothing on the server and initial client render
+  }
+
+  return <p className="text-xs text-muted-foreground">{timeAgo}</p>;
+};
 
 export function Header() {
   const pathname = usePathname();
@@ -91,9 +106,7 @@ export function Header() {
                       <Mail className={cn("h-4 w-4 flex-shrink-0 mt-0.5", notif.read && "ml-[16px]")} />
                       <div className="flex-1">
                           <p className="text-sm">{notif.message}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
-                          </p>
+                          <NotificationTime date={notif.createdAt} />
                       </div>
                   </div>
                 ))}
