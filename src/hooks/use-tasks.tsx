@@ -3,9 +3,11 @@
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import type { Task, UserProfile, TaskStatus } from '@/lib/data';
-import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query, orderBy, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query, orderBy, getDoc, writeBatch } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
+import { useUsers } from './use-users';
+
 
 type TaskWithId = Task & { id: string };
 
@@ -20,8 +22,23 @@ interface TaskContextType {
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
+const createNotification = async (userId: string, message: string, link: string) => {
+    try {
+        await addDoc(collection(db, 'notifications'), {
+            userId,
+            message,
+            link,
+            read: false,
+            createdAt: serverTimestamp(),
+        });
+    } catch (e) {
+        console.error("Error creating notification:", e);
+    }
+};
+
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { user: currentUser } = useAuth();
+    const { users: allUsers } = useUsers();
     const [tasks, setTasks] = useState<TaskWithId[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
@@ -58,11 +75,25 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const addTask = useCallback(async (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => {
         try {
-            await addDoc(collection(db, 'tasks'), {
+            const docRef = await addDoc(collection(db, 'tasks'), {
                 ...task,
                 createdAt: serverTimestamp(),
                 activeAssigneeIndex: 0,
             });
+
+            // Notify assigned users
+            if (task.assigneeIds && task.assigneeIds.length > 0) {
+                 const client = (await getDoc(doc(db, 'clients', task.clientId!))).data();
+                 const clientName = client?.name || 'a client';
+                task.assigneeIds.forEach(userId => {
+                    createNotification(
+                        userId,
+                        `You have been assigned a new task: "${task.title}" for ${clientName}.`,
+                        `/clients/${task.clientId}`
+                    );
+                });
+            }
+
         } catch (e) {
             console.error("Error adding document: ", e);
             setError(new Error('Failed to add task. Please check your network connection.'));
@@ -72,19 +103,37 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const updateTask = useCallback(async (taskId: string, taskUpdate: Partial<Task>) => {
         try {
             const taskRef = doc(db, 'tasks', taskId);
-            
-            // To prevent overwriting data, fetch the latest document first
             const docSnap = await getDoc(taskRef);
+
             if (docSnap.exists()) {
-                const existingData = docSnap.data();
+                const existingData = docSnap.data() as Task;
                 const dataToUpdate = { ...existingData, ...taskUpdate };
 
-                 // Firestore doesn't support `undefined` values.
                 if (dataToUpdate.description === undefined) {
                     dataToUpdate.description = existingData.description || '';
                 }
                 
                 await updateDoc(taskRef, dataToUpdate);
+
+                // Check if assignees changed to send notifications
+                const oldAssignees = new Set(existingData.assigneeIds || []);
+                const newAssignees = new Set(dataToUpdate.assigneeIds || []);
+                
+                const addedAssignees = [...newAssignees].filter(x => !oldAssignees.has(x));
+
+                if (addedAssignees.length > 0) {
+                    const client = (await getDoc(doc(db, 'clients', dataToUpdate.clientId!))).data();
+                    const clientName = client?.name || 'a client';
+
+                    addedAssignees.forEach(userId => {
+                        createNotification(
+                            userId,
+                            `You have been assigned to the task: "${dataToUpdate.title}" for ${clientName}.`,
+                            `/clients/${dataToUpdate.clientId}`
+                        );
+                    });
+                }
+
 
             } else {
                  await updateDoc(taskRef, taskUpdate);
@@ -97,7 +146,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
     
     const updateTaskStatus = useCallback(async (task: TaskWithId, newStatus: string) => {
-        const { id, assigneeIds = [], activeAssigneeIndex = 0 } = task;
+        const { id, assigneeIds = [], activeAssigneeIndex = 0, title, clientId } = task;
 
         let updateData: Partial<Task> = {};
         
@@ -114,8 +163,30 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (newStatus === 'Ready for Next' && !isLastAssignee) {
                 updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
                 updateData.status = 'On Work';
-            } else if ((newStatus === 'For Approval' || newStatus === 'Ready for Next') && isLastAssignee) {
+                 // Notify next assignee
+                const nextAssigneeId = assigneeIds[activeAssigneeIndex + 1];
+                 const client = (await getDoc(doc(db, 'clients', clientId!))).data();
+                 const clientName = client?.name || 'a client';
+                createNotification(
+                    nextAssigneeId,
+                    `Your turn for task: "${title}" for ${clientName}.`,
+                    `/clients/${clientId}`
+                );
+
+            } else if (newStatus === 'For Approval' || (newStatus === 'Ready for Next' && isLastAssignee)) {
                 updateData.status = 'For Approval';
+                // Notify all admins
+                const admins = allUsers.filter(u => u.role === 'admin');
+                const client = (await getDoc(doc(db, 'clients', clientId!))).data();
+                const clientName = client?.name || 'a client';
+                admins.forEach(admin => {
+                    createNotification(
+                        admin.id,
+                        `Task by ${currentUser.name} is ready for approval: "${title}" for ${clientName}.`,
+                        `/clients/${clientId}`
+                    );
+                });
+
             } else if (newStatus === 'On Work') {
                  updateData.status = 'On Work';
             }
@@ -147,7 +218,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setError(new Error('Failed to update task status.'));
         }
 
-    }, [currentUser, tasks]);
+    }, [currentUser, allUsers, tasks]);
 
 
     const value = {

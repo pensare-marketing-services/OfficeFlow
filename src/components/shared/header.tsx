@@ -2,11 +2,14 @@
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { UserNav } from '@/components/shared/user-nav';
-import { usePathname } from 'next/navigation';
-import { Bell } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Bell, CircleDot, Mail } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Separator } from '../ui/separator';
+import { useNotifications } from '@/hooks/use-notifications';
+import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
 
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/dashboard')) return 'Dashboard';
@@ -17,7 +20,18 @@ function getPageTitle(pathname: string): string {
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const title = getPageTitle(pathname);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+
+  const handleNotificationClick = (notification: { id: string, link?: string, read: boolean }) => {
+    if (!notification.read) {
+      markAsRead(notification.id);
+    }
+    if (notification.link) {
+      router.push(notification.link);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-10 flex h-10 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-sm print:hidden sm:px-6">
@@ -29,47 +43,62 @@ export function Header() {
       <div className="ml-auto flex items-center gap-2">
          <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="relative rounded-full">
               <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                 <span className="absolute top-1 right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 items-center justify-center bg-accent text-accent-foreground text-[8px]">
+                      {unreadCount}
+                    </span>
+                  </span>
+              )}
               <span className="sr-only">Toggle notifications</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-80">
-            <div className="p-4">
+          <PopoverContent align="end" className="w-96 p-0">
+            <div className="flex items-center justify-between p-4">
                 <h3 className="font-headline text-lg font-medium">Notifications</h3>
-                <p className="text-sm text-muted-foreground">You have 3 unread messages.</p>
+                {unreadCount > 0 && (
+                  <Button variant="link" size="sm" className="h-auto p-0" onClick={markAllAsRead}>
+                    Mark all as read
+                  </Button>
+                )}
             </div>
             <Separator />
-            <div className="space-y-2 p-4">
-                <div className="flex items-start gap-3">
-                    <div className="mt-1 h-2 w-2 rounded-full bg-accent"/>
-                    <div>
-                        <p className="text-sm font-medium">New task assigned</p>
-                        <p className="text-xs text-muted-foreground">"Fix login authentication bug" was assigned to you.</p>
-                    </div>
+             {notifications.length === 0 ? (
+                <div className="text-center text-muted-foreground p-8">
+                  <div className="flex justify-center mb-4">
+                      <div className="rounded-full bg-secondary p-4">
+                          <Bell className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                  </div>
+                  <h3 className="font-semibold">No notifications yet</h3>
+                  <p className="text-sm">We'll let you know when something comes up.</p>
                 </div>
-                 <div className="flex items-start gap-3">
-                    <div className="mt-1 h-2 w-2 rounded-full bg-accent"/>
-                    <div>
-                        <p className="text-sm font-medium">Deadline approaching</p>
-                        <p className="text-xs text-muted-foreground">"Client Meeting Preparation" is due tomorrow.</p>
-                    </div>
-                </div>
-                 <div className="flex items-start gap-3">
-                    <div className="mt-1 h-2 w-2 rounded-full bg-accent"/>
-                    <div>
-                        <p className="text-sm font-medium">Report Generated</p>
-                        <p className="text-xs text-muted-foreground">Your client report for Q3 is ready.</p>
-                    </div>
-                </div>
-                 <div className="flex items-start gap-3">
-                    <div className="mt-1 h-2 w-2 rounded-full bg-primary/20"/>
-                    <div>
-                        <p className="text-sm font-medium text-muted-foreground">Task Completed</p>
-                        <p className="text-xs text-muted-foreground">Bob completed "Onboard new marketing intern".</p>
-                    </div>
-                </div>
-            </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto">
+                {notifications.map((notif) => (
+                  <div 
+                    key={notif.id} 
+                    className={cn(
+                      "flex items-start gap-3 p-4 border-b hover:bg-muted/50 cursor-pointer",
+                      notif.read && "opacity-60"
+                    )}
+                    onClick={() => handleNotificationClick(notif)}
+                  >
+                      {!notif.read && <div className="mt-1 h-2 w-2 rounded-full bg-accent flex-shrink-0"/>}
+                      <Mail className={cn("h-4 w-4 flex-shrink-0 mt-0.5", notif.read && "ml-[16px]")} />
+                      <div className="flex-1">
+                          <p className="text-sm">{notif.message}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true })}
+                          </p>
+                      </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </PopoverContent>
         </Popover>
         <UserNav />
