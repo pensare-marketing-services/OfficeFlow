@@ -147,35 +147,33 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     const updateTaskStatus = useCallback(async (task: TaskWithId, newStatus: string) => {
         const { id, assigneeIds = [], activeAssigneeIndex = 0, title, clientId } = task;
-
+        if (!currentUser) return;
+    
         let updateData: Partial<Task> = {};
-        
-        if (currentUser?.role === 'admin' && newStatus === 'Reschedule') {
+    
+        if (currentUser.role === 'admin' && newStatus === 'Reschedule') {
             updateData.status = 'Scheduled';
             updateData.activeAssigneeIndex = 0;
-        } 
-        else if (currentUser?.role === 'employee') {
-            const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser?.uid;
+        } else if (currentUser.role === 'employee') {
+            const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser.uid;
             if (!isMyTurn) return;
-
+    
             const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
-            
+    
             if (newStatus === 'Ready for Next' && !isLastAssignee) {
                 updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
                 updateData.status = 'On Work';
-                 // Notify next assignee
                 const nextAssigneeId = assigneeIds[activeAssigneeIndex + 1];
-                 const client = (await getDoc(doc(db, 'clients', clientId!))).data();
-                 const clientName = client?.name || 'a client';
+                const client = (await getDoc(doc(db, 'clients', clientId!))).data();
+                const clientName = client?.name || 'a client';
                 createNotification(
                     nextAssigneeId,
                     `Your turn for task: "${title}" for ${clientName}.`,
                     `/clients/${clientId}`
                 );
-
-            } else if (newStatus === 'For Approval' || (newStatus === 'Ready for Next' && isLastAssignee)) {
+            } else if (newStatus === 'For Approval') {
                 updateData.status = 'For Approval';
-                // Notify all admins
+                 // This is the single point for approval notifications
                 const admins = allUsers.filter(u => u.role === 'admin');
                 const client = (await getDoc(doc(db, 'clients', clientId!))).data();
                 const clientName = client?.name || 'a client';
@@ -186,39 +184,23 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         `/clients/${clientId}`
                     );
                 });
-
             } else if (newStatus === 'On Work') {
-                 updateData.status = 'On Work';
+                updateData.status = 'On Work';
             }
+        } else if (currentUser.role === 'admin') {
+            updateData.status = newStatus as TaskStatus;
         }
-        else if (currentUser?.role === 'admin') {
-             updateData.status = newStatus as TaskStatus;
-        }
-
+    
         if (Object.keys(updateData).length === 0) return;
-
-
-        // Optimistic update
-        setTasks(prevTasks =>
-            prevTasks.map(t =>
-                t.id === id ? { ...t, ...updateData } : t
-            )
-        );
-        
+    
         try {
             const taskRef = doc(db, 'tasks', id);
             await updateDoc(taskRef, updateData);
         } catch (e) {
             console.error("Error updating task status:", e);
-             // Revert optimistic update on error
-            setTasks(prevTasks => {
-                const originalTask = tasks.find(t => t.id === id);
-                return prevTasks.map(t => t.id === id ? originalTask || t : t);
-            });
             setError(new Error('Failed to update task status.'));
         }
-
-    }, [currentUser, allUsers, tasks]);
+    }, [currentUser, allUsers]);
 
 
     const value = {
