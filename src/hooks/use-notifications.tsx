@@ -3,7 +3,7 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback, useRef } from 'react';
 import type { Notification } from '@/lib/data';
-import { collection, onSnapshot, query, where, updateDoc, doc, writeBatch, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, updateDoc, doc, writeBatch, Timestamp } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
 import { useToast } from './use-toast';
@@ -48,23 +48,28 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         setError(null);
         displayedToastsRef.current.clear(); // Reset on user change
 
+        // Query without ordering to avoid composite index requirement
         const notificationsQuery = query(
             collection(db, 'notifications'), 
-            where('userId', '==', currentUser.uid),
-            orderBy('createdAt', 'desc')
+            where('userId', '==', currentUser.uid)
         );
 
         const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
             const serverNotifications = snapshot.docs.map(doc => {
                 const data = doc.data();
+                const createdAt = data.createdAt instanceof Timestamp 
+                    ? data.createdAt.toDate() 
+                    : new Date(); // Fallback for any non-timestamp values
                 return { 
                     ...data, 
                     id: doc.id,
-                    // Ensure createdAt is a JS Date object for sorting
-                    createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date()
+                    createdAt
                 } as NotificationWithId;
             });
             
+            // Sort on the client
+            serverNotifications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
             // Handle new notifications for toasts
             serverNotifications.forEach(notif => {
                 if (!notif.read && !displayedToastsRef.current.has(notif.id)) {
@@ -93,20 +98,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             setLoading(false);
         }, (err: any) => {
             console.error("Notifications subscription error:", err);
-            if (err.code === 'failed-precondition') {
-                 setError(new Error('Query requires an index. Sorting on client.'));
-                 // Fallback to client-side sorting
-                 const fallbackQuery = query(collection(db, 'notifications'), where('userId', '==', currentUser.uid));
-                 const fallbackUnsubscribe = onSnapshot(fallbackQuery, (snapshot) => {
-                    const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as NotificationWithId))
-                                             .sort((a,b) => b.createdAt.toDate() - a.createdAt.toDate());
-                    setNotifications(data);
-                    setLoading(false);
-                 });
-                 return () => fallbackUnsubscribe();
-            } else {
-                setError(new Error('Failed to load notifications.'));
-            }
+            setError(new Error('Failed to load notifications. Please check your connection or browser extensions.'));
             setLoading(false);
         });
 
