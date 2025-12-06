@@ -666,41 +666,43 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         </Popover>
                                     </TableCell>
                                      <TableCell className="py-0 px-2">
-                                        <AlertDialog>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-7 w-8" disabled={!isEditable}>
-                                                        <MoreVertical className="h-4 w-4" />
-                                                        <span className="sr-only">More options</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                {isEditable && onTaskDelete && (
-                                                <DropdownMenuContent align="end">
-                                                    <AlertDialogTrigger asChild>
-                                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            Delete Task
-                                                        </DropdownMenuItem>
-                                                    </AlertDialogTrigger>
-                                                </DropdownMenuContent>
-                                                )}
-                                            </DropdownMenu>
+                                        {isEditable && (
+                                            <AlertDialog>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-7 w-8">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                            <span className="sr-only">More options</span>
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    {onTaskDelete && (
+                                                    <DropdownMenuContent align="end">
+                                                        <AlertDialogTrigger asChild>
+                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                Delete Task
+                                                            </DropdownMenuItem>
+                                                        </AlertDialogTrigger>
+                                                    </DropdownMenuContent>
+                                                    )}
+                                                </DropdownMenu>
 
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        This action cannot be undone. This will permanently delete the task "{task.title}".
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => onTaskDelete!(task.id)} className="bg-destructive hover:bg-destructive/90">
-                                                        Delete
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action cannot be undone. This will permanently delete the task "{task.title}".
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => onTaskDelete!(task.id)} className="bg-destructive hover:bg-destructive/90">
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             )})}
