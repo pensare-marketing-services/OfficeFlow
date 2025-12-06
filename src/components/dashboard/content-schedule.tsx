@@ -100,7 +100,7 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
         }
     };
     
-    const commonClasses = "bg-transparent border-0 focus-visible:ring-1 text-xs p-1 h-7 placeholder:text-muted-foreground/70";
+    const commonClasses = "bg-transparent border-0 focus-visible:ring-1 text-xs p-1 h-7 placeholder:text-muted-foreground/70 w-full";
 
     if (type === 'textarea') {
          return <Textarea value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={cn(commonClasses, "h-auto")} placeholder={placeholder} />;
@@ -388,6 +388,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 </TableHead>
                                 <TableHead className="w-[130px] px-1 border-r">Status</TableHead>
                                 <TableHead className="w-[80px] px-1 text-center">Remarks</TableHead>
+                                <TableHead className="w-[40px] px-1"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -422,283 +423,286 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
 
                                 return (
-                                <DropdownMenu key={task.id}>
-                                    <AlertDialog>
-                                        <DropdownMenuTrigger asChild>
-                                            <TableRow className="border-b" onContextMenu={(e) => {
-                                                if (!isEditable) e.preventDefault();
-                                            }}>
-                                                <TableCell className="py-0 px-2 border-r">
-                                                    <Popover>
-                                                        <PopoverTrigger asChild>
-                                                            <Button
-                                                                variant={'ghost'}
-                                                                size="default"
-                                                                disabled={!isEditable}
-                                                                className={cn('w-full justify-start text-left font-normal h-7 text-xs', !task.deadline && 'text-muted-foreground')}
-                                                            >
-                                                            
-                                                                {task.deadline ? format(new Date(task.deadline), 'MMM dd') : <span>Pick a date</span>}
-                                                            </Button>
-                                                        </PopoverTrigger>
-                                                        <PopoverContent className="w-auto p-0">
-                                                            <Calendar
-                                                                mode="single"
-                                                                selected={task.deadline ? new Date(task.deadline) : undefined}
-                                                                onSelect={(date) => handleFieldChange(task.id, 'deadline', date ? date.toISOString() : '')}
-                                                                initialFocus
+                                <TableRow key={task.id} className="border-b">
+                                    <TableCell className="py-0 px-2 border-r">
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={'ghost'}
+                                                    size="default"
+                                                    disabled={!isEditable}
+                                                    className={cn('w-full justify-start text-left font-normal h-7 text-xs', !task.deadline && 'text-muted-foreground')}
+                                                >
+                                                
+                                                    {task.deadline ? format(new Date(task.deadline), 'MMM dd') : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={task.deadline ? new Date(task.deadline) : undefined}
+                                                    onSelect={(date) => handleFieldChange(task.id, 'deadline', date ? date.toISOString() : '')}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </TableCell>
+                                    {showClient && <TableCell className="py-0 px-2 border-r font-medium">{client?.name || '-'}</TableCell>}
+                                    <TableCell className="py-0 px-2 border-r">
+                                        {isEditable ? (
+                                            <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Content Title"/>
+                                        ) : (
+                                            <div className="text-xs p-1 h-7 flex items-center truncate" title={task.title}>{task.title || '-'}</div>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="py-0 px-2 border-r">
+                                        <div className="w-full">
+                                            {wordCount > 10 ? (
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1 truncate">
+                                                            {descriptionPreview}... <span className="underline">Read more</span>
+                                                        </p>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-[60vw]">
+                                                        <DialogHeader>
+                                                            <DialogTitle>{task.title}</DialogTitle>
+                                                        </DialogHeader>
+                                                        {isEditable ? (
+                                                            <Textarea 
+                                                                defaultValue={task.description} 
+                                                                onBlur={(e) => handleFieldChange(task.id, 'description', e.target.value)} 
+                                                                className="h-48"
+                                                                placeholder="Add a detailed description..."
                                                             />
-                                                        </PopoverContent>
-                                                    </Popover>
-                                                </TableCell>
-                                                {showClient && <TableCell className="py-0 px-2 border-r font-medium">{client?.name || '-'}</TableCell>}
-                                                <TableCell className="py-0 px-2 border-r">
-                                                    {isEditable ? (
-                                                        <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Content Title"/>
-                                                    ) : (
-                                                        <div className="text-xs p-1 h-7 flex items-center truncate" title={task.title}>{task.title || '-'}</div>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="py-0 px-2 border-r">
-                                                    <div className="w-full">
-                                                        {wordCount > 10 ? (
-                                                            <Dialog>
-                                                                <DialogTrigger asChild>
-                                                                    <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground p-1 truncate">
-                                                                        {descriptionPreview}... <span className="underline">Read more</span>
-                                                                    </p>
-                                                                </DialogTrigger>
-                                                                <DialogContent className="sm:max-w-[60vw]">
-                                                                    <DialogHeader>
-                                                                        <DialogTitle>{task.title}</DialogTitle>
-                                                                    </DialogHeader>
-                                                                    {isEditable ? (
-                                                                        <Textarea 
-                                                                            defaultValue={task.description} 
-                                                                            onBlur={(e) => handleFieldChange(task.id, 'description', e.target.value)} 
-                                                                            className="h-48"
-                                                                            placeholder="Add a detailed description..."
-                                                                        />
-                                                                    ) : (
-                                                                        <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4 text-sm">
-                                                                            {task.description}
-                                                                        </div>
-                                                                    )}
-                                                                </DialogContent>
-                                                            </Dialog>
                                                         ) : (
-                                                            isEditable ? (
-                                                                <EditableTableCell 
-                                                                    value={task.description || ''} 
-                                                                    onSave={(value) => handleFieldChange(task.id, 'description', value)}
-                                                                    type="textarea"
-                                                                    placeholder="Add a description..."
-                                                                />
-                                                            ) : (
-                                                                <p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p>
-                                                            )
+                                                            <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4 text-sm">
+                                                                {task.description}
+                                                            </div>
+                                                        )}
+                                                    </DialogContent>
+                                                </Dialog>
+                                            ) : (
+                                                isEditable ? (
+                                                    <EditableTableCell 
+                                                        value={task.description || ''} 
+                                                        onSave={(value) => handleFieldChange(task.id, 'description', value)}
+                                                        type="textarea"
+                                                        placeholder="Add a description..."
+                                                    />
+                                                ) : (
+                                                    <p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p>
+                                                )
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="py-0 px-2 border-r">
+                                        {isEditable ? (
+                                            <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
+                                                <SelectTrigger className="h-7 text-xs p-2"><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    {contentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        ) : (
+                                            <div className="text-xs p-2 h-7 flex items-center">{task.contentType || '-'}</div>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="py-0 px-2 border-r">
+                                        <div className="flex items-center gap-1">
+                                            {[0, 1].map(i => (
+                                                <AssigneeSelect 
+                                                    key={i}
+                                                    assigneeId={assigneeIds[i]}
+                                                    onAssigneeChange={(newId) => handleAssigneeChange(task.id, i, newId)}
+                                                    employeeUsers={employeeUsers.filter(u => u.id !== assigneeIds[1-i])} // filter out the other assignee
+                                                    isActive={isMultiAssignee && activeAssigneeIndex === i}
+                                                    isEditable={isEditable}
+                                                />
+                                            ))}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="py-0 px-2 border-r text-center font-bold text-base">
+                                    {isEditable ? (
+                                        <Select
+                                        value={task.priority}
+                                        onValueChange={(value: Task['priority']) => handleFieldChange(task.id, 'priority', value)}
+                                        >
+                                        <SelectTrigger className="h-7 text-xs p-2 font-bold focus:bg-accent">
+                                            <SelectValue>
+                                                <span className="font-bold text-base">{priorityMap[task.priority]}</span>
+                                            </SelectValue>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {priorities.map(p => (
+                                                <SelectItem key={p} value={p}>{p} ({priorityMap[p]})</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                        </Select>
+                                    ) : (
+                                        <div className="font-bold text-base flex items-center justify-center h-7">{priorityMap[task.priority]}</div>
+                                    )}
+                                    </TableCell>
+                                    <TableCell className="py-0 px-2 border-r">
+                                        <Select 
+                                            value={displayedStatus} 
+                                            onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
+                                            disabled={isEmployee && !isMyTurn && !isCompleted}
+                                        >
+                                            <SelectTrigger className={cn("h-7 text-xs p-2 border-0 focus:ring-0", statusColors[displayedStatus])}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {isEditable && (
+                                                    <SelectGroup>
+                                                        <SelectLabel>Actions</SelectLabel>
+                                                        <SelectItem value="Reschedule">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={cn("h-2 w-2 rounded-full", statusDotColors['Reschedule'])} />
+                                                                Reschedule
+                                                            </div>
+                                                        </SelectItem>
+                                                    </SelectGroup>
+                                                )}
+                                                <SelectGroup>
+                                                    <SelectLabel>Statuses</SelectLabel>
+                                                    {allStatuses.map(status => (
+                                                        <SelectItem key={status} value={status} disabled={isEmployee && !availableStatuses.includes(status as TaskStatus)}>
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={cn("h-3 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
+                                                                {status}
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectGroup>
+                                                {![...allStatuses, "Reschedule"].includes(displayedStatus as TaskStatus) && (
+                                                    <SelectItem value={displayedStatus} disabled>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className={cn("h-2 w-2 rounded-full", statusDotColors[displayedStatus])} />
+                                                            {displayedStatus} {displayedStatus === 'On Work' && `(${users.find(u => u.id === currentWorkerId)?.name.split(' ')[0] || '...'})`}
+                                                        </div>
+                                                    </SelectItem>
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                    <TableCell className="py-0 px-2 text-center">
+                                        <Popover onOpenChange={(open) => { if (open) handlePopoverOpen(task.id); }}>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-7 w-8">
+                                                    <MessageSquare className="h-4 w-4" />
+                                                    {hasUnreadMessage && (
+                                                        <span className="absolute top-1 right-1 flex h-2 w-2">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                                        </span>
+                                                    )}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-80" side="left" align="end">
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between items-center">
+                                                        <h4 className="font-medium leading-none text-xs">Remarks</h4>
+                                                        {(task.progressNotes || []).length > 0 && isEditable && (
+                                                            <Button variant="ghost" size="default" onClick={() => handleClearChat(task.id)} className="text-xs h-7 text-muted-foreground">
+                                                                <Trash2 className="mr-1 h-3 w-3" />
+                                                                Clear
+                                                            </Button>
                                                         )}
                                                     </div>
-                                                </TableCell>
-                                                <TableCell className="py-0 px-2 border-r">
-                                                    {isEditable ? (
-                                                        <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
-                                                            <SelectTrigger className="h-7 text-xs p-2"><SelectValue /></SelectTrigger>
-                                                            <SelectContent>
-                                                                {contentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
-                                                            </SelectContent>
-                                                        </Select>
-                                                    ) : (
-                                                        <div className="text-xs p-2 h-7 flex items-center">{task.contentType || '-'}</div>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="py-0 px-2 border-r">
-                                                    <div className="flex items-center gap-1">
-                                                        {[0, 1].map(i => (
-                                                            <AssigneeSelect 
-                                                                key={i}
-                                                                assigneeId={assigneeIds[i]}
-                                                                onAssigneeChange={(newId) => handleAssigneeChange(task.id, i, newId)}
-                                                                employeeUsers={employeeUsers.filter(u => u.id !== assigneeIds[1-i])} // filter out the other assignee
-                                                                isActive={isMultiAssignee && activeAssigneeIndex === i}
-                                                                isEditable={isEditable}
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="py-0 px-2 border-r text-center font-bold text-base">
-                                                {isEditable ? (
-                                                    <Select
-                                                    value={task.priority}
-                                                    onValueChange={(value: Task['priority']) => handleFieldChange(task.id, 'priority', value)}
-                                                    >
-                                                    <SelectTrigger className="h-7 text-xs p-2 font-bold focus:bg-accent">
-                                                        <SelectValue>
-                                                            <span className="font-bold text-base">{priorityMap[task.priority]}</span>
-                                                        </SelectValue>
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {priorities.map(p => (
-                                                            <SelectItem key={p} value={p}>{p} ({priorityMap[p]})</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                    </Select>
-                                                ) : (
-                                                    <div className="font-bold text-base flex items-center justify-center h-7">{priorityMap[task.priority]}</div>
-                                                )}
-                                                </TableCell>
-                                                <TableCell className="py-0 px-2 border-r">
-                                                    <Select 
-                                                        value={displayedStatus} 
-                                                        onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                                        disabled={isEmployee && !isMyTurn && !isCompleted}
-                                                    >
-                                                        <SelectTrigger className={cn("h-7 text-xs p-2 border-0 focus:ring-0", statusColors[displayedStatus])}>
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {isEditable && (
-                                                                <SelectGroup>
-                                                                    <SelectLabel>Actions</SelectLabel>
-                                                                    <SelectItem value="Reschedule">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <div className={cn("h-2 w-2 rounded-full", statusDotColors['Reschedule'])} />
-                                                                            Reschedule
-                                                                        </div>
-                                                                    </SelectItem>
-                                                                </SelectGroup>
-                                                            )}
-                                                            <SelectGroup>
-                                                                <SelectLabel>Statuses</SelectLabel>
-                                                                {allStatuses.map(status => (
-                                                                    <SelectItem key={status} value={status} disabled={isEmployee && !availableStatuses.includes(status as TaskStatus)}>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <div className={cn("h-3 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
-                                                                            {status}
-                                                                        </div>
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectGroup>
-                                                            {![...allStatuses, "Reschedule"].includes(displayedStatus as TaskStatus) && (
-                                                                <SelectItem value={displayedStatus} disabled>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className={cn("h-2 w-2 rounded-full", statusDotColors[displayedStatus])} />
-                                                                        {displayedStatus} {displayedStatus === 'On Work' && `(${users.find(u => u.id === currentWorkerId)?.name.split(' ')[0] || '...'})`}
+                                                    <div className="max-h-60 space-y-3 overflow-y-auto p-1">
+                                                        {(task.progressNotes || []).map((note, i) => {
+                                                            const author = users.find(u => u.id === note.authorId);
+                                                            const authorName = author ? author.name : note.authorName;
+                                                            return (
+                                                                <div key={i} className={cn("flex items-start gap-2 text-xs", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                                    {note.authorId !== currentUser?.uid && (
+                                                                        <Avatar className="h-6 w-6 border">
+                                                                            
+                                                                            <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
+                                                                        </Avatar>
+                                                                    )}
+                                                                    <div className={cn("max-w-[75%] rounded-lg p-2", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                        <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                                        {note.note && <p className="text-[11px]">{note.note}</p>}
+                                                                        {note.imageUrl && (
+                                                                            <Dialog>
+                                                                                <DialogTrigger asChild>
+                                                                                    <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto cursor-pointer" />
+                                                                                </DialogTrigger>
+                                                                                <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+                                                                                    <DialogHeader className="sr-only">
+                                                                                        <DialogTitle>Image Preview</DialogTitle>
+                                                                                        <DialogDescription>A full-screen view of the image attached to the remark.</DialogDescription>
+                                                                                    </DialogHeader>
+                                                                                    <img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain" />
+                                                                                </DialogContent>
+                                                                            </Dialog>
+                                                                        )}
+                                                                        <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
                                                                     </div>
-                                                                </SelectItem>
-                                                            )}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </TableCell>
-                                                <TableCell className="py-0 px-2 text-center">
-                                                    <Popover onOpenChange={(open) => { if (open) handlePopoverOpen(task.id); }}>
-                                                        <PopoverTrigger asChild>
-                                                            <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-7 w-8">
-                                                                <MessageSquare className="h-4 w-4" />
-                                                                {hasUnreadMessage && (
-                                                                    <span className="absolute top-1 right-1 flex h-2 w-2">
-                                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                                                                    </span>
-                                                                )}
-                                                            </Button>
-                                                        </PopoverTrigger>
-                                                        <PopoverContent className="w-80" side="left" align="end">
-                                                            <div className="space-y-2">
-                                                                <div className="flex justify-between items-center">
-                                                                    <h4 className="font-medium leading-none text-xs">Remarks</h4>
-                                                                    {(task.progressNotes || []).length > 0 && isEditable && (
-                                                                        <Button variant="ghost" size="default" onClick={() => handleClearChat(task.id)} className="text-xs h-7 text-muted-foreground">
-                                                                            <Trash2 className="mr-1 h-3 w-3" />
-                                                                            Clear
-                                                                        </Button>
+                                                                    {note.authorId === currentUser?.uid && (
+                                                                        <Avatar className="h-6 w-6 border">
+                                                                            
+                                                                            <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
+                                                                        </Avatar>
                                                                     )}
                                                                 </div>
-                                                                <div className="max-h-60 space-y-3 overflow-y-auto p-1">
-                                                                    {(task.progressNotes || []).map((note, i) => {
-                                                                        const author = users.find(u => u.id === note.authorId);
-                                                                        const authorName = author ? author.name : note.authorName;
-                                                                        return (
-                                                                            <div key={i} className={cn("flex items-start gap-2 text-xs", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
-                                                                                {note.authorId !== currentUser?.uid && (
-                                                                                    <Avatar className="h-6 w-6 border">
-                                                                                        
-                                                                                        <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
-                                                                                    </Avatar>
-                                                                                )}
-                                                                                <div className={cn("max-w-[75%] rounded-lg p-2", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                                                                                    <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                                    {note.note && <p className="text-[11px]">{note.note}</p>}
-                                                                                    {note.imageUrl && (
-                                                                                        <Dialog>
-                                                                                            <DialogTrigger asChild>
-                                                                                                <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto cursor-pointer" />
-                                                                                            </DialogTrigger>
-                                                                                            <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
-                                                                                                <DialogHeader className="sr-only">
-                                                                                                    <DialogTitle>Image Preview</DialogTitle>
-                                                                                                    <DialogDescription>A full-screen view of the image attached to the remark.</DialogDescription>
-                                                                                                </DialogHeader>
-                                                                                                <img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain" />
-                                                                                            </DialogContent>
-                                                                                        </Dialog>
-                                                                                    )}
-                                                                                    <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
-                                                                                </div>
-                                                                                {note.authorId === currentUser?.uid && (
-                                                                                    <Avatar className="h-6 w-6 border">
-                                                                                        
-                                                                                        <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
-                                                                                    </Avatar>
-                                                                                )}
-                                                                            </div>
-                                                                        )
-                                                                    })}
-                                                                </div>
-                                                                <div className="relative">
-                                                                    <Textarea 
-                                                                        placeholder="Add a remark or paste an image..."
-                                                                        value={noteInput}
-                                                                        onChange={(e) => setNoteInput(e.target.value)}
-                                                                        onKeyDown={(e) => handleNewNote(e, task)}
-                                                                        onPaste={(e) => handlePaste(e, task)}
-                                                                        className="pr-2"
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </PopoverContent>
-                                                    </Popover>
-                                                </TableCell>
-                                            </TableRow>
-                                        </DropdownMenuTrigger>
-                                        
-                                        {isEditable && onTaskDelete && (
-                                            <DropdownMenuContent>
-                                                <AlertDialogTrigger asChild>
-                                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        Delete Task
-                                                    </DropdownMenuItem>
-                                                </AlertDialogTrigger>
-                                            </DropdownMenuContent>
-                                        )}
+                                                            )
+                                                        })}
+                                                    </div>
+                                                    <div className="relative">
+                                                        <Textarea 
+                                                            placeholder="Add a remark or paste an image..."
+                                                            value={noteInput}
+                                                            onChange={(e) => setNoteInput(e.target.value)}
+                                                            onKeyDown={(e) => handleNewNote(e, task)}
+                                                            onPaste={(e) => handlePaste(e, task)}
+                                                            className="pr-2"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </TableCell>
+                                     <TableCell className="py-0 px-2">
+                                        <AlertDialog>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-7 w-8" disabled={!isEditable}>
+                                                        <MoreVertical className="h-4 w-4" />
+                                                        <span className="sr-only">More options</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                {isEditable && onTaskDelete && (
+                                                <DropdownMenuContent align="end">
+                                                    <AlertDialogTrigger asChild>
+                                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Delete Task
+                                                        </DropdownMenuItem>
+                                                    </AlertDialogTrigger>
+                                                </DropdownMenuContent>
+                                                )}
+                                            </DropdownMenu>
 
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This action cannot be undone. This will permanently delete the task "{task.title}".
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => onTaskDelete!(task.id)} className="bg-destructive hover:bg-destructive/90">
-                                                    Delete
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </DropdownMenu>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be undone. This will permanently delete the task "{task.title}".
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => onTaskDelete!(task.id)} className="bg-destructive hover:bg-destructive/90">
+                                                        Delete
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </TableCell>
+                                </TableRow>
                             )})}
                         </TableBody>
                     </Table>
