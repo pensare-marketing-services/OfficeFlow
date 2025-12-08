@@ -73,7 +73,7 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard 
             title="Total Tasks" 
             value={totalTasks} 
