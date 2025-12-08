@@ -32,10 +32,12 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
   const inProgressStatuses = ['To Do', 'Scheduled', 'On Work', 'Hold', 'Ready for Next'];
 
   const overdueTasks = useMemo(() => {
-    const now = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to the beginning of today
+
     return tasks.filter(task => {
       const deadline = new Date(task.deadline);
-      return deadline < now && !['For Approval', 'Approved', 'Posted'].includes(task.status);
+      return deadline < today && !['For Approval', 'Approved', 'Posted'].includes(task.status);
     });
   }, [tasks]);
 

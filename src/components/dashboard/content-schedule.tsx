@@ -406,7 +406,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const isEditable = currentUser?.role === 'admin';
                                 
                                 let currentStatus = task.status;
-                                if (!['For Approval', 'Approved', 'Posted'].includes(task.status) && new Date(task.deadline) < new Date()) {
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0); // Set to the beginning of today
+                                if (!['For Approval', 'Approved', 'Posted'].includes(task.status) && new Date(task.deadline) < today) {
                                     currentStatus = 'Overdue';
                                 }
 
