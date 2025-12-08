@@ -156,6 +156,37 @@
           "format": "uri"
         }
       }
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Represents a single notification for a user.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user this notification is for."
+        },
+        "message": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string",
+          "format": "uri"
+        },
+        "read": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "message",
+        "read",
+        "createdAt"
+      ]
     }
   },
   "auth": {
@@ -181,6 +212,12 @@
         "$ref": "#/entities/Client"
       },
       "description": "Stores all clients for the organization."
+    },
+    "/notifications/{notificationId}": {
+      "schema": {
+        "$ref": "#/entities/Notification"
+      },
+      "description": "Stores notifications for users."
     }
   }
 }

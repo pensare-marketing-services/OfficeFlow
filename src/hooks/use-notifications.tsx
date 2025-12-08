@@ -6,7 +6,6 @@ import type { Notification } from '@/lib/data';
 import { collection, onSnapshot, query, where, updateDoc, doc, writeBatch, Timestamp } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
-import { useToast } from './use-toast';
 
 type NotificationWithId = Notification & { id: string };
 
@@ -23,7 +22,6 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { user: currentUser } = useAuth();
-    const { toast } = useToast();
     const [notifications, setNotifications] = useState<NotificationWithId[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
@@ -48,7 +46,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         setError(null);
         displayedToastsRef.current.clear(); // Reset on user change
 
-        // Query without ordering to avoid composite index requirement
         const notificationsQuery = query(
             collection(db, 'notifications'), 
             where('userId', '==', currentUser.uid)
@@ -67,23 +64,19 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                 } as NotificationWithId;
             });
             
-            // Sort on the client
             serverNotifications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-            // Handle new notifications for toasts
-            serverNotifications.forEach(notif => {
-                if (!notif.read && !displayedToastsRef.current.has(notif.id)) {
-                    // Check if it's a reasonably new notification to avoid toasting old ones on login
-                    const tenMinutes = 10 * 60 * 1000;
-                    if (new Date().getTime() - new Date(notif.createdAt).getTime() < tenMinutes) {
-                         if ('Notification' in window && Notification.permission === 'granted') {
-                            new Notification('OfficeFlow', {
-                                body: notif.message,
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'added') {
+                    const newNotif = change.doc.data() as Notification;
+                    if (!newNotif.read) {
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                           new Notification('OfficeFlow', {
+                                body: newNotif.message,
                                 icon: '/avatars/app-logo-black.png' 
                             });
                         }
                     }
-                    displayedToastsRef.current.add(notif.id);
                 }
             });
 
@@ -101,7 +94,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
         return () => unsubscribe();
 
-    }, [currentUser?.uid, toast]);
+    }, [currentUser?.uid]);
 
     const markAsRead = useCallback(async (notificationId: string) => {
         const notifRef = doc(db, 'notifications', notificationId);
