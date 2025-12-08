@@ -4,7 +4,7 @@
 
 import { useState, useMemo } from 'react';
 import { StatsCard } from './stats-card';
-import { ClipboardList, Users, CheckCircle2 } from 'lucide-react';
+import { ClipboardList, Users, CheckCircle2, AlertTriangle } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 import type { Task, UserProfile as User } from '@/lib/data';
 import EmployeeTasks from './employee-tasks';
@@ -17,7 +17,7 @@ interface AdminDashboardProps {
   users: UserWithId[];
 }
 
-type TaskFilter = 'total' | 'completed';
+type TaskFilter = 'total' | 'completed' | 'overdue';
 type ViewMode = 'tasks' | 'employees';
 
 export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
@@ -29,20 +29,35 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
   const totalEmployees = users.filter(u => u.role === 'employee').length;
   const completedTasks = tasks.filter(t => t.status === 'Approved' || t.status === 'Posted').length;
   
+  const inProgressStatuses = ['To Do', 'Scheduled', 'On Work', 'Hold', 'Ready for Next'];
+
+  const overdueTasks = useMemo(() => {
+    const now = new Date();
+    return tasks.filter(task => {
+      const deadline = new Date(task.deadline);
+      return deadline < now && !['For Approval', 'Approved', 'Posted'].includes(task.status);
+    });
+  }, [tasks]);
+
+  const overdueCount = overdueTasks.length;
+  
   const filteredTasks = useMemo(() => {
     if (viewMode !== 'tasks') return [];
     switch (taskFilter) {
       case 'completed':
         return tasks.filter(t => t.status === 'Approved' || t.status === 'Posted');
+      case 'overdue':
+        return overdueTasks;
       case 'total':
       default:
         return tasks;
     }
-  }, [tasks, taskFilter, viewMode]);
+  }, [tasks, taskFilter, viewMode, overdueTasks]);
 
   const filterTitles: Record<TaskFilter, string> = {
     total: "All Recent Tasks",
     completed: "Completed Tasks",
+    overdue: "Overdue Tasks"
   };
 
   const handleTaskFilterClick = (filter: TaskFilter) => {
@@ -56,7 +71,7 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
         <StatsCard 
             title="Total Tasks" 
             value={totalTasks} 
@@ -78,6 +93,14 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
             variant="success"
             onClick={() => handleTaskFilterClick('completed')}
             isActive={viewMode === 'tasks' && taskFilter === 'completed'}
+        />
+        <StatsCard
+            title="Overdue"
+            value={overdueCount}
+            icon={AlertTriangle}
+            variant="destructive"
+            onClick={() => handleTaskFilterClick('overdue')}
+            isActive={viewMode === 'tasks' && taskFilter === 'overdue'}
         />
       </div>
       

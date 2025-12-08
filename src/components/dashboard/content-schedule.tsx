@@ -31,7 +31,7 @@ type ClientWithId = Client & { id: string };
 
 type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
 
-const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
+const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Overdue'];
 const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
 const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
 
@@ -59,6 +59,7 @@ const statusColors: Record<string, string> = {
     Hold: 'bg-gray-500 text-white',
     'Ready for Next': 'bg-teal-500 text-white',
     'Reschedule': 'bg-rose-500 text-white',
+    Overdue: 'bg-red-600 text-white',
 };
 
 const statusDotColors: Record<string, string> = {
@@ -71,6 +72,7 @@ const statusDotColors: Record<string, string> = {
     Hold: 'bg-gray-500',
     'Ready for Next': 'bg-teal-500',
     'Reschedule': 'bg-rose-500',
+    Overdue: 'bg-red-600',
 };
 
 const priorityMap: Record<Task['priority'], number> = {
@@ -341,7 +343,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     }, [users]);
     
     const getAvailableStatuses = (task: Task) => {
-        if (currentUser?.role === 'admin') return allStatuses;
+        if (currentUser?.role === 'admin') return allStatuses.filter(s => s !== 'Overdue');
 
         const { assigneeIds = [], activeAssigneeIndex = 0 } = task;
         const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser?.uid;
@@ -403,13 +405,18 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const isEmployee = currentUser?.role === 'employee';
                                 const isEditable = currentUser?.role === 'admin';
                                 
+                                let currentStatus = task.status;
+                                if (!['For Approval', 'Approved', 'Posted'].includes(task.status) && new Date(task.deadline) < new Date()) {
+                                    currentStatus = 'Overdue';
+                                }
+
                                 const availableStatuses = getAvailableStatuses(task);
                                 
                                 const getDisplayedStatus = (): TaskStatus => {
-                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' && task.status !== 'Scheduled') {
+                                    if (isEmployee && !isMyTurn && !isCompleted && currentStatus !== 'For Approval' && currentStatus !== 'Scheduled') {
                                        return 'On Work';
                                     }
-                                    return task.status;
+                                    return currentStatus;
                                 }
 
                                 const displayedStatus = getDisplayedStatus();
@@ -547,7 +554,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         <Select 
                                             value={displayedStatus} 
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={isEmployee && !isMyTurn && !isCompleted}
+                                            disabled={(isEmployee && !isMyTurn && !isCompleted) || displayedStatus === 'Overdue'}
                                         >
                                             <SelectTrigger className={cn("h-7 text-xs p-2 border-0 focus:ring-0", statusColors[displayedStatus])}>
                                                 <SelectValue />
@@ -567,7 +574,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 <SelectGroup>
                                                     <SelectLabel>Statuses</SelectLabel>
                                                     {allStatuses.map(status => (
-                                                        <SelectItem key={status} value={status} disabled={isEmployee && !availableStatuses.includes(status as TaskStatus)}>
+                                                        <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus)) || status === 'Overdue'}>
                                                             <div className="flex items-center gap-2">
                                                                 <div className={cn("h-3 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
                                                                 {status}
@@ -666,7 +673,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         </Popover>
                                     </TableCell>
                                      <TableCell className="py-0 px-2">
-                                        {isEditable && (
+                                        {isEditable && onTaskDelete && (
                                             <AlertDialog>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
@@ -675,7 +682,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                             <span className="sr-only">More options</span>
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    {onTaskDelete && (
+                                                    
                                                     <DropdownMenuContent align="end">
                                                         <AlertDialogTrigger asChild>
                                                             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
@@ -684,7 +691,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                             </DropdownMenuItem>
                                                         </AlertDialogTrigger>
                                                     </DropdownMenuContent>
-                                                    )}
+                                                    
                                                 </DropdownMenu>
 
                                                 <AlertDialogContent>
@@ -713,5 +720,3 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
-
-    
