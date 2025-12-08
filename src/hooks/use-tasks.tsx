@@ -8,6 +8,7 @@ import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query,
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
 import { useUsers } from './use-users';
+import { toast } from './use-toast';
 
 
 type TaskWithId = Task & { id: string };
@@ -24,19 +25,6 @@ interface TaskContextType {
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
-const createNotification = async (userId: string, message: string, link: string) => {
-    try {
-        await addDoc(collection(db, 'notifications'), {
-            userId,
-            message,
-            link,
-            read: false,
-            createdAt: serverTimestamp(),
-        });
-    } catch (e) {
-        console.error("Error creating notification:", e);
-    }
-};
 
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { user: currentUser } = useAuth();
@@ -76,6 +64,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
     const addTask = useCallback(async (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => {
+        if (!currentUser) return;
         try {
             const docRef = await addDoc(collection(db, 'tasks'), {
                 ...task,
@@ -83,16 +72,16 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 activeAssigneeIndex: 0,
             });
 
-            // Notify assigned users
             if (task.assigneeIds && task.assigneeIds.length > 0) {
                  const client = (await getDoc(doc(db, 'clients', task.clientId!))).data();
                  const clientName = client?.name || 'a client';
                 task.assigneeIds.forEach(userId => {
-                    createNotification(
-                        userId,
-                        `You have been assigned a new task: "${task.title}" for ${clientName}.`,
-                        `/clients/${task.clientId}`
-                    );
+                    if (userId === currentUser.uid) {
+                        toast({
+                            title: "Task Assigned",
+                            description: `You have been assigned a new task: "${task.title}" for ${clientName}.`,
+                        });
+                    }
                 });
             }
 
@@ -100,9 +89,10 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             console.error("Error adding document: ", e);
             setError(new Error('Failed to add task. Please check your network connection.'));
         }
-    }, []);
+    }, [currentUser]);
 
     const updateTask = useCallback(async (taskId: string, taskUpdate: Partial<Task>) => {
+        if (!currentUser) return;
         try {
             const taskRef = doc(db, 'tasks', taskId);
             const docSnap = await getDoc(taskRef);
@@ -117,37 +107,33 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 
                 await updateDoc(taskRef, dataToUpdate);
 
-                // --- Notification Logic ---
-
                 const client = (await getDoc(doc(db, 'clients', (dataToUpdate.clientId || existingData.clientId)!))).data();
                 const clientName = client?.name || 'a client';
                 const taskTitle = dataToUpdate.title || existingData.title;
-                const taskLink = `/clients/${dataToUpdate.clientId || existingData.clientId}`;
 
-                // 1. Reschedule Notification
                 const wasRescheduled = currentUser?.role === 'admin' && 'status' in dataToUpdate && dataToUpdate.status === 'Scheduled' && 'activeAssigneeIndex' in dataToUpdate && dataToUpdate.activeAssigneeIndex === 0 && existingData.status !== 'Scheduled';
                 if (wasRescheduled && (existingData.assigneeIds?.length ?? 0) > 0) {
                      const firstAssigneeId = existingData.assigneeIds![0];
-                     createNotification(
-                        firstAssigneeId,
-                        `Task "${taskTitle}" has been rescheduled and is back in your queue.`,
-                        taskLink
-                    );
+                     if (firstAssigneeId === currentUser.uid) {
+                        toast({
+                            title: 'Task Rescheduled',
+                            description: `Task "${taskTitle}" is back in your queue.`,
+                        });
+                     }
                 }
 
-
-                // 2. New Assignee Notification
                 const oldAssignees = new Set(existingData.assigneeIds || []);
                 const newAssignees = new Set(dataToUpdate.assigneeIds || []);
                 const addedAssignees = [...newAssignees].filter(x => !oldAssignees.has(x));
 
                 if (addedAssignees.length > 0) {
                     addedAssignees.forEach(userId => {
-                        createNotification(
-                            userId,
-                            `You have been assigned to the task: "${taskTitle}" for ${clientName}.`,
-                            taskLink
-                        );
+                         if (userId === currentUser.uid) {
+                            toast({
+                                title: "You've been assigned a new task",
+                                description: `Task: "${taskTitle}" for ${clientName}.`,
+                            });
+                         }
                     });
                 }
             }
@@ -156,7 +142,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             console.error("Error updating document: ", e);
             setError(new Error('Failed to update task. Please check your network connection.'));
         }
-    }, [currentUser?.role]);
+    }, [currentUser]);
     
     const deleteTask = useCallback(async (taskId: string) => {
         try {
@@ -178,27 +164,20 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
         const client = (await getDoc(doc(db, 'clients', clientId!))).data();
         const clientName = client?.name || 'a client';
-        const taskLink = `/clients/${clientId}`;
 
         if (newStatus === 'Ready for Next' && !isLastAssignee) {
             updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
             updateData.status = 'On Work';
-            const nextAssigneeId = assigneeIds[activeAssigneeIndex + 1];
-            createNotification(
-                nextAssigneeId,
-                `Your turn for task: "${title}" for ${clientName}.`,
-                taskLink
-            );
         } else if (newStatus === 'For Approval') {
             updateData.status = 'For Approval';
             const admins = allUsers.filter(u => u.role === 'admin');
-            admins.forEach(admin => {
-                createNotification(
-                    admin.id,
-                    `Task by ${currentUser.name} is ready for approval: "${title}" for ${clientName}.`,
-                    taskLink
-                );
-            });
+            if (admins.some(admin => admin.id === currentUser.uid)) {
+                 toast({
+                    title: 'Task Ready for Approval',
+                    description: `Task by ${currentUser.name}: "${title}" for ${clientName}.`,
+                });
+            }
+           
         } else if (newStatus === 'On Work') {
             updateData.status = 'On Work';
         }

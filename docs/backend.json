@@ -156,40 +156,6 @@
           "format": "uri"
         }
       }
-    },
-    "Notification": {
-      "title": "Notification",
-      "description": "Represents an in-app notification for a user.",
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "description": "The UID of the user this notification is for."
-        },
-        "message": {
-          "type": "string",
-          "description": "The content of the notification."
-        },
-        "link": {
-          "type": "string",
-          "format": "uri-reference",
-          "description": "A relative link to the relevant page (e.g., a task)."
-        },
-        "read": {
-          "type": "boolean",
-          "description": "Whether the user has read the notification."
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "userId",
-        "message",
-        "read",
-        "createdAt"
-      ]
     }
   },
   "auth": {
@@ -215,12 +181,6 @@
         "$ref": "#/entities/Client"
       },
       "description": "Stores all clients for the organization."
-    },
-    "/notifications/{notificationId}": {
-      "schema": {
-        "$ref": "#/entities/Notification"
-      },
-      "description": "Stores in-app notifications for users."
     }
   }
 }
