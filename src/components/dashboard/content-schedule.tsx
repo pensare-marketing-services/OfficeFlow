@@ -378,17 +378,17 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                             <TableRow>
                                 <TableHead className="w-[80px] px-1 border-r">Date</TableHead>
                                 {showClient && <TableHead className="min-w-[150px] px-1 border-r">Client</TableHead>}
-                                <TableHead className="min-w-[300px] px-1 border-r">Content Title</TableHead>
-                                <TableHead className="min-w-[300px] px-1 border-r">Content Description</TableHead>
-                                <TableHead className="w-[100px] px-1 border-r">Type</TableHead>
-                                <TableHead className="w-[200px] px-1 border-r">Assigned To</TableHead>
-                                <TableHead className="w-[80px] px-1 border-r text-center">
+                                <TableHead className="min-w-[250px] px-1 border-r">Content Title</TableHead>
+                                <TableHead className="min-w-[250px] px-1 border-r">Content Description</TableHead>
+                                <TableHead className="w-[120px] px-1 border-r">Type</TableHead>
+                                <TableHead className="w-[260px] px-1 border-r">Assigned To</TableHead>
+                                <TableHead className="w-[100px] px-1 border-r text-center">
                                     <Button variant="ghost" onClick={() => requestSort('priority')} className="p-1 h-auto text-muted-foreground hover:bg-transparent">
                                         Priority
                                         <ArrowUpDown className="ml-2 h-3 w-3" />
                                     </Button>
                                 </TableHead>
-                                <TableHead className="w-[100px] px-1 border-r">Status</TableHead>
+                                <TableHead className="w-[120px] px-1 border-r">Status</TableHead>
                                 <TableHead className="w-[80px] px-1 text-center">
                                     <span className="flex items-center justify-center gap-1">
                                         <MessageSquare className="h-4 w-4" />
