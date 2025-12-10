@@ -29,9 +29,9 @@ import { useTasks } from '@/hooks/use-tasks';
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
 
-type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs';
+type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs' | 'Podcast';
 
-const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Overdue'];
+const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
 const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
 
@@ -43,7 +43,7 @@ interface ContentScheduleProps {
     showClient?: boolean;
 }
 
-const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs'];
+const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast'];
 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
@@ -343,7 +343,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     }, [users]);
     
     const getAvailableStatuses = (task: Task) => {
-        if (currentUser?.role === 'admin') return allStatuses.filter(s => s !== 'Overdue');
+        if (currentUser?.role === 'admin') return allStatuses;
 
         const { assigneeIds = [], activeAssigneeIndex = 0 } = task;
         const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser?.uid;
@@ -389,11 +389,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     </Button>
                                 </TableHead>
                                 <TableHead className="w-[120px] px-1 border-r">Status</TableHead>
-                                <TableHead className="w-[50px] px-1 text-center">
-                                    <span className="flex items-center justify-center gap-1">
-                                        <MessageSquare className="h-4 w-4" />
-                                    </span>
-                                </TableHead>
+                                <TableHead className="w-[50px] px-1 text-center">Remarks</TableHead>
                                 <TableHead className="w-[40px] px-1"></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -419,10 +415,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const availableStatuses = getAvailableStatuses(task);
                                 
                                 const getDisplayedStatus = (): TaskStatus => {
+                                    if (currentStatus === 'Overdue') return 'Overdue';
                                     if (isEmployee && !isMyTurn && !isCompleted && currentStatus !== 'For Approval' && currentStatus !== 'Scheduled') {
                                        return 'On Work';
                                     }
-                                    return currentStatus;
+                                    return task.status;
                                 }
 
                                 const displayedStatus = getDisplayedStatus();
@@ -560,7 +557,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         <Select 
                                             value={displayedStatus} 
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={(isEmployee && !isMyTurn && !isCompleted)}
+                                            disabled={(isEmployee && !isMyTurn && !isCompleted && displayedStatus !== 'Overdue')}
                                         >
                                             <SelectTrigger className={cn("h-7 text-xs p-2 border-0 focus:ring-0", statusColors[displayedStatus])}>
                                                 <SelectValue />
@@ -580,7 +577,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 <SelectGroup>
                                                     <SelectLabel>Statuses</SelectLabel>
                                                     {allStatuses.map(status => (
-                                                        <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus)) || status === 'Overdue'}>
+                                                        <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus))}>
                                                             <div className="flex items-center gap-2">
                                                                 <div className={cn("h-3 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
                                                                 {status}

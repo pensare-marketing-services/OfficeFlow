@@ -80,7 +80,16 @@
           "description": "The ID of the client this task is for."
         },
         "contentType": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "Image Ad",
+            "Video Ad",
+            "Carousel",
+            "Backend Ad",
+            "Story",
+            "Web Blogs",
+            "Podcast"
+          ]
         },
         "createdAt": {
           "type": "string",
