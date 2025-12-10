@@ -376,20 +376,25 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                     <Table className="text-xs">
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[90px] px-1 border-r">Date</TableHead>
+                                <TableHead className="w-[80px] px-1 border-r">Date</TableHead>
                                 {showClient && <TableHead className="min-w-[150px] px-1 border-r">Client</TableHead>}
-                                <TableHead className="min-w-[150px] px-1 border-r">Content Title</TableHead>
-                                <TableHead className="min-w-[200px] px-1 border-r">Content Description</TableHead>
-                                <TableHead className="w-[120px] px-1 border-r">Type</TableHead>
-                                <TableHead className="w-[250px] px-1 border-r">Assigned To</TableHead>
-                                <TableHead className="w-[120px] px-1 border-r text-center">
+                                <TableHead className="min-w-[300px] px-1 border-r">Content Title</TableHead>
+                                <TableHead className="min-w-[300px] px-1 border-r">Content Description</TableHead>
+                                <TableHead className="w-[100px] px-1 border-r">Type</TableHead>
+                                <TableHead className="w-[200px] px-1 border-r">Assigned To</TableHead>
+                                <TableHead className="w-[80px] px-1 border-r text-center">
                                     <Button variant="ghost" onClick={() => requestSort('priority')} className="p-1 h-auto text-muted-foreground hover:bg-transparent">
                                         Priority
                                         <ArrowUpDown className="ml-2 h-3 w-3" />
                                     </Button>
                                 </TableHead>
-                                <TableHead className="w-[130px] px-1 border-r">Status</TableHead>
-                                <TableHead className="w-[80px] px-1 text-center">Remarks</TableHead>
+                                <TableHead className="w-[100px] px-1 border-r">Status</TableHead>
+                                <TableHead className="w-[80px] px-1 text-center">
+                                    <span className="flex items-center justify-center gap-1">
+                                        <MessageSquare className="h-4 w-4" />
+                                        Remarks
+                                    </span>
+                                </TableHead>
                                 <TableHead className="w-[40px] px-1"></TableHead>
                             </TableRow>
                         </TableHeader>
