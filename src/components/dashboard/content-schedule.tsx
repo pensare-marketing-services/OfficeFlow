@@ -376,23 +376,22 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                     <Table className="text-xs">
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[80px] px-1 border-r">Date</TableHead>
-                                {showClient && <TableHead className="min-w-[150px] px-1 border-r">Client</TableHead>}
+                                <TableHead className="w-[100px] px-1 border-r">Date</TableHead>
+                                {showClient && <TableHead className="min-w-[100px] px-1 border-r">Client</TableHead>}
                                 <TableHead className="min-w-[250px] px-1 border-r">Content Title</TableHead>
                                 <TableHead className="min-w-[250px] px-1 border-r">Content Description</TableHead>
                                 <TableHead className="w-[120px] px-1 border-r">Type</TableHead>
-                                <TableHead className="w-[260px] px-1 border-r">Assigned To</TableHead>
-                                <TableHead className="w-[100px] px-1 border-r text-center">
+                                <TableHead className="w-[200px] px-1 border-r">Assigned To</TableHead>
+                                <TableHead className="w-[80px] px-1 border-r text-center">
                                     <Button variant="ghost" onClick={() => requestSort('priority')} className="p-1 h-auto text-muted-foreground hover:bg-transparent">
                                         Priority
                                         <ArrowUpDown className="ml-2 h-3 w-3" />
                                     </Button>
                                 </TableHead>
                                 <TableHead className="w-[120px] px-1 border-r">Status</TableHead>
-                                <TableHead className="w-[80px] px-1 text-center">
+                                <TableHead className="w-[50px] px-1 text-center">
                                     <span className="flex items-center justify-center gap-1">
                                         <MessageSquare className="h-4 w-4" />
-                                        Remarks
                                     </span>
                                 </TableHead>
                                 <TableHead className="w-[40px] px-1"></TableHead>
@@ -410,7 +409,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const isEmployee = currentUser?.role === 'employee';
                                 const isEditable = currentUser?.role === 'admin';
                                 
-                                let currentStatus = task.status;
+                                let currentStatus: TaskStatus = task.status;
                                 const today = new Date();
                                 today.setHours(0, 0, 0, 0); // Set to the beginning of today
                                 if (!['For Approval', 'Approved', 'Posted'].includes(task.status) && new Date(task.deadline) < today) {
@@ -561,7 +560,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         <Select 
                                             value={displayedStatus} 
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={(isEmployee && !isMyTurn && !isCompleted) || displayedStatus === 'Overdue'}
+                                            disabled={(isEmployee && !isMyTurn && !isCompleted)}
                                         >
                                             <SelectTrigger className={cn("h-7 text-xs p-2 border-0 focus:ring-0", statusColors[displayedStatus])}>
                                                 <SelectValue />
