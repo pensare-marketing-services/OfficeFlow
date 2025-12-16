@@ -3,7 +3,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import type { Task, UserProfile as User, ProgressNote, TaskStatus, Client } from '@/lib/data';
+import type { Task, UserProfile as User, ProgressNote, TaskStatus, Client, ContentType } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -29,8 +29,6 @@ import { useTasks } from '@/hooks/use-tasks';
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
 
-type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs' | 'Podcast';
-
 const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
 const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
@@ -43,7 +41,7 @@ interface ContentScheduleProps {
     showClient?: boolean;
 }
 
-const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast'];
+const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast', 'SEO', 'Website'];
 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
@@ -376,11 +374,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                     <Table className="text-xs">
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[100px] px-1 border-r">Date</TableHead>
+                                <TableHead className="w-[80px] px-1 border-r">Date</TableHead>
                                 {showClient && <TableHead className="min-w-[100px] px-1 border-r">Client</TableHead>}
-                                <TableHead className="min-w-[250px] px-1 border-r">Content Title</TableHead>
-                                <TableHead className="min-w-[250px] px-1 border-r">Content Description</TableHead>
-                                <TableHead className="w-[120px] px-1 border-r">Type</TableHead>
+                                <TableHead className="min-w-[300px] px-1 border-r">Content Title</TableHead>
+                                <TableHead className="min-w-[300px] px-1 border-r">Content Description</TableHead>
+                                <TableHead className="w-[100px] px-1 border-r">Type</TableHead>
                                 <TableHead className="w-[200px] px-1 border-r">Assigned To</TableHead>
                                 <TableHead className="w-[80px] px-1 border-r text-center">
                                     <Button variant="ghost" onClick={() => requestSort('priority')} className="p-1 h-auto text-muted-foreground hover:bg-transparent">
