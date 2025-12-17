@@ -1,8 +1,8 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import type { UserProfile } from '@/lib/data';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
 
@@ -12,6 +12,8 @@ interface UserContextType {
     users: UserWithId[];
     loading: boolean;
     error: Error | null;
+    deleteUser: (userId: string) => Promise<void>;
+    updateUserPassword: (userId: string, newPassword: string) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -49,11 +51,36 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
 
     }, [currentUser?.uid]);
+    
+    const deleteUser = useCallback(async (userId: string) => {
+        try {
+            const userDocRef = doc(db, 'users', userId);
+            await deleteDoc(userDocRef);
+        } catch (e: any) {
+            console.error("Error deleting user:", e);
+            throw new Error("Failed to delete user. Please try again.");
+        }
+    }, []);
+
+    const updateUserPassword = useCallback(async (userId: string, newPassword: string) => {
+        if (newPassword.length < 6) {
+            throw new Error("Password must be at least 6 characters long.");
+        }
+        try {
+            const userDocRef = doc(db, 'users', userId);
+            await updateDoc(userDocRef, { password: newPassword });
+        } catch (e: any) {
+            console.error("Error updating password:", e);
+            throw new Error("Failed to update password. Please try again.");
+        }
+    }, []);
 
     const value = {
         users,
         loading,
         error,
+        deleteUser,
+        updateUserPassword
     };
 
     return (
