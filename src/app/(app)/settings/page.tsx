@@ -12,7 +12,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import type { Client } from '@/lib/data';
 
-const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
+const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 type ClientWithId = Client & { id: string };
 
@@ -62,30 +62,29 @@ export default function SettingsPage() {
                              <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Email</TableHead>
+                                        <TableHead className="w-[50px]">#</TableHead>
+                                        <TableHead>Username</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {usersLoading && Array.from({length: 3}).map((_, i) => (
                                         <TableRow key={i}>
-                                            <TableCell><Skeleton className="h-8 w-48" /></TableCell>
-                                            <TableCell><Skeleton className="h-8 w-48" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
                                         </TableRow>
                                     ))}
                                     {error && <TableRow><TableCell colSpan={2} className="text-destructive">{error.message}</TableCell></TableRow>}
-                                    {!usersLoading && employees.map(employee => (
+                                    {!usersLoading && employees.map((employee, index) => (
                                         <TableRow key={employee.id}>
+                                            <TableCell>{index + 1}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-8 w-8">
-                                                        
-                                                        <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
+                                                        <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
                                                     </Avatar>
-                                                    <span className="font-medium">{employee.name}</span>
+                                                    <span className="font-medium">{employee.username}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{employee.email}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -101,18 +100,20 @@ export default function SettingsPage() {
                              <Table>
                                 <TableHeader>
                                     <TableRow>
+                                        <TableHead className="w-[50px]">#</TableHead>
                                         <TableHead>Client Name</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {clientsLoading && <TableRow><TableCell><Skeleton className="h-8 w-full" /></TableCell></TableRow>}
-                                    {!clientsLoading && clients.map(client => (
+                                    {clientsLoading && <TableRow><TableCell colSpan={2}><Skeleton className="h-8 w-full" /></TableCell></TableRow>}
+                                    {!clientsLoading && clients.map((client, index) => (
                                         <TableRow key={client.id}>
+                                            <TableCell>{index + 1}</TableCell>
                                             <TableCell className="font-medium">{client.name}</TableCell>
                                         </TableRow>
                                     ))}
                                     {!clientsLoading && clients.length === 0 && (
-                                        <TableRow><TableCell className="text-center text-muted-foreground">No clients added yet.</TableCell></TableRow>
+                                        <TableRow><TableCell colSpan={2} className="text-center text-muted-foreground">No clients added yet.</TableCell></TableRow>
                                     )}
                                 </TableBody>
                             </Table>

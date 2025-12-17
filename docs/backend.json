@@ -32,9 +32,9 @@
         }
       },
       "required": [
-        "name",
-        "email",
-        "role"
+        "role",
+        "username",
+        "password"
       ]
     },
     "Task": {

@@ -172,7 +172,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             updateData.status = 'For Approval';
             const admins = allUsers.filter(u => u.role === 'admin');
              admins.forEach(admin => {
-                createNotification(admin.id, `Task by ${currentUser.name}: "${title}" for ${clientName} is ready for approval.`);
+                createNotification(admin.id, `Task by ${currentUser.username}: "${title}" for ${clientName} is ready for approval.`);
             });
            
         } else if (newStatus === 'On Work') {

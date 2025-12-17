@@ -45,7 +45,7 @@ const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backen
 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
-const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
+const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 const statusColors: Record<string, string> = {
     'To Do': 'bg-gray-500 text-white',
@@ -129,9 +129,9 @@ const AssigneeSelect = ({
              <div className="flex items-center gap-1 truncate w-[120px] p-2 h-7 text-xs">
                 <Avatar className="h-5 w-5">
                     
-                    <AvatarFallback>{getInitials(selectedUser.name)}</AvatarFallback>
+                    <AvatarFallback>{getInitials(selectedUser.username)}</AvatarFallback>
                 </Avatar>
-                <span className="truncate">{selectedUser.name}</span>
+                <span className="truncate">{selectedUser.username}</span>
             </div>
         ) : (
              <div className="w-[120px] p-2 h-7 text-xs text-muted-foreground">-</div>
@@ -148,9 +148,9 @@ const AssigneeSelect = ({
                     <div className="flex items-center gap-1 truncate">
                         <Avatar className="h-5 w-5">
                             
-                            <AvatarFallback>{getInitials(selectedUser.name)}</AvatarFallback>
+                            <AvatarFallback>{getInitials(selectedUser.username)}</AvatarFallback>
                         </Avatar>
-                        <span className="truncate">{selectedUser.name}</span>
+                        <span className="truncate">{selectedUser.username}</span>
                     </div>
                 ) : <SelectValue placeholder="Assign..." />}
             </SelectTrigger>
@@ -161,9 +161,9 @@ const AssigneeSelect = ({
                         <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6">
                                 
-                                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                                <AvatarFallback>{getInitials(user.username)}</AvatarFallback>
                             </Avatar>
-                            <span className="text-xs">{user.name}</span>
+                            <span className="text-xs">{user.username}</span>
                         </div>
                     </SelectItem>
                 ))}
@@ -265,7 +265,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         const newNote: Partial<ProgressNote> = {
             date: new Date().toISOString(),
             authorId: currentUser.uid,
-            authorName: currentUser.name,
+            authorName: currentUser.username,
         };
 
         if (note.note) {
@@ -587,7 +587,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     <SelectItem value={displayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
                                                             <div className={cn("h-2 w-2 rounded-full", statusDotColors[displayedStatus])} />
-                                                            {displayedStatus} {displayedStatus === 'On Work' && `(${users.find(u => u.id === currentWorkerId)?.name.split(' ')[0] || '...'})`}
+                                                            {displayedStatus} {displayedStatus === 'On Work' && `(${users.find(u => u.id === currentWorkerId)?.username?.split(' ')[0] || '...'})`}
                                                         </div>
                                                     </SelectItem>
                                                 )}
@@ -621,7 +621,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                                         {(task.progressNotes || []).map((note, i) => {
                                                             const author = users.find(u => u.id === note.authorId);
-                                                            const authorName = author ? author.name : note.authorName;
+                                                            const authorName = author ? author.username : note.authorName;
                                                             return (
                                                                 <div key={i} className={cn("flex items-start gap-2 text-xs", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                     {note.authorId !== currentUser?.uid && (
@@ -652,7 +652,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                                     {note.authorId === currentUser?.uid && (
                                                                         <Avatar className="h-6 w-6 border">
                                                                             
-                                                                            <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
+                                                                            <AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback>
                                                                         </Avatar>
                                                                     )}
                                                                 </div>

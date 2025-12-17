@@ -36,7 +36,7 @@ interface RecentTasksProps {
   onTaskDelete?: (taskId: string) => void;
 }
 
-const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
+const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
 
@@ -98,7 +98,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
             note: note.note || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
-            authorName: currentUser.name,
+            authorName: currentUser.username,
             imageUrl: note.imageUrl,
         };
 
@@ -235,7 +235,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                         {assignees.map(assignee => (
                                             <Avatar key={assignee.id} className="h-8 w-8 border-2 border-background">
                                             
-                                            <AvatarFallback>{getInitials(assignee.name)}</AvatarFallback>
+                                            <AvatarFallback>{getInitials(assignee.username)}</AvatarFallback>
                                             </Avatar>
                                         ))}
                                         </div>
@@ -298,7 +298,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                                             <div className="max-h-60 space-y-4 overflow-y-auto p-1">
                                                             {(task.progressNotes || []).map((note, i) => {
                                                                 const author = users.find(u => u.id === note.authorId);
-                                                                const authorName = author ? author.name : (note.authorName || '');
+                                                                const authorName = author ? author.username : (note.authorName || '');
                                                                 return (
                                                                     <div key={i} className={cn("flex items-start gap-3 text-sm", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                         {note.authorId !== currentUser?.uid && (
@@ -329,7 +329,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                                                             {note.authorId === currentUser?.uid && (
                                                                                 <Avatar className="h-8 w-8 border">
                                                                                 
-                                                                                <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
+                                                                                <AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback>
                                                                             </Avatar>
                                                                         )}
                                                                     </div>

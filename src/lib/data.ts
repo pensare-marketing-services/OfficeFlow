@@ -1,8 +1,8 @@
 
 export type UserProfile = {
   uid?: string;
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   role: 'admin' | 'employee';
   username?: string;
   password?: string;
@@ -17,7 +17,7 @@ export type ProgressNote = {
     note: string;
     date: string;
     authorId: string;
-    authorName: string;
+    authorName?: string;
     imageUrl?: string;
 };
 

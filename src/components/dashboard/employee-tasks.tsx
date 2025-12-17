@@ -17,7 +17,7 @@ interface EmployeeTasksProps {
   users: UserWithId[];
 }
 
-const getInitials = (name: string) => name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : '';
+const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     'Approved': 'default',
@@ -63,10 +63,10 @@ export default function EmployeeTasks({ tasks, users }: EmployeeTasksProps) {
               <div className="flex items-center gap-4 w-full">
                 <Avatar>
                   
-                  <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                  <AvatarFallback>{getInitials(user.username)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left">
-                  <div className="font-semibold">{user.name}</div>
+                  <div className="font-semibold">{user.username}</div>
                   <div className="text-xs text-muted-foreground">{user.email}</div>
                 </div>
                 <div className="flex items-center gap-4 pr-4">

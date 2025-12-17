@@ -3,7 +3,7 @@
  * @fileoverview This action handles user creation securely on the backend
  * by calling the Firebase Auth and Firestore REST APIs.
  */
-
+import { getFirestore as getAdminFirestore } from 'firebase-admin/firestore';
 import { CreateUserInput, CreateUserInputSchema } from './user-flow-schema';
 
 async function firebaseFetch(path: string, options: RequestInit) {
@@ -41,16 +41,18 @@ export async function createUser(data: CreateUserInput): Promise<{ uid: string }
     throw new Error('Invalid input data.');
   }
 
-  const { name, email, role, username, password } = validation.data;
+  const { role, username, password } = validation.data;
 
   // 1. Create user in Firebase Authentication via REST API
+  // To keep things simple with custom auth, we will just use a random email
+  const randomEmail = `${username}-${Date.now()}@officeflow.app`;
   const authApiUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signUp`;
   
   const authResponse = await firebaseFetch(authApiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: email,
+        email: randomEmail,
         password: password,
         returnSecureToken: true,
       }),
@@ -63,12 +65,11 @@ export async function createUser(data: CreateUserInput): Promise<{ uid: string }
   }
 
   // 2. Create user profile in Firestore via REST API
-  const userProfile = {
-    name: { stringValue: name },
-    email: { stringValue: email },
+  const userProfile: any = {
     role: { stringValue: role },
     username: { stringValue: username },
     password: { stringValue: password },
+    email: { stringValue: randomEmail },
   };
 
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;

@@ -33,13 +33,9 @@ export function UserNav() {
     return null;
   }
 
-  const getInitials = (name: string) => {
-    if (!name) return '';
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
+  const getInitials = (name: string = '') => {
+    if (!name) return 'U';
+    return name.charAt(0).toUpperCase();
   };
 
   return (
@@ -48,14 +44,14 @@ export function UserNav() {
         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
           <Avatar className="h-9 w-9">
             
-            <AvatarFallback>{user.name ? getInitials(user.name) : 'U'}</AvatarFallback>
+            <AvatarFallback>{getInitials(user.username)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="font-headline text-sm font-medium leading-none">{user.name}</p>
+            <p className="font-headline text-sm font-medium leading-none">{user.username}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
