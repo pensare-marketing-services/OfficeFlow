@@ -32,7 +32,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setLoading(true);
         setError(null);
 
-        const usersQuery = query(collection(db, 'users'), orderBy('name', 'asc'));
+        const usersQuery = query(collection(db, 'users'), orderBy('username', 'asc'));
 
         const unsubUsers = onSnapshot(usersQuery, (snapshot) => {
             const usersData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as UserWithId));
