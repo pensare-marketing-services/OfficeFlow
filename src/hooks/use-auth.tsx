@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, signOut, User, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '@/firebase/client';
 import type { UserProfile } from '@/lib/data';
 
@@ -11,7 +11,7 @@ type UserWithRole = UserProfile & { uid: string };
 interface AuthContextType {
   user: UserWithRole | null;
   loading: boolean;
-  login: (email: string, pass: string) => Promise<void>;
+  login: (identifier: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -21,8 +21,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserWithRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const login = useCallback(async (email: string, pass: string) => {
-    await signInWithEmailAndPassword(auth, email, pass);
+  const login = useCallback(async (identifier: string, pass: string) => {
+    // Try to find user by username first
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('username', '==', identifier));
+    const querySnapshot = await getDocs(q);
+
+    let userDoc;
+    if (!querySnapshot.empty) {
+      userDoc = querySnapshot.docs[0];
+    } else {
+      // If not found by username, try by email for backward compatibility
+      const emailQuery = query(usersRef, where('email', '==', identifier));
+      const emailQuerySnapshot = await getDocs(emailQuery);
+      if (!emailQuerySnapshot.empty) {
+        userDoc = emailQuerySnapshot.docs[0];
+      }
+    }
+
+    if (!userDoc) {
+      throw new Error('No user found with that username or email.');
+    }
+
+    const userData = userDoc.data() as UserProfile;
+
+    // For new users with custom password OR old users with default password
+    const passwordToTry = userData.password || 'password';
+
+    if (pass !== passwordToTry) {
+       // If custom password check fails, try Firebase auth for users who might have changed it
+       try {
+         await signInWithEmailAndPassword(auth, userData.email, pass);
+         // If this succeeds, onAuthStateChanged will handle setting the user.
+         return;
+       } catch (e) {
+         throw new Error('Invalid credentials.');
+       }
+    }
+    
+    // For users matching custom password or default password, sign them in with Firebase
+    // This will keep them authenticated with Firebase services
+    await signInWithEmailAndPassword(auth, userData.email, pass);
     // onAuthStateChanged will handle the rest
   }, []);
 
@@ -52,7 +91,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     name: firebaseUser.displayName || firebaseUser.email || 'New User',
                     email: firebaseUser.email!,
                     role: 'employee', // Default role
-                    
                 };
 
                 try {

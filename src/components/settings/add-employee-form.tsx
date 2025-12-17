@@ -25,6 +25,8 @@ export default function AddEmployeeForm() {
       name: '',
       email: '',
       role: 'employee',
+      username: '',
+      password: '',
     },
   });
 
@@ -36,7 +38,7 @@ export default function AddEmployeeForm() {
         
         toast({
             title: "User Created Successfully",
-            description: `${data.name}'s account has been created. They can now log in with the default password.`,
+            description: `${data.name}'s account has been created. They can now log in.`,
             duration: 7000,
         });
         form.reset();
@@ -62,6 +64,12 @@ export default function AddEmployeeForm() {
                     )} />
                     <FormField control={form.control} name="email" render={({ field }) => (
                         <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="e.g., jane@officeflow.com" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                     <FormField control={form.control} name="username" render={({ field }) => (
+                        <FormItem><FormLabel>Username</FormLabel><FormControl><Input placeholder="e.g., janedoe" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                     <FormField control={form.control} name="password" render={({ field }) => (
+                        <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="Set a password" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="role" render={({ field }) => (
                         <FormItem>

@@ -31,7 +31,7 @@ import { AppLogo, AppLogoBlack } from '@/components/shared/app-logo';
 
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email.' }),
+  identifier: z.string().min(1, { message: 'Username or Email is required.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
 });
 
@@ -45,20 +45,20 @@ export default function LoginPage() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: 'password' },
+    defaultValues: { identifier: '', password: '' },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
     setError(null);
     try {
-      await login(data.email, data.password);
+      await login(data.identifier, data.password);
       router.push('/dashboard');
     } catch (e: any) {
-      if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
-        setError('Invalid email or password. Please try again.');
+      if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential' || e.message.includes('No user found')) {
+        setError('Invalid credentials. Please try again.');
       } else {
-        setError('An unexpected error occurred. Please try again.');
+        setError(e.message || 'An unexpected error occurred. Please try again.');
       }
       setLoading(false);
     }
@@ -73,7 +73,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
-          <CardDescription>Enter credentials to sign in. Default password for new users is "password".</CardDescription>
+          <CardDescription>Enter credentials to sign in.</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -86,12 +86,12 @@ export default function LoginPage() {
                     )}
                     <FormField
                         control={form.control}
-                        name="email"
+                        name="identifier"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>Username or Email</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter your email" {...field} />
+                                    <Input placeholder="Enter your username or email" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

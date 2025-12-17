@@ -4,7 +4,8 @@ export type UserProfile = {
   name: string;
   email: string;
   role: 'admin' | 'employee';
-  
+  username?: string;
+  password?: string;
 };
 
 export type User = UserProfile & { id: string };

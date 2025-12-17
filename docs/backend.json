@@ -21,6 +21,14 @@
             "employee"
           ],
           "description": "The user's role in the system."
+        },
+        "username": {
+            "type": "string",
+            "description": "The user's unique username for login."
+        },
+        "password": {
+            "type": "string",
+            "description": "The user's password for login (stored for custom auth)."
         }
       },
       "required": [
