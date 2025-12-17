@@ -31,7 +31,7 @@ import { AppLogo, AppLogoBlack } from '@/components/shared/app-logo';
 
 
 const loginSchema = z.object({
-  identifier: z.string().min(1, { message: 'Username or Email is required.' }),
+  identifier: z.string().min(1, { message: 'Username is required.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
 });
 
@@ -89,9 +89,9 @@ export default function LoginPage() {
                         name="identifier"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Username or Email</FormLabel>
+                                <FormLabel>Username</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter your username or email" {...field} />
+                                    <Input placeholder="Enter your username" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

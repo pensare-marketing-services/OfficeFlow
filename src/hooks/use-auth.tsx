@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (!userDoc) {
         setLoading(false);
-        throw new Error('No user found with that username or email.');
+        throw new Error('No user found with that username.');
     }
 
     const userData = userDoc.data() as UserProfile;
