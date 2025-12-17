@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, UserPlus } from 'lucide-react';
+import { Loader2, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -18,6 +18,7 @@ export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const form = useForm<CreateUserInput>({
     resolver: zodResolver(CreateUserInputSchema),
@@ -61,7 +62,24 @@ export default function AddEmployeeForm() {
                         <FormItem><FormLabel>Username</FormLabel><FormControl><Input placeholder="e.g., janedoe" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                      <FormField control={form.control} name="password" render={({ field }) => (
-                        <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="Set a password" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                                <div className="relative">
+                                    <Input type={isPasswordVisible ? 'text' : 'password'} placeholder="Set a password" {...field} />
+                                    <Button 
+                                        type="button"
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                                        onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                                    >
+                                        {isPasswordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </Button>
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
                     )} />
                     <FormField control={form.control} name="role" render={({ field }) => (
                         <FormItem>

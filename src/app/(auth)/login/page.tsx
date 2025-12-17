@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { AppLogo, AppLogoBlack } from '@/components/shared/app-logo';
 
 
@@ -42,6 +42,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -104,7 +105,18 @@ export default function LoginPage() {
                             <FormItem>
                                 <FormLabel>Password</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="Enter your password" {...field} />
+                                    <div className="relative">
+                                        <Input type={isPasswordVisible ? 'text' : 'password'} placeholder="Enter your password" {...field} />
+                                        <Button 
+                                            type="button"
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                                            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                                        >
+                                            {isPasswordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </Button>
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
