@@ -21,7 +21,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserWithRole | null>(null);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    // This effect now only handles session restoration from sessionStorage
+    setLoading(true);
+    const userId = sessionStorage.getItem('userId');
+    if (userId) {
+      const userDocRef = doc(db, 'users', userId);
+      const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setUser({ ...docSnap.data() as UserProfile, uid: docSnap.id });
+        } else {
+          sessionStorage.removeItem('userId');
+          setUser(null);
+        }
+        setLoading(false);
+      }, () => {
+        sessionStorage.removeItem('userId');
+        setUser(null);
+        setLoading(false);
+      });
+      return () => unsubscribe();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
   const login = useCallback(async (identifier: string, pass: string) => {
+    setLoading(true);
     // Try to find user by username first
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('username', '==', identifier));
@@ -29,98 +55,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     let userDoc;
     if (!querySnapshot.empty) {
-      userDoc = querySnapshot.docs[0];
+        userDoc = querySnapshot.docs[0];
     } else {
-      // If not found by username, try by email for backward compatibility
-      const emailQuery = query(usersRef, where('email', '==', identifier));
-      const emailQuerySnapshot = await getDocs(emailQuery);
-      if (!emailQuerySnapshot.empty) {
-        userDoc = emailQuerySnapshot.docs[0];
-      }
+        // If not found by username, try by email for backward compatibility
+        const emailQuery = query(usersRef, where('email', '==', identifier));
+        const emailQuerySnapshot = await getDocs(emailQuery);
+        if (!emailQuerySnapshot.empty) {
+            userDoc = emailQuerySnapshot.docs[0];
+        }
     }
 
     if (!userDoc) {
-      throw new Error('No user found with that username or email.');
+        setLoading(false);
+        throw new Error('No user found with that username or email.');
     }
 
     const userData = userDoc.data() as UserProfile;
-
-    // For new users with custom password OR old users with default password
     const passwordToTry = userData.password || 'password';
 
-    if (pass !== passwordToTry) {
-       // If custom password check fails, try Firebase auth for users who might have changed it
-       try {
-         await signInWithEmailAndPassword(auth, userData.email, pass);
-         // If this succeeds, onAuthStateChanged will handle setting the user.
-         return;
-       } catch (e) {
-         throw new Error('Invalid credentials.');
-       }
+    if (pass === passwordToTry) {
+        const loggedInUser: UserWithRole = { ...userData, uid: userDoc.id };
+        sessionStorage.setItem('userId', userDoc.id);
+        setUser(loggedInUser);
+        setLoading(false);
+    } else {
+        setLoading(false);
+        throw new Error('Invalid credentials.');
     }
-    
-    // For users matching custom password or default password, sign them in with Firebase
-    // This will keep them authenticated with Firebase services
-    await signInWithEmailAndPassword(auth, userData.email, pass);
-    // onAuthStateChanged will handle the rest
   }, []);
 
   const logout = useCallback(async () => {
+    sessionStorage.removeItem('userId');
+    setUser(null);
+    // Also sign out from Firebase if there was any session, just in case.
     await signOut(auth);
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
-      if (firebaseUser) {
-        setLoading(true);
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
-        
-        const unsubProfile = onSnapshot(userDocRef, async (docSnap) => {
-            if (docSnap.exists()) {
-                const userProfile = docSnap.data() as UserProfile;
-                setUser({
-                    ...userProfile,
-                    uid: firebaseUser.uid,
-                });
-                setLoading(false);
-            } else {
-                // Profile doesn't exist, this might be a first-time login
-                // after manual creation in Auth. Let's create a default profile.
-                console.log("User profile not found, creating a default one.");
-                const newUserProfile: UserProfile = {
-                    name: firebaseUser.displayName || firebaseUser.email || 'New User',
-                    email: firebaseUser.email!,
-                    role: 'employee', // Default role
-                };
-
-                try {
-                    await setDoc(userDocRef, newUserProfile);
-                    // The onSnapshot listener will fire again with the new data,
-                    // so we don't need to call setUser here.
-                } catch (error) {
-                    console.error("Error creating user profile:", error);
-                    setUser(null);
-                    setLoading(false);
-                    signOut(auth);
-                }
-            }
-        }, (error) => {
-            console.error("Error fetching user profile:", error);
-            setUser(null);
-            setLoading(false);
-            signOut(auth); // Sign out if we can't read the profile
-        });
-
-        return () => unsubProfile();
-
-      } else {
-        // User is signed out
-        setUser(null);
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
   }, []);
 
   const value = { user, loading, login, logout };
