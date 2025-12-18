@@ -327,9 +327,13 @@
         },
         "amount": {
           "type": "number"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Received", "Not Received"]
         }
       },
-      "required": ["date", "amount"]
+      "required": ["date", "amount", "status"]
     }
   },
   "auth": {

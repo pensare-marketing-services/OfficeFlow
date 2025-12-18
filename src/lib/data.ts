@@ -70,10 +70,13 @@ export type PaidPromotion = {
     clientId: string;
 };
 
+export type CashInTransactionStatus = 'Received' | 'Not Received';
+
 export type CashInTransaction = {
     id: string;
     date: string;
     amount: number;
+    status: CashInTransactionStatus;
 }
 
 

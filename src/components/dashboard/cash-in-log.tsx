@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import type { CashInTransaction } from '@/lib/data';
+import type { CashInTransaction, CashInTransactionStatus } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -14,12 +14,15 @@ import { cn } from '@/lib/utils';
 import { collection, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Separator } from '../ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface CashInLogProps {
     clientId: string;
     transactions: (CashInTransaction & { id: string })[];
     totalCashIn: number;
 }
+
+const statuses: CashInTransactionStatus[] = ['Received', 'Not Received'];
 
 export default function CashInLog({ clientId, transactions, totalCashIn }: CashInLogProps) {
     const [newDate, setNewDate] = useState<Date | undefined>(new Date());
@@ -31,10 +34,16 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
         const newTransaction: Omit<CashInTransaction, 'id'> = {
             date: newDate.toISOString(),
             amount: Number(newAmount),
+            status: 'Not Received',
         };
         await addDoc(collection(db, `clients/${clientId}/cashInTransactions`), newTransaction);
         setNewDate(new Date());
         setNewAmount('');
+    };
+
+    const handleTransactionChange = async (id: string, field: keyof CashInTransaction, value: any) => {
+        const transactionRef = doc(db, `clients/${clientId}/cashInTransactions`, id);
+        await updateDoc(transactionRef, { [field]: value });
     };
 
     const deleteTransaction = async (id: string) => {
@@ -51,6 +60,7 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                     <TableHeader>
                         <TableRow>
                             <TableHead>Date</TableHead>
+                            <TableHead>Status</TableHead>
                             <TableHead className="text-right">Amount</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
@@ -59,6 +69,16 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                         {transactions.map((t) => (
                              <TableRow key={t.id}>
                                 <TableCell className="py-1 px-2 text-xs">{format(new Date(t.date), 'MMM dd, yyyy')}</TableCell>
+                                <TableCell className='p-1'>
+                                     <Select value={t.status} onValueChange={(v: CashInTransactionStatus) => handleTransactionChange(t.id, 'status', v)}>
+                                        <SelectTrigger className={cn("h-7 text-xs", t.status === 'Received' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {statuses.map(s => <SelectItem key={s} value={s}>{s === 'Received' ? 'Cash Received' : 'Not Rcvd'}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </TableCell>
                                 <TableCell className="py-1 px-2 text-xs text-right font-medium">{t.amount.toFixed(2)}</TableCell>
                                 <TableCell className="p-0 text-center">
                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteTransaction(t.id)}>
@@ -69,7 +89,7 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                         ))}
                         {transactions.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
                                     No cash-in transactions yet.
                                 </TableCell>
                             </TableRow>
