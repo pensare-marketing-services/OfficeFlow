@@ -85,13 +85,18 @@ export default function AddClientForm() {
     <Card>
         <CardHeader className="p-3">
             <CardTitle className="font-headline text-base flex items-center gap-2"><Building /> Add New Client</CardTitle>
-            <CardDescription className="text-xs">Add a new client and assign employees to them.</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
                 <CardContent className="space-y-2 p-3">
                     <FormField control={form.control} name="name" render={({ field }) => (
-                        <FormItem><FormLabel>Client Name</FormLabel><FormControl><Input placeholder="e.g., Acme Inc." {...field} className="h-8 text-xs" /></FormControl><FormMessage /></FormItem>
+                         <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
+                            <FormLabel className="col-span-1">Client Name</FormLabel>
+                            <FormControl className="col-span-2">
+                                <Input placeholder="e.g., Acme Inc." {...field} className="h-8 text-xs" />
+                            </FormControl>
+                            <div className="col-span-3 col-start-2"><FormMessage /></div>
+                        </FormItem>
                     )} />
 
                     {[1, 2, 3].map((num) => {
@@ -107,29 +112,31 @@ export default function AddClientForm() {
                                 control={form.control}
                                 name={fieldName}
                                 render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Assign Employee {num}</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value || 'unassigned'} disabled={usersLoading}>
-                                        <FormControl>
-                                        <SelectTrigger className="h-8 text-xs">
-                                            <SelectValue placeholder={usersLoading ? "Loading..." : "Select an employee"} />
-                                        </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="unassigned">None</SelectItem>
-                                            {filteredOptions.map((employee) => (
-                                                <SelectItem key={employee.id} value={employee.id}>
-                                                     <div className="flex items-center gap-2">
-                                                        <Avatar className="h-6 w-6">
-                                                            <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
-                                                        </Avatar>
-                                                        <span>{employee.username}</span>
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
+                                <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
+                                    <FormLabel className="col-span-1">Employee {num}</FormLabel>
+                                    <div className="col-span-2">
+                                        <Select onValueChange={field.onChange} value={field.value || 'unassigned'} disabled={usersLoading}>
+                                            <FormControl>
+                                            <SelectTrigger className="h-8 text-xs">
+                                                <SelectValue placeholder={usersLoading ? "Loading..." : "Select employee"} />
+                                            </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="unassigned">None</SelectItem>
+                                                {filteredOptions.map((employee) => (
+                                                    <SelectItem key={employee.id} value={employee.id}>
+                                                         <div className="flex items-center gap-2">
+                                                            <Avatar className="h-6 w-6 text-xs">
+                                                                <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
+                                                            </Avatar>
+                                                            <span>{employee.username}</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="col-span-3 col-start-2"><FormMessage /></div>
                                 </FormItem>
                                 )}
                             />

@@ -270,6 +270,9 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2 space-y-4">
                      <Card>
+                        <CardHeader className="p-3">
+                            <CardTitle className="flex items-center gap-2 text-base"><Building /> Manage Clients</CardTitle>
+                        </CardHeader>
                         <CardContent className="p-0">
                              <Table>
                                 <TableHeader>
@@ -307,10 +310,13 @@ export default function SettingsPage() {
                             </Table>
                         </CardContent>
                     </Card>
+                </div>
+                <div className="space-y-4">
+                    <AddEmployeeForm />
+                    <AddClientForm />
                     <Card>
                         <CardHeader className="p-3">
                             <CardTitle className="flex items-center gap-2 text-base"><Users /> Manage Employees</CardTitle>
-                            <CardDescription className="text-xs">View and manage the employees in your organization.</CardDescription>
                         </CardHeader>
                         <CardContent className="p-0">
                              <Table>
@@ -375,10 +381,6 @@ export default function SettingsPage() {
                             </Table>
                         </CardContent>
                     </Card>
-                </div>
-                <div className="space-y-4">
-                    <AddEmployeeForm />
-                    <AddClientForm />
                 </div>
             </div>
         </div>
