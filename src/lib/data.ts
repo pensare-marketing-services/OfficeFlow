@@ -66,6 +66,7 @@ export type PaidPromotion = {
     status: 'Active' | 'Stopped' | 'Scheduled';
     assignedTo: string;
     spent: number;
+    cashIn: number;
     remarks: string;
     clientId: string;
 };

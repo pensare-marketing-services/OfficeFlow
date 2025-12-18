@@ -148,7 +148,8 @@
       },
       "required": [
         "id",
-        "note"
+        "note",
+        "update"
       ]
     },
     "Client": {
@@ -294,6 +295,9 @@
           "description": "The username of the person assigned."
         },
         "spent": {
+          "type": "number"
+        },
+        "cashIn": {
           "type": "number"
         },
         "remarks": {
