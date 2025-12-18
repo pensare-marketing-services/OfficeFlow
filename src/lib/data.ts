@@ -57,6 +57,20 @@ export type Client = {
   notes?: ClientNote[];
 };
 
+export type PaidPromotion = {
+    id: string;
+    date: string;
+    campaign: string;
+    adType: 'Lead Call' | 'Reach Ad';
+    budget: number;
+    status: 'Stopped' | 'Running';
+    assignedTo: string;
+    spent: number;
+    leads: number;
+    clientId: string;
+};
+
+
 export type Notification = {
   id: string;
   userId: string;

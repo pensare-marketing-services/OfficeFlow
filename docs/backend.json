@@ -128,14 +128,27 @@
       "description": "A single note or remark for a client.",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "note": { "type": "string" },
-        "update": { 
+        "id": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "update": {
           "type": "string",
-          "enum": ["Done", "On Work", "Pending", "Scheduled", "For Approval"]
+          "enum": [
+            "Done",
+            "On Work",
+            "Pending",
+            "Scheduled",
+            "For Approval"
+          ]
         }
       },
-      "required": ["id", "note"]
+      "required": [
+        "id",
+        "note"
+      ]
     },
     "Client": {
       "title": "Client",
@@ -238,6 +251,55 @@
         "read",
         "createdAt"
       ]
+    },
+     "PaidPromotion": {
+      "title": "Paid Promotion",
+      "description": "Represents a single paid promotion campaign for a client.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "campaign": {
+          "type": "string"
+        },
+        "adType": {
+          "type": "string",
+          "enum": ["Lead Call", "Reach Ad"]
+        },
+        "budget": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Stopped", "Running"]
+        },
+        "assignedTo": {
+          "type": "string",
+          "description": "The username of the person assigned."
+        },
+        "spent": {
+          "type": "number"
+        },
+        "leads": {
+          "type": "number"
+        },
+         "clientId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "campaign",
+        "adType",
+        "budget",
+        "status",
+        "assignedTo",
+        "spent",
+        "leads",
+        "clientId"
+      ]
     }
   },
   "auth": {
@@ -263,6 +325,12 @@
         "$ref": "#/entities/Client"
       },
       "description": "Stores all clients for the organization."
+    },
+     "/clients/{clientId}/promotions/{promotionId}": {
+      "schema": {
+        "$ref": "#/entities/PaidPromotion"
+      },
+      "description": "Stores all paid promotions for a specific client."
     },
     "/notifications/{notificationId}": {
       "schema": {

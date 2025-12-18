@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Pen } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
 import ClientNotesTable from '@/components/dashboard/client-notes-table';
+import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
 
 
 type UserWithId = User & { id: string };
@@ -190,6 +191,14 @@ export default function ClientIdPage() {
                        />
                     )}
                 </div>
+            </div>
+             <div className="space-y-4">
+                 {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                    <PaidPromotionsTable 
+                        clientId={client.id}
+                        users={users as UserWithId[]}
+                    />
+                 )}
             </div>
         </div>
     );
