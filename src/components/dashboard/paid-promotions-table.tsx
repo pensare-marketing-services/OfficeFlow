@@ -243,13 +243,12 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                             <TableCell></TableCell>
                         </TableRow>
                          <TableRow>
-                            <TableCell colSpan={4}></TableCell>
-                            <TableCell className="font-bold">{totalBudget.toFixed(2)}</TableCell>
-                             <TableCell></TableCell>
-                            <TableCell className="text-right font-bold">TOTAL</TableCell>
+                            <TableCell colSpan={3}></TableCell>
+                            <TableCell className="p-1 font-bold">{totalBudget.toFixed(2)}</TableCell>
+                             <TableCell colSpan={2}></TableCell>
                             <TableCell className="p-1 font-bold">{totalSpent.toFixed(2)}</TableCell>
                             <TableCell className="p-1 font-bold">{totalCashIn.toFixed(2)}</TableCell>
-                            <TableCell></TableCell>
+                            <TableCell colSpan={2}></TableCell>
                         </TableRow>
                         <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
                         <TableRow>
