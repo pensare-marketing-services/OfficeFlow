@@ -10,15 +10,17 @@ import { useUsers } from '@/hooks/use-users';
 import { Skeleton } from '@/components/ui/skeleton';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
-import type { Client } from '@/lib/data';
+import type { Client, UserProfile } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 type ClientWithId = Client & { id: string };
+type UserWithId = UserProfile & { id: string };
 
 const EditablePasswordCell = ({ userId, initialPassword }: { userId: string, initialPassword?: string }) => {
     const { updateUserPassword } = useUsers();
@@ -74,6 +76,38 @@ const EditablePasswordCell = ({ userId, initialPassword }: { userId: string, ini
         </div>
     )
 }
+
+const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string[], allUsers: UserWithId[] }) => {
+    const assignedEmployees = useMemo(() => {
+        if (!employeeIds) return [];
+        return employeeIds.map(id => allUsers.find(u => u.id === id)).filter(Boolean) as UserWithId[];
+    }, [employeeIds, allUsers]);
+
+    if (assignedEmployees.length === 0) {
+        return <TableCell className="text-muted-foreground text-xs">-</TableCell>;
+    }
+
+    return (
+        <TableCell>
+            <div className="flex -space-x-2">
+                <TooltipProvider>
+                    {assignedEmployees.map(employee => (
+                        <Tooltip key={employee.id}>
+                            <TooltipTrigger asChild>
+                                <Avatar className="h-7 w-7 border-2 border-background text-xs">
+                                    <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
+                                </Avatar>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{employee.username}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    ))}
+                </TooltipProvider>
+            </div>
+        </TableCell>
+    );
+};
 
 export default function SettingsPage() {
     const { users, loading: usersLoading, error, deleteUser } = useUsers();
@@ -194,18 +228,20 @@ export default function SettingsPage() {
                                     <TableRow>
                                         <TableHead className="w-[50px]">#</TableHead>
                                         <TableHead>Client Name</TableHead>
+                                        <TableHead>Assigned Employees</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {clientsLoading && <TableRow><TableCell colSpan={2}><Skeleton className="h-8 w-full" /></TableCell></TableRow>}
+                                    {clientsLoading && <TableRow><TableCell colSpan={3}><Skeleton className="h-8 w-full" /></TableCell></TableRow>}
                                     {!clientsLoading && clients.map((client, index) => (
                                         <TableRow key={client.id}>
                                             <TableCell>{index + 1}</TableCell>
                                             <TableCell className="font-medium">{client.name}</TableCell>
+                                            <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
                                         </TableRow>
                                     ))}
                                     {!clientsLoading && clients.length === 0 && (
-                                        <TableRow><TableCell colSpan={2} className="text-center text-muted-foreground">No clients added yet.</TableCell></TableRow>
+                                        <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground">No clients added yet.</TableCell></TableRow>
                                     )}
                                 </TableBody>
                             </Table>

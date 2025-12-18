@@ -39,9 +39,9 @@ export default function AddClientForm() {
     resolver: zodResolver(clientSchema),
     defaultValues: {
       name: '',
-      employeeId1: '',
-      employeeId2: '',
-      employeeId3: '',
+      employeeId1: 'unassigned',
+      employeeId2: 'unassigned',
+      employeeId3: 'unassigned',
     },
   });
 
@@ -109,7 +109,7 @@ export default function AddClientForm() {
                                 render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Assign Employee {num}</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value || ''} disabled={usersLoading}>
+                                    <Select onValueChange={field.onChange} value={field.value || 'unassigned'} disabled={usersLoading}>
                                         <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder={usersLoading ? "Loading..." : "Select an employee"} />
