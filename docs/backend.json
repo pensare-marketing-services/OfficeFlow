@@ -130,7 +130,10 @@
       "properties": {
         "id": { "type": "string" },
         "note": { "type": "string" },
-        "update": { "type": "string" }
+        "update": { 
+          "type": "string",
+          "enum": ["Done", "On Work", "Pending", "Scheduled", "For Approval"]
+        }
       },
       "required": ["id", "note"]
     },

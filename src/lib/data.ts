@@ -37,10 +37,12 @@ export type Task = {
   activeAssigneeIndex?: number;
 };
 
+export type ClientNoteStatus = "Done" | "On Work" | "Pending" | "Scheduled" | "For Approval";
+
 export type ClientNote = {
   id: string;
   note: string;
-  update: string;
+  update: ClientNoteStatus;
 }
 
 export type Client = {
