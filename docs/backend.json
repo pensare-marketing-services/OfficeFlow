@@ -123,6 +123,17 @@
         "deadline"
       ]
     },
+    "ClientNote": {
+      "title": "Client Note",
+      "description": "A single note or remark for a client.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "note": { "type": "string" },
+        "update": { "type": "string" }
+      },
+      "required": ["id", "note"]
+    },
     "Client": {
       "title": "Client",
       "description": "Represents a client of the agency.",
@@ -157,6 +168,13 @@
         "priority": {
           "type": "number",
           "description": "A number used to sort clients for display. Lower numbers appear first."
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/ClientNote"
+          },
+          "description": "A list of notes specific to this client."
         }
       },
       "required": [

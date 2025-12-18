@@ -37,6 +37,12 @@ export type Task = {
   activeAssigneeIndex?: number;
 };
 
+export type ClientNote = {
+  id: string;
+  note: string;
+  update: string;
+}
+
 export type Client = {
   id: string;
   name: string;
@@ -46,6 +52,7 @@ export type Client = {
   monthlyReach?: string;
   employeeIds?: string[];
   priority?: number;
+  notes?: ClientNote[];
 };
 
 export type Notification = {

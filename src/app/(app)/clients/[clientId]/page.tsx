@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import type { Task, UserProfile as User, Client } from '@/lib/data';
+import type { Task, UserProfile as User, Client, ClientNote } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
 import { Input } from '@/components/ui/input';
 import { Pen } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
+import ClientNotesTable from '@/components/dashboard/client-notes-table';
 
 
 type UserWithId = User & { id: string };
@@ -124,6 +125,10 @@ export default function ClientIdPage() {
         addTask(newTask);
     };
 
+    const handleNotesUpdate = (notes: ClientNote[]) => {
+        handleClientUpdate({ notes });
+    }
+
     const filteredTasks = useMemo(() => {
         if (!tasks || !client) return [];
         return tasks.filter(task => task.clientId === client.id);
@@ -178,7 +183,12 @@ export default function ClientIdPage() {
                     )}
                 </div>
                 <div className="lg:col-span-1">
-                    {/* This is where the next table will go */}
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                       <ClientNotesTable 
+                            notes={client.notes || []}
+                            onUpdate={handleNotesUpdate}
+                       />
+                    )}
                 </div>
             </div>
         </div>
