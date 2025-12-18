@@ -2,13 +2,13 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import type { Task, UserProfile as User, Client, ClientNote } from '@/lib/data';
+import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, collection, onSnapshot, query } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
@@ -17,6 +17,7 @@ import { Pen } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
 import ClientNotesTable from '@/components/dashboard/client-notes-table';
 import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
+import CashInLog from '@/components/dashboard/cash-in-log';
 
 
 type UserWithId = User & { id: string };
@@ -64,6 +65,8 @@ export default function ClientIdPage() {
     const { users, loading: usersLoading } = useUsers();
     const [client, setClient] = useState<ClientWithId | null>(null);
     const [loading, setLoading] = useState(true);
+    const [cashInTransactions, setCashInTransactions] = useState<(CashInTransaction & { id: string })[]>([]);
+    const [cashInLoading, setCashInLoading] = useState(true);
     
     const params = useParams();
     const clientId = params.clientId as string;
@@ -87,6 +90,22 @@ export default function ClientIdPage() {
 
         fetchClient();
 
+    }, [clientId]);
+    
+    useEffect(() => {
+        if (!clientId) return;
+        setCashInLoading(true);
+        const cashInQuery = query(collection(db, `clients/${clientId}/cashInTransactions`));
+        const unsubscribe = onSnapshot(cashInQuery, (snapshot) => {
+            const transationsData = snapshot.docs.map(doc => ({ ...doc.data() as CashInTransaction, id: doc.id }));
+            setCashInTransactions(transationsData);
+            setCashInLoading(false);
+        }, (error) => {
+            console.error("Error fetching cash-in transactions:", error);
+            setCashInLoading(false);
+        });
+
+        return () => unsubscribe();
     }, [clientId]);
 
 
@@ -134,8 +153,12 @@ export default function ClientIdPage() {
         if (!tasks || !client) return [];
         return tasks.filter(task => task.clientId === client.id);
     }, [tasks, client]);
+    
+    const totalCashIn = useMemo(() => {
+        return cashInTransactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+    }, [cashInTransactions]);
 
-    const pageLoading = loading || tasksLoading || usersLoading;
+    const pageLoading = loading || tasksLoading || usersLoading || cashInLoading;
 
     return (
         <div className="space-y-4">
@@ -192,13 +215,25 @@ export default function ClientIdPage() {
                     )}
                 </div>
             </div>
-             <div className="space-y-4">
-                 {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
-                    <PaidPromotionsTable 
-                        clientId={client.id}
-                        users={users as UserWithId[]}
-                    />
-                 )}
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                 <div className="lg:col-span-2">
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                        <PaidPromotionsTable 
+                            clientId={client.id}
+                            users={users as UserWithId[]}
+                            totalCashIn={totalCashIn}
+                        />
+                    )}
+                 </div>
+                 <div className="lg:col-span-1">
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                        <CashInLog
+                            clientId={client.id}
+                            transactions={cashInTransactions}
+                            totalCashIn={totalCashIn}
+                        />
+                    )}
+                 </div>
             </div>
         </div>
     );

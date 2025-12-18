@@ -66,10 +66,15 @@ export type PaidPromotion = {
     status: 'Active' | 'Stopped' | 'Scheduled';
     assignedTo: string;
     spent: number;
-    cashIn: number;
     remarks: string;
     clientId: string;
 };
+
+export type CashInTransaction = {
+    id: string;
+    date: string;
+    amount: number;
+}
 
 
 export type Notification = {

@@ -21,6 +21,7 @@ type UserWithId = User & { id: string };
 interface PaidPromotionsTableProps {
   clientId: string;
   users: UserWithId[];
+  totalCashIn: number;
 }
 
 const adTypes: PaidPromotion['adType'][] = [
@@ -77,7 +78,7 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsTableProps) {
+export default function PaidPromotionsTable({ clientId, users, totalCashIn }: PaidPromotionsTableProps) {
     const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
     const [oldBalance, setOldBalance] = useState(0);
@@ -112,7 +113,6 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
             status: 'Active' as const,
             assignedTo: '',
             spent: 0,
-            cashIn: 0,
             remarks: '',
             clientId,
         };
@@ -127,7 +127,6 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
 
     const totalSpent = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.spent) || 0), 0), [promotions]);
     const totalBudget = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.budget) || 0), 0), [promotions]);
-    const totalCashIn = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.cashIn) || 0), 0), [promotions]);
     const gst = totalSpent * 0.18;
     const totalWithGst = totalSpent + gst;
     const balance = (oldBalance + totalCashIn) - totalWithGst;
@@ -152,7 +151,6 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                             <TableHead>Status</TableHead>
                             <TableHead>Assigned</TableHead>
                             <TableHead className="w-[100px]">Spent</TableHead>
-                            <TableHead className="w-[100px]">Cash In</TableHead>
                             <TableHead>Remarks</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
@@ -211,7 +209,6 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                                     </Select>
                                 </TableCell>
                                 <TableCell className="p-0"><EditableCell value={promo.spent} onSave={(v) => handlePromotionChange(promo.id, 'spent', v)} type="number" /></TableCell>
-                                <TableCell className="p-0"><EditableCell value={promo.cashIn || 0} onSave={(v) => handlePromotionChange(promo.id, 'cashIn', v)} type="number" /></TableCell>
                                 <TableCell className="p-0"><EditableCell value={promo.remarks} onSave={(v) => handlePromotionChange(promo.id, 'remarks', v)} type="text" /></TableCell>
                                 <TableCell className="p-0 text-center">
                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deletePromotion(promo.id)}>
@@ -222,51 +219,49 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                         ))}
                          {!loading && promotions.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                                     No promotions added yet.
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                     <TableFooter>
-                         <TableRow>
-                            <TableCell colSpan={3} className="text-right font-bold text-sm">Totals</TableCell>
-                            <TableCell className="p-1 font-bold text-sm">{totalBudget.toFixed(2)}</TableCell>
-                             <TableCell colSpan={2}></TableCell>
-                            <TableCell className="p-1 font-bold text-sm">{totalSpent.toFixed(2)}</TableCell>
-                            <TableCell className="p-1 font-bold text-sm">{totalCashIn.toFixed(2)}</TableCell>
-                            <TableCell colSpan={2}></TableCell>
-                        </TableRow>
-                        <TableRow><TableCell colSpan={10} className="p-0 h-2"><Separator /></TableCell></TableRow>
-                        
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold">Old bal</TableCell>
-                            <TableCell className="p-0">
+                            <TableCell colSpan={3} />
+                            <TableCell className="p-1 font-bold text-sm text-center">{totalBudget.toFixed(2)}</TableCell>
+                            <TableCell colSpan={2} />
+                            <TableCell className="p-1 font-bold text-sm text-center">{totalSpent.toFixed(2)}</TableCell>
+                            <TableCell colSpan={2} />
+                        </TableRow>
+                         <TableRow><TableCell colSpan={9} className="p-0 h-2"><Separator /></TableCell></TableRow>
+                        <TableRow>
+                            <TableCell colSpan={6} className="text-right font-bold text-sm">Old bal</TableCell>
+                            <TableCell className="p-0 text-right" colSpan={2}>
                                 <Input 
                                     type="number" 
                                     value={oldBalance} 
                                     onChange={(e) => setOldBalance(Number(e.target.value))} 
-                                    className="h-7 text-xs p-1 bg-yellow-200 font-bold"
+                                    className="h-7 text-xs p-1 bg-yellow-200 font-bold border-0 text-right"
                                 />
                             </TableCell>
-                            <TableCell colSpan={2}></TableCell>
+                            <TableCell />
                         </TableRow>
-                        <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold">GST 18%</TableCell>
-                            <TableCell className="p-1 font-bold">{gst.toFixed(2)}</TableCell>
-                            <TableCell colSpan={2}></TableCell>
-                        </TableRow>
-                        <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
                          <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold">Total</TableCell>
-                            <TableCell className="p-1 font-bold">{totalWithGst.toFixed(2)}</TableCell>
-                             <TableCell colSpan={2}></TableCell>
+                            <TableCell colSpan={6} className="text-right font-bold text-sm">GST 18%</TableCell>
+                            <TableCell className="p-1 font-bold text-sm text-right" colSpan={2}>{gst.toFixed(2)}</TableCell>
+                            <TableCell />
                         </TableRow>
-                        <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
+                        <TableRow><TableCell colSpan={9} className="p-0 h-1"><Separator /></TableCell></TableRow>
+                         <TableRow>
+                            <TableCell colSpan={6} className="text-right font-bold text-sm">Total</TableCell>
+                            <TableCell className="p-1 font-bold text-sm text-right" colSpan={2}>{totalWithGst.toFixed(2)}</TableCell>
+                            <TableCell />
+                        </TableRow>
+                        <TableRow><TableCell colSpan={9} className="p-0 h-1"><Separator /></TableCell></TableRow>
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold">Balance</TableCell>
-                            <TableCell className="p-1 font-bold text-red-600">{balance.toFixed(2)}</TableCell>
-                            <TableCell colSpan={2}></TableCell>
+                            <TableCell colSpan={6} className="text-right font-bold text-sm">Balance</TableCell>
+                            <TableCell className="p-1 font-bold text-sm text-red-600 text-right" colSpan={2}>{balance.toFixed(2)}</TableCell>
+                             <TableCell />
                         </TableRow>
                     </TableFooter>
                 </Table>

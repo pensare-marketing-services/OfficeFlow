@@ -297,9 +297,6 @@
         "spent": {
           "type": "number"
         },
-        "cashIn": {
-          "type": "number"
-        },
         "remarks": {
           "type": "string"
         },
@@ -318,6 +315,21 @@
         "remarks",
         "clientId"
       ]
+    },
+    "CashInTransaction": {
+      "title": "Cash In Transaction",
+      "description": "Represents a single cash-in transaction from a client.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "amount": {
+          "type": "number"
+        }
+      },
+      "required": ["date", "amount"]
     }
   },
   "auth": {
@@ -349,6 +361,12 @@
         "$ref": "#/entities/PaidPromotion"
       },
       "description": "Stores all paid promotions for a specific client."
+    },
+    "/clients/{clientId}/cashInTransactions/{transactionId}": {
+      "schema": {
+        "$ref": "#/entities/CashInTransaction"
+      },
+      "description": "Stores all cash-in transactions for a specific client."
     },
     "/notifications/{notificationId}": {
       "schema": {
