@@ -58,7 +58,8 @@ export default function AddClientForm() {
     setLoading(true);
     setError(null);
 
-    const employeeIds = [data.employeeId1, data.employeeId2, data.employeeId3].filter(Boolean) as string[];
+    const employeeIds = [data.employeeId1, data.employeeId2, data.employeeId3]
+      .filter(id => id && id !== 'unassigned') as string[];
     const uniqueEmployeeIds = [...new Set(employeeIds)];
 
     try {
@@ -115,7 +116,7 @@ export default function AddClientForm() {
                                         </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="">None</SelectItem>
+                                            <SelectItem value="unassigned">None</SelectItem>
                                             {filteredOptions.map((employee) => (
                                                 <SelectItem key={employee.id} value={employee.id}>
                                                      <div className="flex items-center gap-2">
