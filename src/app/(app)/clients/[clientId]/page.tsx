@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
@@ -132,7 +132,7 @@ export default function ClientIdPage() {
     const pageLoading = loading || tasksLoading || usersLoading;
 
     return (
-        <div className="space-y-0">
+        <div className="space-y-4">
             <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
@@ -151,33 +151,37 @@ export default function ClientIdPage() {
                         </div>
                     </div>
                 </CardHeader>
+                 {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
+                    <ClientPlanSummary 
+                        client={client} 
+                        onUpdate={(id, data) => handleClientUpdate(data)} 
+                    />
+                )}
             </Card>
 
-            <div className="space-y-0">
-                {pageLoading ? <Skeleton className="h-96 w-full mt-4" /> : client ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div className="lg:col-span-1">
-                            <ClientPlanSummary 
-                                client={client} 
-                                onUpdate={(id, data) => handleClientUpdate(data)} 
-                            />
-                            <ContentSchedule 
-                                tasks={filteredTasks} 
-                                users={users as UserWithId[]} 
-                                onTaskUpdate={handleTaskUpdate}
-                                onTaskDelete={handleTaskDelete}
-                                showClient={false}
-                            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Card className="lg:col-span-1">
+                    <CardContent className="p-0">
+                        <div className="overflow-x-auto">
+                            {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
+                                <ContentSchedule 
+                                    tasks={filteredTasks} 
+                                    users={users as UserWithId[]} 
+                                    onTaskUpdate={handleTaskUpdate}
+                                    onTaskDelete={handleTaskDelete}
+                                    showClient={false}
+                                />
+                            ) : (
+                                <div className="text-center text-muted-foreground py-16">
+                                    Client not found or you do not have permission to view them.
+                                </div>
+                            )}
                         </div>
-                         <div className="lg:col-span-1">
-                            {/* This is where the next table will go */}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-center text-muted-foreground py-16">
-                        Client not found or you do not have permission to view them.
-                    </div>
-                )}
+                    </CardContent>
+                </Card>
+                <div className="lg:col-span-1">
+                    {/* This is where the next table will go */}
+                </div>
             </div>
         </div>
     );
