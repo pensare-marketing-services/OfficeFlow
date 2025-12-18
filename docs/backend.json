@@ -153,6 +153,10 @@
             "type": "string"
           },
           "description": "The UIDs of the employees assigned to this client. Can have up to 3 assignees."
+        },
+        "priority": {
+          "type": "number",
+          "description": "A number used to sort clients for display. Lower numbers appear first."
         }
       },
       "required": [

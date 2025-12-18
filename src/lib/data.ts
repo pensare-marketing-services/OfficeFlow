@@ -45,6 +45,7 @@ export type Client = {
   billDuration?: string;
   monthlyReach?: string;
   employeeIds?: string[];
+  priority?: number;
 };
 
 export type Notification = {

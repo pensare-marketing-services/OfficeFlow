@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useUsers } from '@/hooks/use-users';
 import { Skeleton } from '@/components/ui/skeleton';
-import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import type { Client, UserProfile } from '@/lib/data';
 import { Button } from '@/components/ui/button';
@@ -234,7 +234,43 @@ const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string
     );
 };
 
-const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void>, startIndex?: number }) => {
+const EditablePriorityCell = ({ client, onUpdate }: { client: ClientWithId, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void> }) => {
+    const [priority, setPriority] = useState(client.priority || 0);
+
+    useEffect(() => {
+        setPriority(client.priority || 0);
+    }, [client.priority]);
+
+    const handleSave = () => {
+        const newPriority = Number(priority);
+        if (newPriority !== client.priority) {
+            onUpdate(client.id, { priority: newPriority });
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSave();
+            e.currentTarget.blur();
+        }
+    };
+
+    return (
+        <TableCell className="px-2 py-1 text-xs">
+            <Input
+                type="number"
+                value={priority}
+                onChange={(e) => setPriority(Number(e.target.value))}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                className="h-7 w-12 text-xs p-1"
+            />
+        </TableCell>
+    );
+};
+
+
+const ClientTable = ({ clients, users, loading, onUpdate }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void> }) => {
     return (
          <Table>
             <TableHeader>
@@ -251,9 +287,9 @@ const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { cl
                         <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                     </TableRow>
                 ))}
-                {!loading && clients.map((client, index) => (
+                {!loading && clients.map((client) => (
                     <TableRow key={client.id}>
-                        <TableCell className="px-2 py-1 text-xs">{startIndex + index + 1}</TableCell>
+                        <EditablePriorityCell client={client} onUpdate={onUpdate} />
                         <TableCell className="font-medium text-xs py-1 px-2">{client.name}</TableCell>
                         <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
                          <TableCell className="text-right px-2 py-1">
@@ -280,7 +316,7 @@ export default function SettingsPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        const clientsQuery = collection(db, "clients");
+        const clientsQuery = query(collection(db, "clients"), orderBy("priority", "asc"));
         const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
             const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
             setClients(clientsData);
@@ -343,7 +379,7 @@ export default function SettingsPage() {
                     <AddEmployeeForm />
                 </div>
                 <div className="lg:col-span-1">
-                    <AddClientForm />
+                    <AddClientForm clientCount={clients.length}/>
                 </div>
                 <div className="lg:col-span-1">
                      <Card>

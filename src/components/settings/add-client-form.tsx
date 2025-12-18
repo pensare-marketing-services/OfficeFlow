@@ -29,7 +29,7 @@ type ClientFormValues = z.infer<typeof clientSchema>;
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
-export default function AddClientForm() {
+export default function AddClientForm({ clientCount }: { clientCount: number }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -65,7 +65,8 @@ export default function AddClientForm() {
     try {
         await addDoc(collection(db, 'clients'), { 
             name: data.name,
-            employeeIds: uniqueEmployeeIds
+            employeeIds: uniqueEmployeeIds,
+            priority: clientCount + 1,
         });
         
         toast({
