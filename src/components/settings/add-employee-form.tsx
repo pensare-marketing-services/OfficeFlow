@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { createUser } from '@/ai/flows/user-flow';
 import { CreateUserInput, CreateUserInputSchema } from '@/ai/flows/user-flow-schema';
+import { cn } from '@/lib/utils';
 
 export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
@@ -51,20 +52,25 @@ export default function AddEmployeeForm() {
 
   return (
     <Card>
-        <CardHeader className="p-3">
-            <CardTitle className="font-headline text-base flex items-center gap-2"><UserPlus /> Add New User</CardTitle>
-            <CardDescription className="text-xs">Create a new admin or employee account.</CardDescription>
+        <CardHeader className="p-2">
+            <CardTitle className="font-headline text-base flex items-center gap-1 pb-0"><UserPlus /> Add New User</CardTitle>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
                 <CardContent className="space-y-2 p-3">
                      <FormField control={form.control} name="username" render={({ field }) => (
-                        <FormItem><FormLabel>Username</FormLabel><FormControl><Input className="h-8 text-xs" placeholder="e.g., janedoe" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
+                            <FormLabel className="col-span-1">Username</FormLabel>
+                            <FormControl className="col-span-2">
+                                <Input className="h-8 text-xs" placeholder="e.g., janedoe" {...field} />
+                            </FormControl>
+                            <div className="col-span-3"><FormMessage /></div>
+                        </FormItem>
                     )} />
                      <FormField control={form.control} name="password" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
+                        <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
+                            <FormLabel className="col-span-1">Password</FormLabel>
+                            <FormControl className="col-span-2">
                                 <div className="relative">
                                     <Input className="h-8 text-xs" type={isPasswordVisible ? 'text' : 'password'} placeholder="Set a password" {...field} />
                                     <Button 
@@ -78,24 +84,26 @@ export default function AddEmployeeForm() {
                                     </Button>
                                 </div>
                             </FormControl>
-                            <FormMessage />
+                             <div className="col-span-3"><FormMessage /></div>
                         </FormItem>
                     )} />
                     <FormField control={form.control} name="role" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Role</FormLabel>
-                             <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                <SelectTrigger className="h-8 text-xs">
-                                    <SelectValue placeholder="Select a role" />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="employee">Employee</SelectItem>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
+                        <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
+                            <FormLabel className="col-span-1">Role</FormLabel>
+                            <div className="col-span-2">
+                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger className="h-8 text-xs">
+                                        <SelectValue placeholder="Select a role" />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="employee">Employee</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                             <div className="col-span-3"><FormMessage /></div>
                         </FormItem>
                     )} />
                 </CardContent>

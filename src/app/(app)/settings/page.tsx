@@ -266,22 +266,10 @@ export default function SettingsPage() {
 
     return (
         <div className="space-y-4">
-            <div>
-                <h2 className="font-headline text-xl font-semibold tracking-tight">
-                    Settings
-                </h2>
-                <p className="text-muted-foreground text-xs">
-                    Manage your team, clients, and application settings.
-                </p>
-            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2 space-y-4">
                      <Card>
-                        <CardHeader className="p-3">
-                            <CardTitle className="flex items-center gap-2 text-base"><Building /> Manage Clients</CardTitle>
-                            <CardDescription className="text-xs">View and edit all your clients in one place.</CardDescription>
-                        </CardHeader>
                         <CardContent className="p-0">
                              <Table>
                                 <TableHeader>
