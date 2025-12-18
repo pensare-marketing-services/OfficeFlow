@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -266,14 +267,27 @@
         },
         "adType": {
           "type": "string",
-          "enum": ["Lead Call", "Reach Ad"]
+          "enum": [
+            "EG Whatsapp",
+            "EG Instagram",
+            "EG FB Post",
+            "EG Insta Post",
+            "Traffic Web",
+            "Lead Gen",
+            "Lead Call",
+            "Profile Visit Ad",
+            "FB Page Like",
+            "Carousel Ad",
+            "IG Engage",
+            "Reach Ad"
+          ]
         },
         "budget": {
           "type": "number"
         },
         "status": {
           "type": "string",
-          "enum": ["Stopped", "Running"]
+          "enum": ["Active", "Stopped", "Scheduled"]
         },
         "assignedTo": {
           "type": "string",
@@ -282,8 +296,8 @@
         "spent": {
           "type": "number"
         },
-        "leads": {
-          "type": "number"
+        "remarks": {
+          "type": "string"
         },
          "clientId": {
           "type": "string"
@@ -297,7 +311,7 @@
         "status",
         "assignedTo",
         "spent",
-        "leads",
+        "remarks",
         "clientId"
       ]
     }

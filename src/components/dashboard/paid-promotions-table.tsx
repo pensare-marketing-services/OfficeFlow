@@ -14,6 +14,7 @@ import { format, isValid } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query } from 'firebase/firestore';
 import { db } from '@/firebase/client';
+import { Separator } from '../ui/separator';
 
 type UserWithId = User & { id: string };
 
@@ -22,8 +23,21 @@ interface PaidPromotionsTableProps {
   users: UserWithId[];
 }
 
-const adTypes: PaidPromotion['adType'][] = ["Lead Call", "Reach Ad"];
-const statuses: PaidPromotion['status'][] = ["Stopped", "Running"];
+const adTypes: PaidPromotion['adType'][] = [
+    "EG Whatsapp", 
+    "EG Instagram", 
+    "EG FB Post", 
+    "EG Insta Post", 
+    "Traffic Web", 
+    "Lead Gen", 
+    "Lead Call", 
+    "Profile Visit Ad", 
+    "FB Page Like", 
+    "Carousel Ad", 
+    "IG Engage",
+    "Reach Ad"
+];
+const statuses: PaidPromotion['status'][] = ["Active", "Stopped", "Scheduled"];
 
 const EditableCell: React.FC<{
     value: string | number;
@@ -95,10 +109,10 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
             campaign: '',
             adType: 'Lead Call' as const,
             budget: 0,
-            status: 'Running' as const,
+            status: 'Active' as const,
             assignedTo: '',
             spent: 0,
-            leads: 0,
+            remarks: '',
             clientId,
         };
         await addDoc(collection(db, `clients/${clientId}/promotions`), newPromotion);
@@ -111,7 +125,7 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
     const employeeUsers = useMemo(() => users.filter(u => u.role === 'employee'), [users]);
 
     const totalSpent = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.spent) || 0), 0), [promotions]);
-    const totalLeads = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.leads) || 0), 0), [promotions]);
+    const totalBudget = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.budget) || 0), 0), [promotions]);
     const gst = totalSpent * 0.18;
     const totalWithGst = totalSpent + gst;
     const balance = oldBalance - totalWithGst;
@@ -136,7 +150,7 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                             <TableHead>Status</TableHead>
                             <TableHead>Assigned</TableHead>
                             <TableHead>Spent</TableHead>
-                            <TableHead>Leads</TableHead>
+                            <TableHead>Remarks</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -178,7 +192,7 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                                 <TableCell className="p-0"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" /></TableCell>
                                 <TableCell className="p-1">
                                     <Select value={promo.status} onValueChange={(v: PaidPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-xs", promo.status === 'Stopped' ? 'bg-red-500 text-white' : '')}><SelectValue /></SelectTrigger>
+                                        <SelectTrigger className={cn("h-7 text-xs", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : '')}><SelectValue /></SelectTrigger>
                                         <SelectContent>
                                             {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
@@ -194,7 +208,7 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                                     </Select>
                                 </TableCell>
                                 <TableCell className="p-0"><EditableCell value={promo.spent} onSave={(v) => handlePromotionChange(promo.id, 'spent', v)} type="number" /></TableCell>
-                                <TableCell className="p-0"><EditableCell value={promo.leads} onSave={(v) => handlePromotionChange(promo.id, 'leads', v)} type="number" /></TableCell>
+                                <TableCell className="p-0"><EditableCell value={promo.remarks} onSave={(v) => handlePromotionChange(promo.id, 'remarks', v)} type="text" /></TableCell>
                                 <TableCell className="p-0 text-center">
                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deletePromotion(promo.id)}>
                                         <Trash2 className="h-4 w-4" />
@@ -225,24 +239,29 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                             <TableCell></TableCell>
                         </TableRow>
                          <TableRow>
-                            <TableCell colSpan={5}></TableCell>
+                            <TableCell colSpan={3}></TableCell>
+                            <TableCell className="font-bold">{totalBudget.toFixed(2)}</TableCell>
+                            <TableCell></TableCell>
                             <TableCell className="text-right font-bold">TOTAL</TableCell>
                             <TableCell className="p-1 font-bold">{totalSpent.toFixed(2)}</TableCell>
-                             <TableCell className="p-1 font-bold">{totalLeads}</TableCell>
+                             <TableCell className="p-1 font-bold"></TableCell>
                             <TableCell></TableCell>
                         </TableRow>
+                        <TableRow><TableCell colSpan={9} className="p-0 h-1"><Separator /></TableCell></TableRow>
                         <TableRow>
                             <TableCell colSpan={5}></TableCell>
                             <TableCell className="text-right font-bold">GST 18%</TableCell>
                             <TableCell className="p-1 font-bold">{gst.toFixed(2)}</TableCell>
                             <TableCell colSpan={2}></TableCell>
                         </TableRow>
+                        <TableRow><TableCell colSpan={9} className="p-0 h-1"><Separator /></TableCell></TableRow>
                          <TableRow>
                             <TableCell colSpan={5}></TableCell>
                             <TableCell className="text-right font-bold">Total</TableCell>
                             <TableCell className="p-1 font-bold">{totalWithGst.toFixed(2)}</TableCell>
                              <TableCell colSpan={2}></TableCell>
                         </TableRow>
+                        <TableRow><TableCell colSpan={9} className="p-0 h-1"><Separator /></TableCell></TableRow>
                         <TableRow>
                             <TableCell colSpan={5}></TableCell>
                             <TableCell className="text-right font-bold">Balance</TableCell>

@@ -61,12 +61,12 @@ export type PaidPromotion = {
     id: string;
     date: string;
     campaign: string;
-    adType: 'Lead Call' | 'Reach Ad';
+    adType: 'EG Whatsapp' | 'EG Instagram' | 'EG FB Post' | 'EG Insta Post' | 'Traffic Web' | 'Lead Gen' | 'Lead Call' | 'Profile Visit Ad' | 'FB Page Like' | 'Carousel Ad' | 'IG Engage' | 'Reach Ad';
     budget: number;
-    status: 'Stopped' | 'Running';
+    status: 'Active' | 'Stopped' | 'Scheduled';
     assignedTo: string;
     spent: number;
-    leads: number;
+    remarks: string;
     clientId: string;
 };
 
