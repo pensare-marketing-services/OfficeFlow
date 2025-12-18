@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useUsers } from '@/hooks/use-users';
 import { Skeleton } from '@/components/ui/skeleton';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import type { Client, UserProfile } from '@/lib/data';
 import { Button } from '@/components/ui/button';
@@ -16,11 +16,151 @@ import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2 } from 'lucide-react';
+
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 type ClientWithId = Client & { id: string };
 type UserWithId = UserProfile & { id: string };
+
+const editClientSchema = z.object({
+  name: z.string().min(2, 'Client name must be at least 2 characters.'),
+  employeeId1: z.string().optional(),
+  employeeId2: z.string().optional(),
+  employeeId3: z.string().optional(),
+});
+
+type EditClientFormValues = z.infer<typeof editClientSchema>;
+
+const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId, allUsers: UserWithId[], onUpdate: (data: Partial<Client>) => Promise<void> }) => {
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const { toast } = useToast();
+
+    const employeeOptions = useMemo(() => {
+        return allUsers.filter(u => u.role === 'employee');
+    }, [allUsers]);
+
+    const form = useForm<EditClientFormValues>({
+        resolver: zodResolver(editClientSchema),
+        defaultValues: {
+            name: client.name,
+            employeeId1: client.employeeIds?.[0] || 'unassigned',
+            employeeId2: client.employeeIds?.[1] || 'unassigned',
+            employeeId3: client.employeeIds?.[2] || 'unassigned',
+        },
+    });
+    
+    useEffect(() => {
+        if(open) {
+            form.reset({
+                name: client.name,
+                employeeId1: client.employeeIds?.[0] || 'unassigned',
+                employeeId2: client.employeeIds?.[1] || 'unassigned',
+                employeeId3: client.employeeIds?.[2] || 'unassigned',
+            });
+        }
+    }, [client, open, form]);
+
+    const watchEmployee1 = form.watch('employeeId1');
+    const watchEmployee2 = form.watch('employeeId2');
+    const watchEmployee3 = form.watch('employeeId3');
+
+    const onSubmit = async (data: EditClientFormValues) => {
+        setLoading(true);
+        const employeeIds = [data.employeeId1, data.employeeId2, data.employeeId3]
+            .filter(id => id && id !== 'unassigned') as string[];
+        const uniqueEmployeeIds = [...new Set(employeeIds)];
+
+        try {
+            await onUpdate({ name: data.name, employeeIds: uniqueEmployeeIds });
+            toast({ title: "Client Updated", description: "The client's details have been saved." });
+            setOpen(false);
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: "Update Failed", description: error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Pen className="h-4 w-4" />
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Edit Client: {client.name}</DialogTitle>
+                </DialogHeader>
+                 <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField control={form.control} name="name" render={({ field }) => (
+                            <FormItem><FormLabel>Client Name</FormLabel><FormControl><Input placeholder="e.g., Acme Inc." {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+
+                        {[1, 2, 3].map((num) => {
+                            const fieldName = `employeeId${num}` as const;
+                            const watchedIds = [watchEmployee1, watchEmployee2, watchEmployee3];
+                            const filteredOptions = employeeOptions.filter(
+                                (emp) => !watchedIds.includes(emp.id) || watchedIds[num - 1] === emp.id
+                            );
+
+                            return (
+                                <FormField
+                                    key={num}
+                                    control={form.control}
+                                    name={fieldName}
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Assign Employee {num}</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value || 'unassigned'}>
+                                            <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select an employee" />
+                                            </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="unassigned">None</SelectItem>
+                                                {filteredOptions.map((employee) => (
+                                                    <SelectItem key={employee.id} value={employee.id}>
+                                                        <div className="flex items-center gap-2">
+                                                            <Avatar className="h-6 w-6 text-xs">
+                                                                <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
+                                                            </Avatar>
+                                                            <span>{employee.username}</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                            )
+                        })}
+                        <DialogFooter>
+                            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                             <Button type="submit" disabled={loading}>
+                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Changes
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 const EditablePasswordCell = ({ userId, initialPassword }: { userId: string, initialPassword?: string }) => {
     const { updateUserPassword } = useUsers();
@@ -88,23 +228,8 @@ const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string
     }
 
     return (
-        <TableCell>
-            <div className="flex -space-x-2">
-                <TooltipProvider>
-                    {assignedEmployees.map(employee => (
-                        <Tooltip key={employee.id}>
-                            <TooltipTrigger asChild>
-                                <Avatar className="h-7 w-7 border-2 border-background text-xs">
-                                    <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
-                                </Avatar>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{employee.username}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    ))}
-                </TooltipProvider>
-            </div>
+        <TableCell className="text-xs">
+            {assignedEmployees.map(e => e.username).join(', ')}
         </TableCell>
     );
 };
@@ -113,6 +238,7 @@ export default function SettingsPage() {
     const { users, loading: usersLoading, error, deleteUser } = useUsers();
     const [clients, setClients] = useState<ClientWithId[]>([]);
     const [clientsLoading, setClientsLoading] = useState(true);
+    const { toast } = useToast();
 
     useEffect(() => {
         const clientsQuery = collection(db, "clients");
@@ -133,6 +259,11 @@ export default function SettingsPage() {
         return users.filter(u => u.role === 'employee');
     }, [users]);
     
+    const handleUpdateClient = async (clientId: string, data: Partial<Client>) => {
+        const clientRef = doc(db, 'clients', clientId);
+        await updateDoc(clientRef, data);
+    };
+
     return (
         <div className="space-y-8">
             <div>
@@ -220,7 +351,7 @@ export default function SettingsPage() {
                      <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Building /> Manage Clients</CardTitle>
-                            <CardDescription>View all your clients in one place.</CardDescription>
+                            <CardDescription>View and edit all your clients in one place.</CardDescription>
                         </CardHeader>
                         <CardContent>
                              <Table>
@@ -229,19 +360,34 @@ export default function SettingsPage() {
                                         <TableHead className="w-[50px]">#</TableHead>
                                         <TableHead>Client Name</TableHead>
                                         <TableHead>Assigned Employees</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {clientsLoading && <TableRow><TableCell colSpan={3}><Skeleton className="h-8 w-full" /></TableCell></TableRow>}
-                                    {!clientsLoading && clients.map((client, index) => (
+                                    {(clientsLoading || usersLoading) && Array.from({length: 3}).map((_, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {!clientsLoading && !usersLoading && clients.map((client, index) => (
                                         <TableRow key={client.id}>
                                             <TableCell>{index + 1}</TableCell>
                                             <TableCell className="font-medium">{client.name}</TableCell>
                                             <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
+                                             <TableCell className="text-right">
+                                                 <EditClientDialog 
+                                                    client={client} 
+                                                    allUsers={users}
+                                                    onUpdate={(data) => handleUpdateClient(client.id, data)}
+                                                 />
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                     {!clientsLoading && clients.length === 0 && (
-                                        <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground">No clients added yet.</TableCell></TableRow>
+                                        <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No clients added yet.</TableCell></TableRow>
                                     )}
                                 </TableBody>
                             </Table>
