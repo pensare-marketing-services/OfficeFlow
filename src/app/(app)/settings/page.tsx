@@ -234,6 +234,45 @@ const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string
     );
 };
 
+const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void>, startIndex?: number }) => {
+    return (
+         <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="w-[40px] px-2 text-xs h-8">#</TableHead>
+                    <TableHead className="px-2 text-xs h-8">Client Name</TableHead>
+                    <TableHead className="px-2 text-xs h-8">Assigned Employees</TableHead>
+                    <TableHead className="text-right px-2 text-xs h-8">Actions</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {loading && Array.from({length: 8}).map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
+                    </TableRow>
+                ))}
+                {!loading && clients.map((client, index) => (
+                    <TableRow key={client.id}>
+                        <TableCell className="px-2 py-1 text-xs">{startIndex + index + 1}</TableCell>
+                        <TableCell className="font-medium text-xs py-1 px-2">{client.name}</TableCell>
+                        <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
+                         <TableCell className="text-right px-2 py-1">
+                             <EditClientDialog 
+                                client={client} 
+                                allUsers={users}
+                                onUpdate={(data) => onUpdate(client.id, data)}
+                             />
+                        </TableCell>
+                    </TableRow>
+                ))}
+                {!loading && clients.length === 0 && (
+                    <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground p-4">No clients in this column.</TableCell></TableRow>
+                )}
+            </TableBody>
+        </Table>
+    );
+};
+
 export default function SettingsPage() {
     const { users, loading: usersLoading, error, deleteUser } = useUsers();
     const [clients, setClients] = useState<ClientWithId[]>([]);
@@ -264,57 +303,48 @@ export default function SettingsPage() {
         await updateDoc(clientRef, data);
     };
 
+    const midPoint = Math.ceil(clients.length / 2);
+    const firstColumnClients = clients.slice(0, midPoint);
+    const secondColumnClients = clients.slice(midPoint);
+    const pageLoading = clientsLoading || usersLoading;
+
     return (
         <div className="space-y-4">
+             <Card>
+                <CardHeader className="p-3">
+                    <CardTitle className="flex items-center gap-2 text-base"><Building /> Manage Clients</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4">
+                        <div>
+                             <ClientTable 
+                                clients={firstColumnClients}
+                                users={users}
+                                loading={pageLoading}
+                                onUpdate={handleUpdateClient}
+                            />
+                        </div>
+                         <div>
+                             <ClientTable 
+                                clients={secondColumnClients}
+                                users={users}
+                                loading={pageLoading}
+                                onUpdate={handleUpdateClient}
+                                startIndex={firstColumnClients.length}
+                            />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2 space-y-4">
-                     <Card>
-                        <CardHeader className="p-3">
-                            <CardTitle className="flex items-center gap-2 text-base"><Building /> Manage Clients</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                             <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-[40px] px-2 text-xs h-8">#</TableHead>
-                                        <TableHead className="px-2 text-xs h-8">Client Name</TableHead>
-                                        <TableHead className="px-2 text-xs h-8">Assigned Employees</TableHead>
-                                        <TableHead className="text-right px-2 text-xs h-8">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {(clientsLoading || usersLoading) && Array.from({length: 3}).map((_, i) => (
-                                        <TableRow key={i}>
-                                            <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
-                                        </TableRow>
-                                    ))}
-                                    {!clientsLoading && !usersLoading && clients.map((client, index) => (
-                                        <TableRow key={client.id}>
-                                            <TableCell className="px-2 py-1 text-xs">{index + 1}</TableCell>
-                                            <TableCell className="font-medium text-xs py-1 px-2">{client.name}</TableCell>
-                                            <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
-                                             <TableCell className="text-right px-2 py-1">
-                                                 <EditClientDialog 
-                                                    client={client} 
-                                                    allUsers={users}
-                                                    onUpdate={(data) => handleUpdateClient(client.id, data)}
-                                                 />
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                    {!clientsLoading && clients.length === 0 && (
-                                        <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground p-4">No clients added yet.</TableCell></TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </div>
-                <div className="space-y-4">
+                <div className="lg:col-span-1 space-y-4">
                     <AddEmployeeForm />
                     <AddClientForm />
-                    <Card>
+                </div>
+                <div className="lg:col-span-2 space-y-4">
+                     <Card>
                         <CardHeader className="p-3">
                             <CardTitle className="flex items-center gap-2 text-base"><Users /> Manage Employees</CardTitle>
                         </CardHeader>
