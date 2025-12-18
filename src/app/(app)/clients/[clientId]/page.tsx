@@ -159,26 +159,24 @@ export default function ClientIdPage() {
                 )}
             </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Card className="lg:col-span-1">
-                    <CardContent className="p-0">
-                        <div className="overflow-x-auto">
-                            {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
-                                <ContentSchedule 
-                                    tasks={filteredTasks} 
-                                    users={users as UserWithId[]} 
-                                    onTaskUpdate={handleTaskUpdate}
-                                    onTaskDelete={handleTaskDelete}
-                                    showClient={false}
-                                />
-                            ) : (
-                                <div className="text-center text-muted-foreground py-16">
-                                    Client not found or you do not have permission to view them.
-                                </div>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2">
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
+                        <ContentSchedule 
+                            tasks={filteredTasks} 
+                            users={users as UserWithId[]} 
+                            onTaskUpdate={handleTaskUpdate}
+                            onTaskDelete={handleTaskDelete}
+                            showClient={false}
+                        />
+                    ) : (
+                        <Card>
+                            <CardContent className="text-center text-muted-foreground py-16">
+                                Client not found or you do not have permission to view them.
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
                 <div className="lg:col-span-1">
                     {/* This is where the next table will go */}
                 </div>

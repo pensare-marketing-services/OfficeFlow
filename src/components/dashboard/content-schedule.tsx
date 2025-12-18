@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -125,7 +123,7 @@ const AssigneeSelect = ({
 
     if (!isEditable) {
         return selectedUser ? (
-             <div className="flex items-center gap-1 truncate w-[120px] p-2 h-7 text-xs">
+             <div className="flex items-center gap-1 truncate w-full p-2 h-7 text-xs">
                 <Avatar className="h-5 w-5">
                     
                     <AvatarFallback>{getInitials(selectedUser.username)}</AvatarFallback>
@@ -133,7 +131,7 @@ const AssigneeSelect = ({
                 <span className="truncate">{selectedUser.username}</span>
             </div>
         ) : (
-             <div className="w-[120px] p-2 h-7 text-xs text-muted-foreground">-</div>
+             <div className="w-full p-2 h-7 text-xs text-muted-foreground">-</div>
         )
     }
 
@@ -142,7 +140,7 @@ const AssigneeSelect = ({
             value={assigneeId || 'unassigned'}
             onValueChange={(value) => onAssigneeChange(value === 'unassigned' ? '' : value)}
         >
-            <SelectTrigger className={cn("w-[120px] h-7 text-xs p-1", isActive && "ring-2 ring-accent")}>
+            <SelectTrigger className={cn("w-full h-7 text-xs p-1", isActive && "ring-2 ring-accent")}>
                 {selectedUser ? (
                     <div className="flex items-center gap-1 truncate">
                         <Avatar className="h-5 w-5 text-xs">
@@ -374,11 +372,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Date</TableHead>
-                                {showClient && <TableHead className="min-w-[100px] p-1 border-r h-8">Client</TableHead>}
-                                <TableHead className="min-w-[150px] p-1 border-r h-8">Content Title</TableHead>
-                                <TableHead className="min-w-[200px] p-1 border-r h-8">Content Description</TableHead>
+                                {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
+                                <TableHead className="w-[150px] p-1 border-r h-8">Content Title</TableHead>
+                                <TableHead className="w-[180px] p-1 border-r h-8">Content Description</TableHead>
                                 <TableHead className="w-[100px] p-1 border-r h-8">Type</TableHead>
-                                <TableHead className="w-[200px] p-1 border-r h-8">Assigned To</TableHead>
+                                <TableHead className="min-w-[240px] p-1 border-r h-8">Assigned To</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r text-center h-8">
                                     <Button variant="ghost" onClick={() => requestSort('priority')} className="p-1 h-auto text-xs text-muted-foreground hover:bg-transparent">
                                         Priority
@@ -489,14 +487,15 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     <TableCell className="p-0 border-r">
                                         <div className="flex items-center gap-1 p-1">
                                             {[0, 1].map(i => (
-                                                <AssigneeSelect 
-                                                    key={i}
-                                                    assigneeId={assigneeIds[i]}
-                                                    onAssigneeChange={(newId) => handleAssigneeChange(task.id, i, newId)}
-                                                    employeeUsers={employeeUsers.filter(u => u.id !== assigneeIds[1-i])} // filter out the other assignee
-                                                    isActive={isMultiAssignee && activeAssigneeIndex === i}
-                                                    isEditable={isEditable}
-                                                />
+                                                <div key={i} className="flex-1 min-w-0">
+                                                    <AssigneeSelect 
+                                                        assigneeId={assigneeIds[i]}
+                                                        onAssigneeChange={(newId) => handleAssigneeChange(task.id, i, newId)}
+                                                        employeeUsers={employeeUsers.filter(u => u.id !== assigneeIds[1-i])} // filter out the other assignee
+                                                        isActive={isMultiAssignee && activeAssigneeIndex === i}
+                                                        isEditable={isEditable}
+                                                    />
+                                                </div>
                                             ))}
                                         </div>
                                     </TableCell>
