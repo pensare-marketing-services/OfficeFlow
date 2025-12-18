@@ -43,26 +43,26 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
     };
 
     return (
-        <Card className="shadow-none rounded-t-none">
+        <Card className="shadow-none border-t">
             <CardContent className="p-0">
                 <Table>
                     <TableBody>
                         <TableRow className="border-b">
-                             <TableCell className="font-bold text-xs p-2 bg-muted/50">PLAN</TableCell>
+                             <TableCell className="font-bold text-xs p-2 bg-muted/50 w-[15%]">PLAN</TableCell>
                             <TableCell className="p-1">
                                 <EditableField value={client.plan || ''} onSave={(value) => handleSave('plan', value)} />
                             </TableCell>
-                             <TableCell className="font-bold text-xs p-2 bg-muted/50">Bill Duration</TableCell>
+                             <TableCell className="font-bold text-xs p-2 bg-muted/50 w-[15%]">Bill Duration</TableCell>
                             <TableCell className="p-1">
                                 <EditableField value={client.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
                             </TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableCell className="font-bold text-xs p-2 bg-muted/50">Social Platforms</TableCell>
+                            <TableCell className="font-bold text-xs p-2 bg-muted/50 w-[15%]">Social Platforms</TableCell>
                             <TableCell className="p-1">
                                 <EditableField value={client.socialPlatforms || ''} onSave={(value) => handleSave('socialPlatforms', value)} />
                             </TableCell>
-                            <TableCell className="font-bold text-xs p-2 bg-muted/50">Monthly Reach</TableCell>
+                            <TableCell className="font-bold text-xs p-2 bg-muted/50 w-[15%]">Monthly Reach</TableCell>
                             <TableCell className="p-1">
                                  <EditableField value={client.monthlyReach || ''} onSave={(value) => handleSave('monthlyReach', value)} />
                             </TableCell>

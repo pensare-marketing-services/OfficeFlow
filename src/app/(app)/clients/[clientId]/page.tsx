@@ -164,14 +164,16 @@ export default function ClientIdPage() {
         <div className="space-y-4">
             <Card>
                 <CardHeader>
-                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                        <div>
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
+                        <div className="flex-1">
                              {pageLoading ? <Skeleton className="h-8 w-48 mb-2" /> : client ? (
-                                <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
+                                <>
+                                    <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
+                                    <CardDescription>Manage client plans and progress.</CardDescription>
+                                </>
                              ) : (
                                 <CardTitle className="font-headline">Client Not Found</CardTitle>
                              )}
-                            <CardDescription>Manage client plans and progress.</CardDescription>
                         </div>
                         <div className="flex items-center gap-4">
                             {client && (
@@ -179,13 +181,15 @@ export default function ClientIdPage() {
                             )}
                         </div>
                     </div>
+                     {pageLoading ? <Skeleton className="h-24 w-full mt-4" /> : client && (
+                        <div className="mt-4">
+                            <ClientPlanSummary 
+                                client={client} 
+                                onUpdate={(id, data) => handleClientUpdate(data)} 
+                            />
+                        </div>
+                    )}
                 </CardHeader>
-                 {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
-                    <ClientPlanSummary 
-                        client={client} 
-                        onUpdate={(id, data) => handleClientUpdate(data)} 
-                    />
-                )}
             </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
