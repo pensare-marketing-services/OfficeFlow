@@ -123,25 +123,14 @@ const AssigneeSelect = ({
     const selectedUser = employeeUsers.find(u => u.id === assigneeId);
 
     const TriggerContent = () => selectedUser ? (
-        <TooltipProvider delayDuration={100}>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                     <Avatar className="h-6 w-6 text-xs border-2 border-transparent group-hover:border-primary transition-colors">
-                        <AvatarFallback>{getInitials(selectedUser.username)}</AvatarFallback>
-                    </Avatar>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>{selectedUser.username}</p>
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
+        <span className="truncate text-xs">{selectedUser.username}</span>
     ) : <SelectValue placeholder="Assign" />;
 
 
     if (!isEditable) {
         return selectedUser ? (
-            <div className="flex items-center justify-center p-1 h-7">
-                <TriggerContent />
+            <div className="flex items-center justify-start p-1 h-7 text-xs truncate">
+                {selectedUser.username}
             </div>
         ) : (
              <div className="w-full p-2 h-7 text-xs text-muted-foreground">-</div>
@@ -379,13 +368,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 <TableHead className="w-[80px] p-1 border-r h-8">Date</TableHead>
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
-                                <TableHead className="w-[180px] p-1 border-r h-8">Description</TableHead>
+                                <TableHead className="p-1 border-r h-8 w-1/3">Description</TableHead>
                                 <TableHead className="w-[100px] p-1 border-r h-8">Type</TableHead>
                                 <TableHead className="w-[120px] p-1 border-r h-8">Assigned To</TableHead>
-                                <TableHead className="w-[80px] p-1 border-r text-center h-8">
-                                    <button className="p-1 h-auto text-xs text-muted-foreground w-full">Priority</button>
-                                </TableHead>
-                                <TableHead className="w-[120px] p-1 border-r h-8">Status</TableHead>
+                                <TableHead className="w-[60px] p-1 border-r text-center h-8">Priority</TableHead>
+                                <TableHead className="w-[100px] p-1 border-r h-8">Status</TableHead>
                                 <TableHead className="w-[50px] p-1 text-center h-8">Remarks</TableHead>
                                 <TableHead className="w-[40px] p-1 h-8"></TableHead>
                             </TableRow>
@@ -487,7 +474,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
-                                        <div className="flex items-center justify-center gap-1 p-1">
+                                        <div className="flex items-center justify-start gap-1 p-1">
                                             {[0, 1].map(i => (
                                                 <div key={i} className="flex-1 min-w-0">
                                                     <AssigneeSelect 
