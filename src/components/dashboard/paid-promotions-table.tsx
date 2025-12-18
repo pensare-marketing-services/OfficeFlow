@@ -146,7 +146,7 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[110px]">Date</TableHead>
-                            <TableHead className="w-[250px]">Campaign</TableHead>
+                            <TableHead className="w-[300px]">Campaign</TableHead>
                             <TableHead>Ad Type</TableHead>
                             <TableHead className="w-[100px]">Budget</TableHead>
                             <TableHead>Status</TableHead>
@@ -278,5 +278,3 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
         </Card>
     );
 }
-
-    
