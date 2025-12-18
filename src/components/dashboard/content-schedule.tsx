@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useTasks } from '@/hooks/use-tasks';
-import { Tooltip, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 
 type UserWithId = User & { id: string };
@@ -362,7 +362,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         return (
              <div className="flex h-64 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 bg-card">
                 <div className="text-center">
-                <h3 className="font-headline text-lg font-semibold">No Content Scheduled</h3>
+                <h3 className="font-headline text-lg font-semibold">No Tasks Scheduled</h3>
                 <p className="text-muted-foreground">There are no tasks in this view.</p>
                 </div>
             </div>
