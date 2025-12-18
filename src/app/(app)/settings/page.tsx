@@ -339,11 +339,13 @@ export default function SettingsPage() {
 
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-1 space-y-4">
+                <div className="lg:col-span-1">
                     <AddEmployeeForm />
+                </div>
+                <div className="lg:col-span-1">
                     <AddClientForm />
                 </div>
-                <div className="lg:col-span-2 space-y-4">
+                <div className="lg:col-span-1">
                      <Card>
                         <CardHeader className="p-3">
                             <CardTitle className="flex items-center gap-2 text-base"><Users /> Manage Employees</CardTitle>
