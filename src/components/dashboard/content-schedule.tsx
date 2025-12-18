@@ -19,7 +19,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useAuth } from '@/hooks/use-auth';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
@@ -675,41 +674,23 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     </TableCell>
                                      <TableCell className="py-0 px-2">
                                         {isEditable && onTaskDelete && (
-                                            <AlertDialog>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-8">
-                                                            <MoreVertical className="h-4 w-4" />
-                                                            <span className="sr-only">More options</span>
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    
-                                                    <DropdownMenuContent align="end">
-                                                        <AlertDialogTrigger asChild>
-                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
-                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                Delete Task
-                                                            </DropdownMenuItem>
-                                                        </AlertDialogTrigger>
-                                                    </DropdownMenuContent>
-                                                    
-                                                </DropdownMenu>
-
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This action cannot be undone. This will permanently delete the task "{task.title}".
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => onTaskDelete!(task.id)} className="bg-destructive hover:bg-destructive/90">
-                                                            Delete
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-7 w-8">
+                                                        <MoreVertical className="h-4 w-4" />
+                                                        <span className="sr-only">More options</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem 
+                                                        onSelect={() => onTaskDelete(task.id)}
+                                                        className="text-destructive"
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        Delete Task
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         )}
                                     </TableCell>
                                 </TableRow>
