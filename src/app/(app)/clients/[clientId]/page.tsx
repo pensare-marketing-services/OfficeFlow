@@ -155,19 +155,24 @@ export default function ClientIdPage() {
 
             <div className="space-y-0">
                 {pageLoading ? <Skeleton className="h-96 w-full mt-4" /> : client ? (
-                    <>
-                        <ClientPlanSummary 
-                            client={client} 
-                            onUpdate={(id, data) => handleClientUpdate(data)} 
-                        />
-                        <ContentSchedule 
-                            tasks={filteredTasks} 
-                            users={users as UserWithId[]} 
-                            onTaskUpdate={handleTaskUpdate}
-                            onTaskDelete={handleTaskDelete}
-                            showClient={false}
-                        />
-                    </>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="lg:col-span-1">
+                            <ClientPlanSummary 
+                                client={client} 
+                                onUpdate={(id, data) => handleClientUpdate(data)} 
+                            />
+                            <ContentSchedule 
+                                tasks={filteredTasks} 
+                                users={users as UserWithId[]} 
+                                onTaskUpdate={handleTaskUpdate}
+                                onTaskDelete={handleTaskDelete}
+                                showClient={false}
+                            />
+                        </div>
+                         <div className="lg:col-span-1">
+                            {/* This is where the next table will go */}
+                        </div>
+                    </div>
                 ) : (
                     <div className="text-center text-muted-foreground py-16">
                         Client not found or you do not have permission to view them.
