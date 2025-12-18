@@ -143,8 +143,8 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[120px]">Date</TableHead>
-                            <TableHead>Campaign</TableHead>
+                            <TableHead className="w-[110px]">Date</TableHead>
+                            <TableHead className="w-[200px]">Campaign</TableHead>
                             <TableHead>Ad Type</TableHead>
                             <TableHead>Budget</TableHead>
                             <TableHead>Status</TableHead>
