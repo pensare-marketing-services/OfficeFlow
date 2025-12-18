@@ -279,6 +279,51 @@ export default function SettingsPage() {
                 <div className="lg:col-span-2 space-y-8">
                      <Card>
                         <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Building /> Manage Clients</CardTitle>
+                            <CardDescription>View and edit all your clients in one place.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[50px]">#</TableHead>
+                                        <TableHead>Client Name</TableHead>
+                                        <TableHead>Assigned Employees</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {(clientsLoading || usersLoading) && Array.from({length: 3}).map((_, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {!clientsLoading && !usersLoading && clients.map((client, index) => (
+                                        <TableRow key={client.id}>
+                                            <TableCell>{index + 1}</TableCell>
+                                            <TableCell className="font-medium">{client.name}</TableCell>
+                                            <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
+                                             <TableCell className="text-right">
+                                                 <EditClientDialog 
+                                                    client={client} 
+                                                    allUsers={users}
+                                                    onUpdate={(data) => handleUpdateClient(client.id, data)}
+                                                 />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {!clientsLoading && clients.length === 0 && (
+                                        <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No clients added yet.</TableCell></TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Users /> Manage Employees</CardTitle>
                             <CardDescription>View and manage the employees in your organization.</CardDescription>
                         </CardHeader>
@@ -344,51 +389,6 @@ export default function SettingsPage() {
                                             </TableCell>
                                         </TableRow>
                                     ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                     <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Building /> Manage Clients</CardTitle>
-                            <CardDescription>View and edit all your clients in one place.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                             <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-[50px]">#</TableHead>
-                                        <TableHead>Client Name</TableHead>
-                                        <TableHead>Assigned Employees</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {(clientsLoading || usersLoading) && Array.from({length: 3}).map((_, i) => (
-                                        <TableRow key={i}>
-                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
-                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
-                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
-                                            <TableCell><Skeleton className="h-8 w-full" /></TableCell>
-                                        </TableRow>
-                                    ))}
-                                    {!clientsLoading && !usersLoading && clients.map((client, index) => (
-                                        <TableRow key={client.id}>
-                                            <TableCell>{index + 1}</TableCell>
-                                            <TableCell className="font-medium">{client.name}</TableCell>
-                                            <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
-                                             <TableCell className="text-right">
-                                                 <EditClientDialog 
-                                                    client={client} 
-                                                    allUsers={users}
-                                                    onUpdate={(data) => handleUpdateClient(client.id, data)}
-                                                 />
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                    {!clientsLoading && clients.length === 0 && (
-                                        <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No clients added yet.</TableCell></TableRow>
-                                    )}
                                 </TableBody>
                             </Table>
                         </CardContent>
