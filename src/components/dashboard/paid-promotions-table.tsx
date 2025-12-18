@@ -229,10 +229,19 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                         )}
                     </TableBody>
                     <TableFooter>
+                         <TableRow>
+                            <TableCell colSpan={3} className="text-right font-bold text-sm">Totals</TableCell>
+                            <TableCell className="p-1 font-bold text-sm">{totalBudget.toFixed(2)}</TableCell>
+                             <TableCell colSpan={2}></TableCell>
+                            <TableCell className="p-1 font-bold text-sm">{totalSpent.toFixed(2)}</TableCell>
+                            <TableCell className="p-1 font-bold text-sm">{totalCashIn.toFixed(2)}</TableCell>
+                            <TableCell colSpan={2}></TableCell>
+                        </TableRow>
+                        <TableRow><TableCell colSpan={10} className="p-0 h-2"><Separator /></TableCell></TableRow>
+                        
                         <TableRow>
-                            <TableCell colSpan={6}></TableCell>
-                            <TableCell className="text-right font-bold">Old bal</TableCell>
-                            <TableCell colSpan={2} className="p-0">
+                            <TableCell colSpan={7} className="text-right font-bold">Old bal</TableCell>
+                            <TableCell className="p-0">
                                 <Input 
                                     type="number" 
                                     value={oldBalance} 
@@ -240,34 +249,22 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                                     className="h-7 text-xs p-1 bg-yellow-200 font-bold"
                                 />
                             </TableCell>
-                            <TableCell></TableCell>
-                        </TableRow>
-                         <TableRow>
-                            <TableCell colSpan={3}></TableCell>
-                            <TableCell className="p-1 font-bold">{totalBudget.toFixed(2)}</TableCell>
-                             <TableCell colSpan={2}></TableCell>
-                            <TableCell className="p-1 font-bold">{totalSpent.toFixed(2)}</TableCell>
-                            <TableCell className="p-1 font-bold">{totalCashIn.toFixed(2)}</TableCell>
                             <TableCell colSpan={2}></TableCell>
                         </TableRow>
-                        <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
                         <TableRow>
-                            <TableCell colSpan={6}></TableCell>
-                            <TableCell className="text-right font-bold">GST 18%</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold">GST 18%</TableCell>
                             <TableCell className="p-1 font-bold">{gst.toFixed(2)}</TableCell>
                             <TableCell colSpan={2}></TableCell>
                         </TableRow>
                         <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
                          <TableRow>
-                            <TableCell colSpan={6}></TableCell>
-                            <TableCell className="text-right font-bold">Total</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold">Total</TableCell>
                             <TableCell className="p-1 font-bold">{totalWithGst.toFixed(2)}</TableCell>
                              <TableCell colSpan={2}></TableCell>
                         </TableRow>
                         <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
                         <TableRow>
-                            <TableCell colSpan={6}></TableCell>
-                            <TableCell className="text-right font-bold">Balance</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold">Balance</TableCell>
                             <TableCell className="p-1 font-bold text-red-600">{balance.toFixed(2)}</TableCell>
                             <TableCell colSpan={2}></TableCell>
                         </TableRow>
