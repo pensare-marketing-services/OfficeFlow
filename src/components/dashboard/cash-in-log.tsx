@@ -1,20 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, 'react';
 import type { CashInTransaction, CashInTransactionStatus } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { format, isValid } from 'date-fns';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { collection, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Separator } from '../ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Input } from '../ui/input';
 
 interface CashInLogProps {
     clientId: string;
@@ -25,8 +25,8 @@ interface CashInLogProps {
 const statuses: CashInTransactionStatus[] = ['Received', 'Not Received'];
 
 export default function CashInLog({ clientId, transactions, totalCashIn }: CashInLogProps) {
-    const [newDate, setNewDate] = useState<Date | undefined>(new Date());
-    const [newAmount, setNewAmount] = useState<number | ''>('');
+    const [newDate, setNewDate] = React.useState<Date | undefined>(new Date());
+    const [newAmount, setNewAmount] = React.useState<number | ''>('');
 
     const addTransaction = async () => {
         if (!newDate || newAmount === '' || newAmount <= 0) return;
@@ -59,8 +59,8 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                  <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead className="w-[100px]">Date</TableHead>
+                            <TableHead className="w-[120px]">Status</TableHead>
                             <TableHead className="text-right">Amount</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
@@ -71,11 +71,11 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                                 <TableCell className="py-1 px-2 text-xs">{format(new Date(t.date), 'MMM dd, yyyy')}</TableCell>
                                 <TableCell className='p-1'>
                                      <Select value={t.status} onValueChange={(v: CashInTransactionStatus) => handleTransactionChange(t.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-xs", t.status === 'Received' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
+                                        <SelectTrigger className={cn("h-7 text-xs w-full", t.status === 'Received' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {statuses.map(s => <SelectItem key={s} value={s}>{s === 'Received' ? 'Cash Received' : 'Not Rcvd'}</SelectItem>)}
+                                            {statuses.map(s => <SelectItem key={s} value={s} className="text-xs">{s === 'Received' ? 'Cash Rcvd' : 'Not Rcvd'}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
