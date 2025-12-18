@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useTasks } from '@/hooks/use-tasks';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 type UserWithId = User & { id: string };
@@ -361,16 +361,15 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     return (
         <Card>
             <CardContent className="p-0">
-                 <div className="overflow-x-auto">
                     <Table className="text-xs">
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Date</TableHead>
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
-                                <TableHead className="p-1 border-r h-8 w-[25%]">Description</TableHead>
+                                <TableHead className="p-1 border-r h-8 w-[15%]">Description</TableHead>
                                 <TableHead className="w-[100px] p-1 border-r h-8">Type</TableHead>
-                                <TableHead className="w-[200px] p-1 border-r h-8">Assigned To</TableHead>
+                                <TableHead className="w-[240px] p-1 border-r h-8">Assigned To</TableHead>
                                 <TableHead className="w-[40px] p-1 border-r text-center h-8">Priority</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Status</TableHead>
                                 <TableHead className="w-[40px] p-1 text-center h-8">Remarks</TableHead>
@@ -656,7 +655,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                             )})}
                         </TableBody>
                     </Table>
-                </div>
             </CardContent>
         </Card>
     );
