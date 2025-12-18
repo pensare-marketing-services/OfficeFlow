@@ -165,7 +165,7 @@ export default function ClientIdPage() {
             <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
-                        <div className="flex-1 space-y-4">
+                        <div className="flex-1 space-y-1">
                              {pageLoading ? <Skeleton className="h-8 w-48 mb-2" /> : client ? (
                                 <>
                                     <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
@@ -174,14 +174,18 @@ export default function ClientIdPage() {
                              ) : (
                                 <CardTitle className="font-headline">Client Not Found</CardTitle>
                              )}
-                              {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
+                        </div>
+                        
+                        <div className="flex-grow">
+                          {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
                                 <ClientPlanSummary 
                                     client={client} 
                                     onUpdate={(id, data) => handleClientUpdate(data)} 
                                 />
                             )}
                         </div>
-                        <div className="flex items-center gap-4">
+                        
+                        <div className="flex items-start gap-4">
                             {client && (
                                 <Button onClick={handleAddTask} disabled={tasksLoading}>Add Task</Button>
                             )}
