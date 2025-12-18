@@ -82,16 +82,16 @@ export default function AddClientForm() {
   }
 
   return (
-    <Card className="shadow-lg">
-        <CardHeader>
-            <CardTitle className="font-headline text-xl flex items-center gap-2"><Building /> Add New Client</CardTitle>
-            <CardDescription>Add a new client and assign employees to them.</CardDescription>
+    <Card>
+        <CardHeader className="p-3">
+            <CardTitle className="font-headline text-base flex items-center gap-2"><Building /> Add New Client</CardTitle>
+            <CardDescription className="text-xs">Add a new client and assign employees to them.</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-2 p-3">
                     <FormField control={form.control} name="name" render={({ field }) => (
-                        <FormItem><FormLabel>Client Name</FormLabel><FormControl><Input placeholder="e.g., Acme Inc." {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Client Name</FormLabel><FormControl><Input placeholder="e.g., Acme Inc." {...field} className="h-8 text-xs" /></FormControl><FormMessage /></FormItem>
                     )} />
 
                     {[1, 2, 3].map((num) => {
@@ -111,7 +111,7 @@ export default function AddClientForm() {
                                     <FormLabel>Assign Employee {num}</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value || 'unassigned'} disabled={usersLoading}>
                                         <FormControl>
-                                        <SelectTrigger>
+                                        <SelectTrigger className="h-8 text-xs">
                                             <SelectValue placeholder={usersLoading ? "Loading..." : "Select an employee"} />
                                         </SelectTrigger>
                                         </FormControl>
@@ -136,14 +136,14 @@ export default function AddClientForm() {
                         )
                     })}
                 </CardContent>
-                <CardFooter className="flex-col items-stretch gap-4">
+                <CardFooter className="flex-col items-stretch gap-2 p-3">
                     {error && (
                         <Alert variant="destructive">
                             <AlertTitle>Error</AlertTitle>
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     )}
-                    <Button type="submit" disabled={loading} className="w-full">
+                    <Button type="submit" disabled={loading} className="w-full" size="sm">
                         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Building className="mr-2 h-4 w-4" />}
                         {loading ? 'Adding...' : 'Add Client'}
                     </Button>

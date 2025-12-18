@@ -50,28 +50,28 @@ export default function AddEmployeeForm() {
   }
 
   return (
-    <Card className="shadow-lg">
-        <CardHeader>
-            <CardTitle className="font-headline text-xl flex items-center gap-2"><UserPlus /> Add New User</CardTitle>
-            <CardDescription>Create a new admin or employee account.</CardDescription>
+    <Card>
+        <CardHeader className="p-3">
+            <CardTitle className="font-headline text-base flex items-center gap-2"><UserPlus /> Add New User</CardTitle>
+            <CardDescription className="text-xs">Create a new admin or employee account.</CardDescription>
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-2 p-3">
                      <FormField control={form.control} name="username" render={({ field }) => (
-                        <FormItem><FormLabel>Username</FormLabel><FormControl><Input placeholder="e.g., janedoe" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Username</FormLabel><FormControl><Input className="h-8 text-xs" placeholder="e.g., janedoe" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                      <FormField control={form.control} name="password" render={({ field }) => (
                         <FormItem>
                             <FormLabel>Password</FormLabel>
                             <FormControl>
                                 <div className="relative">
-                                    <Input type={isPasswordVisible ? 'text' : 'password'} placeholder="Set a password" {...field} />
+                                    <Input className="h-8 text-xs" type={isPasswordVisible ? 'text' : 'password'} placeholder="Set a password" {...field} />
                                     <Button 
                                         type="button"
                                         variant="ghost" 
                                         size="icon" 
-                                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                                        className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground"
                                         onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                                     >
                                         {isPasswordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -86,7 +86,7 @@ export default function AddEmployeeForm() {
                             <FormLabel>Role</FormLabel>
                              <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
-                                <SelectTrigger>
+                                <SelectTrigger className="h-8 text-xs">
                                     <SelectValue placeholder="Select a role" />
                                 </SelectTrigger>
                                 </FormControl>
@@ -99,14 +99,14 @@ export default function AddEmployeeForm() {
                         </FormItem>
                     )} />
                 </CardContent>
-                <CardFooter className="flex-col items-stretch gap-4">
+                <CardFooter className="flex-col items-stretch gap-2 p-3">
                     {error && (
                         <Alert variant="destructive">
                             <AlertTitle>Error</AlertTitle>
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     )}
-                    <Button type="submit" disabled={loading} className="w-full">
+                    <Button type="submit" disabled={loading} className="w-full" size="sm">
                         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
                         {loading ? 'Adding...' : 'Add User'}
                     </Button>

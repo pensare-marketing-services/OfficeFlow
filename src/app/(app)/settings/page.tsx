@@ -224,11 +224,11 @@ const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string
     }, [employeeIds, allUsers]);
 
     if (assignedEmployees.length === 0) {
-        return <TableCell className="text-muted-foreground text-xs p-2">-</TableCell>;
+        return <TableCell className="text-muted-foreground text-xs p-1">-</TableCell>;
     }
 
     return (
-        <TableCell className="text-xs p-2">
+        <TableCell className="text-xs p-1">
             {assignedEmployees.map(e => e.username).join(', ')}
         </TableCell>
     );
@@ -265,45 +265,45 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <div>
-                <h2 className="font-headline text-2xl font-semibold tracking-tight">
+                <h2 className="font-headline text-xl font-semibold tracking-tight">
                     Settings
                 </h2>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-xs">
                     Manage your team, clients, and application settings.
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2 space-y-4">
                      <Card>
-                        <CardHeader className="p-4">
-                            <CardTitle className="flex items-center gap-2 text-lg"><Building /> Manage Clients</CardTitle>
-                            <CardDescription className="text-sm">View and edit all your clients in one place.</CardDescription>
+                        <CardHeader className="p-3">
+                            <CardTitle className="flex items-center gap-2 text-base"><Building /> Manage Clients</CardTitle>
+                            <CardDescription className="text-xs">View and edit all your clients in one place.</CardDescription>
                         </CardHeader>
                         <CardContent className="p-0">
                              <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-[40px] px-4">#</TableHead>
-                                        <TableHead>Client Name</TableHead>
-                                        <TableHead>Assigned Employees</TableHead>
-                                        <TableHead className="text-right px-4">Actions</TableHead>
+                                        <TableHead className="w-[40px] px-2 text-xs h-8">#</TableHead>
+                                        <TableHead className="px-2 text-xs h-8">Client Name</TableHead>
+                                        <TableHead className="px-2 text-xs h-8">Assigned Employees</TableHead>
+                                        <TableHead className="text-right px-2 text-xs h-8">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {(clientsLoading || usersLoading) && Array.from({length: 3}).map((_, i) => (
                                         <TableRow key={i}>
-                                            <TableCell colSpan={4} className="p-2"><Skeleton className="h-8 w-full" /></TableCell>
+                                            <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                                         </TableRow>
                                     ))}
                                     {!clientsLoading && !usersLoading && clients.map((client, index) => (
                                         <TableRow key={client.id}>
-                                            <TableCell className="px-4 py-1">{index + 1}</TableCell>
-                                            <TableCell className="font-medium text-sm py-1">{client.name}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">{index + 1}</TableCell>
+                                            <TableCell className="font-medium text-xs py-1 px-2">{client.name}</TableCell>
                                             <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
-                                             <TableCell className="text-right px-4 py-1">
+                                             <TableCell className="text-right px-2 py-1">
                                                  <EditClientDialog 
                                                     client={client} 
                                                     allUsers={users}
@@ -320,42 +320,42 @@ export default function SettingsPage() {
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardHeader className="p-4">
-                            <CardTitle className="flex items-center gap-2 text-lg"><Users /> Manage Employees</CardTitle>
-                            <CardDescription className="text-sm">View and manage the employees in your organization.</CardDescription>
+                        <CardHeader className="p-3">
+                            <CardTitle className="flex items-center gap-2 text-base"><Users /> Manage Employees</CardTitle>
+                            <CardDescription className="text-xs">View and manage the employees in your organization.</CardDescription>
                         </CardHeader>
                         <CardContent className="p-0">
                              <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-[40px] px-4">#</TableHead>
-                                        <TableHead>Username</TableHead>
-                                        <TableHead>Password</TableHead>
-                                        <TableHead className="text-right px-4">Actions</TableHead>
+                                        <TableHead className="w-[40px] px-2 text-xs h-8">#</TableHead>
+                                        <TableHead className="px-2 text-xs h-8">Username</TableHead>
+                                        <TableHead className="px-2 text-xs h-8">Password</TableHead>
+                                        <TableHead className="text-right px-2 text-xs h-8">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {usersLoading && Array.from({length: 3}).map((_, i) => (
                                         <TableRow key={i}>
-                                             <TableCell colSpan={4} className="p-2"><Skeleton className="h-8 w-full" /></TableCell>
+                                             <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                                         </TableRow>
                                     ))}
                                     {error && <TableRow><TableCell colSpan={4} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
                                     {!usersLoading && employees.map((employee, index) => (
                                         <TableRow key={employee.id}>
-                                            <TableCell className="px-4 py-1">{index + 1}</TableCell>
-                                            <TableCell className="py-1">
+                                            <TableCell className="px-2 py-1 text-xs">{index + 1}</TableCell>
+                                            <TableCell className="py-1 px-2">
                                                 <div className="flex items-center gap-2">
-                                                    <Avatar className="h-7 w-7">
+                                                    <Avatar className="h-6 w-6">
                                                         <AvatarFallback className="text-xs">{getInitials(employee.username)}</AvatarFallback>
                                                     </Avatar>
-                                                    <span className="font-medium text-sm">{employee.username}</span>
+                                                    <span className="font-medium text-xs">{employee.username}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="py-1">
+                                            <TableCell className="py-1 px-2">
                                                 <EditablePasswordCell userId={employee.id} initialPassword={employee.password} />
                                             </TableCell>
-                                            <TableCell className="text-right px-4 py-1">
+                                            <TableCell className="text-right px-2 py-1">
                                                 <AlertDialog>
                                                     <AlertDialogTrigger asChild>
                                                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive h-7 w-7">
@@ -388,7 +388,7 @@ export default function SettingsPage() {
                         </CardContent>
                     </Card>
                 </div>
-                <div className="space-y-6">
+                <div className="space-y-4">
                     <AddEmployeeForm />
                     <AddClientForm />
                 </div>
