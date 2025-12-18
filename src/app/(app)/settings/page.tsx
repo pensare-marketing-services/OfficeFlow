@@ -270,7 +270,7 @@ const EditablePriorityCell = ({ client, onUpdate }: { client: ClientWithId, onUp
 };
 
 
-const ClientTable = ({ clients, users, loading, onUpdate }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void> }) => {
+const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void>, startIndex?: number }) => {
     return (
          <Table>
             <TableHeader>
@@ -287,7 +287,7 @@ const ClientTable = ({ clients, users, loading, onUpdate }: { clients: ClientWit
                         <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                     </TableRow>
                 ))}
-                {!loading && clients.map((client) => (
+                {!loading && clients.map((client, index) => (
                     <TableRow key={client.id}>
                         <EditablePriorityCell client={client} onUpdate={onUpdate} />
                         <TableCell className="font-medium text-xs py-1 px-2">{client.name}</TableCell>
