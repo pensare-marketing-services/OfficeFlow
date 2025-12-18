@@ -157,17 +157,17 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
   return (
     <>
     <Card className="shadow-md">
-      <CardHeader>
-        <CardTitle className="font-headline">{title}</CardTitle>
-        <CardDescription>
+      <CardHeader className="py-4 px-6">
+        <CardTitle className="font-headline text-xl">{title}</CardTitle>
+        <CardDescription className="text-sm">
             { isAdmin ? "An overview of the latest tasks across the company." : "Your most recent tasks."}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Task</TableHead>
+              <TableHead className="px-6">Task</TableHead>
                <TableHead>Client</TableHead>
                {isAdmin && <TableHead>Assigned To</TableHead>}
               <TableHead>Priority</TableHead>
@@ -194,9 +194,9 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
 
                 return (
                     <DropdownMenu key={task.id}>
-                        <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
-                            <TableCell>
-                                <div className="font-medium">{task.title}</div>
+                        <TableRow className="text-xs" onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
+                            <TableCell className="px-6 py-2">
+                                <div className="font-medium text-sm">{task.title}</div>
                                 {wordCount > 10 ? (
                                     <Dialog>
                                         <DialogTrigger asChild>
@@ -219,7 +219,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                     <p className="text-xs text-muted-foreground">{task.description}</p>
                                 )}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="py-2">
                                 {client ? (
                                     <span className="text-sm">{client.name}</span>
                                 ) : (
@@ -227,22 +227,22 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                 )}
                             </TableCell>
                             {isAdmin && (
-                            <TableCell>
+                            <TableCell className="py-2">
                                 <div className="flex -space-x-2">
                                 {assignees.map(assignee => (
                                     <DropdownMenuTrigger asChild key={assignee.id}>
-                                        <Avatar className="h-8 w-8 border-2 border-background cursor-pointer">
-                                        <AvatarFallback>{getInitials(assignee.username)}</AvatarFallback>
+                                        <Avatar className="h-7 w-7 border-2 border-background cursor-pointer">
+                                        <AvatarFallback className="text-xs">{getInitials(assignee.username)}</AvatarFallback>
                                         </Avatar>
                                     </DropdownMenuTrigger>
                                 ))}
                                 </div>
                             </TableCell>
                             )}
-                            <TableCell>
+                            <TableCell className="py-2">
                             <span className="font-bold text-lg">{priorityMap[task.priority]}</span>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="py-2">
                                 {onTaskUpdate && isEmployeeView ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
@@ -250,7 +250,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                             value={task.status}
                                             disabled={isCompleted}
                                         >
-                                            <SelectTrigger className="w-[140px] text-xs focus:ring-accent">
+                                            <SelectTrigger className="w-[140px] h-8 text-xs focus:ring-accent">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -267,19 +267,19 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                         </Select>
                                     </div>
                                 ) : (
-                                <Badge variant={statusVariant[task.status] || 'default'} className="capitalize">{task.status}</Badge>
+                                <Badge variant={statusVariant[task.status] || 'default'} className="capitalize text-xs">{task.status}</Badge>
                                 )}
                             </TableCell>
                             {isEmployeeView && (
-                                <TableCell className="text-center">
+                                <TableCell className="text-center py-2">
                                     <Popover onOpenChange={(open) => {
                                         if (open) {
                                             setNoteInput('');
                                         }
                                     }}>
                                         <PopoverTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="relative">
-                                                <MessageSquare className="h-5 w-5" />
+                                            <Button variant="ghost" size="icon" className="relative h-8 w-8">
+                                                <MessageSquare className="h-4 w-4" />
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-96" side="bottom" align="end">

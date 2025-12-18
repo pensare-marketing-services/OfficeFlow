@@ -99,13 +99,13 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
         }
     };
     
-    const commonClasses = "bg-transparent border-0 focus-visible:ring-1 text-xs p-1 h-7 placeholder:text-muted-foreground/70 w-full";
+    const commonClasses = "bg-transparent border-0 focus-visible:ring-1 text-xs p-1 h-auto placeholder:text-muted-foreground/70 w-full";
 
     if (type === 'textarea') {
          return <Textarea value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={cn(commonClasses, "h-auto")} placeholder={placeholder} />;
     }
 
-    return <Input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={commonClasses} placeholder={placeholder} />;
+    return <Input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={cn(commonClasses, 'h-7')} placeholder={placeholder} />;
 };
 
 const AssigneeSelect = ({
@@ -142,10 +142,10 @@ const AssigneeSelect = ({
             value={assigneeId || 'unassigned'}
             onValueChange={(value) => onAssigneeChange(value === 'unassigned' ? '' : value)}
         >
-            <SelectTrigger className={cn("w-[120px] h-7 text-xs p-2", isActive && "ring-2 ring-accent")}>
+            <SelectTrigger className={cn("w-[120px] h-7 text-xs p-1", isActive && "ring-2 ring-accent")}>
                 {selectedUser ? (
                     <div className="flex items-center gap-1 truncate">
-                        <Avatar className="h-5 w-5">
+                        <Avatar className="h-5 w-5 text-xs">
                             
                             <AvatarFallback>{getInitials(selectedUser.username)}</AvatarFallback>
                         </Avatar>
@@ -375,12 +375,12 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                             <TableRow>
                                 <TableHead className="w-[80px] px-1 border-r">Date</TableHead>
                                 {showClient && <TableHead className="min-w-[100px] px-1 border-r">Client</TableHead>}
-                                <TableHead className="min-w-[300px] px-1 border-r">Content Title</TableHead>
-                                <TableHead className="min-w-[300px] px-1 border-r">Content Description</TableHead>
+                                <TableHead className="min-w-[150px] px-1 border-r">Content Title</TableHead>
+                                <TableHead className="min-w-[200px] px-1 border-r">Content Description</TableHead>
                                 <TableHead className="w-[100px] px-1 border-r">Type</TableHead>
                                 <TableHead className="w-[200px] px-1 border-r">Assigned To</TableHead>
                                 <TableHead className="w-[80px] px-1 border-r text-center">
-                                    <Button variant="ghost" onClick={() => requestSort('priority')} className="p-1 h-auto text-muted-foreground hover:bg-transparent">
+                                    <Button variant="ghost" onClick={() => requestSort('priority')} className="p-1 h-auto text-xs text-muted-foreground hover:bg-transparent">
                                         Priority
                                         <ArrowUpDown className="ml-2 h-3 w-3" />
                                     </Button>
@@ -431,14 +431,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
-                                    <TableCell className="py-0 px-2 border-r">
+                                    <TableCell className="py-0 px-1 border-r">
                                         <Popover>
                                             <PopoverTrigger asChild>
                                                 <Button
                                                     variant={'ghost'}
-                                                    size="default"
+                                                    size="sm"
                                                     disabled={!isEditable}
-                                                    className={cn('w-full justify-start text-left font-normal h-7 text-xs', !task.deadline && 'text-muted-foreground')}
+                                                    className={cn('w-full justify-start text-left font-normal h-7 text-xs px-1', !task.deadline && 'text-muted-foreground')}
                                                 >
                                                 
                                                     {task.deadline ? format(new Date(task.deadline), 'MMM dd') : <span>Pick a date</span>}
@@ -454,15 +454,15 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                    {showClient && <TableCell className="py-0 px-2 border-r font-medium">{client?.name || '-'}</TableCell>}
-                                    <TableCell className="py-0 px-2 border-r">
+                                    {showClient && <TableCell className="py-0 px-1 border-r font-medium text-xs">{client?.name || '-'}</TableCell>}
+                                    <TableCell className="py-0 px-1 border-r">
                                         {isEditable ? (
                                             <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Content Title"/>
                                         ) : (
                                             <div className="text-xs p-1 h-7 flex items-center truncate" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
-                                    <TableCell className="py-0 px-2 border-r">
+                                    <TableCell className="py-0 px-1 border-r">
                                         <div className="w-full">
                                             {wordCount > 10 ? (
                                                 <Dialog>
@@ -503,19 +503,19 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             )}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="py-0 px-2 border-r">
+                                    <TableCell className="py-0 px-1 border-r">
                                         {isEditable ? (
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
-                                                <SelectTrigger className="h-7 text-xs p-2"><SelectValue /></SelectTrigger>
+                                                <SelectTrigger className="h-7 text-xs p-1"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
                                                     {contentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         ) : (
-                                            <div className="text-xs p-2 h-7 flex items-center">{task.contentType || '-'}</div>
+                                            <div className="text-xs p-1 h-7 flex items-center">{task.contentType || '-'}</div>
                                         )}
                                     </TableCell>
-                                    <TableCell className="py-0 px-2 border-r">
+                                    <TableCell className="py-0 px-1 border-r">
                                         <div className="flex items-center gap-1">
                                             {[0, 1].map(i => (
                                                 <AssigneeSelect 
@@ -529,13 +529,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             ))}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="py-0 px-2 border-r text-center font-bold text-base">
+                                    <TableCell className="py-0 px-1 border-r text-center font-bold text-base">
                                     {isEditable ? (
                                         <Select
                                         value={task.priority}
                                         onValueChange={(value: Task['priority']) => handleFieldChange(task.id, 'priority', value)}
                                         >
-                                        <SelectTrigger className="h-7 text-xs p-2 font-bold focus:bg-accent">
+                                        <SelectTrigger className="h-7 text-xs p-1 font-bold focus:bg-accent">
                                             <SelectValue>
                                                 <span className="font-bold text-base">{priorityMap[task.priority]}</span>
                                             </SelectValue>
@@ -550,13 +550,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         <div className="font-bold text-base flex items-center justify-center h-7">{priorityMap[task.priority]}</div>
                                     )}
                                     </TableCell>
-                                    <TableCell className="py-0 px-2 border-r">
+                                    <TableCell className="py-0 px-1 border-r">
                                         <Select 
                                             value={displayedStatus} 
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
                                             disabled={(isEmployee && !isMyTurn && !isCompleted && displayedStatus !== 'Overdue')}
                                         >
-                                            <SelectTrigger className={cn("h-7 text-xs p-2 border-0 focus:ring-0", statusColors[displayedStatus])}>
+                                            <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[displayedStatus])}>
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -576,7 +576,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     {allStatuses.map(status => (
                                                         <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus))}>
                                                             <div className="flex items-center gap-2">
-                                                                <div className={cn("h-3 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
+                                                                <div className={cn("h-2 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
                                                                 {status}
                                                             </div>
                                                         </SelectItem>
@@ -593,10 +593,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                    <TableCell className="py-0 px-2 text-center">
+                                    <TableCell className="py-0 px-1 text-center">
                                         <Popover onOpenChange={(open) => { if (open) handlePopoverOpen(task.id); }}>
                                             <PopoverTrigger asChild>
-                                                <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-7 w-8">
+                                                <Button variant="ghost" size="icon" disabled={!task.assigneeIds || task.assigneeIds.length === 0} className="relative h-7 w-7">
                                                     <MessageSquare className="h-4 w-4" />
                                                     {hasUnreadMessage && (
                                                         <span className="absolute top-1 right-1 flex h-2 w-2">
@@ -665,18 +665,18 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                             onChange={(e) => setNoteInput(e.target.value)}
                                                             onKeyDown={(e) => handleNewNote(e, task)}
                                                             onPaste={(e) => handlePaste(e, task)}
-                                                            className="pr-2"
+                                                            className="pr-2 text-xs"
                                                         />
                                                     </div>
                                                 </div>
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                     <TableCell className="py-0 px-2">
+                                     <TableCell className="py-0 px-1">
                                         {isEditable && onTaskDelete && (
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-7 w-8">
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7">
                                                         <MoreVertical className="h-4 w-4" />
                                                         <span className="sr-only">More options</span>
                                                     </Button>

@@ -32,7 +32,7 @@ const EditableField: React.FC<{ value: string; onSave: (value: string) => void }
         }
     };
     
-    return <Input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-stone-50 dark:bg-stone-800 border-0 focus-visible:ring-1 h-8 px-1 text-sm text-foreground" />;
+    return <Input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className="bg-stone-50 dark:bg-stone-800 border-0 focus-visible:ring-1 h-7 px-1 text-xs text-foreground" />;
 };
 
 
@@ -43,27 +43,27 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
     };
 
     return (
-        <Card className="shadow-md bg-green-100">
+        <Card className="shadow-none bg-green-100/50 dark:bg-green-900/20">
             <CardContent className="p-0">
                 <Table>
                     <TableBody>
                         <TableRow className="border-b">
-                             <TableCell className="font-bold">PLAN</TableCell>
-                            <TableCell>
+                             <TableCell className="font-bold text-xs p-2">PLAN</TableCell>
+                            <TableCell className="p-1">
                                 <EditableField value={client.plan || ''} onSave={(value) => handleSave('plan', value)} />
                             </TableCell>
-                             <TableCell className="font-bold">Bill Duration</TableCell>
-                            <TableCell>
+                             <TableCell className="font-bold text-xs p-2">Bill Duration</TableCell>
+                            <TableCell className="p-1">
                                 <EditableField value={client.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
                             </TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableCell className="font-bold">Social Platforms</TableCell>
-                            <TableCell>
+                            <TableCell className="font-bold text-xs p-2">Social Platforms</TableCell>
+                            <TableCell className="p-1">
                                 <EditableField value={client.socialPlatforms || ''} onSave={(value) => handleSave('socialPlatforms', value)} />
                             </TableCell>
-                            <TableCell className="font-bold">Monthly Reach</TableCell>
-                            <TableCell>
+                            <TableCell className="font-bold text-xs p-2">Monthly Reach</TableCell>
+                            <TableCell className="p-1">
                                  <EditableField value={client.monthlyReach || ''} onSave={(value) => handleSave('monthlyReach', value)} />
                             </TableCell>
                         </TableRow>

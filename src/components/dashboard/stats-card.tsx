@@ -13,8 +13,8 @@ interface StatsCardProps {
 
 export function StatsCard({ title, value, icon: Icon, variant = 'default', onClick, isActive }: StatsCardProps) {
   const cardClasses = cn(
-    "shadow-md transition-all",
-    onClick && "cursor-pointer hover:shadow-lg hover:-translate-y-1",
+    "shadow-sm transition-all",
+    onClick && "cursor-pointer hover:shadow-md hover:-translate-y-0.5",
     isActive && "ring-2 shadow-lg",
     {
       'ring-primary': isActive && variant === 'default',
@@ -27,7 +27,7 @@ export function StatsCard({ title, value, icon: Icon, variant = 'default', onCli
     }
   );
   
-  const iconClasses = cn("h-5 w-5 text-muted-foreground", {
+  const iconClasses = cn("h-4 w-4 text-muted-foreground", {
     'text-destructive': variant === 'destructive',
     'text-emerald-500': variant === 'success',
     'text-amber-500': variant === 'warning',
@@ -35,12 +35,12 @@ export function StatsCard({ title, value, icon: Icon, variant = 'default', onCli
 
   return (
     <Card className={cardClasses} onClick={onClick} >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 px-4 py-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 px-3 pt-2 pb-1">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className={iconClasses} />
       </CardHeader>
-      <CardContent  className='p-1'>
-        <div className="font-headline text-1xl font-bold  px-4 py-0">{value}</div>
+      <CardContent className='p-3 pt-0'>
+        <div className="font-headline text-2xl font-bold">{value}</div>
       </CardContent>
     </Card>
   );
