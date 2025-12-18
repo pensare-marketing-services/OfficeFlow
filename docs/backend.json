@@ -146,6 +146,13 @@
         "monthlyReach": {
           "type": "string",
           "description": "The target monthly reach for the client's campaigns."
+        },
+        "employeeIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The UIDs of the employees assigned to this client. Can have up to 3 assignees."
         }
       },
       "required": [
