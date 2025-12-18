@@ -1,6 +1,6 @@
 'use client';
 
-import React, 'react';
+import React from 'react';
 import type { CashInTransaction, CashInTransactionStatus } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
