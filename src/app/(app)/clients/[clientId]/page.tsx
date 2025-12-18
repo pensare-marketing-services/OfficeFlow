@@ -163,7 +163,7 @@ export default function ClientIdPage() {
     return (
         <div className="space-y-4">
             <Card>
-                <CardHeader>
+                <CardHeader className="space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
                         <div className="flex-1">
                              {pageLoading ? <Skeleton className="h-8 w-48 mb-2" /> : client ? (
@@ -181,8 +181,8 @@ export default function ClientIdPage() {
                             )}
                         </div>
                     </div>
-                     {pageLoading ? <Skeleton className="h-24 w-full mt-4" /> : client && (
-                        <div className="mt-4">
+                     {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
+                        <div>
                             <ClientPlanSummary 
                                 client={client} 
                                 onUpdate={(id, data) => handleClientUpdate(data)} 
