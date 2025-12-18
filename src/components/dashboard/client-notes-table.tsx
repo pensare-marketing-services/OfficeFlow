@@ -18,7 +18,7 @@ const statusColors: Record<ClientNoteStatus, string> = {
     "Done": "bg-green-500",
     "On Work": "bg-gray-500",
     "Pending": "bg-blue-500",
-    "Scheduled": "bg-stone-400",
+    "Scheduled": "bg-gray-400",
     "For Approval": "bg-orange-500",
 };
 
@@ -171,3 +171,5 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
     </Card>
   );
 }
+
+    

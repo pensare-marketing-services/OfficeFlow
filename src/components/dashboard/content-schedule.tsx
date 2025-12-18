@@ -47,7 +47,7 @@ const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() :
 
 const statusColors: Record<string, string> = {
     'To Do': 'bg-gray-500 text-white',
-    Scheduled: 'bg-cyan-500 text-white',
+    Scheduled: 'bg-gray-500 text-white',
     'On Work': 'bg-yellow-500 text-black',
     'For Approval': 'bg-orange-500 text-white',
     Approved: 'bg-green-500 text-white',
@@ -60,7 +60,7 @@ const statusColors: Record<string, string> = {
 
 const statusDotColors: Record<string, string> = {
     'To Do': 'bg-gray-500',
-    Scheduled: 'bg-cyan-500',
+    Scheduled: 'bg-gray-500',
     'On Work': 'bg-yellow-500',
     'For Approval': 'bg-orange-500',
     Approved: 'bg-green-500',
@@ -370,10 +370,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
                                 <TableHead className="p-1 border-r h-8 w-[25%]">Description</TableHead>
                                 <TableHead className="w-[100px] p-1 border-r h-8">Type</TableHead>
-                                <TableHead className="w-[180px] p-1 border-r h-8">Assigned To</TableHead>
-                                <TableHead className="w-[60px] p-1 border-r text-center h-8">Priority</TableHead>
-                                <TableHead className="w-[100px] p-1 border-r h-8">Status</TableHead>
-                                <TableHead className="w-[50px] p-1 text-center h-8">Remarks</TableHead>
+                                <TableHead className="w-[200px] p-1 border-r h-8">Assigned To</TableHead>
+                                <TableHead className="w-[40px] p-1 border-r text-center h-8">Priority</TableHead>
+                                <TableHead className="w-[80px] p-1 border-r h-8">Status</TableHead>
+                                <TableHead className="w-[40px] p-1 text-center h-8">Remarks</TableHead>
                                 <TableHead className="w-[40px] p-1 h-8"></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -661,3 +661,5 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
+
+    

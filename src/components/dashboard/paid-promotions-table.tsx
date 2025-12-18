@@ -192,7 +192,7 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
                                 <TableCell className="p-0"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" /></TableCell>
                                 <TableCell className="p-1">
                                     <Select value={promo.status} onValueChange={(v: PaidPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-xs", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : '')}><SelectValue /></SelectTrigger>
+                                        <SelectTrigger className={cn("h-7 text-xs", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}><SelectValue /></SelectTrigger>
                                         <SelectContent>
                                             {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
@@ -274,3 +274,5 @@ export default function PaidPromotionsTable({ clientId, users }: PaidPromotionsT
         </Card>
     );
 }
+
+    
