@@ -144,6 +144,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead className="w-[40px] px-2 text-xs">Sl.No</TableHead>
                             <TableHead className="w-[110px]">Date</TableHead>
                             <TableHead className="w-[300px]">Campaign</TableHead>
                             <TableHead>Ad Type</TableHead>
@@ -157,8 +158,9 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                     </TableHeader>
                     <TableBody>
                         {loading && <TableRow><TableCell colSpan={10} className="h-24 text-center">Loading...</TableCell></TableRow>}
-                        {!loading && promotions.map((promo) => (
+                        {!loading && promotions.map((promo, index) => (
                             <TableRow key={promo.id}>
+                                <TableCell className="px-2 py-1 text-xs text-center">{index + 1}</TableCell>
                                 <TableCell className="p-0">
                                      <Popover>
                                         <PopoverTrigger asChild>
@@ -219,7 +221,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                         ))}
                          {!loading && promotions.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                                     No promotions added yet.
                                 </TableCell>
                             </TableRow>
@@ -227,15 +229,15 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                     </TableBody>
                     <TableFooter>
                         <TableRow>
-                            <TableCell colSpan={3} />
+                            <TableCell colSpan={4} />
                             <TableCell className="p-1 font-bold text-sm text-center">{totalBudget.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                             <TableCell className="p-1 font-bold text-sm text-center">{totalSpent.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
-                         <TableRow><TableCell colSpan={9} className="p-0 h-2"><Separator /></TableCell></TableRow>
+                         <TableRow><TableCell colSpan={10} className="p-0 h-2"><Separator /></TableCell></TableRow>
                         <TableRow>
-                            <TableCell colSpan={6} className="text-right font-bold text-sm">Old bal</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-sm">Old bal</TableCell>
                             <TableCell className="p-0 text-right" colSpan={2}>
                                 <Input 
                                     type="number" 
@@ -247,19 +249,19 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                             <TableCell />
                         </TableRow>
                          <TableRow>
-                            <TableCell colSpan={6} className="text-right font-bold text-sm">GST 18%</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-sm">GST 18%</TableCell>
                             <TableCell className="p-1 font-bold text-sm text-right" colSpan={2}>{gst.toFixed(2)}</TableCell>
                             <TableCell />
                         </TableRow>
-                        <TableRow><TableCell colSpan={9} className="p-0 h-1"><Separator /></TableCell></TableRow>
+                        <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
                          <TableRow>
-                            <TableCell colSpan={6} className="text-right font-bold text-sm">Total</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-sm">Total</TableCell>
                             <TableCell className="p-1 font-bold text-sm text-right" colSpan={2}>{totalWithGst.toFixed(2)}</TableCell>
                             <TableCell />
                         </TableRow>
-                        <TableRow><TableCell colSpan={9} className="p-0 h-1"><Separator /></TableCell></TableRow>
+                        <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
                         <TableRow>
-                            <TableCell colSpan={6} className="text-right font-bold text-sm">Balance</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-sm">Balance</TableCell>
                             <TableCell className="p-1 font-bold text-sm text-red-600 text-right" colSpan={2}>{balance.toFixed(2)}</TableCell>
                              <TableCell />
                         </TableRow>
