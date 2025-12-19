@@ -24,10 +24,11 @@ import { AppLogo } from './app-logo';
 import React, { useMemo } from 'react';
 
 
-const navItems = [
+const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true },
 ];
+
+const settingsNavItem = { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true };
 
 const clientCategories = [
     { key: 'seo', label: 'Clients - SEO', icon: Briefcase },
@@ -41,7 +42,7 @@ export function SidebarNav() {
   const { user } = useAuth();
   const { clients, loading: clientsLoading } = useClients();
 
-  const filteredNavItems = navItems.filter(item => {
+  const filteredMainNavItems = mainNavItems.filter(item => {
     if (!item.adminOnly) return true;
     return user?.role === 'admin';
   });
@@ -64,7 +65,7 @@ export function SidebarNav() {
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
-          {filteredNavItems.map((item) => (
+          {filteredMainNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <Link href={item.href!}>
                     <SidebarMenuButton
@@ -125,6 +126,24 @@ export function SidebarNav() {
             }
             return null;
           })}
+           {user?.role === 'admin' && (
+             <SidebarMenuItem>
+                <Link href={settingsNavItem.href!}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith(settingsNavItem.href!)}
+                      tooltip={{
+                        children: settingsNavItem.label,
+                      }}
+                    >
+                        <span>
+                          <settingsNavItem.icon />
+                          <span>{settingsNavItem.label}</span>
+                        </span>
+                    </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+           )}
         </SidebarMenu>
       </SidebarContent>
     </>
