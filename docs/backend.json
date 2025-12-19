@@ -342,6 +342,40 @@
         }
       },
       "required": ["date", "amount", "status"]
+    },
+     "SeoTask": {
+      "title": "SEO Task",
+      "description": "Represents a single SEO-related task for a client.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "taskName": {
+          "type": "string"
+        },
+        "assigneeId": {
+          "type": "string",
+          "description": "The UID of the user this task is assigned to."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Pending", "Completed"]
+        },
+        "remarks": {
+          "type": "string"
+        },
+        "clientId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "taskName",
+        "status",
+        "clientId"
+      ]
     }
   },
   "auth": {
@@ -379,6 +413,12 @@
         "$ref": "#/entities/CashInTransaction"
       },
       "description": "Stores all cash-in transactions for a specific client."
+    },
+     "/clients/{clientId}/seoTasks/{seoTaskId}": {
+      "schema": {
+        "$ref": "#/entities/SeoTask"
+      },
+      "description": "Stores all SEO tasks for a specific client."
     },
     "/notifications/{notificationId}": {
       "schema": {

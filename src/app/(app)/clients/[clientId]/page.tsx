@@ -18,6 +18,7 @@ import { useUsers } from '@/hooks/use-users';
 import ClientNotesTable from '@/components/dashboard/client-notes-table';
 import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
 import CashInLog from '@/components/dashboard/cash-in-log';
+import SeoTable from '@/components/dashboard/seo-table';
 
 
 type UserWithId = User & { id: string };
@@ -241,6 +242,9 @@ export default function ClientIdPage() {
                     )}
                  </div>
             </div>
+            {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                <SeoTable clientId={client.id} users={users as UserWithId[]} />
+            )}
         </div>
     );
 }

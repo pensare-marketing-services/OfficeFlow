@@ -1,4 +1,5 @@
 
+
 export type UserProfile = {
   uid?: string;
   name?: string;
@@ -78,6 +79,16 @@ export type CashInTransaction = {
     date: string;
     amount: number;
     status: CashInTransactionStatus;
+}
+
+export type SeoTask = {
+  id: string;
+  date: string;
+  taskName: string;
+  assigneeId: string;
+  status: 'Pending' | 'Completed';
+  remarks: string;
+  clientId: string;
 }
 
 
