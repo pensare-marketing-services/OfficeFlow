@@ -167,8 +167,8 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Client</TableHead>
               <TableHead className="px-6">Task</TableHead>
-               <TableHead>Client</TableHead>
                {isAdmin && <TableHead>Assigned To</TableHead>}
               <TableHead>Priority</TableHead>
               <TableHead>Status</TableHead>
@@ -195,6 +195,13 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                 return (
                     <DropdownMenu key={task.id}>
                         <TableRow className="text-xs" onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
+                            <TableCell className="py-2">
+                                {client ? (
+                                    <span className="text-sm">{client.name}</span>
+                                ) : (
+                                    <span className="text-sm text-muted-foreground">-</span>
+                                )}
+                            </TableCell>
                             <TableCell className="px-6 py-2">
                                 <div className="font-medium text-sm">{task.title}</div>
                                 {wordCount > 10 ? (
@@ -217,13 +224,6 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                     </Dialog>
                                 ) : (
                                     <p className="text-xs text-muted-foreground">{task.description}</p>
-                                )}
-                            </TableCell>
-                            <TableCell className="py-2">
-                                {client ? (
-                                    <span className="text-sm">{client.name}</span>
-                                ) : (
-                                    <span className="text-sm text-muted-foreground">-</span>
                                 )}
                             </TableCell>
                             {isAdmin && (
