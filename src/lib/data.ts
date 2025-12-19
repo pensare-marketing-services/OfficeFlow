@@ -44,6 +44,7 @@ export type ClientNote = {
   id: string;
   note: string;
   update: ClientNoteStatus;
+  remarks?: string;
 }
 
 export type Client = {

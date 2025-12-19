@@ -144,6 +144,10 @@
             "Scheduled",
             "For Approval"
           ]
+        },
+        "remarks": {
+          "type": "string",
+          "description": "Additional remarks for the note."
         }
       },
       "required": [
