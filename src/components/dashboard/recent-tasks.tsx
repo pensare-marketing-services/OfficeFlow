@@ -157,17 +157,17 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
   return (
     <>
     <Card className="shadow-md">
-      <CardHeader className="py-4 px-3">
+      <CardHeader className="py-2 px-3">
         <CardTitle className="font-headline text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <Table>
           <TableHeader>
-            <TableRow className="border-0">
-              <TableHead className="px-3">Client</TableHead>
-              <TableHead className="px-3">Task</TableHead>
-               {isAdmin && <TableHead className="px-3">Assigned To</TableHead>}
-              <TableHead className="px-3">Priority</TableHead>
+            <TableRow>
+              <TableHead className="px-3 border-r">Client</TableHead>
+              <TableHead className="px-3 border-r">Task</TableHead>
+               {isAdmin && <TableHead className="px-3 border-r">Assigned To</TableHead>}
+              <TableHead className="px-3 border-r">Priority</TableHead>
               <TableHead className="px-3">Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead>Remarks</TableHead>}
             </TableRow>
@@ -191,15 +191,15 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
 
                 return (
                     <DropdownMenu key={task.id}>
-                        <TableRow className="text-xs border-0" onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
-                            <TableCell className="py-1 px-3">
+                        <TableRow className="text-xs" onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
+                            <TableCell className="py-1 px-3 border-r">
                                 {client ? (
                                     <span className="text-sm">{client.name}</span>
                                 ) : (
                                     <span className="text-sm text-muted-foreground">-</span>
                                 )}
                             </TableCell>
-                            <TableCell className="py-1 px-3">
+                            <TableCell className="py-1 px-3 border-r">
                                 <div className="font-medium text-sm">{task.title}</div>
                                 {wordCount > 10 ? (
                                     <Dialog>
@@ -224,15 +224,15 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                 )}
                             </TableCell>
                             {isAdmin && (
-                            <TableCell className="py-1 px-3">
+                            <TableCell className="py-1 px-3 border-r">
                                 <DropdownMenuTrigger asChild>
-                                    <span className="cursor-pointer hover:underline">
+                                    <span className="cursor-pointer hover:underline text-sm">
                                         {assignees.map(a => a.username).join(', ') || '-'}
                                     </span>
                                 </DropdownMenuTrigger>
                             </TableCell>
                             )}
-                            <TableCell className="py-1 px-3">
+                            <TableCell className="py-1 px-3 border-r">
                                 <span className="font-bold text-lg">{priorityMap[task.priority]}</span>
                             </TableCell>
                             <TableCell className="py-1 px-3">
