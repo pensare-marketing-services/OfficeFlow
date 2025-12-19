@@ -267,7 +267,15 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                         </Select>
                                     </div>
                                 ) : (
-                                <Badge variant={statusVariant[task.status] || 'default'} className="capitalize text-xs">{task.status}</Badge>
+                                <Badge variant={statusVariant[task.status] || 'default'} className={cn(
+                                    "capitalize text-xs",
+                                    {
+                                        "bg-green-600 hover:bg-green-600 text-white": task.status === 'Approved',
+                                        "bg-gray-500 hover:bg-gray-500 text-white": task.status === 'Scheduled',
+                                        "bg-orange-500 hover:bg-orange-500 text-white": task.status === 'On Work',
+                                        "bg-yellow-500 hover:bg-yellow-500 text-black": task.status === 'For Approval',
+                                    }
+                                )}>{task.status}</Badge>
                                 )}
                             </TableCell>
                             {isEmployeeView && (
@@ -374,3 +382,5 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
     </>
   );
 }
+
+    
