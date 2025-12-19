@@ -85,7 +85,9 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
   const handleNoteChange = (index: number, field: keyof ClientNote, value: any) => {
     const updatedNotes = [...localNotes];
     updatedNotes[index] = { ...updatedNotes[index], [field]: value };
-    onUpdate(updatedNotes);
+    // Firestore does not support `undefined` values.
+    const cleanNotes = JSON.parse(JSON.stringify(updatedNotes));
+    onUpdate(cleanNotes);
   };
   
    const addRemark = (noteIndex: number, remark: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
