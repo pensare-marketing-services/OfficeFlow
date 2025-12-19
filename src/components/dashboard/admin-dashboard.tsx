@@ -25,7 +25,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const [viewMode, setViewMode] = useState<ViewMode>('tasks');
   const { deleteTask } = useTasks();
 
-  const dmTasks = tasks.filter(task => ['Image Ad', 'Video Ad', 'Carousel', 'Story'].includes(task.contentType || ''));
+  const dmTasks = tasks.filter(task => !['SEO', 'Website', 'Web Blogs'].includes(task.contentType || ''));
   const seoTasks = tasks.filter(task => task.contentType === 'SEO');
   const webTasks = tasks.filter(task => task.contentType === 'Website' || task.contentType === 'Web Blogs');
 
