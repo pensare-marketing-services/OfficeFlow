@@ -146,8 +146,11 @@
           ]
         },
         "remarks": {
-          "type": "string",
-          "description": "Additional remarks for the note."
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/ProgressNote"
+          },
+          "description": "A list of remarks specific to this note."
         }
       },
       "required": [
