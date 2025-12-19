@@ -365,20 +365,20 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                     <Table className="text-xs">
                         <TableHeader>
                             <TableRow>
+                                <TableHead className="w-[40px] p-1 border-r h-8 text-center">#</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Date</TableHead>
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
                                 <TableHead className="p-1 border-r h-8 w-[15%]">Description</TableHead>
                                 <TableHead className="w-[100px] p-1 border-r h-8">Type</TableHead>
                                 <TableHead className="w-[240px] p-1 border-r h-8">Assigned To</TableHead>
-                                <TableHead className="w-[40px] p-1 border-r text-center h-8">Priority</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Status</TableHead>
                                 <TableHead className="w-[40px] p-1 text-center h-8">Remarks</TableHead>
                                 <TableHead className="w-[40px] p-1 h-8"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {sortedTasks.map((task) => {
+                            {sortedTasks.map((task, index) => {
                                 const isCompleted = completedStatuses.includes(task.status);
                                 const client = getClient(task.clientId);
                                 const { assigneeIds = [], activeAssigneeIndex = 0 } = task;
@@ -418,6 +418,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
+                                    <TableCell className="p-0 px-1 border-r text-center font-medium">{index + 1}</TableCell>
                                     <TableCell className="p-0 px-1 border-r">
                                         <Popover>
                                             <PopoverTrigger asChild>
@@ -487,27 +488,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 </div>
                                             ))}
                                         </div>
-                                    </TableCell>
-                                    <TableCell className="p-0 border-r text-center font-bold">
-                                    {isEditable ? (
-                                        <Select
-                                        value={task.priority}
-                                        onValueChange={(value: Task['priority']) => handleFieldChange(task.id, 'priority', value)}
-                                        >
-                                        <SelectTrigger className="h-7 text-xs p-1 font-bold focus:bg-accent text-base">
-                                            <SelectValue>
-                                                <span className="font-bold text-base">{priorityMap[task.priority]}</span>
-                                            </SelectValue>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {priorities.map(p => (
-                                                <SelectItem key={p} value={p}>{p} ({priorityMap[p]})</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                        </Select>
-                                    ) : (
-                                        <div className="font-bold text-base flex items-center justify-center h-7">{priorityMap[task.priority]}</div>
-                                    )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
                                         <Select 
