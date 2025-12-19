@@ -15,9 +15,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Textarea } from '../ui/textarea';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { LinkifiedText } from '@/components/shared/linkified-text';
 
 
 const noteStatuses: ClientNoteStatus[] = ["Pending", "On Work", "For Approval", "Done", "Scheduled"];
+const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
 const statusColors: Record<ClientNoteStatus, string> = {
     "Done": "bg-green-500",
@@ -72,6 +76,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
   const [openedChats, setOpenedChats] = useState<Set<string>>(new Set());
   const { user: currentUser } = useAuth();
   const { users } = useUsers();
+  const { toast } = useToast();
 
   useEffect(() => {
     setLocalNotes(notes);
@@ -83,14 +88,16 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
     onUpdate(updatedNotes);
   };
   
-   const addRemark = (noteIndex: number, remarkText: string) => {
-    if (!currentUser || !remarkText.trim()) return;
+   const addRemark = (noteIndex: number, remark: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
+    if (!currentUser) return;
+    if (!remark.note?.trim() && !remark.imageUrl) return;
 
     const newRemark: ProgressNote = {
-      note: remarkText.trim(),
+      note: remark.note || '',
       date: new Date().toISOString(),
       authorId: currentUser.uid,
       authorName: currentUser.username,
+      imageUrl: remark.imageUrl
     };
     
     const existingRemarks = localNotes[noteIndex].remarks || [];
@@ -102,7 +109,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
             e.preventDefault();
             const text = noteInput.trim();
             if(text){
-                addRemark(noteIndex, text);
+                addRemark(noteIndex, { note: text });
                 setNoteInput('');
             }
         }
@@ -127,6 +134,36 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
         setOpenedChats(prev => new Set(prev.add(noteId)));
         setNoteInput('');
     }
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>, noteIndex: number) => {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                if (!file) return;
+
+                if (file.size > MAX_IMAGE_SIZE_BYTES) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Image too large',
+                        description: `Please paste an image smaller than ${MAX_IMAGE_SIZE_BYTES / 1024 / 1024}MB.`
+                    });
+                    e.preventDefault();
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    if(event.target && typeof event.target.result === 'string') {
+                       addRemark(noteIndex, { imageUrl: event.target.result });
+                    }
+                };
+                reader.readAsDataURL(file);
+                e.preventDefault();
+                return;
+            }
+        }
+    };
 
   return (
     <Card>
@@ -191,7 +228,21 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                                 )}
                                                 <div className={cn("max-w-[75%] rounded-lg p-2", remark.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                     <p className="font-bold text-xs mb-1">{remark.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                    {remark.note && <p className="text-[11px]">{remark.note}</p>}
+                                                    {remark.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={remark.note} /></div>}
+                                                    {remark.imageUrl && (
+                                                        <Dialog>
+                                                            <DialogTrigger asChild>
+                                                                <img src={remark.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto cursor-pointer" />
+                                                            </DialogTrigger>
+                                                            <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+                                                                <DialogHeader className="sr-only">
+                                                                    <DialogTitle>Image Preview</DialogTitle>
+                                                                    <DialogDescription>A full-screen view of the image attached to the remark.</DialogDescription>
+                                                                </DialogHeader>
+                                                                <img src={remark.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain" />
+                                                            </DialogContent>
+                                                        </Dialog>
+                                                    )}
                                                     <p className={cn("text-right text-[9px] mt-1 opacity-70", remark.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(remark.date), "MMM d, HH:mm")}</p>
                                                 </div>
                                                 {remark.authorId === currentUser?.uid && (
@@ -208,10 +259,11 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                 </div>
                                 <div className="relative">
                                     <Textarea 
-                                        placeholder="Add a remark..."
+                                        placeholder="Add a remark or paste an image..."
                                         value={noteInput}
                                         onChange={(e) => setNoteInput(e.target.value)}
                                         onKeyDown={(e) => handleNewRemark(e, index)}
+                                        onPaste={(e) => handlePaste(e, index)}
                                         className="pr-2 text-xs"
                                     />
                                 </div>

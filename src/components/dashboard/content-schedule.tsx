@@ -22,6 +22,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useTasks } from '@/hooks/use-tasks';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { LinkifiedText } from '@/components/shared/linkified-text';
 
 
 type UserWithId = User & { id: string };
@@ -253,6 +254,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
     const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
         if (!currentUser) return;
+        if (!note.note?.trim() && !note.imageUrl) return;
 
         const newNote: Partial<ProgressNote> = {
             date: new Date().toISOString(),
@@ -572,7 +574,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                                     )}
                                                                     <div className={cn("max-w-[75%] rounded-lg p-2", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                         <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                        {note.note && <p className="text-[11px]">{note.note}</p>}
+                                                                        {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
                                                                         {note.imageUrl && (
                                                                             <Dialog>
                                                                                 <DialogTrigger asChild>
