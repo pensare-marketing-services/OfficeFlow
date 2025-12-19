@@ -86,7 +86,6 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
       id: Date.now().toString(),
       note: '',
       update: 'Pending',
-      remarks: ''
     };
     onUpdate([...localNotes, newNote]);
   };
@@ -111,7 +110,6 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
             <TableRow>
               <TableHead className="w-[10px] p-1"></TableHead>
               <TableHead className="p-1 h-8 text-xs">Note</TableHead>
-              <TableHead className="p-1 h-8 text-xs w-[150px]">Remarks</TableHead>
               <TableHead className="p-1 h-8 text-xs w-[150px]">Status</TableHead>
               <TableHead className="w-[40px] p-1"></TableHead>
             </TableRow>
@@ -124,12 +122,6 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                   <EditableCell
                     value={note.note}
                     onSave={(value) => handleNoteChange(index, 'note', value)}
-                  />
-                </TableCell>
-                 <TableCell className="p-0">
-                  <EditableCell
-                    value={note.remarks || ''}
-                    onSave={(value) => handleNoteChange(index, 'remarks', value)}
                   />
                 </TableCell>
                 <TableCell className="p-1">
@@ -168,7 +160,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
             ))}
             {localNotes.length === 0 && (
                 <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground p-4 h-24">
+                    <TableCell colSpan={4} className="text-center text-muted-foreground p-4 h-24">
                         No notes for this client yet.
                     </TableCell>
                 </TableRow>
