@@ -6,15 +6,17 @@ import EmployeeDashboard from '@/components/dashboard/employee-dashboard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
 import { useTasks } from '@/hooks/use-tasks';
-import type { Task, UserProfile } from '@/lib/data';
+import type { Task, UserProfile, Client } from '@/lib/data';
 import { useUsers } from '@/hooks/use-users';
+import { useClients } from '@/hooks/use-clients';
 
 export default function DashboardPage() {
   const { user, loading: userLoading } = useAuth();
   const { tasks, loading: tasksLoading, updateTask } = useTasks();
   const { users, loading: usersLoading } = useUsers();
+  const { clients, loading: clientsLoading } = useClients();
   
-  const finalLoading = userLoading || tasksLoading || usersLoading;
+  const finalLoading = userLoading || tasksLoading || usersLoading || clientsLoading;
 
   const handleTaskUpdate = (taskId: string, updatedData: Partial<Task>) => {
     updateTask(taskId, updatedData);
@@ -50,6 +52,6 @@ export default function DashboardPage() {
   const allUsers = (users as (UserProfile & {id: string})[]);
 
   return user.role === 'admin' ? 
-    <AdminDashboard tasks={tasks || []} users={allUsers} /> : 
+    <AdminDashboard tasks={tasks || []} users={allUsers} clients={clients || []} /> : 
     <EmployeeDashboard employeeTasks={employeeTasks} users={allUsers} onTaskUpdate={handleTaskUpdate} />;
 }

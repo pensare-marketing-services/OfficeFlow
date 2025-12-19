@@ -1,36 +1,49 @@
-
-
 'use client';
 
 import { useState, useMemo } from 'react';
 import { StatsCard } from './stats-card';
 import { ClipboardList, Users, CheckCircle2, AlertTriangle } from 'lucide-react';
 import RecentTasks from './recent-tasks';
-import type { Task, UserProfile as User } from '@/lib/data';
+import type { Task, UserProfile as User, Client } from '@/lib/data';
 import EmployeeTasks from './employee-tasks';
 import { useTasks } from '@/hooks/use-tasks';
 
 type UserWithId = User & { id: string };
+type ClientWithId = Client & { id: string };
 
 interface AdminDashboardProps {
   tasks: (Task & { id: string })[];
   users: UserWithId[];
+  clients: ClientWithId[];
 }
 
 type TaskFilter = 'total' | 'completed' | 'overdue';
 type ViewMode = 'tasks' | 'employees';
 
-export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
+export default function AdminDashboard({ tasks, users, clients }: AdminDashboardProps) {
   const [taskFilter, setTaskFilter] = useState<TaskFilter>('total');
   const [viewMode, setViewMode] = useState<ViewMode>('tasks');
   const { deleteTask } = useTasks();
+
+  const clientMap = useMemo(() => {
+    return new Map(clients.map(client => [client.id, client]));
+  }, [clients]);
+
+  const getTasksForCategory = (category: string) => {
+    return tasks.filter(task => {
+        const client = task.clientId ? clientMap.get(task.clientId) : undefined;
+        return client?.categories?.includes(category);
+    });
+  };
+
+  const dmTasks = getTasksForCategory('digital marketing');
+  const seoTasks = getTasksForCategory('seo');
+  const webTasks = getTasksForCategory('website');
 
   const totalTasks = tasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
   const completedTasks = tasks.filter(t => t.status === 'Approved' || t.status === 'Posted').length;
   
-  const inProgressStatuses = ['To Do', 'Scheduled', 'On Work', 'Hold', 'Ready for Next'];
-
   const overdueTasks = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to the beginning of today
@@ -74,8 +87,6 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
   return (
     
     <div className="space-y-6 ">
-      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 w-[50%]">
-     */}
      <div className="w-full lg:w-1/2 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 
         <StatsCard 
@@ -110,7 +121,17 @@ export default function AdminDashboard({ tasks, users }: AdminDashboardProps) {
         />
       </div>
       
-      {viewMode === 'tasks' && <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskDelete={deleteTask} />}
+      {viewMode === 'tasks' && taskFilter !== 'total' && (
+        <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskDelete={deleteTask} />
+      )}
+      {viewMode === 'tasks' && taskFilter === 'total' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <RecentTasks tasks={dmTasks} users={users} title="Tasks - DM" onTaskDelete={deleteTask} />
+            <RecentTasks tasks={seoTasks} users={users} title="Tasks - SEO" onTaskDelete={deleteTask} />
+            <RecentTasks tasks={webTasks} users={users} title="Tasks - Web" onTaskDelete={deleteTask} />
+        </div>
+      )}
+
       {viewMode === 'employees' && <EmployeeTasks tasks={tasks} users={users} />}
 
     </div>
