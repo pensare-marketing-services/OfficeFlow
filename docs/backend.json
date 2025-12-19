@@ -193,6 +193,14 @@
             "$ref": "#/entities/ClientNote"
           },
           "description": "A list of notes specific to this client."
+        },
+        "categories": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": ["seo", "website", "digital marketing"]
+            },
+            "description": "The service categories this client belongs to."
         }
       },
       "required": [

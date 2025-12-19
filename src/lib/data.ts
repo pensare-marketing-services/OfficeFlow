@@ -55,6 +55,7 @@ export type Client = {
   employeeIds?: string[];
   priority?: number;
   notes?: ClientNote[];
+  categories?: string[];
 };
 
 export type PaidPromotion = {

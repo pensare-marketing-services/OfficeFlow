@@ -16,13 +16,17 @@ import { db } from '@/firebase/client';
 import { useUsers } from '@/hooks/use-users';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Checkbox } from '../ui/checkbox';
+import { Separator } from '../ui/separator';
 
+const categories = ["seo", "website", "digital marketing"] as const;
 
 const clientSchema = z.object({
   name: z.string().min(2, 'Client name must be at least 2 characters.'),
   employeeId1: z.string().optional(),
   employeeId2: z.string().optional(),
   employeeId3: z.string().optional(),
+  categories: z.array(z.string()).optional(),
 });
 
 type ClientFormValues = z.infer<typeof clientSchema>;
@@ -42,6 +46,7 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
       employeeId1: 'unassigned',
       employeeId2: 'unassigned',
       employeeId3: 'unassigned',
+      categories: [],
     },
   });
 
@@ -67,6 +72,7 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
             name: data.name,
             employeeIds: uniqueEmployeeIds,
             priority: clientCount + 1,
+            categories: data.categories || []
         });
         
         toast({
@@ -89,10 +95,10 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
         </CardHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-                <CardContent className="space-y-2 p-3">
+                <CardContent className="space-y-3 p-3">
                     <FormField control={form.control} name="name" render={({ field }) => (
                          <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
-                            <FormLabel className="col-span-1">Client Name</FormLabel>
+                            <FormLabel className="col-span-1 text-xs">Client Name</FormLabel>
                             <FormControl className="col-span-2">
                                 <Input placeholder="e.g., Acme Inc." {...field} className="h-8 text-xs" />
                             </FormControl>
@@ -100,49 +106,101 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
                         </FormItem>
                     )} />
 
-                    {[1, 2, 3].map((num) => {
-                        const fieldName = `employeeId${num}` as const;
-                        const watchedIds = [watchEmployee1, watchEmployee2, watchEmployee3];
-                        const filteredOptions = employeeOptions.filter(
-                            (emp) => !watchedIds.includes(emp.id) || watchedIds[num - 1] === emp.id
-                        );
+                    <div className="space-y-1">
+                        <FormLabel className="text-xs">Assign Employees</FormLabel>
+                        <div className="flex gap-2">
+                            {[1, 2, 3].map((num) => {
+                                const fieldName = `employeeId${num}` as const;
+                                const watchedIds = [watchEmployee1, watchEmployee2, watchEmployee3];
+                                const filteredOptions = employeeOptions.filter(
+                                    (emp) => !watchedIds.includes(emp.id) || watchedIds[num - 1] === emp.id
+                                );
 
-                        return (
-                            <FormField
-                                key={num}
-                                control={form.control}
-                                name={fieldName}
-                                render={({ field }) => (
-                                <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
-                                    <FormLabel className="col-span-1">Employee {num}</FormLabel>
-                                    <div className="col-span-2">
-                                        <Select onValueChange={field.onChange} value={field.value || 'unassigned'} disabled={usersLoading}>
+                                return (
+                                    <FormField
+                                        key={num}
+                                        control={form.control}
+                                        name={fieldName}
+                                        render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <Select onValueChange={field.onChange} value={field.value || 'unassigned'} disabled={usersLoading}>
+                                                <FormControl>
+                                                <SelectTrigger className="h-8 text-xs">
+                                                    <SelectValue placeholder={usersLoading ? "..." : `Emp ${num}`} />
+                                                </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="unassigned">None</SelectItem>
+                                                    {filteredOptions.map((employee) => (
+                                                        <SelectItem key={employee.id} value={employee.id}>
+                                                            <div className="flex items-center gap-2">
+                                                                <Avatar className="h-6 w-6 text-xs">
+                                                                    <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
+                                                                </Avatar>
+                                                                <span className="text-xs">{employee.username}</span>
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                )
+                            })}
+                        </div>
+                    </div>
+                     <Separator />
+                     <FormField
+                        control={form.control}
+                        name="categories"
+                        render={() => (
+                            <FormItem>
+                                <div className="mb-2">
+                                    <FormLabel className="text-xs">Categories</FormLabel>
+                                </div>
+                                <div className="flex flex-wrap gap-4">
+                                {categories.map((item) => (
+                                    <FormField
+                                    key={item}
+                                    control={form.control}
+                                    name="categories"
+                                    render={({ field }) => {
+                                        return (
+                                        <FormItem
+                                            key={item}
+                                            className="flex flex-row items-start space-x-2 space-y-0"
+                                        >
                                             <FormControl>
-                                            <SelectTrigger className="h-8 text-xs">
-                                                <SelectValue placeholder={usersLoading ? "Loading..." : "Select employee"} />
-                                            </SelectTrigger>
+                                            <Checkbox
+                                                checked={field.value?.includes(item)}
+                                                onCheckedChange={(checked) => {
+                                                return checked
+                                                    ? field.onChange([...(field.value || []), item])
+                                                    : field.onChange(
+                                                        field.value?.filter(
+                                                        (value) => value !== item
+                                                        )
+                                                    )
+                                                }}
+                                            />
                                             </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="unassigned">None</SelectItem>
-                                                {filteredOptions.map((employee) => (
-                                                    <SelectItem key={employee.id} value={employee.id}>
-                                                         <div className="flex items-center gap-2">
-                                                            <Avatar className="h-6 w-6 text-xs">
-                                                                <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
-                                                            </Avatar>
-                                                            <span>{employee.username}</span>
-                                                        </div>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="col-span-3 col-start-2"><FormMessage /></div>
-                                </FormItem>
-                                )}
-                            />
-                        )
-                    })}
+                                            <FormLabel className="font-normal text-xs capitalize">
+                                            {item}
+                                            </FormLabel>
+                                        </FormItem>
+                                        )
+                                    }}
+                                    />
+                                ))}
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+
+
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-2 p-3">
                     {error && (
