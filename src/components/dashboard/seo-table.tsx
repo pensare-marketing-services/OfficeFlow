@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, 'use useState', 'use useEffect', 'use useMemo' from 'react';
 import type { Task, UserProfile as User, ContentType } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -25,7 +25,7 @@ interface SeoTableProps {
   onTaskDelete: (taskId: string) => void;
 }
 
-const statuses: Task['status'][] = ["Pending", "Completed"];
+const allStatuses: Task['status'][] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 
 const EditableCell: React.FC<{
     value: string | number;
@@ -150,7 +150,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                                     <Select value={task.status} onValueChange={(v: Task['status']) => handleTaskChange(task.id, 'status', v)}>
                                         <SelectTrigger className={cn("h-7 text-xs", task.status === 'Completed' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white')}><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                            {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                            {allStatuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
@@ -175,5 +175,3 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
         </Card>
     );
 }
-
-    
