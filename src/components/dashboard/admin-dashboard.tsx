@@ -114,7 +114,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskDelete={deleteTask} />
       )}
       {viewMode === 'tasks' && taskFilter === 'total' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
             <RecentTasks tasks={dmTasks} users={users} title="Tasks - Digital Marketing" onTaskDelete={deleteTask} />
             <RecentTasks tasks={seoTasks} users={users} title="Tasks - SEO" onTaskDelete={deleteTask} />
             <RecentTasks tasks={webTasks} users={users} title="Tasks - Website" onTaskDelete={deleteTask} />

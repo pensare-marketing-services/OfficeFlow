@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import type { Task, UserProfile as User, ProgressNote, Client, TaskStatus } from '@/lib/data';
@@ -65,6 +63,10 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
   const [noteInput, setNoteInput] = useState('');
   const { toast } = useToast();
   
+  const sortedTasks = useMemo(() => {
+    return [...tasks].sort((a, b) => priorityMap[a.priority] - priorityMap[b.priority]);
+  }, [tasks]);
+
   useEffect(() => {
     const clientsQuery = collection(db, "clients");
     const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
@@ -164,16 +166,16 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="px-3 border-r">Client</TableHead>
-              <TableHead className="px-3 border-r">Task</TableHead>
-               {isAdmin && <TableHead className="px-3 border-r">Assigned To</TableHead>}
-              <TableHead className="px-3 border-r">Priority</TableHead>
-              <TableHead className="px-3">Status</TableHead>
+              <TableHead className="py-1 px-3 border-r border-t">Client</TableHead>
+              <TableHead className="py-1 px-3 border-r border-t">Task</TableHead>
+               {isAdmin && <TableHead className="py-1 px-3 border-r border-t">Assigned To</TableHead>}
+              <TableHead className="py-1 px-3 border-r border-t">Order</TableHead>
+              <TableHead className="py-1 px-3 border-t">Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead>Remarks</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tasks.map(task => {
+            {sortedTasks.map(task => {
                 const assignees = (task.assigneeIds || []).map(id => getAssignee(id)).filter(Boolean) as UserWithId[];
                 const client = getClient(task.clientId);
                 const isEmployeeView = currentUser?.role === 'employee';
@@ -192,14 +194,14 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                 return (
                     <DropdownMenu key={task.id}>
                         <TableRow className="text-xs" onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
-                            <TableCell className="py-1 px-3 border-r">
+                            <TableCell className="py-1 px-3 border-r border-t">
                                 {client ? (
                                     <span className="text-sm">{client.name}</span>
                                 ) : (
                                     <span className="text-sm text-muted-foreground">-</span>
                                 )}
                             </TableCell>
-                            <TableCell className="py-1 px-3 border-r">
+                            <TableCell className="py-1 px-3 border-r border-t">
                                 <div className="font-medium text-sm">{task.title}</div>
                                 {wordCount > 10 ? (
                                     <Dialog>
@@ -224,7 +226,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                 )}
                             </TableCell>
                             {isAdmin && (
-                            <TableCell className="py-1 px-3 border-r">
+                            <TableCell className="py-1 px-3 border-r border-t">
                                 <DropdownMenuTrigger asChild>
                                     <span className="cursor-pointer hover:underline text-sm">
                                         {assignees.map(a => a.username).join(', ') || '-'}
@@ -232,10 +234,10 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                 </DropdownMenuTrigger>
                             </TableCell>
                             )}
-                            <TableCell className="py-1 px-3 border-r">
+                            <TableCell className="py-1 px-3 border-r border-t">
                                 <span className="font-bold text-lg">{priorityMap[task.priority]}</span>
                             </TableCell>
-                            <TableCell className="py-1 px-3">
+                            <TableCell className="py-1 px-3 border-t">
                                 {onTaskUpdate && isEmployeeView ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
@@ -272,7 +274,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                 )}
                             </TableCell>
                             {isEmployeeView && (
-                                <TableCell className="text-center py-1 px-3">
+                                <TableCell className="text-center py-1 px-3 border-t">
                                     <Popover onOpenChange={(open) => {
                                         if (open) {
                                             setNoteInput('');
