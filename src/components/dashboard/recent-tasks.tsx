@@ -193,16 +193,16 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
 
                 return (
                     <DropdownMenu key={task.id}>
-                        <TableRow className="text-xs" onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
-                            <TableCell className="py-1 px-3 border-r border-t">
+                        <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
+                            <TableCell className="py-1 px-3 border-r border-t text-xs">
                                 {client ? (
-                                    <span className="text-sm">{client.name}</span>
+                                    <span>{client.name}</span>
                                 ) : (
-                                    <span className="text-sm text-muted-foreground">-</span>
+                                    <span className="text-muted-foreground">-</span>
                                 )}
                             </TableCell>
                             <TableCell className="py-1 px-3 border-r border-t">
-                                <div className="font-medium text-sm">{task.title}</div>
+                                <div className="font-medium text-xs">{task.title}</div>
                                 {wordCount > 10 ? (
                                     <Dialog>
                                         <DialogTrigger asChild>
@@ -228,14 +228,14 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                             {isAdmin && (
                             <TableCell className="py-1 px-3 border-r border-t">
                                 <DropdownMenuTrigger asChild>
-                                    <span className="cursor-pointer hover:underline text-sm">
+                                    <span className="cursor-pointer hover:underline text-xs">
                                         {assignees.map(a => a.username).join(', ') || '-'}
                                     </span>
                                 </DropdownMenuTrigger>
                             </TableCell>
                             )}
                             <TableCell className="py-1 px-3 border-r border-t">
-                                <span className="font-bold text-lg">{priorityMap[task.priority]}</span>
+                                <span className="font-bold text-base">{priorityMap[task.priority]}</span>
                             </TableCell>
                             <TableCell className="py-1 px-3 border-t">
                                 {onTaskUpdate && isEmployeeView ? (
