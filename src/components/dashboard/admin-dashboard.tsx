@@ -25,20 +25,9 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const [viewMode, setViewMode] = useState<ViewMode>('tasks');
   const { deleteTask } = useTasks();
 
-  const clientMap = useMemo(() => {
-    return new Map(clients.map(client => [client.id, client]));
-  }, [clients]);
-
-  const getTasksForCategory = (category: string) => {
-    return tasks.filter(task => {
-        const client = task.clientId ? clientMap.get(task.clientId) : undefined;
-        return client?.categories?.includes(category);
-    });
-  };
-
-  const dmTasks = getTasksForCategory('digital marketing');
-  const seoTasks = getTasksForCategory('seo');
-  const webTasks = getTasksForCategory('website');
+  const dmTasks = tasks.filter(task => ['Image Ad', 'Video Ad', 'Carousel', 'Story'].includes(task.contentType || ''));
+  const seoTasks = tasks.filter(task => task.contentType === 'SEO');
+  const webTasks = tasks.filter(task => task.contentType === 'Website' || task.contentType === 'Web Blogs');
 
   const totalTasks = tasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
@@ -126,9 +115,9 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
       )}
       {viewMode === 'tasks' && taskFilter === 'total' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <RecentTasks tasks={dmTasks} users={users} title="Tasks - DM" onTaskDelete={deleteTask} />
+            <RecentTasks tasks={dmTasks} users={users} title="Tasks - Digital Marketing" onTaskDelete={deleteTask} />
             <RecentTasks tasks={seoTasks} users={users} title="Tasks - SEO" onTaskDelete={deleteTask} />
-            <RecentTasks tasks={webTasks} users={users} title="Tasks - Web" onTaskDelete={deleteTask} />
+            <RecentTasks tasks={webTasks} users={users} title="Tasks - Website" onTaskDelete={deleteTask} />
         </div>
       )}
 
