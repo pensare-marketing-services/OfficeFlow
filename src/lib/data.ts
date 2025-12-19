@@ -12,7 +12,7 @@ export type UserProfile = {
 export type User = UserProfile & { id: string };
 
 export type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs' | 'Podcast' | 'SEO' | 'Website';
-export type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold';
+export type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold' | 'Pending' | 'Completed';
 export type TaskStatus = 'To Do' | ContentStatus | 'Ready for Next' | 'Reschedule' | 'Overdue';
 export type ProgressNote = {
     note: string;
@@ -80,17 +80,6 @@ export type CashInTransaction = {
     amount: number;
     status: CashInTransactionStatus;
 }
-
-export type SeoTask = {
-  id: string;
-  date: string;
-  taskName: string;
-  assigneeId: string;
-  status: 'Pending' | 'Completed';
-  remarks: string;
-  clientId: string;
-}
-
 
 export type Notification = {
   id: string;
@@ -251,3 +240,5 @@ export const tasks: Task[] = [
     activeAssigneeIndex: 1,
   },
 ];
+
+    

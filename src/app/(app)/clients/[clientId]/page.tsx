@@ -19,6 +19,7 @@ import ClientNotesTable from '@/components/dashboard/client-notes-table';
 import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
 import CashInLog from '@/components/dashboard/cash-in-log';
 import SeoTable from '@/components/dashboard/seo-table';
+import WebsiteTable from '@/components/dashboard/website-table';
 
 
 type UserWithId = User & { id: string };
@@ -152,9 +153,19 @@ export default function ClientIdPage() {
 
     const filteredTasks = useMemo(() => {
         if (!tasks || !client) return [];
-        return tasks.filter(task => task.clientId === client.id);
+        return tasks.filter(task => task.clientId === client.id && !['SEO', 'Website', 'Web Blogs'].includes(task.contentType || ''));
     }, [tasks, client]);
     
+    const seoTasks = useMemo(() => {
+        if (!tasks || !client) return [];
+        return tasks.filter(task => task.clientId === client.id && task.contentType === 'SEO');
+    }, [tasks, client]);
+    
+    const websiteTasks = useMemo(() => {
+        if (!tasks || !client) return [];
+        return tasks.filter(task => task.clientId === client.id && (task.contentType === 'Website' || task.contentType === 'Web Blogs'));
+    }, [tasks, client]);
+
     const totalCashIn = useMemo(() => {
         return cashInTransactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
     }, [cashInTransactions]);
@@ -242,9 +253,34 @@ export default function ClientIdPage() {
                     )}
                  </div>
             </div>
-            {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
-                <SeoTable clientId={client.id} users={users as UserWithId[]} />
-            )}
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="lg:col-span-1">
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                        <SeoTable 
+                            clientId={client.id}
+                            users={users as UserWithId[]}
+                            tasks={seoTasks}
+                            onTaskAdd={addTask}
+                            onTaskUpdate={updateTask}
+                            onTaskDelete={deleteTask}
+                        />
+                    )}
+                </div>
+                <div className="lg:col-span-1">
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                         <WebsiteTable
+                            clientId={client.id}
+                            users={users as UserWithId[]}
+                            tasks={websiteTasks}
+                            onTaskAdd={addTask}
+                            onTaskUpdate={updateTask}
+                            onTaskDelete={deleteTask}
+                        />
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
+
+    

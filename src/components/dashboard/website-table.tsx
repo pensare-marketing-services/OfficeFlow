@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 type UserWithId = User & { id: string };
 type TaskWithId = Task & { id: string };
 
-interface SeoTableProps {
+interface WebsiteTableProps {
   clientId: string;
   users: UserWithId[];
   tasks: TaskWithId[];
@@ -65,7 +65,7 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpdate, onTaskDelete }: SeoTableProps) {
+export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTaskUpdate, onTaskDelete }: WebsiteTableProps) {
     
     const handleTaskChange = (id: string, field: keyof Task, value: any) => {
         onTaskUpdate(id, { [field]: value });
@@ -81,7 +81,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
             assigneeIds: [],
             progressNotes: [],
             clientId,
-            contentType: 'SEO',
+            contentType: 'Website',
         };
         onTaskAdd(newTask);
     };
@@ -91,7 +91,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between p-3">
-                <CardTitle className="text-base font-headline">SEO</CardTitle>
+                <CardTitle className="text-base font-headline">Website</CardTitle>
                 <Button size="sm" onClick={addTask} className="h-7 gap-1">
                     <Plus className="h-4 w-4" />
                     Add Task
@@ -165,7 +165,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                          {tasks.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                                    No SEO tasks added yet.
+                                    No Website tasks added yet.
                                 </TableCell>
                             </TableRow>
                         )}

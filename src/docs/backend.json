@@ -1,0 +1,392 @@
+
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user in the system, either an admin or an employee.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address, used for login."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "admin",
+            "employee"
+          ],
+          "description": "The user's role in the system."
+        },
+        "username": {
+            "type": "string",
+            "description": "The user's unique username for login."
+        },
+        "password": {
+            "type": "string",
+            "description": "The user's password for login (stored for custom auth)."
+        }
+      },
+      "required": [
+        "role",
+        "username",
+        "password"
+      ]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Represents a single task or piece of content to be worked on.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "To Do",
+            "In Progress",
+            "Done",
+            "Overdue",
+            "Scheduled",
+            "On Work",
+            "For Approval",
+            "Approved",
+            "Posted",
+            "Hold",
+            "Ready for Next"
+          ]
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "Low",
+            "Medium",
+            "High"
+          ]
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "assigneeIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The UIDs of the users this task is assigned to. Can have up to 2 assignees."
+        },
+        "clientId": {
+          "type": "string",
+          "description": "The ID of the client this task is for."
+        },
+        "contentType": {
+          "type": "string",
+          "enum": [
+            "Image Ad",
+            "Video Ad",
+            "Carousel",
+            "Backend Ad",
+            "Story",
+            "Web Blogs",
+            "Podcast",
+            "SEO",
+            "Website"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "progressNotes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/ProgressNote"
+          }
+        },
+        "activeAssigneeIndex": {
+          "type": "number",
+          "description": "The index of the assignee in the assigneeIds array who is currently responsible for the task."
+        }
+      },
+      "required": [
+        "title",
+        "status",
+        "priority",
+        "deadline"
+      ]
+    },
+    "ClientNote": {
+      "title": "Client Note",
+      "description": "A single note or remark for a client.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "update": {
+          "type": "string",
+          "enum": [
+            "Done",
+            "On Work",
+            "Pending",
+            "Scheduled",
+            "For Approval"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "note",
+        "update"
+      ]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "Represents a client of the agency.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "socialPlatforms": {
+          "type": "string",
+          "description": "Social media platforms managed for the client."
+        },
+        "plan": {
+          "type": "string",
+          "description": "The monthly content plan for the client."
+        },
+        "billDuration": {
+          "type": "string",
+          "description": "The billing period for the client."
+        },
+        "monthlyReach": {
+          "type": "string",
+          "description": "The target monthly reach for the client's campaigns."
+        },
+        "employeeIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The UIDs of the employees assigned to this client. Can have up to 3 assignees."
+        },
+        "priority": {
+          "type": "number",
+          "description": "A number used to sort clients for display. Lower numbers appear first."
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/ClientNote"
+          },
+          "description": "A list of notes specific to this client."
+        },
+        "categories": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": ["seo", "website", "digital marketing"]
+            },
+            "description": "The service categories this client belongs to."
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "ProgressNote": {
+      "title": "Progress Note",
+      "description": "A single note or remark on a task, which can include text or an image.",
+      "type": "object",
+      "properties": {
+        "note": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "authorId": {
+          "type": "string"
+        },
+        "authorName": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Represents a single notification for a user.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user this notification is for."
+        },
+        "message": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string",
+          "format": "uri"
+        },
+        "read": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "message",
+        "read",
+        "createdAt"
+      ]
+    },
+     "PaidPromotion": {
+      "title": "Paid Promotion",
+      "description": "Represents a single paid promotion campaign for a client.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "campaign": {
+          "type": "string"
+        },
+        "adType": {
+          "type": "string",
+          "enum": [
+            "EG Whatsapp",
+            "EG Instagram",
+            "EG FB Post",
+            "EG Insta Post",
+            "Traffic Web",
+            "Lead Gen",
+            "Lead Call",
+            "Profile Visit Ad",
+            "FB Page Like",
+            "Carousel Ad",
+            "IG Engage",
+            "Reach Ad"
+          ]
+        },
+        "budget": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Active", "Stopped", "Scheduled"]
+        },
+        "assignedTo": {
+          "type": "string",
+          "description": "The username of the person assigned."
+        },
+        "spent": {
+          "type": "number"
+        },
+        "remarks": {
+          "type": "string"
+        },
+         "clientId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "campaign",
+        "adType",
+        "budget",
+        "status",
+        "assignedTo",
+        "spent",
+        "remarks",
+        "clientId"
+      ]
+    },
+    "CashInTransaction": {
+      "title": "Cash In Transaction",
+      "description": "Represents a single cash-in transaction from a client.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Received", "Not Received"]
+        }
+      },
+      "required": ["date", "amount", "status"]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password"
+    ]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Stores public profiles for all users."
+    },
+    "/tasks/{taskId}": {
+      "schema": {
+        "$ref": "#/entities/Task"
+      },
+      "description": "Stores all tasks for the organization."
+    },
+    "/clients/{clientId}": {
+      "schema": {
+        "$ref": "#/entities/Client"
+      },
+      "description": "Stores all clients for the organization."
+    },
+     "/clients/{clientId}/promotions/{promotionId}": {
+      "schema": {
+        "$ref": "#/entities/PaidPromotion"
+      },
+      "description": "Stores all paid promotions for a specific client."
+    },
+    "/clients/{clientId}/cashInTransactions/{transactionId}": {
+      "schema": {
+        "$ref": "#/entities/CashInTransaction"
+      },
+      "description": "Stores all cash-in transactions for a specific client."
+    },
+    "/notifications/{notificationId}": {
+      "schema": {
+        "$ref": "#/entities/Notification"
+      },
+      "description": "Stores notifications for users."
+    }
+  }
+}
+
+    
