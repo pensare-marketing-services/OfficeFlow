@@ -103,10 +103,10 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                         <TableRow>
                             <TableHead className="w-[40px] px-2 text-xs">Sl.No</TableHead>
                             <TableHead className="w-[110px]">Date</TableHead>
-                            <TableHead className="w-[300px]">Task</TableHead>
+                            <TableHead className="w-[150px]">Task</TableHead>
                             <TableHead>Assigned</TableHead>
                             <TableHead>Status</TableHead>
-                            <TableHead>Remarks</TableHead>
+                            <TableHead className="w-[250px]">Remarks</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -138,7 +138,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                                 </TableCell>
                                 <TableCell className="p-0"><EditableCell value={task.title} onSave={(v) => handleTaskChange(task.id, 'title', v)} /></TableCell>
                                 <TableCell className="p-1">
-                                    <Select value={task.assigneeIds.length > 0 ? task.assigneeIds[0] : 'unassigned'} onValueChange={(v) => handleTaskChange(task.id, 'assigneeIds', v === 'unassigned' ? [] : [v])}>
+                                    <Select value={task.assigneeIds && task.assigneeIds.length > 0 ? task.assigneeIds[0] : 'unassigned'} onValueChange={(v) => handleTaskChange(task.id, 'assigneeIds', v === 'unassigned' ? [] : [v])}>
                                         <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Assign" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="unassigned">Unassigned</SelectItem>
