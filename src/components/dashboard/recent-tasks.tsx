@@ -153,7 +153,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
         }
     }
 
-  const employeeAllowedStatuses: TaskStatus[] = ['On Work', 'For Approval'];
+  const employeeAllowedStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
   const isAdmin = currentUser?.role === 'admin';
 
   return (
@@ -186,7 +186,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
 
                 const isCompleted = completedStatuses.includes(task.status);
                 
-                const statusOptions: TaskStatus[] = ['On Work', 'For Approval'];
+                const statusOptions: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
                 if (!statusOptions.includes(task.status)) {
                     statusOptions.unshift(task.status);
                 }

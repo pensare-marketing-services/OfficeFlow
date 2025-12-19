@@ -341,11 +341,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         if (!isMyTurn) return [];
 
         const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
+        const baseStatuses: TaskStatus[] = ['On Work', 'Hold'];
+
         if (isLastAssignee) {
-            return ['On Work', 'For Approval'];
+            return [...baseStatuses, 'For Approval', 'Approved', 'Posted'];
         }
         
-        return ['On Work', 'Ready for Next'];
+        return [...baseStatuses, 'Ready for Next'];
     };
 
     if (tasks.length === 0) {
@@ -644,4 +646,5 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     
 
     
+
 

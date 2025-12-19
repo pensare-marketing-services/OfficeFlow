@@ -151,7 +151,8 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, []);
 
-    const updateTaskStatus = useCallback(async (task: TaskWithId, newStatus: string) => {
+    const updateTaskStatus = useCallback(async (task: TaskWithId, newStatusString: string) => {
+        const newStatus = newStatusString as TaskStatus;
         const { id, assigneeIds = [], activeAssigneeIndex = 0, title, clientId } = task;
         if (!currentUser || currentUser.role !== 'employee') return;
     
@@ -162,21 +163,24 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const isLastAssignee = activeAssigneeIndex === assigneeIds.length - 1;
         const client = (await getDoc(doc(db, 'clients', clientId!))).data();
         const clientName = client?.name || 'a client';
+        
+        const allowedStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 
-        if (newStatus === 'Ready for Next' && !isLastAssignee) {
-            updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
-            updateData.status = 'On Work';
-            const nextAssigneeId = assigneeIds[activeAssigneeIndex + 1];
-            createNotification(nextAssigneeId, `Task "${title}" for ${clientName} is now ready for you.`);
-        } else if (newStatus === 'For Approval') {
-            updateData.status = 'For Approval';
-            const admins = allUsers.filter(u => u.role === 'admin');
-             admins.forEach(admin => {
-                createNotification(admin.id, `Task by ${currentUser.username}: "${title}" for ${clientName} is ready for approval.`);
-            });
-           
-        } else if (newStatus === 'On Work') {
-            updateData.status = 'On Work';
+        if (allowedStatuses.includes(newStatus)) {
+             if (newStatus === 'Ready for Next' && !isLastAssignee) {
+                updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
+                updateData.status = 'On Work';
+                const nextAssigneeId = assigneeIds[activeAssigneeIndex + 1];
+                createNotification(nextAssigneeId, `Task "${title}" for ${clientName} is now ready for you.`);
+            } else if (newStatus === 'For Approval') {
+                updateData.status = 'For Approval';
+                const admins = allUsers.filter(u => u.role === 'admin');
+                 admins.forEach(admin => {
+                    createNotification(admin.id, `Task by ${currentUser.username}: "${title}" for ${clientName} is ready for approval.`);
+                });
+            } else {
+                updateData.status = newStatus;
+            }
         }
     
         if (Object.keys(updateData).length === 0) return;

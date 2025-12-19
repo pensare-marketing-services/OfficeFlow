@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import type { Task, UserProfile as User } from '@/lib/data';
 import { StatsCard } from './stats-card';
-import { ClipboardList, CheckCircle2, Hourglass, AlertTriangle } from 'lucide-react';
+import { ClipboardList, CheckCircle2, Hourglass, AlertTriangle, PauseCircle } from 'lucide-react';
 import ContentSchedule from './content-schedule';
 import { useTasks } from '@/hooks/use-tasks';
 import { useUsers } from '@/hooks/use-users';
@@ -19,7 +19,7 @@ interface EmployeeDashboardProps {
   onTaskUpdate: (taskId: string, updatedData: Partial<Task>) => void;
 }
 
-type TaskFilter = 'active' | 'inProgress' | 'completed' | 'overdue';
+type TaskFilter = 'active' | 'inProgress' | 'completed' | 'overdue' | 'onHold';
 
 export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: EmployeeDashboardProps) {
   const { user } = useAuth();
@@ -45,7 +45,9 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
   
   const totalTasks = employeeTasks.length;
   const completedTasksCount = employeeTasks.filter(t => completedStatuses.includes(t.status)).length;
-  const activeTasksCount = totalTasks - completedTasksCount - overdueCount;
+  const onHoldTasksCount = employeeTasks.filter(t => t.status === 'Hold').length;
+  const activeTasks = employeeTasks.filter(t => !completedStatuses.includes(t.status) && !overdueTasks.some(ot => ot.id === t.id) && t.status !== 'Hold');
+  const activeTasksCount = activeTasks.length;
   const inProgressTasksCount = employeeTasks.filter(t => t.status === 'On Work').length;
   
   const filteredTasks = useMemo(() => {
@@ -56,17 +58,20 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
         return employeeTasks.filter(t => completedStatuses.includes(t.status));
       case 'overdue':
         return overdueTasks;
+      case 'onHold':
+        return employeeTasks.filter(t => t.status === 'Hold');
       case 'active':
       default:
-        return employeeTasks.filter(t => !completedStatuses.includes(t.status) && !overdueTasks.some(ot => ot.id === t.id));
+        return activeTasks;
     }
-  }, [employeeTasks, taskFilter, overdueTasks]);
+  }, [employeeTasks, taskFilter, overdueTasks, activeTasks]);
 
   const filterTitles: Record<TaskFilter, string> = {
     active: "My Active Tasks",
     inProgress: "My In Progress Tasks",
     completed: "My Completed Tasks",
-    overdue: "My Overdue Tasks"
+    overdue: "My Overdue Tasks",
+    onHold: "My On Hold Tasks",
   };
 
   const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
@@ -76,7 +81,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
 
   return (
     <div className="space-y-4">
-      <div className="w-full lg:w-1/2 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <StatsCard 
             title="My Tasks" 
             value={activeTasksCount} 
@@ -107,6 +112,13 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
             variant="destructive"
             onClick={() => setTaskFilter('overdue')}
             isActive={taskFilter === 'overdue'}
+        />
+         <StatsCard
+            title="On Hold"
+            value={onHoldTasksCount}
+            icon={PauseCircle}
+            onClick={() => setTaskFilter('onHold')}
+            isActive={taskFilter === 'onHold'}
         />
       </div>
 
