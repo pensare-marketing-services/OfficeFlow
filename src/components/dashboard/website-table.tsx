@@ -1,6 +1,6 @@
 'use client';
 
-import React, 'use useState', 'use useEffect', 'use useMemo' from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Task, UserProfile as User, ContentType } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
