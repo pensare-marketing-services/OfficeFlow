@@ -11,7 +11,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Briefcase, PanelLeftClose, PanelRightClose, Building, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Settings, Briefcase, PanelLeftClose, PanelRightClose, Building, ChevronDown, Tags } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -21,13 +21,19 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/colla
 import { Skeleton } from '../ui/skeleton';
 import { cn } from '@/lib/utils';
 import { AppLogo } from './app-logo';
+import React, { useMemo } from 'react';
 
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { name: 'clients', label: 'Clients', icon: Briefcase, adminOnly: true },
   { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true },
 ];
+
+const clientCategories = [
+    { key: 'seo', label: 'Clients - SEO', icon: Briefcase },
+    { key: 'digital marketing', label: 'Clients - DM', icon: Briefcase },
+    { key: 'website', label: 'Clients - Web', icon: Briefcase },
+]
 
 
 export function SidebarNav() {
@@ -40,13 +46,17 @@ export function SidebarNav() {
     return user?.role === 'admin';
   });
 
+  const categorizedClients = useMemo(() => {
+    return {
+      seo: clients.filter(c => c.categories?.includes('seo')),
+      'digital marketing': clients.filter(c => c.categories?.includes('digital marketing')),
+      website: clients.filter(c => c.categories?.includes('website')),
+    }
+  }, [clients]);
+
   return (
     <>
       <SidebarHeader>
-        {/* <div className="flex items-center gap-2">
-            <AppLogo />
-            <span className="font-headline text-lg font-semibold text-sidebar-foreground">OfficeFlow</span>
-        </div> */}
          <div className="items-center">
             <AppLogo />
            
@@ -54,48 +64,7 @@ export function SidebarNav() {
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
-          {filteredNavItems.map((item) => {
-            if (item.name === 'clients') {
-              return (
-                 <Collapsible key={item.name} className="w-full">
-                    <SidebarMenuItem>
-                       <CollapsibleTrigger asChild>
-                           <SidebarMenuButton isActive={pathname.startsWith('/clients')} className="group justify-between">
-                              <span className='flex items-center gap-2'>
-                                <item.icon className="h-4 w-4"/>
-                                <span>{item.label}</span>
-                              </span>
-                              <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
-                           </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                    </SidebarMenuItem>
-                    <CollapsibleContent>
-                       <SidebarMenuSub>
-                           {clientsLoading && (
-                                <>
-                                    <Skeleton className="h-7 w-full" />
-                                    <Skeleton className="h-7 w-full" />
-                                </>
-                            )}
-                            {clients.map(client => (
-                                <SidebarMenuItem key={client.id}>
-                                    <Link href={`/clients/${client.id}`}>
-                                        <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
-                                            <span>
-                                                <Building />
-                                                <span>{client.name}</span>
-                                            </span>
-                                        </SidebarMenuSubButton>
-                                    </Link>
-                                </SidebarMenuItem>
-                            ))}
-                       </SidebarMenuSub>
-                    </CollapsibleContent>
-                 </Collapsible>
-              )
-            }
-            
-            return (
+          {filteredNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <Link href={item.href!}>
                     <SidebarMenuButton
@@ -112,7 +81,49 @@ export function SidebarNav() {
                     </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
-            )
+          ))}
+          {user?.role === 'admin' && clientCategories.map(category => {
+            const categoryClients = categorizedClients[category.key as keyof typeof categorizedClients];
+            if (clientsLoading || categoryClients.length > 0) {
+              return (
+                 <Collapsible key={category.key} className="w-full" defaultOpen={pathname.includes('/clients')}>
+                    <SidebarMenuItem>
+                       <CollapsibleTrigger asChild>
+                           <SidebarMenuButton isActive={pathname.startsWith('/clients')} className="group justify-between">
+                              <span className='flex items-center gap-2'>
+                                <category.icon className="h-4 w-4"/>
+                                <span>{category.label}</span>
+                              </span>
+                              <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
+                           </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                    </SidebarMenuItem>
+                    <CollapsibleContent>
+                       <SidebarMenuSub>
+                           {clientsLoading && (
+                                <>
+                                    <Skeleton className="h-7 w-full" />
+                                    <Skeleton className="h-7 w-full" />
+                                </>
+                            )}
+                            {!clientsLoading && categoryClients.map(client => (
+                                <SidebarMenuItem key={client.id}>
+                                    <Link href={`/clients/${client.id}`}>
+                                        <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
+                                            <span>
+                                                <Building />
+                                                <span>{client.name}</span>
+                                            </span>
+                                        </SidebarMenuSubButton>
+                                    </Link>
+                                </SidebarMenuItem>
+                            ))}
+                       </SidebarMenuSub>
+                    </CollapsibleContent>
+                 </Collapsible>
+              )
+            }
+            return null;
           })}
         </SidebarMenu>
       </SidebarContent>
