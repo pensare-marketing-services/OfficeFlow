@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
-import { doc, updateDoc, getDoc, collection, onSnapshot, query } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
@@ -97,7 +97,7 @@ export default function ClientIdPage() {
     useEffect(() => {
         if (!clientId) return;
         setCashInLoading(true);
-        const cashInQuery = query(collection(db, `clients/${clientId}/cashInTransactions`));
+        const cashInQuery = query(collection(db, `clients/${clientId}/cashInTransactions`), orderBy("date"));
         const unsubscribe = onSnapshot(cashInQuery, (snapshot) => {
             const transationsData = snapshot.docs.map(doc => ({ ...doc.data() as CashInTransaction, id: doc.id }));
             setCashInTransactions(transationsData);
@@ -282,5 +282,3 @@ export default function ClientIdPage() {
         </div>
     );
 }
-
-    
