@@ -116,14 +116,17 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
             if (task.description === 'Paid Promotion' && task.clientId === clientId) {
                 const promotion = promotions.find(p => p.campaign === task.title);
                 if (promotion) {
-                    let promotionStatus: PaidPromotion['status'] = promotion.status;
+                    let promotionStatus: PaidPromotion['status'] | null = null;
+                    
                     if (task.status === 'On Work' && promotion.status !== 'Active') {
                         promotionStatus = 'Active';
                     } else if (task.status === 'Completed' && promotion.status !== 'Stopped') {
                         promotionStatus = 'Stopped';
+                    } else if (task.status === 'Scheduled' && promotion.status !== 'Scheduled') {
+                        promotionStatus = 'Scheduled';
                     }
                     
-                    if (promotionStatus !== promotion.status) {
+                    if (promotionStatus && promotionStatus !== promotion.status) {
                         handlePromotionChange(promotion.id, 'status', promotionStatus);
                     }
                 }
@@ -166,7 +169,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         if (field === 'status' && linkedTask) {
             let taskStatus: Task['status'] = 'Scheduled';
             if (value === 'Active') taskStatus = 'On Work';
-            if (value === 'Stopped') taskStatus = 'Hold';
+            if (value === 'Stopped') taskStatus = 'Completed';
             updateTask(linkedTask.id, { status: taskStatus });
         }
          if (field === 'campaign' && linkedTask) {
@@ -210,7 +213,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
             campaign: '',
             adType: 'Lead Call' as const,
             budget: 0,
-            status: 'Active' as const,
+            status: 'Scheduled' as const,
             assignedTo: '',
             spent: 0,
             remarks: [],
