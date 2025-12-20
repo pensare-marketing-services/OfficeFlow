@@ -37,6 +37,8 @@ const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() :
 
 const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
 const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Completed', 'Running'];
+const standardContentTypes: (Task['contentType'])[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast', 'SEO', 'Website'];
+
 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
@@ -108,7 +110,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const handleStatusChange = (task: Task & {id: string}, newStatus: Task['status']) => {
     if(updateTask) {
         let statusToSave = newStatus;
-        if (newStatus === 'Running') statusToSave = 'On Work';
+        if (newStatus === 'Running' || newStatus === 'Started') statusToSave = 'On Work';
         if (newStatus === 'Completed') statusToSave = 'Completed';
         
         updateTask(task.id, { status: statusToSave });
@@ -176,7 +178,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         }
     }
 
-  const employeeAllowedStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Running', 'Completed'];
+  const employeeAllowedStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Running', 'Completed', 'Started'];
   const isAdmin = currentUser?.role === 'admin';
 
   return (
@@ -208,24 +210,24 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 const descriptionPreview = descriptionWords.slice(0, 10).join(' ');
 
                 const isCompleted = completedStatuses.includes(task.status);
-                const isPromotionTask = task.description === 'Paid Promotion';
+                const isPromotionTask = task.contentType && !standardContentTypes.includes(task.contentType);
                 
-                let statusOptions: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
+                let statusOptions: TaskStatus[] = allStatuses;
 
-                if(isPromotionTask && isEmployeeView){
-                    statusOptions = ['Running', 'Completed'];
+                if (isPromotionTask && isEmployeeView) {
+                    statusOptions = ['Started', 'Completed'];
                 }
                 
                 if (!statusOptions.includes(task.status)) {
                     if (task.status === 'On Work' && isPromotionTask && isEmployeeView) {
-                        // Don't add 'On Work' if 'Running' is the option
+                       // Don't add 'On Work' if 'Started' is the option
                     } else {
                          statusOptions.unshift(task.status);
                     }
                 }
                  let currentStatus = task.status;
-                 if(task.status === 'On Work' && isPromotionTask && isEmployeeView) {
-                    currentStatus = 'Running';
+                 if (task.status === 'On Work' && isPromotionTask && isEmployeeView) {
+                    currentStatus = 'Started';
                  }
 
                 return (
@@ -275,7 +277,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 <span className="font-bold text-base">{priorityMap[task.priority]}</span>
                             </TableCell>
                             <TableCell className="py-1 px-3 border-t">
-                                {updateTask && (isAdmin || (isEmployeeView && !isPromotionTask) || (isPromotionTask && isEmployeeView) ) ? (
+                                {updateTask ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
                                             onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
@@ -286,7 +288,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {(isPromotionTask && isEmployeeView ? ['Scheduled', 'Running', 'Completed'] : allStatuses).map(status => (
+                                                {statusOptions.map(status => (
                                                     <SelectItem 
                                                         key={status} 
                                                         value={status}

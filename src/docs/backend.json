@@ -64,7 +64,8 @@
             "Hold",
             "Ready for Next",
             "Running",
-            "Completed"
+            "Completed",
+            "Started"
           ]
         },
         "priority": {
@@ -449,5 +450,3 @@
     }
   }
 }
-
-    
