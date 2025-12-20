@@ -19,11 +19,11 @@ interface EmployeeDashboardProps {
   onTaskUpdate: (taskId: string, updatedData: Partial<Task>) => void;
 }
 
-type TaskFilter = 'active' | 'inProgress' | 'completed' | 'overdue' | 'onHold';
+type TaskFilter = 'all' | 'inProgress' | 'completed' | 'overdue' | 'onHold';
 
 export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: EmployeeDashboardProps) {
   const { user } = useAuth();
-  const [taskFilter, setTaskFilter] = useState<TaskFilter>('active');
+  const [taskFilter, setTaskFilter] = useState<TaskFilter>('all');
   const { users } = useUsers();
 
 
@@ -41,13 +41,15 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
     });
   }, [employeeTasks]);
 
+  const allNonCompletedTasks = useMemo(() => {
+    return employeeTasks.filter(t => !completedStatuses.includes(t.status));
+  }, [employeeTasks]);
+  
   const overdueCount = overdueTasks.length;
   
-  const totalTasks = employeeTasks.length;
+  const allTasksCount = allNonCompletedTasks.length;
   const completedTasksCount = employeeTasks.filter(t => completedStatuses.includes(t.status)).length;
   const onHoldTasksCount = employeeTasks.filter(t => t.status === 'Hold').length;
-  const activeTasks = employeeTasks.filter(t => !completedStatuses.includes(t.status) && !overdueTasks.some(ot => ot.id === t.id) && t.status !== 'Hold');
-  const activeTasksCount = activeTasks.length;
   const inProgressTasksCount = employeeTasks.filter(t => t.status === 'On Work').length;
   
   const filteredTasks = useMemo(() => {
@@ -60,14 +62,14 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
         return overdueTasks;
       case 'onHold':
         return employeeTasks.filter(t => t.status === 'Hold');
-      case 'active':
+      case 'all':
       default:
-        return activeTasks;
+        return allNonCompletedTasks;
     }
-  }, [employeeTasks, taskFilter, overdueTasks, activeTasks]);
+  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks]);
 
   const filterTitles: Record<TaskFilter, string> = {
-    active: "My Active Tasks",
+    all: "All My Tasks",
     inProgress: "My In Progress Tasks",
     completed: "My Completed Tasks",
     overdue: "My Overdue Tasks",
@@ -83,11 +85,11 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <StatsCard 
-            title="My Tasks" 
-            value={activeTasksCount} 
+            title="All Tasks" 
+            value={allTasksCount} 
             icon={ClipboardList} 
-            onClick={() => setTaskFilter('active')}
-            isActive={taskFilter === 'active'}
+            onClick={() => setTaskFilter('all')}
+            isActive={taskFilter === 'all'}
         />
         <StatsCard 
             title="On Work" 
