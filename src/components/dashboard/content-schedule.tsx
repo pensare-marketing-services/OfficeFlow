@@ -40,7 +40,9 @@ interface ContentScheduleProps {
     showClient?: boolean;
 }
 
-const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast', 'SEO', 'Website'];
+const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast', 'SEO', 'Website', 'EG Whatsapp', 'EG Instagram', 'EG FB Post', 'EG Insta Post', 'Traffic Web', 'Lead Gen', 'Lead Call', 'Profile Visit Ad', 'FB Page Like', 'Carousel Ad', 'IG Engage', 'Reach Ad'];
+const standardContentTypes: (Task['contentType'])[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast', 'SEO', 'Website'];
+
 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
@@ -391,7 +393,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 
                                 const isMyTurn = currentWorkerId === currentUser?.uid;
                                 const isEmployee = currentUser?.role === 'employee';
-                                const isEditable = currentUser?.role === 'admin';
+                                const isAdmin = currentUser?.role === 'admin';
                                 
                                 const today = new Date();
                                 today.setHours(0, 0, 0, 0);
@@ -417,6 +419,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
                                 const lastNote = (task.progressNotes?.length ?? 0) > 0 ? task.progressNotes![task.progressNotes!.length - 1] : null;
                                 const hasUnreadMessage = lastNote && lastNote.authorId !== currentUser?.uid && !openedChats.has(task.id);
+                                
+                                const isPromotionTask = task.contentType && !standardContentTypes.includes(task.contentType);
 
 
                                 return (
@@ -428,7 +432,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 <Button
                                                     variant={'ghost'}
                                                     size="sm"
-                                                    disabled={!isEditable}
+                                                    disabled={!isAdmin}
                                                     className={cn('w-full justify-start text-left font-normal h-7 text-xs px-1', !task.deadline && 'text-muted-foreground')}
                                                 >
                                                 
@@ -447,14 +451,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     </TableCell>
                                     {showClient && <TableCell className="p-1 border-r font-medium text-xs">{client?.name || '-'}</TableCell>}
                                     <TableCell className="p-0 border-r">
-                                        {isEditable ? (
+                                        {isAdmin ? (
                                             <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Title"/>
                                         ) : (
                                             <div className="text-xs p-1 h-7 flex items-center truncate" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
-                                        {isEditable ? (
+                                        {isAdmin ? (
                                             <EditableTableCell 
                                                 value={task.description || ''} 
                                                 onSave={(value) => handleFieldChange(task.id, 'description', value)}
@@ -466,7 +470,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
-                                        {isEditable ? (
+                                        {isAdmin && !isPromotionTask ? (
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                                 <SelectTrigger className="h-7 text-xs p-1"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
@@ -486,7 +490,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                         onAssigneeChange={(newId) => handleAssigneeChange(task.id, i, newId)}
                                                         employeeUsers={employeeUsers.filter(u => u.id !== assigneeIds[1-i])} // filter out the other assignee
                                                         isActive={isMultiAssignee && activeAssigneeIndex === i}
-                                                        isEditable={isEditable}
+                                                        isEditable={isAdmin}
                                                     />
                                                 </div>
                                             ))}
@@ -496,13 +500,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         <Select 
                                             value={finalDisplayedStatus}
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={(isEmployee && !isMyTurn && !isCompleted && !isOverdue)}
+                                            disabled={(isEmployee && !isMyTurn && !isCompleted && !isOverdue) && !isOverdue}
                                         >
                                             <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {isEditable && (
+                                                {isAdmin && (
                                                     <SelectGroup>
                                                         <SelectLabel>Actions</SelectLabel>
                                                         <SelectItem value="Reschedule">
@@ -558,7 +562,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 <div className="space-y-2">
                                                     <div className="flex justify-between items-center">
                                                         <h4 className="font-medium leading-none text-xs">Remarks</h4>
-                                                        {(task.progressNotes || []).length > 0 && isEditable && (
+                                                        {(task.progressNotes || []).length > 0 && isAdmin && (
                                                             <Button variant="ghost" size="default" onClick={() => handleClearChat(task.id)} className="text-xs h-7 text-muted-foreground">
                                                                 <Trash2 className="mr-1 h-3 w-3" />
                                                                 Clear
@@ -621,7 +625,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         </Popover>
                                     </TableCell>
                                      <TableCell className="p-0">
-                                        {isEditable && onTaskDelete && (
+                                        {isAdmin && onTaskDelete && (
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" size="icon" className="h-7 w-7">
