@@ -260,7 +260,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                             value={task.status}
                                             disabled={isCompleted && !isAdmin}
                                         >
-                                            <SelectTrigger className={cn("w-[140px] h-8 text-xs focus:ring-accent", statusColors[task.status])}>
+                                            <SelectTrigger className={cn("w-[120px] h-8 text-xs focus:ring-accent", statusColors[task.status])}>
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
