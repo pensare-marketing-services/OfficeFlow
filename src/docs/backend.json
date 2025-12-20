@@ -64,8 +64,7 @@
             "Hold",
             "Ready for Next",
             "Running",
-            "Completed",
-            "Started"
+            "Completed"
           ]
         },
         "priority": {
@@ -328,7 +327,10 @@
           "type": "number"
         },
         "remarks": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/ProgressNote"
+          }
         },
          "clientId": {
           "type": "string"

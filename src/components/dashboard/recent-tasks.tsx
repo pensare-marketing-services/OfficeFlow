@@ -37,7 +37,21 @@ const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() :
 
 const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
 const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Completed', 'Running'];
-const standardContentTypes: (Task['contentType'])[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast', 'SEO', 'Website'];
+
+const adTypes: (Task['contentType'])[] = [
+    "EG Whatsapp", 
+    "EG Instagram", 
+    "EG FB Post", 
+    "EG Insta Post", 
+    "Traffic Web", 
+    "Lead Gen", 
+    "Lead Call", 
+    "Profile Visit Ad", 
+    "FB Page Like", 
+    "Carousel Ad", 
+    "IG Engage",
+    "Reach Ad"
+];
 
 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
@@ -110,7 +124,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const handleStatusChange = (task: Task & {id: string}, newStatus: Task['status']) => {
     if(updateTask) {
         let statusToSave = newStatus;
-        if (newStatus === 'Running' || newStatus === 'Started') statusToSave = 'On Work';
+        if (newStatus === 'Running') statusToSave = 'On Work';
         if (newStatus === 'Completed') statusToSave = 'Completed';
         
         updateTask(task.id, { status: statusToSave });
@@ -178,7 +192,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         }
     }
 
-  const employeeAllowedStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Running', 'Completed', 'Started'];
+  const employeeAllowedStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Running', 'Completed'];
   const isAdmin = currentUser?.role === 'admin';
 
   return (
@@ -210,12 +224,12 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 const descriptionPreview = descriptionWords.slice(0, 10).join(' ');
 
                 const isCompleted = completedStatuses.includes(task.status);
-                const isPromotionTask = task.contentType && !standardContentTypes.includes(task.contentType);
+                const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
                 
                 let statusOptions: TaskStatus[] = allStatuses;
 
                 if (isPromotionTask && isEmployeeView) {
-                    statusOptions = ['Started', 'Completed'];
+                    statusOptions = ['Running', 'Completed'];
                 }
                 
                 if (!statusOptions.includes(task.status)) {
@@ -227,7 +241,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 }
                  let currentStatus = task.status;
                  if (task.status === 'On Work' && isPromotionTask && isEmployeeView) {
-                    currentStatus = 'Started';
+                    currentStatus = 'Running';
                  }
 
                 return (
