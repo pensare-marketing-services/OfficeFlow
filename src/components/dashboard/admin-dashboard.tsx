@@ -25,10 +25,6 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const [viewMode, setViewMode] = useState<ViewMode>('tasks');
   const { deleteTask, updateTask } = useTasks();
 
-  const dmTasks = tasks.filter(task => !['SEO', 'Website', 'Web Blogs'].includes(task.contentType || ''));
-  const seoTasks = tasks.filter(task => task.contentType === 'SEO');
-  const webTasks = tasks.filter(task => task.contentType === 'Website' || task.contentType === 'Web Blogs');
-
   const totalTasks = tasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
   const completedTasks = tasks.filter(t => t.status === 'Approved' || t.status === 'Posted').length;
@@ -57,6 +53,11 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         return tasks;
     }
   }, [tasks, taskFilter, viewMode, overdueTasks]);
+  
+  const dmTasks = filteredTasks.filter(task => !['SEO', 'Website', 'Web Blogs'].includes(task.contentType || ''));
+  const seoTasks = filteredTasks.filter(task => task.contentType === 'SEO');
+  const webTasks = filteredTasks.filter(task => task.contentType === 'Website' || task.contentType === 'Web Blogs');
+
 
   const filterTitles: Record<TaskFilter, string> = {
     total: "All Recent Tasks",

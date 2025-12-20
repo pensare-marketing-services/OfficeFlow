@@ -393,24 +393,23 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const isEmployee = currentUser?.role === 'employee';
                                 const isEditable = currentUser?.role === 'admin';
                                 
-                                let currentStatus: TaskStatus = task.status;
                                 const today = new Date();
-                                today.setHours(0, 0, 0, 0); // Set to the beginning of today
-                                if (!['For Approval', 'Approved', 'Posted'].includes(task.status) && new Date(task.deadline) < today) {
-                                    currentStatus = 'Overdue';
-                                }
+                                today.setHours(0, 0, 0, 0);
+                                const isOverdue = !['For Approval', 'Approved', 'Posted'].includes(task.status) && new Date(task.deadline) < today;
 
-                                const availableStatuses = getAvailableStatuses(task);
+                                const displayedStatus: TaskStatus = isOverdue ? 'Overdue' : task.status;
                                 
-                                const getDisplayedStatus = (): TaskStatus => {
-                                    if (currentStatus === 'Overdue') return 'Overdue';
-                                    if (isEmployee && !isMyTurn && !isCompleted && currentStatus !== 'For Approval' && currentStatus !== 'Scheduled') {
+                                const getDisplayedStatusForEmployee = (): TaskStatus => {
+                                    if (isOverdue) return 'Overdue';
+                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' && task.status !== 'Scheduled') {
                                        return 'On Work';
                                     }
                                     return task.status;
                                 }
 
-                                const displayedStatus = getDisplayedStatus();
+                                const finalDisplayedStatus = isEmployee ? getDisplayedStatusForEmployee() : displayedStatus;
+
+                                const availableStatuses = getAvailableStatuses(task);
                                 
                                 const descriptionWords = task.description ? task.description.split(/\s+/).filter(Boolean) : [];
                                 const wordCount = descriptionWords.length;
@@ -495,11 +494,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
                                         <Select 
-                                            value={displayedStatus} 
+                                            value={finalDisplayedStatus}
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={(isEmployee && !isMyTurn && !isCompleted && displayedStatus !== 'Overdue')}
+                                            disabled={(isEmployee && !isMyTurn && !isCompleted && !isOverdue)}
                                         >
-                                            <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[displayedStatus])}>
+                                            <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -525,14 +524,20 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                         </SelectItem>
                                                     ))}
                                                 </SelectGroup>
-                                                {![...allStatuses, "Reschedule"].includes(displayedStatus as TaskStatus) && (
-                                                    <SelectItem value={displayedStatus} disabled>
+                                                 {![...allStatuses, "Reschedule", "Overdue"].includes(finalDisplayedStatus as TaskStatus) && (
+                                                    <SelectItem value={finalDisplayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
-                                                            <div className={cn("h-2 w-2 rounded-full", statusDotColors[displayedStatus])} />
-                                                            {displayedStatus} {displayedStatus === 'On Work' && `(${users.find(u => u.id === currentWorkerId)?.username?.split(' ')[0] || '...'})`}
+                                                            <div className={cn("h-2 w-2 rounded-full", statusDotColors[finalDisplayedStatus])} />
+                                                            {finalDisplayedStatus} {finalDisplayedStatus === 'On Work' && `(${users.find(u => u.id === currentWorkerId)?.username?.split(' ')[0] || '...'})`}
                                                         </div>
                                                     </SelectItem>
                                                 )}
+                                                {isOverdue && <SelectItem value="Overdue" disabled>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className={cn("h-2 w-2 rounded-full", statusDotColors.Overdue)} />
+                                                        Overdue
+                                                    </div>
+                                                </SelectItem>}
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
