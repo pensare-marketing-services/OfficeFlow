@@ -12,7 +12,7 @@ export type UserProfile = {
 export type User = UserProfile & { id: string };
 
 export type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs' | 'Podcast' | 'SEO' | 'Website';
-export type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold' | 'Pending' | 'Completed';
+export type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold' | 'Pending' | 'Completed' | 'Running';
 export type TaskStatus = 'To Do' | ContentStatus | 'Ready for Next' | 'Reschedule' | 'Overdue';
 export type ProgressNote = {
     note: string;
@@ -69,7 +69,7 @@ export type PaidPromotion = {
     status: 'Active' | 'Stopped' | 'Scheduled';
     assignedTo: string;
     spent: number;
-    remarks: string;
+    remarks: ProgressNote[];
     clientId: string;
 };
 

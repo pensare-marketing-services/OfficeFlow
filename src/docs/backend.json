@@ -62,7 +62,9 @@
             "Approved",
             "Posted",
             "Hold",
-            "Ready for Next"
+            "Ready for Next",
+            "Running",
+            "Completed"
           ]
         },
         "priority": {
@@ -144,6 +146,13 @@
             "Scheduled",
             "For Approval"
           ]
+        },
+        "remarks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/ProgressNote"
+          },
+          "description": "A list of remarks specific to this note."
         }
       },
       "required": [
@@ -306,7 +315,10 @@
           "type": "number"
         },
         "remarks": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/ProgressNote"
+          }
         },
          "clientId": {
           "type": "string"

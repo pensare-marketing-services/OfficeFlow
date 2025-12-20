@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import type { PaidPromotion, UserProfile as User, Task } from '@/lib/data';
+import type { PaidPromotion, UserProfile as User, Task, ProgressNote } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, CalendarIcon } from 'lucide-react';
+import { Plus, Trash2, CalendarIcon, MessageSquare } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -16,6 +16,12 @@ import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimest
 import { db } from '@/firebase/client';
 import { Separator } from '../ui/separator';
 import { useTasks } from '@/hooks/use-tasks';
+import { useAuth } from '@/hooks/use-auth';
+import { Textarea } from '../ui/textarea';
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { LinkifiedText } from '@/components/shared/linkified-text';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+
 
 type UserWithId = User & { id: string };
 
@@ -40,6 +46,8 @@ const adTypes: PaidPromotion['adType'][] = [
     "Reach Ad"
 ];
 const statuses: PaidPromotion['status'][] = ["Active", "Stopped", "Scheduled"];
+
+const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 const EditableCell: React.FC<{
     value: string | number;
@@ -80,10 +88,12 @@ const EditableCell: React.FC<{
 };
 
 export default function PaidPromotionsTable({ clientId, users, totalCashIn }: PaidPromotionsTableProps) {
+    const { user: currentUser } = useAuth();
     const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
     const [oldBalance, setOldBalance] = useState(0);
     const { addTask, updateTask, tasks } = useTasks();
+    const [noteInput, setNoteInput] = useState('');
 
     useEffect(() => {
         if (!clientId) return;
@@ -101,6 +111,26 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         return () => unsubscribe();
     }, [clientId]);
     
+     useEffect(() => {
+        tasks.forEach(task => {
+            if (task.description === 'Paid Promotion' && task.clientId === clientId) {
+                const promotion = promotions.find(p => p.campaign === task.title);
+                if (promotion) {
+                    let promotionStatus: PaidPromotion['status'] = promotion.status;
+                    if (task.status === 'On Work' && promotion.status !== 'Active') {
+                        promotionStatus = 'Active';
+                    } else if (task.status === 'Completed' && promotion.status !== 'Stopped') {
+                        promotionStatus = 'Stopped';
+                    }
+                    
+                    if (promotionStatus !== promotion.status) {
+                        handlePromotionChange(promotion.id, 'status', promotionStatus);
+                    }
+                }
+            }
+        });
+    }, [tasks, promotions, clientId]);
+
     const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any) => {
         const promotionRef = doc(db, `clients/${clientId}/promotions`, id);
         await updateDoc(promotionRef, { [field]: value });
@@ -143,6 +173,33 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
             updateTask(linkedTask.id, { title: value });
         }
     };
+    
+    const addNote = (promoId: string, note: Partial<ProgressNote>) => {
+        if (!currentUser) return;
+        const promo = promotions.find(p => p.id === promoId);
+        if (!promo) return;
+        const newNote: ProgressNote = {
+            note: note.note || '',
+            date: new Date().toISOString(),
+            authorId: currentUser.uid,
+            authorName: currentUser.username,
+            imageUrl: note.imageUrl,
+        };
+        const updatedRemarks = [...(promo.remarks || []), newNote];
+        handlePromotionChange(promoId, 'remarks', updatedRemarks);
+    };
+
+    const handleNewNote = (e: React.KeyboardEvent<HTMLTextAreaElement>, promoId: string) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const noteText = noteInput.trim();
+            if (noteText) {
+                addNote(promoId, { note: noteText });
+                setNoteInput('');
+            }
+        }
+    };
+
 
     const addPromotion = async () => {
         const newPromotion: Omit<PaidPromotion, 'id'> = {
@@ -153,7 +210,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
             status: 'Active' as const,
             assignedTo: '',
             spent: 0,
-            remarks: '',
+            remarks: [],
             clientId,
         };
         await addDoc(collection(db, `clients/${clientId}/promotions`), newPromotion);
@@ -185,11 +242,11 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[40px] px-2 text-xs">Sl.No</TableHead>
-                            <TableHead className="w-[110px]">Date</TableHead>
+                            <TableHead className="w-[90px]">Date</TableHead>
                             <TableHead className="w-[300px]">Campaign</TableHead>
                             <TableHead>Ad Type</TableHead>
                             <TableHead className="w-[100px]">Budget</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>Ad Status</TableHead>
                             <TableHead>Assigned</TableHead>
                             <TableHead className="w-[100px]">Spent</TableHead>
                             <TableHead>Remarks</TableHead>
@@ -209,7 +266,6 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                                 size="sm"
                                                 className={cn('w-full justify-start text-left font-normal h-7 text-xs px-2', !promo.date && 'text-muted-foreground')}
                                             >
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
                                                 {promo.date && isValid(new Date(promo.date)) ? format(new Date(promo.date), 'MMM dd') : <span>Pick a date</span>}
                                             </Button>
                                         </PopoverTrigger>
@@ -251,7 +307,54 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                     </Select>
                                 </TableCell>
                                 <TableCell className="p-0"><EditableCell value={promo.spent} onSave={(v) => handlePromotionChange(promo.id, 'spent', v)} type="number" /></TableCell>
-                                <TableCell className="p-0"><EditableCell value={promo.remarks} onSave={(v) => handlePromotionChange(promo.id, 'remarks', v)} type="text" /></TableCell>
+                                <TableCell className="p-0 text-center">
+                                    <Popover onOpenChange={(open) => { if (open) setNoteInput(''); }}>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="relative h-7 w-7">
+                                                <MessageSquare className="h-4 w-4" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-80" side="left" align="end">
+                                            <div className="space-y-2">
+                                                 <h4 className="font-medium leading-none text-xs">Remarks</h4>
+                                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
+                                                     {(promo.remarks || []).map((note: ProgressNote, i: number) => {
+                                                        const author = users.find(u => u.id === note.authorId);
+                                                        const authorName = author ? author.username : note.authorName;
+                                                        return (
+                                                             <div key={i} className={cn("flex items-start gap-2 text-xs", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                                {note.authorId !== currentUser?.uid && (
+                                                                    <Avatar className="h-6 w-6 border">
+                                                                        <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
+                                                                    </Avatar>
+                                                                )}
+                                                                <div className={cn("max-w-[75%] rounded-lg p-2", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                    <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                                    {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
+                                                                    <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
+                                                                </div>
+                                                                {note.authorId === currentUser?.uid && (
+                                                                    <Avatar className="h-6 w-6 border">
+                                                                        <AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback>
+                                                                    </Avatar>
+                                                                )}
+                                                            </div>
+                                                        )
+                                                     })}
+                                                 </div>
+                                                 <div className="relative">
+                                                     <Textarea 
+                                                        placeholder="Add a remark..."
+                                                        value={noteInput}
+                                                        onChange={(e) => setNoteInput(e.target.value)}
+                                                        onKeyDown={(e) => handleNewNote(e, promo.id)}
+                                                        className="pr-2 text-xs"
+                                                     />
+                                                 </div>
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
+                                </TableCell>
                                 <TableCell className="p-0 text-center">
                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deletePromotion(promo.id)}>
                                         <Trash2 className="h-4 w-4" />
