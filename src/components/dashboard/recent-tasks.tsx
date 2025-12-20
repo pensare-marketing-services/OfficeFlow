@@ -200,6 +200,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 const descriptionPreview = descriptionWords.slice(0, 10).join(' ');
 
                 const isCompleted = completedStatuses.includes(task.status);
+                const isPromotionTask = task.description === 'Paid Promotion';
                 
                 const statusOptions: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold'];
                 if (!statusOptions.includes(task.status)) {
@@ -253,7 +254,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 <span className="font-bold text-base">{priorityMap[task.priority]}</span>
                             </TableCell>
                             <TableCell className="py-1 px-3 border-t">
-                                {updateTask && (isAdmin || isEmployeeView) ? (
+                                {updateTask && (isAdmin || (isEmployeeView && !isPromotionTask) ) ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
                                             onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 

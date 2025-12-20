@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import type { PaidPromotion, UserProfile as User } from '@/lib/data';
+import type { PaidPromotion, UserProfile as User, Task } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -12,9 +12,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format, isValid } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Separator } from '../ui/separator';
+import { useTasks } from '@/hooks/use-tasks';
 
 type UserWithId = User & { id: string };
 
@@ -82,6 +83,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
     const [oldBalance, setOldBalance] = useState(0);
+    const { addTask, updateTask, tasks } = useTasks();
 
     useEffect(() => {
         if (!clientId) return;
@@ -102,6 +104,44 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any) => {
         const promotionRef = doc(db, `clients/${clientId}/promotions`, id);
         await updateDoc(promotionRef, { [field]: value });
+
+        const promotion = promotions.find(p => p.id === id);
+        if (!promotion) return;
+        
+        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === promotion.campaign && t.clientId === clientId);
+
+        if (field === 'assignedTo') {
+            const employee = users.find(u => u.username === value);
+            if (employee) {
+                if(linkedTask) {
+                    updateTask(linkedTask.id, { assigneeIds: [employee.id] });
+                } else {
+                     const newTask: Omit<Task, 'id' | 'createdAt'> = {
+                        title: promotion.campaign,
+                        description: 'Paid Promotion',
+                        status: 'Scheduled',
+                        priority: 'Medium',
+                        deadline: promotion.date,
+                        assigneeIds: [employee.id],
+                        progressNotes: [],
+                        clientId: clientId,
+                        contentType: 'Image Ad',
+                    };
+                    addTask(newTask);
+                }
+            } else if (linkedTask && value === 'unassigned') {
+                 updateTask(linkedTask.id, { assigneeIds: [] });
+            }
+        }
+        if (field === 'status' && linkedTask) {
+            let taskStatus: Task['status'] = 'Scheduled';
+            if (value === 'Active') taskStatus = 'On Work';
+            if (value === 'Stopped') taskStatus = 'Hold';
+            updateTask(linkedTask.id, { status: taskStatus });
+        }
+         if (field === 'campaign' && linkedTask) {
+            updateTask(linkedTask.id, { title: value });
+        }
     };
 
     const addPromotion = async () => {
