@@ -95,9 +95,15 @@
           "enum": [
             "Image Ad",
             "Video Ad",
-            "Carousel",
-            "Backend Ad",
+            "Carousel Ad",
+            "Reels",
             "Story",
+            "Hoarding",
+            "Other",
+            "Printing",
+            "Board",
+            "Backend Ad",
+            "LED Video",
             "Web Blogs",
             "Podcast",
             "SEO",
@@ -111,7 +117,6 @@
             "Lead Call",
             "Profile Visit Ad",
             "FB Page Like",
-            "Carousel Ad",
             "IG Engage",
             "Reach Ad"
           ]

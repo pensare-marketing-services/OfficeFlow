@@ -11,7 +11,7 @@ export type UserProfile = {
 
 export type User = UserProfile & { id: string };
 
-export type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel' | 'Backend Ad' | 'Story' | 'Web Blogs' | 'Podcast' | 'SEO' | 'Website' | 'EG Whatsapp' | 'EG Instagram' | 'EG FB Post' | 'EG Insta Post' | 'Traffic Web' | 'Lead Gen' | 'Lead Call' | 'Profile Visit Ad' | 'FB Page Like' | 'Carousel Ad' | 'IG Engage' | 'Reach Ad';
+export type ContentType = 'Image Ad' | 'Video Ad' | 'Carousel Ad' | 'Reels' | 'Story' | 'Hoarding' | 'Other' | 'Printing' | 'Board' | 'Backend Ad' | 'LED Video' | 'Web Blogs' | 'Podcast' | 'SEO' | 'Website' | 'EG Whatsapp' | 'EG Instagram' | 'EG FB Post' | 'EG Insta Post' | 'Traffic Web' | 'Lead Gen' | 'Lead Call' | 'Profile Visit Ad' | 'FB Page Like' | 'IG Engage' | 'Reach Ad';
 export type ContentStatus = 'Scheduled' | 'On Work' | 'For Approval' | 'Approved' | 'Posted' | 'Hold' | 'Pending' | 'Completed' | 'Running' | 'Started';
 export type TaskStatus = 'To Do' | ContentStatus | 'Ready for Next' | 'Reschedule' | 'Overdue';
 export type ProgressNote = {
@@ -236,7 +236,7 @@ export const tasks: Task[] = [
     deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
     assigneeIds: ['issec@officeflow.com', 'zeenath@officeflow.com'],
     clientId: 'client-5',
-    contentType: 'Carousel',
+    contentType: 'Carousel Ad',
     progressNotes: [{note: 'Wireframes are done.', date: new Date().toISOString(), authorId: 'issec@officeflow.com', authorName: 'Issec'}],
     activeAssigneeIndex: 1,
   },

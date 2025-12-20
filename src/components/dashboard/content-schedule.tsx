@@ -40,7 +40,7 @@ interface ContentScheduleProps {
     showClient?: boolean;
 }
 
-const adTypes: (Task['contentType'])[] = [
+const adTypes: (ContentType)[] = [
     "EG Whatsapp", 
     "EG Instagram", 
     "EG FB Post", 
@@ -53,6 +53,24 @@ const adTypes: (Task['contentType'])[] = [
     "Carousel Ad", 
     "IG Engage",
     "Reach Ad"
+];
+
+const mainContentTypes: ContentType[] = [
+    'Image Ad',
+    'Video Ad',
+    'Carousel Ad',
+    'Reels',
+    'Story',
+    'Hoarding',
+    'Other',
+    'Printing',
+    'Board',
+    'Backend Ad',
+    'LED Video',
+    'Website',
+    'Podcast',
+    'SEO',
+    'Web Blogs'
 ];
 
 
@@ -505,7 +523,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                                 <SelectTrigger className="h-7 text-xs p-1"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
-                                                     {adTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                                                     {mainContentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         ) : (
