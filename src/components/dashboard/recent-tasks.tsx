@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -20,6 +20,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { LinkifiedText } from '@/components/shared/linkified-text';
 
 
 type UserWithId = User & { id: string };
@@ -29,13 +30,13 @@ interface RecentTasksProps {
   tasks: (Task & {id: string})[];
   users: UserWithId[];
   title: string;
-  onTaskUpdate?: (taskId: string, updatedData: Partial<Task>) => void;
   onTaskDelete?: (taskId: string) => void;
 }
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
+const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
@@ -50,6 +51,19 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'o
     'Hold': 'outline',
 }
 
+const statusColors: Record<string, string> = {
+    'To Do': 'bg-gray-500 text-white',
+    'Scheduled': 'bg-gray-500 text-white',
+    'On Work': 'bg-orange-500 text-white',
+    'For Approval': 'bg-yellow-500 text-black',
+    'Approved': 'bg-green-600 text-white',
+    'Posted': 'bg-purple-500 text-white',
+    'Hold': 'bg-gray-500 text-white',
+    'Ready for Next': 'bg-teal-500 text-white',
+    'Reschedule': 'bg-rose-500 text-white',
+    'Overdue': 'bg-red-600 text-white',
+};
+
 const priorityMap: Record<Task['priority'], number> = {
     'High': 1,
     'Medium': 2,
@@ -57,11 +71,12 @@ const priorityMap: Record<Task['priority'], number> = {
 };
 
 
-export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskDelete }: RecentTasksProps) {
+export default function RecentTasks({ tasks, users, title, onTaskDelete }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
   const [clients, setClients] = useState<ClientWithId[]>([]);
   const [noteInput, setNoteInput] = useState('');
   const { toast } = useToast();
+  const { updateTask } = useTasks();
   
   const sortedTasks = useMemo(() => {
     return [...tasks].sort((a, b) => priorityMap[a.priority] - priorityMap[b.priority]);
@@ -87,13 +102,13 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
   }
 
   const handleStatusChange = (task: Task & {id: string}, newStatus: Task['status']) => {
-    if(onTaskUpdate) {
-        onTaskUpdate(task.id, { status: newStatus });
+    if(updateTask) {
+        updateTask(task.id, { status: newStatus });
     }
   }
 
     const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
-        if (!currentUser || !onTaskUpdate) return;
+        if (!currentUser || !updateTask) return;
         
         const newNote: ProgressNote = { 
             note: note.note || '',
@@ -103,7 +118,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
             imageUrl: note.imageUrl,
         };
 
-        onTaskUpdate(task.id, { progressNotes: [...(task.progressNotes || []), newNote] });
+        updateTask(task.id, { progressNotes: [...(task.progressNotes || []), newNote] });
     }
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>, task: Task & { id: string }) => {
@@ -148,8 +163,8 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
   }
 
     const handleClearChat = (taskId: string) => {
-        if (onTaskUpdate) {
-            onTaskUpdate(taskId, { progressNotes: [] });
+        if (updateTask) {
+            updateTask(taskId, { progressNotes: [] });
         }
     }
 
@@ -216,7 +231,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                             </DialogHeader>
                                             <DialogDescription asChild>
                                             <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
-                                                {task.description}
+                                                <LinkifiedText text={task.description} />
                                             </div>
                                             </DialogDescription>
                                         </DialogContent>
@@ -238,24 +253,24 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                 <span className="font-bold text-base">{priorityMap[task.priority]}</span>
                             </TableCell>
                             <TableCell className="py-1 px-3 border-t">
-                                {onTaskUpdate && isEmployeeView ? (
+                                {updateTask && (isAdmin || isEmployeeView) ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
                                             onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
                                             value={task.status}
-                                            disabled={isCompleted}
+                                            disabled={isCompleted && !isAdmin}
                                         >
-                                            <SelectTrigger className="w-[140px] h-8 text-xs focus:ring-accent">
+                                            <SelectTrigger className={cn("w-[140px] h-8 text-xs focus:ring-accent", statusColors[task.status])}>
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {statusOptions.map(status => (
+                                                {allStatuses.map(status => (
                                                     <SelectItem 
                                                         key={status} 
                                                         value={status}
-                                                        disabled={!employeeAllowedStatuses.includes(status)}
+                                                        disabled={isEmployeeView && !employeeAllowedStatuses.includes(status)}
                                                     >
-                                                        <Badge variant={statusVariant[status] || 'default'} className="capitalize w-full justify-start">{status}</Badge>
+                                                        {status}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -264,12 +279,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                 ) : (
                                 <Badge variant={statusVariant[task.status] || 'default'} className={cn(
                                     "capitalize text-xs",
-                                    {
-                                        "bg-green-600 hover:bg-green-600 text-white": task.status === 'Approved',
-                                        "bg-gray-500 hover:bg-gray-500 text-white": task.status === 'Scheduled',
-                                        "bg-orange-500 hover:bg-orange-500 text-white": task.status === 'On Work',
-                                        "bg-yellow-500 hover:bg-yellow-500 text-black": task.status === 'For Approval',
-                                    }
+                                    statusColors[task.status]
                                 )}>{task.status}</Badge>
                                 )}
                             </TableCell>
@@ -310,7 +320,7 @@ export default function RecentTasks({ tasks, users, title, onTaskUpdate, onTaskD
                                                                 )}
                                                                 <div className={cn("max-w-[75%] rounded-lg p-3", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                     <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                    {note.note && <p>{note.note}</p>}
+                                                                    {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
                                                                     {note.imageUrl && (
                                                                         <Dialog>
                                                                             <DialogTrigger asChild>
