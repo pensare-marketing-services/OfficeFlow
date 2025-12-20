@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import type { PaidPromotion, UserProfile as User, Task, ProgressNote } from '@/lib/data';
+import type { PaidPromotion, UserProfile as User, Task, ProgressNote, ContentType } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -155,7 +155,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                         assigneeIds: [employee.id],
                         progressNotes: [],
                         clientId: clientId,
-                        contentType: 'Image Ad',
+                        contentType: promotion.adType,
                     };
                     addTask(newTask);
                 }
@@ -171,6 +171,9 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         }
          if (field === 'campaign' && linkedTask) {
             updateTask(linkedTask.id, { title: value });
+        }
+        if (field === 'adType' && linkedTask) {
+            updateTask(linkedTask.id, { contentType: value as ContentType });
         }
     };
     
@@ -414,3 +417,5 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         </Card>
     );
 }
+
+    
