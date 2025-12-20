@@ -42,6 +42,20 @@ interface ContentScheduleProps {
 
 const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast', 'SEO', 'Website', 'EG Whatsapp', 'EG Instagram', 'EG FB Post', 'EG Insta Post', 'Traffic Web', 'Lead Gen', 'Lead Call', 'Profile Visit Ad', 'FB Page Like', 'Carousel Ad', 'IG Engage', 'Reach Ad'];
 const standardContentTypes: (Task['contentType'])[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast', 'SEO', 'Website'];
+const adTypes: (Task['contentType'])[] = [
+    "EG Whatsapp", 
+    "EG Instagram", 
+    "EG FB Post", 
+    "EG Insta Post", 
+    "Traffic Web", 
+    "Lead Gen", 
+    "Lead Call", 
+    "Profile Visit Ad", 
+    "FB Page Like", 
+    "Carousel Ad", 
+    "IG Engage",
+    "Reach Ad"
+];
 
 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
@@ -59,6 +73,8 @@ const statusColors: Record<string, string> = {
     'Ready for Next': 'bg-teal-500 text-white',
     'Reschedule': 'bg-rose-500 text-white',
     'Overdue': 'bg-red-600 text-white',
+    'Running': 'bg-blue-500 text-white',
+    'Completed': 'bg-green-600 text-white',
 };
 
 const statusDotColors: Record<string, string> = {
@@ -72,6 +88,8 @@ const statusDotColors: Record<string, string> = {
     'Ready for Next': 'bg-teal-500',
     'Reschedule': 'bg-rose-500',
     'Overdue': 'bg-red-600',
+    'Running': 'bg-blue-500',
+    'Completed': 'bg-green-600',
 };
 
 
@@ -237,10 +255,15 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             return;
         }
 
+        let finalStatus = newStatus;
+        if (newStatus === 'Running') {
+            finalStatus = 'On Work';
+        }
+
         if (currentUser?.role === 'employee') {
-            updateTaskStatus(task, newStatus);
+            updateTaskStatus(task, finalStatus);
         } else {
-            handleFieldChange(task.id, 'status', newStatus as TaskStatus);
+            handleFieldChange(task.id, 'status', finalStatus as TaskStatus);
         }
     }
 
@@ -337,6 +360,12 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     }, [users]);
     
     const getAvailableStatuses = (task: Task) => {
+        const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
+        
+        if (currentUser?.role === 'employee' && isPromotionTask) {
+            return ['Running', 'Completed'];
+        }
+        
         if (currentUser?.role === 'admin') return allStatuses;
 
         const { assigneeIds = [], activeAssigneeIndex = 0 } = task;
@@ -409,7 +438,12 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     return task.status;
                                 }
 
-                                const finalDisplayedStatus = isEmployee ? getDisplayedStatusForEmployee() : displayedStatus;
+                                let finalDisplayedStatus = isEmployee ? getDisplayedStatusForEmployee() : displayedStatus;
+                                const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
+                                if (isEmployee && isPromotionTask && finalDisplayedStatus === 'On Work') {
+                                    finalDisplayedStatus = 'Running';
+                                }
+
 
                                 const availableStatuses = getAvailableStatuses(task);
                                 
@@ -420,7 +454,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const lastNote = (task.progressNotes?.length ?? 0) > 0 ? task.progressNotes![task.progressNotes!.length - 1] : null;
                                 const hasUnreadMessage = lastNote && lastNote.authorId !== currentUser?.uid && !openedChats.has(task.id);
                                 
-                                const isPromotionTask = task.contentType && !standardContentTypes.includes(task.contentType);
+                                const isPromotionType = task.contentType && adTypes.includes(task.contentType);
 
 
                                 return (
@@ -470,7 +504,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
-                                        {isAdmin && !isPromotionTask ? (
+                                        {isAdmin && !isPromotionType ? (
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                                 <SelectTrigger className="h-7 text-xs p-1"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
@@ -500,13 +534,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         <Select 
                                             value={finalDisplayedStatus}
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={(isEmployee && !isMyTurn && !isCompleted && !isOverdue) && !isOverdue}
+                                            disabled={isEmployee && !isMyTurn && !isCompleted && !isOverdue}
                                         >
                                             <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {isAdmin && (
+                                                {isAdmin && !isPromotionTask && (
                                                     <SelectGroup>
                                                         <SelectLabel>Actions</SelectLabel>
                                                         <SelectItem value="Reschedule">
@@ -519,7 +553,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 )}
                                                 <SelectGroup>
                                                     <SelectLabel>Statuses</SelectLabel>
-                                                    {allStatuses.map(status => (
+                                                    {(isPromotionTask && isEmployee ? ['Running', 'Completed'] : allStatuses).map(status => (
                                                         <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus))}>
                                                             <div className="flex items-center gap-2">
                                                                 <div className={cn("h-2 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
@@ -528,7 +562,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                         </SelectItem>
                                                     ))}
                                                 </SelectGroup>
-                                                 {![...allStatuses, "Reschedule", "Overdue"].includes(finalDisplayedStatus as TaskStatus) && (
+                                                 {![...allStatuses, "Reschedule", "Overdue", "Running", "Completed"].includes(finalDisplayedStatus as TaskStatus) && (
                                                     <SelectItem value={finalDisplayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
                                                             <div className={cn("h-2 w-2 rounded-full", statusDotColors[finalDisplayedStatus])} />
