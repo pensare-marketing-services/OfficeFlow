@@ -29,7 +29,7 @@ type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
 
 const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
-const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
+const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
 const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
 
 interface ContentScheduleProps {
@@ -40,8 +40,6 @@ interface ContentScheduleProps {
     showClient?: boolean;
 }
 
-const contentTypes: ContentType[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast', 'SEO', 'Website', 'EG Whatsapp', 'EG Instagram', 'EG FB Post', 'EG Insta Post', 'Traffic Web', 'Lead Gen', 'Lead Call', 'Profile Visit Ad', 'FB Page Like', 'Carousel Ad', 'IG Engage', 'Reach Ad'];
-const standardContentTypes: (Task['contentType'])[] = ['Image Ad', 'Video Ad', 'Carousel', 'Backend Ad', 'Story', 'Web Blogs', 'Podcast', 'SEO', 'Website'];
 const adTypes: (Task['contentType'])[] = [
     "EG Whatsapp", 
     "EG Instagram", 
@@ -256,7 +254,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         }
 
         let finalStatus = newStatus;
-        if (newStatus === 'Running') {
+        const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
+        if (isPromotionTask && newStatus === 'Running') {
             finalStatus = 'On Work';
         }
 
@@ -426,25 +425,23 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 
                                 const today = new Date();
                                 today.setHours(0, 0, 0, 0);
-                                const isOverdue = !['For Approval', 'Approved', 'Posted'].includes(task.status) && new Date(task.deadline) < today;
+                                const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
 
-                                const displayedStatus: TaskStatus = isOverdue ? 'Overdue' : task.status;
-                                
-                                const getDisplayedStatusForEmployee = (): TaskStatus => {
+                                const getDisplayedStatusForEmployee = (): string => {
                                     if (isOverdue) return 'Overdue';
+                                    const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
+                                    if (isPromotionTask) {
+                                        if (task.status === 'On Work') return 'Running';
+                                        if (task.status === 'Completed') return 'Completed';
+                                    }
                                     if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' && task.status !== 'Scheduled') {
                                        return 'On Work';
                                     }
                                     return task.status;
                                 }
 
-                                let finalDisplayedStatus = isEmployee ? getDisplayedStatusForEmployee() : displayedStatus;
-                                const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
-                                if (isEmployee && isPromotionTask && finalDisplayedStatus === 'On Work') {
-                                    finalDisplayedStatus = 'Running';
-                                }
-
-
+                                let finalDisplayedStatus = isEmployee ? getDisplayedStatusForEmployee() : (isOverdue ? 'Overdue' : task.status);
+                                
                                 const availableStatuses = getAvailableStatuses(task);
                                 
                                 const descriptionWords = task.description ? task.description.split(/\s+/).filter(Boolean) : [];
@@ -508,7 +505,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                                 <SelectTrigger className="h-7 text-xs p-1"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
-                                                    {contentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                                                     {adTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         ) : (
@@ -540,7 +537,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {isAdmin && !isPromotionTask && (
+                                                {isAdmin && !isPromotionType && (
                                                     <SelectGroup>
                                                         <SelectLabel>Actions</SelectLabel>
                                                         <SelectItem value="Reschedule">
@@ -553,8 +550,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 )}
                                                 <SelectGroup>
                                                     <SelectLabel>Statuses</SelectLabel>
-                                                    {(isPromotionTask && isEmployee ? ['Running', 'Completed'] : allStatuses).map(status => (
-                                                        <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus))}>
+                                                    {availableStatuses.map(status => (
+                                                        <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus)) && status !== finalDisplayedStatus}>
                                                             <div className="flex items-center gap-2">
                                                                 <div className={cn("h-2 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
                                                                 {status}
@@ -562,7 +559,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                         </SelectItem>
                                                     ))}
                                                 </SelectGroup>
-                                                 {![...allStatuses, "Reschedule", "Overdue", "Running", "Completed"].includes(finalDisplayedStatus as TaskStatus) && (
+                                                 {![...allStatuses, "Reschedule", "Overdue", "Running", "Completed"].includes(finalDisplayedStatus as TaskStatus) && !availableStatuses.includes(finalDisplayedStatus as TaskStatus) && (
                                                     <SelectItem value={finalDisplayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
                                                             <div className={cn("h-2 w-2 rounded-full", statusDotColors[finalDisplayedStatus])} />

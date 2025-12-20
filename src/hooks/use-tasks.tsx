@@ -164,7 +164,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const client = (await getDoc(doc(db, 'clients', clientId!))).data();
         const clientName = client?.name || 'a client';
         
-        const allowedStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
+        const allowedStatuses: TaskStatus[] = ['On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Completed'];
 
         if (allowedStatuses.includes(newStatus)) {
              if (newStatus === 'Ready for Next' && !isLastAssignee) {
