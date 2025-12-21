@@ -272,7 +272,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         }
 
         let finalStatus = newStatus;
-        const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
+        const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
         if (isPromotionTask) {
              if (newStatus === 'Running') finalStatus = 'On Work';
              if (newStatus === 'Completed') finalStatus = 'Completed';
@@ -378,7 +378,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     }, [users]);
     
     const getAvailableStatuses = (task: Task) => {
-        const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
+        const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
         
         if (currentUser?.role === 'employee' && isPromotionTask) {
             return ['Running', 'Completed'];
@@ -445,12 +445,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const today = new Date();
                                 today.setHours(0, 0, 0, 0);
                                 const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
+                                const isPromotionType = task.contentType && adTypes.includes(task.contentType as ContentType);
+
 
                                 const getDisplayedStatusForEmployee = (): string => {
                                     if (isOverdue) return 'Overdue';
                                     if (task.status === 'Scheduled') return 'Scheduled';
 
-                                    const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
+                                    const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
                                     if (isPromotionTask) {
                                         if (task.status === 'On Work') return 'Running';
                                         if (task.status === 'Completed') return 'Completed';
@@ -472,8 +474,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const lastNote = (task.progressNotes?.length ?? 0) > 0 ? task.progressNotes![task.progressNotes!.length - 1] : null;
                                 const hasUnreadMessage = lastNote && lastNote.authorId !== currentUser?.uid && !openedChats.has(task.id);
                                 
-                                const isPromotionType = task.contentType && adTypes.includes(task.contentType);
-
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
@@ -552,7 +552,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         <Select 
                                             value={finalDisplayedStatus}
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={(isEmployee && !isMyTurn && !isCompleted && !isOverdue)}
+                                            disabled={(isEmployee && !isMyTurn && !isCompleted && !isOverdue && task.status !== 'Scheduled')}
                                         >
                                             <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue />
