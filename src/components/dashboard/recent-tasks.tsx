@@ -12,7 +12,7 @@ import { MessageSquare, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
+import { cn, capitalizeSentences } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useTasks } from '@/hooks/use-tasks';
 import { useEffect, useState, useMemo } from 'react';
@@ -38,6 +38,7 @@ const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() :
 
 const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
 const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Completed', 'Running', 'Overdue'];
+const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
 
 const adTypes: (Task['contentType'])[] = [
     "EG Whatsapp", 
@@ -110,10 +111,8 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         isOverdue: !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today
       }))
       .sort((a, b) => {
-        const aIsOverdue = a.isOverdue;
-        const bIsOverdue = b.isOverdue;
-        if (aIsOverdue && !bIsOverdue) return -1;
-        if (!aIsOverdue && bIsOverdue) return 1;
+        if (a.isOverdue && !b.isOverdue) return -1;
+        if (!a.isOverdue && b.isOverdue) return 1;
         
         return priorityMap[a.priority] - priorityMap[b.priority]
       });
@@ -151,6 +150,13 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         updateTask(task.id, { status: statusToSave });
     }
   }
+
+  const handlePriorityChange = (task: Task & {id: string}, newPriority: Task['priority']) => {
+    if(updateTask) {
+        updateTask(task.id, { priority: newPriority });
+    }
+  }
+
 
     const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
         if (!currentUser || !updateTask) return;
@@ -274,7 +280,20 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                         <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
                             <TableCell className="py-1 px-2 border-r border-t text-[11px] font-medium text-center">{index + 1}</TableCell>
                             <TableCell className="py-1 px-2 border-r border-t text-center">
-                                <span className="font-bold text-xs">{priorityMap[task.priority]}</span>
+                               {isAdmin ? (
+                                    <Select value={task.priority} onValueChange={(p: Task['priority']) => handlePriorityChange(task, p)}>
+                                        <SelectTrigger className="h-7 text-[10px] px-2 focus:ring-accent">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {priorities.map(p => (
+                                                <SelectItem key={p} value={p} className="text-xs">{p}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                               ) : (
+                                 <span className="font-bold text-xs">{priorityMap[task.priority]}</span>
+                               )}
                             </TableCell>
                             <TableCell className="py-1 px-2 border-r border-t text-[11px]" style={{maxWidth: '100px'}}>
                                 <Tooltip>
@@ -341,7 +360,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                         <Select 
                                             onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
                                             value={finalDisplayedStatus}
-                                            disabled={(isCompleted && !isAdmin) || finalDisplayedStatus === 'Overdue'}
+                                            disabled={(isCompleted && !isAdmin) || (finalDisplayedStatus === 'Overdue' && !isAdmin)}
                                         >
                                             <SelectTrigger className={cn("w-full h-7 text-[10px] px-2 focus:ring-accent", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>{finalDisplayedStatus}</SelectValue>

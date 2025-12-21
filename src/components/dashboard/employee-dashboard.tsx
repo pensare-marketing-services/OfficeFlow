@@ -19,6 +19,13 @@ interface EmployeeDashboardProps {
   onTaskUpdate: (taskId: string, updatedData: Partial<Task>) => void;
 }
 
+const priorityMap: Record<Task['priority'], number> = {
+    'High': 1,
+    'Medium': 2,
+    'Low': 3
+};
+
+
 type TaskFilter = 'all' | 'inProgress' | 'completed' | 'overdue' | 'onHold';
 
 export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: EmployeeDashboardProps) {
@@ -53,18 +60,34 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
   const inProgressTasksCount = employeeTasks.filter(t => t.status === 'On Work').length;
   
   const filteredTasks = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const getSortedTasks = (tasksToSort: (Task & {id: string})[]) => {
+      return tasksToSort
+      .map(task => ({
+        ...task,
+        isOverdue: !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today
+      }))
+      .sort((a, b) => {
+        if (a.isOverdue && !b.isOverdue) return -1;
+        if (!a.isOverdue && b.isOverdue) return 1;
+        return priorityMap[a.priority] - priorityMap[b.priority];
+      });
+    }
+
     switch (taskFilter) {
       case 'inProgress':
-        return employeeTasks.filter(t => t.status === 'On Work');
+        return getSortedTasks(employeeTasks.filter(t => t.status === 'On Work'));
       case 'completed':
-        return employeeTasks.filter(t => completedStatuses.includes(t.status));
+        return getSortedTasks(employeeTasks.filter(t => completedStatuses.includes(t.status)));
       case 'overdue':
-        return overdueTasks;
+        return getSortedTasks(overdueTasks);
       case 'onHold':
-        return employeeTasks.filter(t => t.status === 'Hold');
+        return getSortedTasks(employeeTasks.filter(t => t.status === 'Hold'));
       case 'all':
       default:
-        return allNonCompletedTasks;
+        return getSortedTasks(allNonCompletedTasks);
     }
   }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks]);
 
