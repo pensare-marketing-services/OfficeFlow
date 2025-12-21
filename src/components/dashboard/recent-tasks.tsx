@@ -116,7 +116,7 @@ const EditablePriorityCell = ({ task, onUpdate }: { task: Task & {id: string}, o
                 onChange={(e) => setPriority(Number(e.target.value))}
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
-                className="h-7 w-10 text-xs p-1 mx-auto"
+                className="h-7 w-4 text-xs p-1 mx-auto"
             />
         </TableCell>
     );
@@ -267,7 +267,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
           <TableHeader>
             <TableRow>
               <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[10px] h-8">#</TableHead>
-              <TableHead className="py-1 px-1 border-r border-t text-[10px] h-8 w-5">Order</TableHead>
+              <TableHead className="py-1 px-1 border-r border-t text-[10px] h-8 w-4">Order</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '100px'}}>Client</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '200px'}}>Task</TableHead>
                {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8">Assigned</TableHead>}
@@ -380,7 +380,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                             </TableCell>
                             )}
                             <TableCell className="py-1 px-2 border-t">
-                                {updateTask && (isAdmin || isEmployeeView) ? (
+                                {(isAdmin || isEmployeeView) ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
                                             onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
