@@ -27,6 +27,21 @@ interface WebsiteTableProps {
 
 const allStatuses: Task['status'][] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 
+const statusColors: Record<string, string> = {
+    'To Do': 'bg-gray-500 text-white',
+    'Scheduled': 'bg-gray-500 text-white',
+    'On Work': 'bg-orange-500 text-white',
+    'For Approval': 'bg-yellow-500 text-black',
+    'Approved': 'bg-green-600 text-white',
+    'Posted': 'bg-purple-500 text-white',
+    'Hold': 'bg-gray-500 text-white',
+    'Ready for Next': 'bg-teal-500 text-white',
+    'Reschedule': 'bg-rose-500 text-white',
+    'Overdue': 'bg-red-600 text-white',
+    'Running': 'bg-blue-500 text-white',
+    'Completed': 'bg-green-600 text-white',
+};
+
 const EditableCell: React.FC<{
     value: string | number;
     onSave: (value: string | number) => void;
@@ -148,7 +163,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                 </TableCell>
                                  <TableCell className="p-1">
                                     <Select value={task.status} onValueChange={(v: Task['status']) => handleTaskChange(task.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-xs", task.status === 'Completed' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white')}><SelectValue /></SelectTrigger>
+                                        <SelectTrigger className={cn("h-7 text-xs", statusColors[task.status] || 'bg-gray-500 text-white')}><SelectValue /></SelectTrigger>
                                         <SelectContent>
                                             {allStatuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
