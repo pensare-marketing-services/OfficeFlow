@@ -172,11 +172,13 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         if (newStatus === 'Running') statusToSave = 'On Work';
         if (newStatus === 'Completed') statusToSave = 'Completed';
         if (newStatus === 'Overdue') {
-            // Overdue is a derived state, we don't save it. But we want to allow changing FROM it.
-            // If the user selects "Overdue" from dropdown, do nothing.
-            // if we are in an overdue state, and the user selects something else, that's fine.
+             // If we are in an overdue state, and the user selects something else, that's fine.
+             // But we don't want to save "Overdue" itself.
             const currentIsOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
-            if(!currentIsOverdue) return;
+             if(!currentIsOverdue) return;
+             if(task.status !== 'Overdue') {
+                 statusToSave = task.status;
+             }
         }
         
         updateTask(task.id, { status: statusToSave });
@@ -265,7 +267,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
           <TableHeader>
             <TableRow>
               <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[10px] h-8">#</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8 w-[50px]">Order</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8 w-[60px]">Order</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '100px'}}>Client</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '200px'}}>Task</TableHead>
                {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8">Assigned</TableHead>}
@@ -515,5 +517,3 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     </TooltipProvider>
   );
 }
-
-    
