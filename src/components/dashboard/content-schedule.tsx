@@ -553,11 +553,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         <Select 
                                             value={finalDisplayedStatus}
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={(isEmployee && !isMyTurn && !isCompleted && !isOverdue)}
+                                            disabled={isEmployee && !isMyTurn && !isCompleted && !isOverdue}
                                         >
                                             <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>
-                                                     {finalDisplayedStatus === 'Scheduled' && 'Scheduled'}
+                                                     {finalDisplayedStatus}
                                                 </SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
