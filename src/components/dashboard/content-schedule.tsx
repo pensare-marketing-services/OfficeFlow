@@ -11,7 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, MessageSquare, Trash2, ArrowUpDown, MoreVertical } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, capitalizeSentences } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useAuth } from '@/hooks/use-auth';
@@ -124,15 +124,17 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
     }, [value]);
     
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        if(e.target.value !== value) {
-            onSave(e.target.value);
+        const formattedValue = capitalizeSentences(e.target.value);
+        if(formattedValue !== value) {
+            onSave(formattedValue);
         }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            onSave(e.currentTarget.value);
+            const formattedValue = capitalizeSentences(e.currentTarget.value);
+            onSave(formattedValue);
             e.currentTarget.blur();
         }
     };
@@ -306,7 +308,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         };
 
         if (note.note) {
-            newNote.note = note.note;
+            newNote.note = capitalizeSentences(note.note);
         }
         if (note.imageUrl) {
             newNote.imageUrl = note.imageUrl;
@@ -452,13 +454,12 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
                                 const getDisplayedStatusForEmployee = (): string => {
                                     if (isOverdue) return 'Overdue';
-                                    if (task.status === 'Scheduled') return 'Scheduled';
-
+                                    
                                     if (isPromotionTask) {
                                         if (task.status === 'On Work') return 'Running';
                                         if (task.status === 'Completed') return 'Completed';
                                     }
-                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval') {
+                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' && task.status !== 'Scheduled') {
                                        return 'On Work';
                                     }
                                     return task.status;
@@ -550,14 +551,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         </div>
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
-                                        <Select 
+                                        <Select
                                             value={finalDisplayedStatus}
-                                            onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
+                                            onValueChange={(value: string) => handleLocalStatusChange(task, value)}
                                             disabled={isEmployee && !isMyTurn && !isCompleted && !isOverdue}
                                         >
                                             <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>
-                                                     {finalDisplayedStatus}
+                                                    {finalDisplayedStatus}
                                                 </SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>

@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, MessageSquare } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+import { cn, capitalizeSentences } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useUsers } from '@/hooks/use-users';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -46,15 +46,17 @@ const EditableCell: React.FC<{ value: string; onSave: (value: string) => void }>
   }, [value]);
 
   const handleBlur = () => {
-    if (currentValue !== value) {
-      onSave(currentValue);
+    const formattedValue = capitalizeSentences(currentValue);
+    if (formattedValue !== value) {
+      onSave(formattedValue);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      onSave(e.currentTarget.value);
+      const formattedValue = capitalizeSentences(e.currentTarget.value);
+      onSave(formattedValue);
       e.currentTarget.blur();
     }
   };
@@ -95,7 +97,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
     if (!remark.note?.trim() && !remark.imageUrl) return;
 
     const newRemark: ProgressNote = {
-      note: remark.note || '',
+      note: remark.note ? capitalizeSentences(remark.note) : '',
       date: new Date().toISOString(),
       authorId: currentUser.uid,
       authorName: currentUser.username,

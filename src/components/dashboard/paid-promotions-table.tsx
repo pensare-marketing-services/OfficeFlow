@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format, isValid } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, capitalizeSentences } from '@/lib/utils';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Separator } from '../ui/separator';
@@ -62,15 +62,17 @@ const EditableCell: React.FC<{
     }, [value]);
 
     const handleBlur = () => {
-        if (currentValue !== value) {
-            onSave(type === 'number' ? Number(currentValue) || 0 : currentValue);
+        const formattedValue = typeof currentValue === 'string' && type === 'text' ? capitalizeSentences(currentValue) : currentValue;
+        if (formattedValue !== value) {
+            onSave(type === 'number' ? Number(formattedValue) || 0 : formattedValue);
         }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            onSave(type === 'number' ? Number(e.currentTarget.value) || 0 : e.currentTarget.value);
+            const formattedValue = type === 'text' ? capitalizeSentences(e.currentTarget.value) : e.currentTarget.value;
+            onSave(type === 'number' ? Number(formattedValue) || 0 : formattedValue);
             e.currentTarget.blur();
         }
     };
@@ -185,7 +187,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         const promo = promotions.find(p => p.id === promoId);
         if (!promo) return;
         const newNote: ProgressNote = {
-            note: note.note || '',
+            note: note.note ? capitalizeSentences(note.note) : '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.username,

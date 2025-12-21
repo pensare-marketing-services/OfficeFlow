@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format, isValid } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, capitalizeSentences } from '@/lib/utils';
 
 type UserWithId = User & { id: string };
 type TaskWithId = Task & { id: string };
@@ -55,15 +55,17 @@ const EditableCell: React.FC<{
     }, [value]);
 
     const handleBlur = () => {
-        if (currentValue !== value) {
-            onSave(type === 'number' ? Number(currentValue) || 0 : currentValue);
+        const formattedValue = typeof currentValue === 'string' && type === 'text' ? capitalizeSentences(currentValue) : currentValue;
+        if (formattedValue !== value) {
+            onSave(type === 'number' ? Number(formattedValue) || 0 : formattedValue);
         }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            onSave(type === 'number' ? Number(e.currentTarget.value) || 0 : e.currentTarget.value);
+            const formattedValue = type === 'text' ? capitalizeSentences(e.currentTarget.value) : e.currentTarget.value;
+            onSave(type === 'number' ? Number(formattedValue) || 0 : formattedValue);
             e.currentTarget.blur();
         }
     };
