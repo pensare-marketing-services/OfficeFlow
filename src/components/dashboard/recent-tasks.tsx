@@ -1,6 +1,6 @@
 'use client';
 
-import type { Task, UserProfile as User, ProgressNote, Client, TaskStatus } from '@/lib/data';
+import type { Task, UserProfile as User, ProgressNote, Client, TaskStatus, ContentType } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -228,7 +228,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
             <TableRow>
               <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[10px] h-8">#</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8 w-[50px]">Order</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '200px'}}>Client</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '100px'}}>Client</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '200px'}}>Task</TableHead>
                {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8">Assigned</TableHead>}
               <TableHead className="py-1 px-2 border-t w-[110px] text-[10px] h-8">Status</TableHead>
@@ -246,7 +246,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 const descriptionPreview = descriptionWords.slice(0, 10).join(' ');
 
                 const isCompleted = completedStatuses.includes(task.status);
-                const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
+                const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
                 
                 let statusOptions: TaskStatus[] = allStatuses;
 
@@ -255,11 +255,11 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 }
                 
                 let currentStatus = task.isOverdue ? 'Overdue' : task.status;
-                if (!statusOptions.includes(currentStatus)) {
+                if (!statusOptions.includes(currentStatus as TaskStatus)) {
                     if (currentStatus === 'On Work' && isPromotionTask && isEmployeeView) {
                        // Don't add 'On Work' if 'Started' is the option
                     } else {
-                         statusOptions.unshift(currentStatus);
+                         statusOptions.unshift(currentStatus as TaskStatus);
                     }
                 }
 
@@ -276,7 +276,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                             <TableCell className="py-1 px-2 border-r border-t text-center">
                                 <span className="font-bold text-xs">{priorityMap[task.priority]}</span>
                             </TableCell>
-                            <TableCell className="py-1 px-2 border-r border-t text-[11px]" style={{maxWidth: '200px'}}>
+                            <TableCell className="py-1 px-2 border-r border-t text-[11px]" style={{maxWidth: '100px'}}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <p className="truncate">
@@ -341,7 +341,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                         <Select 
                                             onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
                                             value={finalDisplayedStatus}
-                                            disabled={isCompleted && !isAdmin}
+                                            disabled={(isCompleted && !isAdmin) || finalDisplayedStatus === 'Overdue'}
                                         >
                                             <SelectTrigger className={cn("w-full h-7 text-[10px] px-2 focus:ring-accent", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>{finalDisplayedStatus}</SelectValue>
@@ -352,7 +352,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                     <SelectItem 
                                                         key={status} 
                                                         value={status}
-                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status)) || (finalDisplayedStatus === 'Overdue' && status !== 'Overdue' && !isAdmin)}
+                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status as TaskStatus)) || (finalDisplayedStatus === 'Overdue' && status !== 'Overdue' && !isAdmin)}
                                                         className="text-xs"
                                                     >
                                                         {status}
