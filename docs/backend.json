@@ -62,16 +62,14 @@
             "Approved",
             "Posted",
             "Hold",
-            "Ready for Next"
+            "Ready for Next",
+            "Running",
+            "Completed"
           ]
         },
         "priority": {
-          "type": "string",
-          "enum": [
-            "Low",
-            "Medium",
-            "High"
-          ]
+          "type": "number",
+          "description": "A number representing the task's priority. A lower number indicates a higher priority."
         },
         "deadline": {
           "type": "string",
@@ -93,13 +91,30 @@
           "enum": [
             "Image Ad",
             "Video Ad",
-            "Carousel",
-            "Backend Ad",
+            "Carousel Ad",
+            "Reels",
             "Story",
+            "Hoarding",
+            "Other",
+            "Printing",
+            "Board",
+            "Backend Ad",
+            "LED Video",
             "Web Blogs",
             "Podcast",
             "SEO",
-            "Website"
+            "Website",
+            "EG Whatsapp",
+            "EG Instagram",
+            "EG FB Post",
+            "EG Insta Post",
+            "Traffic Web",
+            "Lead Gen",
+            "Lead Call",
+            "Profile Visit Ad",
+            "FB Page Like",
+            "IG Engage",
+            "Reach Ad"
           ]
         },
         "createdAt": {
@@ -313,7 +328,10 @@
           "type": "number"
         },
         "remarks": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/ProgressNote"
+          }
         },
          "clientId": {
           "type": "string"
@@ -435,3 +453,5 @@
     }
   }
 }
+
+    

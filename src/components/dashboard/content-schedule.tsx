@@ -31,7 +31,6 @@ type ClientWithId = Client & { id: string };
 
 const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
-const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
 
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
@@ -107,13 +106,6 @@ const statusDotColors: Record<string, string> = {
     'Overdue': 'bg-red-600',
     'Running': 'bg-blue-500',
     'Completed': 'bg-green-600',
-};
-
-
-const priorityMap: Record<Task['priority'], number> = {
-    'High': 1,
-    'Medium': 2,
-    'Low': 3
 };
 
 const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea', placeholder?: string }> = ({ value, onSave, type = 'text', placeholder }) => {
@@ -219,8 +211,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         if (sortConfig !== null) {
             sortableTasks.sort((a, b) => {
                 if (sortConfig.key === 'priority') {
-                    const aValue = priorityMap[a.priority];
-                    const bValue = priorityMap[b.priority];
+                    const aValue = a.priority || 99;
+                    const bValue = b.priority || 99;
                     if (aValue < bValue) {
                         return sortConfig.direction === 'ascending' ? -1 : 1;
                     }
@@ -454,12 +446,12 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
                                 const getDisplayedStatusForEmployee = (): string => {
                                     if (isOverdue) return 'Overdue';
-                                    
                                     if (isPromotionTask) {
                                         if (task.status === 'On Work') return 'Running';
                                         if (task.status === 'Completed') return 'Completed';
                                     }
-                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' && task.status !== 'Scheduled') {
+                                    if (task.status === 'Scheduled') return 'Scheduled';
+                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' ) {
                                        return 'On Work';
                                     }
                                     return task.status;
@@ -551,15 +543,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         </div>
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
-                                        <Select
+                                       <Select
                                             value={finalDisplayedStatus}
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)}
                                             disabled={isEmployee && !isMyTurn && !isCompleted && !isOverdue}
                                         >
                                             <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
-                                                <SelectValue>
-                                                    {finalDisplayedStatus}
-                                                </SelectValue>
+                                                <SelectValue>{finalDisplayedStatus}</SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {isAdmin && !isPromotionTask && (
@@ -709,3 +699,5 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
+
+    

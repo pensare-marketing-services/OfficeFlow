@@ -27,7 +27,7 @@ export type Task = {
   title: string;
   description: string;
   status: TaskStatus;
-  priority: 'Low' | 'Medium' | 'High';
+  priority: number;
   deadline: string; 
   assigneeIds: string[]; 
   progressNotes: ProgressNote[];
@@ -167,7 +167,7 @@ export const tasks: Task[] = [
     title: 'Launch Campaign Video',
     description: 'Finalize and launch the main campaign video ad.',
     status: 'For Approval',
-    priority: 'High',
+    priority: 1,
     deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
     assigneeIds: ['yaseen@officeflow.com', 'issec@officeflow.com'],
     clientId: 'client-1',
@@ -180,7 +180,7 @@ export const tasks: Task[] = [
     title: 'Weekly Social Media Posts',
     description: 'Create and schedule posts for all social channels.',
     status: 'On Work',
-    priority: 'Medium',
+    priority: 2,
     deadline: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
     assigneeIds: ['issec@officeflow.com'],
     clientId: 'client-2',
@@ -193,7 +193,7 @@ export const tasks: Task[] = [
     title: 'Q3 Analytics Report',
     description: 'Compile and present the performance report for Q3.',
     status: 'Approved',
-    priority: 'Medium',
+    priority: 2,
     deadline: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     assigneeIds: ['zeenath@officeflow.com'],
     clientId: 'client-3',
@@ -206,7 +206,7 @@ export const tasks: Task[] = [
     title: 'New Website Blog Post',
     description: 'Write and publish a blog post on "The Future of AI".',
     status: 'Scheduled',
-    priority: 'Low',
+    priority: 3,
     deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     assigneeIds: ['jasnas@officeflow.com'],
     clientId: 'client-1',
@@ -219,7 +219,7 @@ export const tasks: Task[] = [
     title: 'Instagram Story Poll',
     description: 'Run an interactive poll in the Instagram story.',
     status: 'Posted',
-    priority: 'Medium',
+    priority: 2,
     deadline: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     assigneeIds: ['yaseen@officeflow.com'],
     clientId: 'client-4',
@@ -232,7 +232,7 @@ export const tasks: Task[] = [
     title: 'Client Onboarding Carousel',
     description: 'Design a carousel for the new client onboarding flow.',
     status: 'On Work',
-    priority: 'High',
+    priority: 1,
     deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
     assigneeIds: ['issec@officeflow.com', 'zeenath@officeflow.com'],
     clientId: 'client-5',
@@ -246,3 +246,6 @@ export const tasks: Task[] = [
 
     
 
+
+
+    

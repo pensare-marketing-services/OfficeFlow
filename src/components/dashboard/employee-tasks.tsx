@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { Task, UserProfile as User } from '@/lib/data';
@@ -29,10 +30,10 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'o
     'Hold': 'outline',
 }
 
-const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    'High': 'destructive',
-    'Medium': 'secondary',
-    'Low': 'outline'
+const priorityVariant: Record<number, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    1: 'destructive',
+    2: 'secondary',
+    3: 'outline'
 }
 
 export default function EmployeeTasks({ tasks, users }: EmployeeTasksProps) {
@@ -111,3 +112,5 @@ export default function EmployeeTasks({ tasks, users }: EmployeeTasksProps) {
     </Card>
   );
 }
+
+    

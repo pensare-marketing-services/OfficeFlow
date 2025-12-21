@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { LinkifiedText } from '@/components/shared/linkified-text';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Input } from '../ui/input';
 
 
 type UserWithId = User & { id: string };
@@ -38,7 +39,6 @@ const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() :
 
 const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
 const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Completed', 'Running', 'Overdue'];
-const priorities: Task['priority'][] = ['High', 'Medium', 'Low'];
 
 const adTypes: (Task['contentType'])[] = [
     "EG Whatsapp", 
@@ -87,10 +87,39 @@ const statusColors: Record<string, string> = {
     'Running': 'bg-blue-500 text-white',
 };
 
-const priorityMap: Record<Task['priority'], number> = {
-    'High': 1,
-    'Medium': 2,
-    'Low': 3
+const EditablePriorityCell = ({ task, onUpdate }: { task: Task & {id: string}, onUpdate: (taskId: string, data: Partial<Task>) => void }) => {
+    const [priority, setPriority] = useState(task.priority || 0);
+
+    useEffect(() => {
+        setPriority(task.priority || 0);
+    }, [task.priority]);
+
+    const handleSave = () => {
+        const newPriority = Number(priority);
+        if (newPriority !== task.priority) {
+            onUpdate(task.id, { priority: newPriority });
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSave();
+            e.currentTarget.blur();
+        }
+    };
+
+    return (
+        <TableCell className="py-1 px-2 border-r border-t text-center">
+            <Input
+                type="number"
+                value={priority}
+                onChange={(e) => setPriority(Number(e.target.value))}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                className="h-7 w-12 text-xs p-1 mx-auto"
+            />
+        </TableCell>
+    );
 };
 
 
@@ -114,7 +143,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         if (a.isOverdue && !b.isOverdue) return -1;
         if (!a.isOverdue && b.isOverdue) return 1;
         
-        return priorityMap[a.priority] - priorityMap[b.priority]
+        return (a.priority || 99) - (b.priority || 99);
       });
   }, [tasks]);
 
@@ -143,8 +172,11 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         if (newStatus === 'Running') statusToSave = 'On Work';
         if (newStatus === 'Completed') statusToSave = 'Completed';
         if (newStatus === 'Overdue') {
-            updateTask(task.id, {});
-            return;
+            // Overdue is a derived state, we don't save it. But we want to allow changing FROM it.
+            // If the user selects "Overdue" from dropdown, do nothing.
+            // if we are in an overdue state, and the user selects something else, that's fine.
+            const currentIsOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
+            if(!currentIsOverdue) return;
         }
         
         updateTask(task.id, { status: statusToSave });
@@ -279,22 +311,13 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                     <DropdownMenu key={task.id}>
                         <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
                             <TableCell className="py-1 px-2 border-r border-t text-[11px] font-medium text-center">{index + 1}</TableCell>
-                            <TableCell className="py-1 px-2 border-r border-t text-center">
-                               {isAdmin ? (
-                                    <Select value={task.priority} onValueChange={(p: Task['priority']) => handlePriorityChange(task, p)}>
-                                        <SelectTrigger className="h-7 text-[10px] px-2 focus:ring-accent">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {priorities.map(p => (
-                                                <SelectItem key={p} value={p} className="text-xs">{p}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                               ) : (
-                                 <span className="font-bold text-xs">{priorityMap[task.priority]}</span>
-                               )}
-                            </TableCell>
+                            
+                            {isAdmin ? (
+                                <EditablePriorityCell task={task} onUpdate={updateTask} />
+                            ) : (
+                               <TableCell className="py-1 px-2 border-r border-t text-center text-xs font-bold">{task.priority}</TableCell>
+                            )}
+
                             <TableCell className="py-1 px-2 border-r border-t text-[11px]" style={{maxWidth: '100px'}}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
@@ -492,3 +515,5 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     </TooltipProvider>
   );
 }
+
+    

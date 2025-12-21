@@ -19,12 +19,6 @@ interface EmployeeDashboardProps {
   onTaskUpdate: (taskId: string, updatedData: Partial<Task>) => void;
 }
 
-const priorityMap: Record<Task['priority'], number> = {
-    'High': 1,
-    'Medium': 2,
-    'Low': 3
-};
-
 
 type TaskFilter = 'all' | 'inProgress' | 'completed' | 'overdue' | 'onHold';
 
@@ -72,7 +66,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
       .sort((a, b) => {
         if (a.isOverdue && !b.isOverdue) return -1;
         if (!a.isOverdue && b.isOverdue) return 1;
-        return priorityMap[a.priority] - priorityMap[b.priority];
+        return (a.priority || 99) - (b.priority || 99);
       });
     }
 
@@ -159,3 +153,5 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
     </div>
   );
 }
+
+    
