@@ -110,8 +110,11 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         isOverdue: !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today
       }))
       .sort((a, b) => {
-        if (a.isOverdue && !b.isOverdue) return -1;
-        if (!a.isOverdue && b.isOverdue) return 1;
+        const aIsOverdue = a.isOverdue;
+        const bIsOverdue = b.isOverdue;
+        if (aIsOverdue && !bIsOverdue) return -1;
+        if (!aIsOverdue && bIsOverdue) return 1;
+        
         return priorityMap[a.priority] - priorityMap[b.priority]
       });
   }, [tasks]);
@@ -223,12 +226,12 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[11px] h-8">#</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[11px] h-8 w-[50px]">Order</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[11px] h-8 w-[120px]">Client</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[11px] h-8 w-[200px]">Task</TableHead>
-               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[11px] h-8">Assigned</TableHead>}
-              <TableHead className="py-1 px-2 border-t w-[110px] text-[11px] h-8">Status</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[10px] h-8">#</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8 w-[50px]">Order</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '200px'}}>Client</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '200px'}}>Task</TableHead>
+               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8">Assigned</TableHead>}
+              <TableHead className="py-1 px-2 border-t w-[110px] text-[10px] h-8">Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead className="text-xs h-8">Remarks</TableHead>}
             </TableRow>
           </TableHeader>
@@ -273,7 +276,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                             <TableCell className="py-1 px-2 border-r border-t text-center">
                                 <span className="font-bold text-xs">{priorityMap[task.priority]}</span>
                             </TableCell>
-                            <TableCell className="py-1 px-2 border-r border-t text-[11px]">
+                            <TableCell className="py-1 px-2 border-r border-t text-[11px]" style={{maxWidth: '200px'}}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <p className="truncate">
@@ -289,7 +292,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                     </TooltipContent>
                                 </Tooltip>
                             </TableCell>
-                            <TableCell className="py-1 px-2 border-r border-t">
+                            <TableCell className="py-1 px-2 border-r border-t" style={{maxWidth: '200px'}}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div className="font-medium text-[11px] flex items-center gap-2 truncate">
