@@ -67,6 +67,7 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'o
     'Hold': 'outline',
     'Completed': 'default',
     'Running': 'secondary',
+    'Overdue': 'destructive',
 }
 
 const statusColors: Record<string, string> = {
@@ -205,16 +206,17 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="py-1 px-3 border-r border-t w-[40px]">Sl.No</TableHead>
+              <TableHead className="py-1 px-3 border-r border-t w-[60px]">Order</TableHead>
               <TableHead className="py-1 px-3 border-r border-t">Client</TableHead>
               <TableHead className="py-1 px-3 border-r border-t">Task</TableHead>
-               {isAdmin && <TableHead className="py-1 px-3 border-r border-t">Assigned To</TableHead>}
-              <TableHead className="py-1 px-3 border-r border-t">Order</TableHead>
-              <TableHead className="py-1 px-3 border-t">Status</TableHead>
+               {isAdmin && <TableHead className="py-1 px-3 border-r border-t">Assigned</TableHead>}
+              <TableHead className="py-1 px-3 border-t w-[130px]">Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead>Remarks</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedTasks.map(task => {
+            {sortedTasks.map((task, index) => {
                 const assignees = (task.assigneeIds || []).map(id => getAssignee(id)).filter(Boolean) as UserWithId[];
                 const client = getClient(task.clientId);
                 const isEmployeeView = currentUser?.role === 'employee';
@@ -253,6 +255,10 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 return (
                     <DropdownMenu key={task.id}>
                         <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
+                            <TableCell className="py-1 px-3 border-r border-t text-xs font-medium text-center">{index + 1}</TableCell>
+                            <TableCell className="py-1 px-3 border-r border-t text-center">
+                                <span className="font-bold text-base">{priorityMap[task.priority]}</span>
+                            </TableCell>
                             <TableCell className="py-1 px-3 border-r border-t text-xs">
                                 {client ? (
                                     <span>{client.name}</span>
@@ -295,9 +301,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 </DropdownMenuTrigger>
                             </TableCell>
                             )}
-                            <TableCell className="py-1 px-3 border-r border-t">
-                                <span className="font-bold text-base">{priorityMap[task.priority]}</span>
-                            </TableCell>
                             <TableCell className="py-1 px-3 border-t">
                                 {updateTask && (isAdmin || isEmployeeView) ? (
                                     <div className="flex items-center gap-2">
@@ -306,16 +309,16 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                             value={finalDisplayedStatus}
                                             disabled={isCompleted && !isAdmin}
                                         >
-                                            <SelectTrigger className={cn("w-[120px] h-8 text-xs focus:ring-accent", statusColors[finalDisplayedStatus])}>
+                                            <SelectTrigger className={cn("w-full h-8 text-xs focus:ring-accent", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>{finalDisplayedStatus}</SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {isOverdue && <SelectItem value="Overdue" disabled>Overdue</SelectItem>}
+                                                {isOverdue && !isAdmin && <SelectItem value="Overdue" disabled>Overdue</SelectItem>}
                                                 {statusOptions.map(status => (
                                                     <SelectItem 
                                                         key={status} 
                                                         value={status}
-                                                        disabled={isEmployeeView && !employeeAllowedStatuses.includes(status)}
+                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status)) || (isOverdue && status !=='Overdue')}
                                                     >
                                                         {status}
                                                     </SelectItem>
