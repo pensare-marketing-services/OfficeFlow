@@ -76,7 +76,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
 
   return (
     
-    <div className="space-y-6 ">
+    <div className="space-y-4">
      <div className="w-full lg:w-1/2 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 
         <StatsCard 

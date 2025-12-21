@@ -36,7 +36,7 @@ interface RecentTasksProps {
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
-const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Completed', 'Running'];
+const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Completed', 'Running', 'Overdue'];
 
 const adTypes: (Task['contentType'])[] = [
     "EG Whatsapp", 
@@ -100,7 +100,19 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const { updateTask } = useTasks();
   
   const sortedTasks = useMemo(() => {
-    return [...tasks].sort((a, b) => priorityMap[a.priority] - priorityMap[b.priority]);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return [...tasks]
+      .map(task => ({
+        ...task,
+        isOverdue: !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today
+      }))
+      .sort((a, b) => {
+        if (a.isOverdue && !b.isOverdue) return -1;
+        if (!a.isOverdue && b.isOverdue) return 1;
+        return priorityMap[a.priority] - priorityMap[b.priority]
+      });
   }, [tasks]);
 
   useEffect(() => {
@@ -200,19 +212,19 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     <>
     <Card className="shadow-md">
       <CardHeader className="py-2 px-3">
-        <CardTitle className="font-headline text-lg">{title}</CardTitle>
+        <CardTitle className="font-headline text-base">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="py-1 px-3 border-r border-t w-[40px]">Sl.No</TableHead>
-              <TableHead className="py-1 px-3 border-r border-t w-[60px]">Order</TableHead>
-              <TableHead className="py-1 px-3 border-r border-t">Client</TableHead>
-              <TableHead className="py-1 px-3 border-r border-t">Task</TableHead>
-               {isAdmin && <TableHead className="py-1 px-3 border-r border-t">Assigned</TableHead>}
-              <TableHead className="py-1 px-3 border-t w-[130px]">Status</TableHead>
-              {currentUser?.role === 'employee' && <TableHead>Remarks</TableHead>}
+              <TableHead className="py-1 px-2 border-r border-t w-[25px] text-xs h-8">#</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-xs h-8 w-[50px]">Order</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-xs h-8">Client</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-xs h-8">Task</TableHead>
+               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-xs h-8">Assigned</TableHead>}
+              <TableHead className="py-1 px-2 border-t w-[120px] text-xs h-8">Status</TableHead>
+              {currentUser?.role === 'employee' && <TableHead className="text-xs h-8">Remarks</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -245,35 +257,31 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                  if (task.status === 'On Work' && isPromotionTask && isEmployeeView) {
                     currentStatus = 'Running';
                  }
-                 const today = new Date();
-                 today.setHours(0, 0, 0, 0);
-                 const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
-
-                 const finalDisplayedStatus = isOverdue ? 'Overdue' : currentStatus;
+                 const finalDisplayedStatus = task.isOverdue ? 'Overdue' : currentStatus;
 
 
                 return (
                     <DropdownMenu key={task.id}>
                         <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
-                            <TableCell className="py-1 px-3 border-r border-t text-xs font-medium text-center">{index + 1}</TableCell>
-                            <TableCell className="py-1 px-3 border-r border-t text-center">
-                                <span className="font-bold text-base">{priorityMap[task.priority]}</span>
+                            <TableCell className="py-1 px-2 border-r border-t text-xs font-medium text-center">{index + 1}</TableCell>
+                            <TableCell className="py-1 px-2 border-r border-t text-center">
+                                <span className="font-bold text-sm">{priorityMap[task.priority]}</span>
                             </TableCell>
-                            <TableCell className="py-1 px-3 border-r border-t text-xs">
+                            <TableCell className="py-1 px-2 border-r border-t text-xs">
                                 {client ? (
                                     <span>{client.name}</span>
                                 ) : (
                                     <span className="text-muted-foreground">-</span>
                                 )}
                             </TableCell>
-                            <TableCell className="py-1 px-3 border-r border-t">
+                            <TableCell className="py-1 px-2 border-r border-t">
                                 <div className="font-medium text-xs flex items-center gap-2">
                                     {task.title}
                                 </div>
                                 {wordCount > 10 ? (
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <p className="text-xs text-muted-foreground cursor-pointer hover:text-foreground truncate max-w-xs">
+                                            <p className="text-[11px] text-muted-foreground cursor-pointer hover:text-foreground truncate max-w-xs">
                                             {descriptionPreview}... <span className="underline">more</span>
                                             </p>
                                         </DialogTrigger>
@@ -289,11 +297,11 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                         </DialogContent>
                                     </Dialog>
                                 ) : (
-                                    <p className="text-xs text-muted-foreground truncate max-w-xs">{task.description}</p>
+                                    <p className="text-[11px] text-muted-foreground truncate max-w-xs">{task.description}</p>
                                 )}
                             </TableCell>
                             {isAdmin && (
-                            <TableCell className="py-1 px-3 border-r border-t">
+                            <TableCell className="py-1 px-2 border-r border-t">
                                 <DropdownMenuTrigger asChild>
                                     <span className="cursor-pointer hover:underline text-xs">
                                         {assignees.map(a => a.username).join(', ') || '-'}
@@ -301,7 +309,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 </DropdownMenuTrigger>
                             </TableCell>
                             )}
-                            <TableCell className="py-1 px-3 border-t">
+                            <TableCell className="py-1 px-2 border-t">
                                 {updateTask && (isAdmin || isEmployeeView) ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
@@ -309,20 +317,22 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                             value={finalDisplayedStatus}
                                             disabled={isCompleted && !isAdmin}
                                         >
-                                            <SelectTrigger className={cn("w-full h-8 text-xs focus:ring-accent", statusColors[finalDisplayedStatus])}>
+                                            <SelectTrigger className={cn("w-full h-7 text-[11px] px-2 focus:ring-accent", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>{finalDisplayedStatus}</SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {isOverdue && !isAdmin && <SelectItem value="Overdue" disabled>Overdue</SelectItem>}
+                                                <SelectGroup>
                                                 {statusOptions.map(status => (
                                                     <SelectItem 
                                                         key={status} 
                                                         value={status}
-                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status)) || (isOverdue && status !=='Overdue')}
+                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status)) || (task.isOverdue && status !=='Overdue')}
+                                                        className="text-xs"
                                                     >
                                                         {status}
                                                     </SelectItem>
                                                 ))}
+                                                </SelectGroup>
                                             </SelectContent>
                                         </Select>
                                     </div>
