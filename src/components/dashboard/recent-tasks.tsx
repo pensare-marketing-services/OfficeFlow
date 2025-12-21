@@ -247,6 +247,8 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                  today.setHours(0, 0, 0, 0);
                  const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
 
+                 const finalDisplayedStatus = isOverdue ? 'Overdue' : currentStatus;
+
 
                 return (
                     <DropdownMenu key={task.id}>
@@ -260,7 +262,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                             </TableCell>
                             <TableCell className="py-1 px-3 border-r border-t">
                                 <div className="font-medium text-xs flex items-center gap-2">
-                                     {isOverdue && <span className="h-2 w-2 rounded-full bg-red-500" title="Overdue"></span>}
                                     {task.title}
                                 </div>
                                 {wordCount > 10 ? (
@@ -302,13 +303,14 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                     <div className="flex items-center gap-2">
                                         <Select 
                                             onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
-                                            value={currentStatus}
+                                            value={finalDisplayedStatus}
                                             disabled={isCompleted && !isAdmin}
                                         >
-                                            <SelectTrigger className={cn("w-[120px] h-8 text-xs focus:ring-accent", statusColors[currentStatus])}>
-                                                <SelectValue />
+                                            <SelectTrigger className={cn("w-[120px] h-8 text-xs focus:ring-accent", statusColors[finalDisplayedStatus])}>
+                                                <SelectValue>{finalDisplayedStatus}</SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
+                                                {isOverdue && <SelectItem value="Overdue" disabled>Overdue</SelectItem>}
                                                 {statusOptions.map(status => (
                                                     <SelectItem 
                                                         key={status} 
