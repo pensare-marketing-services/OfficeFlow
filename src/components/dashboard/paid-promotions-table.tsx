@@ -155,7 +155,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                         title: promotion.campaign,
                         description: 'Paid Promotion',
                         status: 'Scheduled',
-                        priority: 'Medium',
+                        priority: 2,
                         deadline: promotion.date,
                         assigneeIds: [employee.id],
                         progressNotes: [],
@@ -306,7 +306,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                     </Select>
                                 </TableCell>
                                 <TableCell className="p-1">
-                                    <Select value={promo.assignedTo} onValueChange={(v) => handlePromotionChange(promo.id, 'assignedTo', v)}>
+                                    <Select value={promo.assignedTo || 'unassigned'} onValueChange={(v) => handlePromotionChange(promo.id, 'assignedTo', v)}>
                                         <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Assign" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="unassigned">Unassigned</SelectItem>
@@ -422,5 +422,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         </Card>
     );
 }
+
+    
 
     
