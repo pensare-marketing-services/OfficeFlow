@@ -243,6 +243,10 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                  if (task.status === 'On Work' && isPromotionTask && isEmployeeView) {
                     currentStatus = 'Running';
                  }
+                 const today = new Date();
+                 today.setHours(0, 0, 0, 0);
+                 const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
+
 
                 return (
                     <DropdownMenu key={task.id}>
@@ -255,7 +259,10 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 )}
                             </TableCell>
                             <TableCell className="py-1 px-3 border-r border-t">
-                                <div className="font-medium text-xs">{task.title}</div>
+                                <div className="font-medium text-xs flex items-center gap-2">
+                                     {isOverdue && <span className="h-2 w-2 rounded-full bg-red-500" title="Overdue"></span>}
+                                    {task.title}
+                                </div>
                                 {wordCount > 10 ? (
                                     <Dialog>
                                         <DialogTrigger asChild>
@@ -291,7 +298,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 <span className="font-bold text-base">{priorityMap[task.priority]}</span>
                             </TableCell>
                             <TableCell className="py-1 px-3 border-t">
-                                {updateTask ? (
+                                {updateTask && (isAdmin || isEmployeeView) ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
                                             onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
