@@ -23,6 +23,7 @@ import { db } from '@/firebase/client';
 import { useTasks } from '@/hooks/use-tasks';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { LinkifiedText } from '@/components/shared/linkified-text';
+import { Badge } from '@/components/ui/badge';
 
 
 type UserWithId = User & { id: string };
@@ -275,7 +276,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
         if (isPromotionTask) {
              if (newStatus === 'Running') finalStatus = 'On Work';
-             if (newStatus === 'Completed') finalStatus = 'Completed';
         }
 
         if (currentUser?.role === 'employee') {
@@ -445,14 +445,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const today = new Date();
                                 today.setHours(0, 0, 0, 0);
                                 const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
-                                const isPromotionType = task.contentType && adTypes.includes(task.contentType as ContentType);
+                                const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
 
 
                                 const getDisplayedStatusForEmployee = (): string => {
                                     if (isOverdue) return 'Overdue';
+                                    
                                     if (task.status === 'Scheduled') return 'Scheduled';
 
-                                    const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
                                     if (isPromotionTask) {
                                         if (task.status === 'On Work') return 'Running';
                                         if (task.status === 'Completed') return 'Completed';
@@ -522,7 +522,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
-                                        {(isAdmin && !isPromotionType) ? (
+                                        {(isAdmin && !isPromotionTask) ? (
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                                 <SelectTrigger className="h-7 text-xs p-1"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
@@ -549,53 +549,59 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         </div>
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
-                                        <Select 
-                                            value={finalDisplayedStatus}
-                                            onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={(isEmployee && !isMyTurn && !isCompleted && !isOverdue && task.status !== 'Scheduled')}
-                                        >
-                                            <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {isAdmin && !isPromotionType && (
+                                        {(isEmployee && task.status === 'Scheduled') ? (
+                                            <Badge className={cn("h-7 text-xs p-1 w-full justify-center", statusColors['Scheduled'])}>
+                                                Scheduled
+                                            </Badge>
+                                        ) : (
+                                            <Select 
+                                                value={finalDisplayedStatus}
+                                                onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
+                                                disabled={(isEmployee && !isMyTurn && !isCompleted && !isOverdue)}
+                                            >
+                                                <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {isAdmin && !isPromotionTask && (
+                                                        <SelectGroup>
+                                                            <SelectLabel>Actions</SelectLabel>
+                                                            <SelectItem value="Reschedule">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className={cn("h-2 w-2 rounded-full", statusDotColors['Reschedule'])} />
+                                                                    Reschedule
+                                                                </div>
+                                                            </SelectItem>
+                                                        </SelectGroup>
+                                                    )}
                                                     <SelectGroup>
-                                                        <SelectLabel>Actions</SelectLabel>
-                                                        <SelectItem value="Reschedule">
-                                                            <div className="flex items-center gap-2">
-                                                                <div className={cn("h-2 w-2 rounded-full", statusDotColors['Reschedule'])} />
-                                                                Reschedule
-                                                            </div>
-                                                        </SelectItem>
+                                                        <SelectLabel>Statuses</SelectLabel>
+                                                        {availableStatuses.map(status => (
+                                                            <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus)) && status !== finalDisplayedStatus}>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className={cn("h-2 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
+                                                                    {status}
+                                                                </div>
+                                                            </SelectItem>
+                                                        ))}
                                                     </SelectGroup>
-                                                )}
-                                                <SelectGroup>
-                                                    <SelectLabel>Statuses</SelectLabel>
-                                                    {availableStatuses.map(status => (
-                                                        <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus)) && status !== finalDisplayedStatus}>
+                                                    {![...allStatuses, "Reschedule", "Overdue", "Running", "Completed"].includes(finalDisplayedStatus as TaskStatus) && !availableStatuses.includes(finalDisplayedStatus as TaskStatus) && (
+                                                        <SelectItem value={finalDisplayedStatus} disabled>
                                                             <div className="flex items-center gap-2">
-                                                                <div className={cn("h-2 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
-                                                                {status}
+                                                                <div className={cn("h-2 w-2 rounded-full", statusColors[finalDisplayedStatus])} />
+                                                                {finalDisplayedStatus} {finalDisplayedStatus === 'On Work' && `(${users.find(u => u.id === currentWorkerId)?.username?.split(' ')[0] || '...'})`}
                                                             </div>
                                                         </SelectItem>
-                                                    ))}
-                                                </SelectGroup>
-                                                 {![...allStatuses, "Reschedule", "Overdue", "Running", "Completed"].includes(finalDisplayedStatus as TaskStatus) && !availableStatuses.includes(finalDisplayedStatus as TaskStatus) && (
-                                                    <SelectItem value={finalDisplayedStatus} disabled>
+                                                    )}
+                                                    {isOverdue && <SelectItem value="Overdue" disabled>
                                                         <div className="flex items-center gap-2">
-                                                            <div className={cn("h-2 w-2 rounded-full", statusDotColors[finalDisplayedStatus])} />
-                                                            {finalDisplayedStatus} {finalDisplayedStatus === 'On Work' && `(${users.find(u => u.id === currentWorkerId)?.username?.split(' ')[0] || '...'})`}
+                                                            <div className={cn("h-2 w-2 rounded-full", statusDotColors.Overdue)} />
+                                                            Overdue
                                                         </div>
-                                                    </SelectItem>
-                                                )}
-                                                {isOverdue && <SelectItem value="Overdue" disabled>
-                                                    <div className="flex items-center gap-2">
-                                                        <div className={cn("h-2 w-2 rounded-full", statusDotColors.Overdue)} />
-                                                        Overdue
-                                                    </div>
-                                                </SelectItem>}
-                                            </SelectContent>
-                                        </Select>
+                                                    </SelectItem>}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
                                     </TableCell>
                                     <TableCell className="p-0 text-center">
                                         <Popover onOpenChange={(open) => { if (open) handlePopoverOpen(task.id); }}>
