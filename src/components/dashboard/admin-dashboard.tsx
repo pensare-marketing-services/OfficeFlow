@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { StatsCard } from './stats-card';
-import { ClipboardList, Users, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { ClipboardList, Users, CheckCircle2, AlertTriangle, PauseCircle } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
 import EmployeeTasks from './employee-tasks';
@@ -17,7 +17,7 @@ interface AdminDashboardProps {
   clients: ClientWithId[];
 }
 
-type TaskFilter = 'total' | 'completed' | 'overdue';
+type TaskFilter = 'total' | 'completed' | 'overdue' | 'onHold';
 type ViewMode = 'tasks' | 'employees';
 
 export default function AdminDashboard({ tasks, users, clients }: AdminDashboardProps) {
@@ -28,6 +28,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const totalTasks = tasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
   const completedTasks = tasks.filter(t => t.status === 'Approved' || t.status === 'Posted').length;
+  const onHoldTasksCount = tasks.filter(t => t.status === 'Hold').length;
   
   const overdueTasks = useMemo(() => {
     const today = new Date();
@@ -48,6 +49,8 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         return tasks.filter(t => t.status === 'Approved' || t.status === 'Posted');
       case 'overdue':
         return overdueTasks;
+      case 'onHold':
+        return tasks.filter(t => t.status === 'Hold');
       case 'total':
       default:
         return tasks;
@@ -62,7 +65,8 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const filterTitles: Record<TaskFilter, string> = {
     total: "All Recent Tasks",
     completed: "Completed Tasks",
-    overdue: "Overdue Tasks"
+    overdue: "Overdue Tasks",
+    onHold: "On Hold Tasks"
   };
 
   const handleTaskFilterClick = (filter: TaskFilter) => {
@@ -76,8 +80,8 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
 
   return (
     
-    <div className="space-y-4">
-     <div className="w-full lg:w-1/2 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="space-y-2">
+     <div className="w-full grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 
         <StatsCard 
             title="Total Tasks" 
@@ -109,13 +113,20 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
             onClick={() => handleTaskFilterClick('overdue')}
             isActive={viewMode === 'tasks' && taskFilter === 'overdue'}
         />
+        <StatsCard
+            title="On Hold"
+            value={onHoldTasksCount}
+            icon={PauseCircle}
+            onClick={() => handleTaskFilterClick('onHold')}
+            isActive={viewMode === 'tasks' && taskFilter === 'onHold'}
+        />
       </div>
       
       {viewMode === 'tasks' && taskFilter !== 'total' && (
         <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskDelete={deleteTask} />
       )}
       {viewMode === 'tasks' && taskFilter === 'total' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 items-start">
             <RecentTasks tasks={dmTasks} users={users} title="Tasks - Digital Marketing" onTaskDelete={deleteTask} />
             <RecentTasks tasks={seoTasks} users={users} title="Tasks - SEO" onTaskDelete={deleteTask} />
             <RecentTasks tasks={webTasks} users={users} title="Tasks - Website" onTaskDelete={deleteTask} />

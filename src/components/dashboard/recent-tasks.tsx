@@ -21,6 +21,7 @@ import { db } from '@/firebase/client';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { LinkifiedText } from '@/components/shared/linkified-text';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 
 type UserWithId = User & { id: string };
@@ -139,6 +140,10 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         let statusToSave = newStatus;
         if (newStatus === 'Running') statusToSave = 'On Work';
         if (newStatus === 'Completed') statusToSave = 'Completed';
+        if (newStatus === 'Overdue') {
+            updateTask(task.id, {});
+            return;
+        }
         
         updateTask(task.id, { status: statusToSave });
     }
@@ -209,21 +214,21 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const isAdmin = currentUser?.role === 'admin';
 
   return (
-    <>
+    <TooltipProvider>
     <Card className="shadow-md">
       <CardHeader className="py-2 px-3">
-        <CardTitle className="font-headline text-base">{title}</CardTitle>
+        <CardTitle className="font-headline text-sm">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="py-1 px-2 border-r border-t w-[25px] text-xs h-8">#</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-xs h-8 w-[50px]">Order</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-xs h-8">Client</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-xs h-8">Task</TableHead>
-               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-xs h-8">Assigned</TableHead>}
-              <TableHead className="py-1 px-2 border-t w-[120px] text-xs h-8">Status</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[11px] h-8">#</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[11px] h-8 w-[50px]">Order</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[11px] h-8 w-[120px]">Client</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[11px] h-8 w-[200px]">Task</TableHead>
+               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[11px] h-8">Assigned</TableHead>}
+              <TableHead className="py-1 px-2 border-t w-[110px] text-[11px] h-8">Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead className="text-xs h-8">Remarks</TableHead>}
             </TableRow>
           </TableHeader>
@@ -246,42 +251,60 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                     statusOptions = ['Running', 'Completed'];
                 }
                 
-                if (!statusOptions.includes(task.status)) {
-                    if (task.status === 'On Work' && isPromotionTask && isEmployeeView) {
+                let currentStatus = task.isOverdue ? 'Overdue' : task.status;
+                if (!statusOptions.includes(currentStatus)) {
+                    if (currentStatus === 'On Work' && isPromotionTask && isEmployeeView) {
                        // Don't add 'On Work' if 'Started' is the option
                     } else {
-                         statusOptions.unshift(task.status);
+                         statusOptions.unshift(currentStatus);
                     }
                 }
-                 let currentStatus = task.status;
-                 if (task.status === 'On Work' && isPromotionTask && isEmployeeView) {
+
+                 if (currentStatus === 'On Work' && isPromotionTask && isEmployeeView) {
                     currentStatus = 'Running';
                  }
-                 const finalDisplayedStatus = task.isOverdue ? 'Overdue' : currentStatus;
+                 const finalDisplayedStatus = currentStatus;
 
 
                 return (
                     <DropdownMenu key={task.id}>
                         <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
-                            <TableCell className="py-1 px-2 border-r border-t text-xs font-medium text-center">{index + 1}</TableCell>
+                            <TableCell className="py-1 px-2 border-r border-t text-[11px] font-medium text-center">{index + 1}</TableCell>
                             <TableCell className="py-1 px-2 border-r border-t text-center">
-                                <span className="font-bold text-sm">{priorityMap[task.priority]}</span>
+                                <span className="font-bold text-xs">{priorityMap[task.priority]}</span>
                             </TableCell>
-                            <TableCell className="py-1 px-2 border-r border-t text-xs">
-                                {client ? (
-                                    <span>{client.name}</span>
-                                ) : (
-                                    <span className="text-muted-foreground">-</span>
-                                )}
+                            <TableCell className="py-1 px-2 border-r border-t text-[11px]">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <p className="truncate">
+                                            {client ? (
+                                                <span>{client.name}</span>
+                                            ) : (
+                                                <span className="text-muted-foreground">-</span>
+                                            )}
+                                        </p>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{client?.name}</p>
+                                    </TooltipContent>
+                                </Tooltip>
                             </TableCell>
                             <TableCell className="py-1 px-2 border-r border-t">
-                                <div className="font-medium text-xs flex items-center gap-2">
-                                    {task.title}
-                                </div>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="font-medium text-[11px] flex items-center gap-2 truncate">
+                                            {task.title}
+                                        </div>
+                                    </TooltipTrigger>
+                                     <TooltipContent>
+                                        <p>{task.title}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+
                                 {wordCount > 10 ? (
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <p className="text-[11px] text-muted-foreground cursor-pointer hover:text-foreground truncate max-w-xs">
+                                            <p className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground truncate">
                                             {descriptionPreview}... <span className="underline">more</span>
                                             </p>
                                         </DialogTrigger>
@@ -297,13 +320,13 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                         </DialogContent>
                                     </Dialog>
                                 ) : (
-                                    <p className="text-[11px] text-muted-foreground truncate max-w-xs">{task.description}</p>
+                                    <p className="text-[10px] text-muted-foreground truncate">{task.description}</p>
                                 )}
                             </TableCell>
                             {isAdmin && (
                             <TableCell className="py-1 px-2 border-r border-t">
                                 <DropdownMenuTrigger asChild>
-                                    <span className="cursor-pointer hover:underline text-xs">
+                                    <span className="cursor-pointer hover:underline text-[11px]">
                                         {assignees.map(a => a.username).join(', ') || '-'}
                                     </span>
                                 </DropdownMenuTrigger>
@@ -317,7 +340,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                             value={finalDisplayedStatus}
                                             disabled={isCompleted && !isAdmin}
                                         >
-                                            <SelectTrigger className={cn("w-full h-7 text-[11px] px-2 focus:ring-accent", statusColors[finalDisplayedStatus])}>
+                                            <SelectTrigger className={cn("w-full h-7 text-[10px] px-2 focus:ring-accent", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>{finalDisplayedStatus}</SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
@@ -326,7 +349,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                     <SelectItem 
                                                         key={status} 
                                                         value={status}
-                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status)) || (task.isOverdue && status !=='Overdue')}
+                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status)) || (finalDisplayedStatus === 'Overdue' && status !== 'Overdue' && !isAdmin)}
                                                         className="text-xs"
                                                     >
                                                         {status}
@@ -444,6 +467,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         )}
       </CardContent>
     </Card>
-    </>
+    </TooltipProvider>
   );
 }
