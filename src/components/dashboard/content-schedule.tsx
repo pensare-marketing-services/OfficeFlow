@@ -273,8 +273,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
         let finalStatus = newStatus;
         const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
-        if (isPromotionTask && newStatus === 'Running') {
-            finalStatus = 'On Work';
+        if (isPromotionTask) {
+             if (newStatus === 'Running') finalStatus = 'On Work';
+             if (newStatus === 'Completed') finalStatus = 'Completed';
         }
 
         if (currentUser?.role === 'employee') {
@@ -447,12 +448,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
                                 const getDisplayedStatusForEmployee = (): string => {
                                     if (isOverdue) return 'Overdue';
+                                    if (task.status === 'Scheduled') return 'Scheduled';
+
                                     const isPromotionTask = task.contentType && adTypes.includes(task.contentType);
                                     if (isPromotionTask) {
                                         if (task.status === 'On Work') return 'Running';
                                         if (task.status === 'Completed') return 'Completed';
                                     }
-                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' && task.status !== 'Scheduled') {
+                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval') {
                                        return 'On Work';
                                     }
                                     return task.status;
@@ -519,7 +522,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
-                                        {isAdmin && !isPromotionType ? (
+                                        {(isAdmin && !isPromotionType) ? (
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
                                                 <SelectTrigger className="h-7 text-xs p-1"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
@@ -549,7 +552,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         <Select 
                                             value={finalDisplayedStatus}
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)} 
-                                            disabled={isEmployee && !isMyTurn && !isCompleted && !isOverdue}
+                                            disabled={(isEmployee && !isMyTurn && !isCompleted && !isOverdue) || (isEmployee && isMyTurn && task.status === "Scheduled")}
                                         >
                                             <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue />
