@@ -83,7 +83,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="w-3/4 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <StatsCard 
             title="All Tasks" 
             value={allTasksCount} 
