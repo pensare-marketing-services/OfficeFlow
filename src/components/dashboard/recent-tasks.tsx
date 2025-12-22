@@ -133,10 +133,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const sortedTasks = useMemo(() => {
-    return [...tasks]
-      .sort((a, b) => {
-        return (a.priority || 99) - (b.priority || 99);
-      });
+    return [...tasks].sort((a, b) => (a.priority || 99) - (b.priority || 99));
   }, [tasks]);
 
   useEffect(() => {
@@ -173,7 +170,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     updateTask(task.id, { status: statusToSave });
   }
 
-  const handlePriorityChange = (task: Task & {id: string}, newPriority: Task['priority']) => {
+  const handlePriorityChange = (task: Task & {id: string}, newPriority: number) => {
     updateTask(task.id, { priority: newPriority });
   }
 
@@ -475,7 +472,11 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                         className="pr-8 text-xs"
                                                     />
                                                     <div className="absolute bottom-1 right-1">
-                                                        <InsertLinkPopover textareaRef={textareaRef} onValueChange={setNoteInput} />
+                                                        <InsertLinkPopover 
+                                                            textareaRef={textareaRef} 
+                                                            onValueChange={setNoteInput} 
+                                                            onSend={(message) => addNote(task, {note: message})}
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>

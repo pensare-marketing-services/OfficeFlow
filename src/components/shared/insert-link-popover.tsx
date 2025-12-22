@@ -10,9 +10,10 @@ import { Link, Check } from 'lucide-react';
 interface InsertLinkPopoverProps {
   textareaRef: RefObject<HTMLTextAreaElement>;
   onValueChange: (value: string) => void;
+  onSend: (message: string) => void;
 }
 
-export const InsertLinkPopover: React.FC<InsertLinkPopoverProps> = ({ textareaRef, onValueChange }) => {
+export const InsertLinkPopover: React.FC<InsertLinkPopoverProps> = ({ textareaRef, onValueChange, onSend }) => {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [url, setUrl] = useState('');
@@ -22,24 +23,7 @@ export const InsertLinkPopover: React.FC<InsertLinkPopoverProps> = ({ textareaRe
     const linkText = text || url;
     const markdownLink = `[${linkText}](${url})`;
 
-    if (textareaRef.current) {
-      const { selectionStart, selectionEnd, value } = textareaRef.current;
-      const newValue = 
-        value.substring(0, selectionStart) + 
-        markdownLink + 
-        value.substring(selectionEnd);
-      
-      onValueChange(newValue);
-
-      // We need to wait for the state update to propagate to the textarea
-      setTimeout(() => {
-        if (textareaRef.current) {
-            const newCursorPosition = selectionStart + markdownLink.length;
-            textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
-        }
-      }, 0);
-    }
+    onSend(markdownLink);
     
     setOpen(false);
     setText('');

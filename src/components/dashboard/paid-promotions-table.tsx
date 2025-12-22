@@ -308,7 +308,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                     </Select>
                                 </TableCell>
                                 <TableCell className="p-1">
-                                    <Select value={promo.assignedTo || 'unassigned'} onValueChange={(v) => handlePromotionChange(promo.id, 'assignedTo', v)}>
+                                     <Select value={promo.assignedTo || 'unassigned'} onValueChange={(v) => handlePromotionChange(promo.id, 'assignedTo', v)}>
                                         <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Assign" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="unassigned">Unassigned</SelectItem>
@@ -362,7 +362,11 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                                         className="pr-8 text-xs"
                                                      />
                                                      <div className="absolute bottom-1 right-1">
-                                                        <InsertLinkPopover textareaRef={textareaRef} onValueChange={setNoteInput} />
+                                                        <InsertLinkPopover 
+                                                            textareaRef={textareaRef} 
+                                                            onValueChange={setNoteInput}
+                                                            onSend={(message) => addNote(promo.id, {note: message})}
+                                                        />
                                                     </div>
                                                  </div>
                                             </div>

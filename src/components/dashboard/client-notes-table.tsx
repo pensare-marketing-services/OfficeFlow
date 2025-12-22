@@ -274,7 +274,11 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                         className="pr-2 text-xs"
                                     />
                                     <div className="absolute bottom-1 right-1">
-                                        <InsertLinkPopover textareaRef={textareaRef} onValueChange={setNoteInput} />
+                                        <InsertLinkPopover 
+                                            textareaRef={textareaRef} 
+                                            onValueChange={setNoteInput} 
+                                            onSend={(message) => addRemark(index, {note: message})}
+                                        />
                                     </div>
                                 </div>
                             </div>

@@ -691,7 +691,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                             className="pr-8 text-xs"
                                                         />
                                                          <div className="absolute bottom-1 right-1">
-                                                            <InsertLinkPopover textareaRef={textareaRef} onValueChange={setNoteInput} />
+                                                            <InsertLinkPopover 
+                                                                textareaRef={textareaRef} 
+                                                                onValueChange={setNoteInput} 
+                                                                onSend={(message) => addNote(task, {note: message})}
+                                                            />
                                                         </div>
                                                     </div>
                                                 </div>
