@@ -416,7 +416,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 <TableHead className="w-[80px] p-1 border-r h-8">Date</TableHead>
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
-                                <TableHead className="p-1 border-r h-8 w-[15%]">Description</TableHead>
+                                <TableHead className="p-1 border-r h-8 w-[200px]">Description</TableHead>
                                 <TableHead className="w-[100px] p-1 border-r h-8">Type</TableHead>
                                 <TableHead className="w-[240px] p-1 border-r h-8">Assigned To</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Status</TableHead>
@@ -503,7 +503,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             <div className="text-xs p-1 h-7 flex items-center truncate" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
-                                    <TableCell className="p-0 border-r">
+                                    <TableCell className="p-0 border-r" style={{maxWidth: '200px'}}>
                                         {isAdmin ? (
                                             <EditableTableCell 
                                                 value={task.description || ''} 
@@ -512,7 +512,29 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 placeholder="Add a description..."
                                             />
                                         ) : (
-                                            <p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p>
+                                            <>
+                                            {wordCount > 10 ? (
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <p className="text-xs text-muted-foreground p-1 truncate cursor-pointer hover:text-foreground">
+                                                            {descriptionPreview}... <span className="underline">more</span>
+                                                            </p>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="sm:max-w-[60vw]">
+                                                            <DialogHeader>
+                                                                <DialogTitle>{task.title}</DialogTitle>
+                                                            </DialogHeader>
+                                                            <DialogDescription asChild>
+                                                            <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
+                                                                <LinkifiedText text={task.description} />
+                                                            </div>
+                                                            </DialogDescription>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                ) : (
+                                                    <p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p>
+                                                )}
+                                            </>
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
