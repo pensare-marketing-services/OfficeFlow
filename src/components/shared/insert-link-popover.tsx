@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, RefObject } from 'react';
@@ -81,7 +82,12 @@ export const InsertLinkPopover: React.FC<InsertLinkPopoverProps> = ({ textareaRe
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               className="h-8 text-xs"
-              onKeyDown={(e) => e.key === 'Enter' && handleApply()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleApply();
+                }
+              }}
             />
             <Button
               type="button"
