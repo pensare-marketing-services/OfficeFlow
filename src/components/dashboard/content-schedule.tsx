@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import type { Task, UserProfile as User, ProgressNote, TaskStatus, Client, ContentType } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -24,6 +24,7 @@ import { useTasks } from '@/hooks/use-tasks';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { LinkifiedText } from '@/components/shared/linkified-text';
 import { Badge } from '@/components/ui/badge';
+import { InsertLinkPopover } from '../shared/insert-link-popover';
 
 
 type UserWithId = User & { id: string };
@@ -205,6 +206,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     const [sortConfig, setSortConfig] = useState<{ key: 'priority'; direction: 'ascending' | 'descending' } | null>(null);
     const [openedChats, setOpenedChats] = useState<Set<string>>(new Set());
     const { updateTaskStatus } = useTasks();
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const sortedTasks = useMemo(() => {
         let sortableTasks = [...tasks];
@@ -504,38 +506,38 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r" style={{maxWidth: '200px'}}>
-                                        {isAdmin ? (
-                                            <EditableTableCell 
-                                                value={task.description || ''} 
-                                                onSave={(value) => handleFieldChange(task.id, 'description', value)}
-                                                type="text"
-                                                placeholder="Add a description..."
-                                            />
-                                        ) : (
-                                            <>
-                                            {wordCount > 10 ? (
-                                                    <Dialog>
-                                                        <DialogTrigger asChild>
-                                                            <p className="text-xs text-muted-foreground p-1 truncate cursor-pointer hover:text-foreground">
-                                                            {descriptionPreview}... <span className="underline">more</span>
-                                                            </p>
-                                                        </DialogTrigger>
-                                                        <DialogContent className="sm:max-w-[60vw]">
-                                                            <DialogHeader>
-                                                                <DialogTitle>{task.title}</DialogTitle>
-                                                            </DialogHeader>
-                                                            <DialogDescription asChild>
-                                                            <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
-                                                                <LinkifiedText text={task.description} />
-                                                            </div>
-                                                            </DialogDescription>
-                                                        </DialogContent>
-                                                    </Dialog>
-                                                ) : (
-                                                    <p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p>
-                                                )}
-                                            </>
-                                        )}
+                                        {wordCount > 10 ? (
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <p className="text-xs text-muted-foreground p-1 truncate cursor-pointer hover:text-foreground">
+                                                        {descriptionPreview}... <span className="underline">more</span>
+                                                        </p>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-[60vw]">
+                                                        <DialogHeader>
+                                                            <DialogTitle>{task.title}</DialogTitle>
+                                                        </DialogHeader>
+                                                        <DialogDescription asChild>
+                                                        <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
+                                                            <LinkifiedText text={task.description} />
+                                                        </div>
+                                                        </DialogDescription>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            ) : (
+                                                <>
+                                                    {isAdmin ? (
+                                                        <EditableTableCell 
+                                                            value={task.description || ''} 
+                                                            onSave={(value) => handleFieldChange(task.id, 'description', value)}
+                                                            type="text"
+                                                            placeholder="Add a description..."
+                                                        />
+                                                    ) : (
+                                                        <p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p>
+                                                    )}
+                                                </>
+                                            )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
                                         {(isAdmin && isStandardTask) ? (
@@ -680,13 +682,17 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     </div>
                                                     <div className="relative">
                                                         <Textarea 
+                                                            ref={textareaRef}
                                                             placeholder="Add a remark or paste an image..."
                                                             value={noteInput}
                                                             onChange={(e) => setNoteInput(e.target.value)}
                                                             onKeyDown={(e) => handleNewNote(e, task)}
                                                             onPaste={(e) => handlePaste(e, task)}
-                                                            className="pr-2 text-xs"
+                                                            className="pr-8 text-xs"
                                                         />
+                                                         <div className="absolute bottom-1 right-1">
+                                                            <InsertLinkPopover textareaRef={textareaRef} onValueChange={setNoteInput} />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </PopoverContent>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { PaidPromotion, UserProfile as User, Task, ProgressNote, ContentType } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -21,6 +21,7 @@ import { Textarea } from '../ui/textarea';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { LinkifiedText } from '@/components/shared/linkified-text';
 import { Avatar, AvatarFallback } from '../ui/avatar';
+import { InsertLinkPopover } from '../shared/insert-link-popover';
 
 
 type UserWithId = User & { id: string };
@@ -96,6 +97,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     const [oldBalance, setOldBalance] = useState(0);
     const { addTask, updateTask, tasks } = useTasks();
     const [noteInput, setNoteInput] = useState('');
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
         if (!clientId) return;
@@ -352,12 +354,16 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                                  </div>
                                                  <div className="relative">
                                                      <Textarea 
+                                                        ref={textareaRef}
                                                         placeholder="Add a remark..."
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
                                                         onKeyDown={(e) => handleNewNote(e, promo.id)}
-                                                        className="pr-2 text-xs"
+                                                        className="pr-8 text-xs"
                                                      />
+                                                     <div className="absolute bottom-1 right-1">
+                                                        <InsertLinkPopover textareaRef={textareaRef} onValueChange={setNoteInput} />
+                                                    </div>
                                                  </div>
                                             </div>
                                         </PopoverContent>

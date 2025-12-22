@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { ClientNote, ClientNoteStatus, ProgressNote, UserProfile } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -18,6 +18,7 @@ import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { LinkifiedText } from '@/components/shared/linkified-text';
+import { InsertLinkPopover } from '../shared/insert-link-popover';
 
 
 const noteStatuses: ClientNoteStatus[] = ["Pending", "On Work", "For Approval", "Done", "Scheduled"];
@@ -79,6 +80,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
   const { user: currentUser } = useAuth();
   const { users } = useUsers();
   const { toast } = useToast();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setLocalNotes(notes);
@@ -263,6 +265,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                 </div>
                                 <div className="relative">
                                     <Textarea 
+                                        ref={textareaRef}
                                         placeholder="Add a remark or paste an image..."
                                         value={noteInput}
                                         onChange={(e) => setNoteInput(e.target.value)}
@@ -270,6 +273,9 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                         onPaste={(e) => handlePaste(e, index)}
                                         className="pr-2 text-xs"
                                     />
+                                    <div className="absolute bottom-1 right-1">
+                                        <InsertLinkPopover textareaRef={textareaRef} onValueChange={setNoteInput} />
+                                    </div>
                                 </div>
                             </div>
                         </PopoverContent>

@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn, capitalizeSentences } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useTasks } from '@/hooks/use-tasks';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { LinkifiedText } from '@/components/shared/linkified-text';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Input } from '../ui/input';
+import { InsertLinkPopover } from '../shared/insert-link-popover';
 
 
 type UserWithId = User & { id: string };
@@ -129,6 +130,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const [noteInput, setNoteInput] = useState('');
   const { toast } = useToast();
   const { updateTask } = useTasks();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const sortedTasks = useMemo(() => {
     return [...tasks]
@@ -464,12 +466,17 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                 </div>
                                                 <div className="relative">
                                                     <Textarea 
+                                                        ref={textareaRef}
                                                         placeholder="Add a remark or paste an image..."
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
                                                         onKeyDown={(e) => handleNewNote(e, task)}
                                                         onPaste={(e) => handlePaste(e, task)}
+                                                        className="pr-8 text-xs"
                                                     />
+                                                    <div className="absolute bottom-1 right-1">
+                                                        <InsertLinkPopover textareaRef={textareaRef} onValueChange={setNoteInput} />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </PopoverContent>
