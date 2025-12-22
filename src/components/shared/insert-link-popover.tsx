@@ -52,6 +52,8 @@ export const InsertLinkPopover: React.FC<InsertLinkPopoverProps> = ({ textareaRe
         const { selectionStart, selectionEnd, value } = textareaRef.current;
         const selectedText = value.substring(selectionStart, selectionEnd);
         setText(selectedText);
+        // Clear url field when opening
+        setUrl('');
     }
   }
 
