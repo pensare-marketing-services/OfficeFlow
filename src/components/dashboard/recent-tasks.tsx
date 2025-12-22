@@ -131,18 +131,8 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const { updateTask } = useTasks();
   
   const sortedTasks = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     return [...tasks]
-      .map(task => ({
-        ...task,
-        isOverdue: !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today
-      }))
       .sort((a, b) => {
-        if (a.isOverdue && !b.isOverdue) return -1;
-        if (!a.isOverdue && b.isOverdue) return 1;
-        
         return (a.priority || 99) - (b.priority || 99);
       });
   }, [tasks]);
@@ -167,28 +157,22 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   }
 
   const handleStatusChange = (task: Task & {id: string}, newStatus: Task['status']) => {
-    if(updateTask) {
-        let statusToSave = newStatus;
-        if (newStatus === 'Running') statusToSave = 'On Work';
-        if (newStatus === 'Completed') statusToSave = 'Completed';
-        if (newStatus === 'Overdue') {
-             // If we are in an overdue state, and the user selects something else, that's fine.
-             // But we don't want to save "Overdue" itself.
-            const currentIsOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
-             if(!currentIsOverdue) return;
-             if(task.status !== 'Overdue') {
-                 statusToSave = task.status;
-             }
+    let statusToSave = newStatus;
+    if (newStatus === 'Running') statusToSave = 'On Work';
+    if (newStatus === 'Completed') statusToSave = 'Completed';
+    if (newStatus === 'Overdue') {
+        const currentIsOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
+        if(!currentIsOverdue) return;
+        if(task.status !== 'Overdue') {
+            statusToSave = task.status;
         }
-        
-        updateTask(task.id, { status: statusToSave });
     }
+    
+    updateTask(task.id, { status: statusToSave });
   }
 
   const handlePriorityChange = (task: Task & {id: string}, newPriority: Task['priority']) => {
-    if(updateTask) {
-        updateTask(task.id, { priority: newPriority });
-    }
+    updateTask(task.id, { priority: newPriority });
   }
 
 
@@ -267,7 +251,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
           <TableHeader>
             <TableRow>
               <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[10px] h-8">#</TableHead>
-              <TableHead className="py-1 px-1 border-r border-t text-[10px] h-8 w-2">Order</TableHead>
+              <TableHead className="py-1 px-1 border-r border-t text-[10px] h-8 w-4">Order</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '100px'}}>Client</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '200px'}}>Task</TableHead>
                {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8">Assigned</TableHead>}
@@ -287,6 +271,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
 
                 const isCompleted = completedStatuses.includes(task.status);
                 const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
+                const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
                 
                 let statusOptions: TaskStatus[] = allStatuses;
 
@@ -294,7 +279,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                     statusOptions = ['Running', 'Completed'];
                 }
                 
-                let currentStatus = task.isOverdue ? 'Overdue' : task.status;
+                let currentStatus = isOverdue ? 'Overdue' : task.status;
                 if (!statusOptions.includes(currentStatus as TaskStatus)) {
                     if (currentStatus === 'On Work' && isPromotionTask && isEmployeeView) {
                        // Don't add 'On Work' if 'Started' is the option

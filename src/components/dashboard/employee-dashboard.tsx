@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -54,18 +52,9 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
   const inProgressTasksCount = employeeTasks.filter(t => t.status === 'On Work').length;
   
   const filteredTasks = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     const getSortedTasks = (tasksToSort: (Task & {id: string})[]) => {
       return tasksToSort
-      .map(task => ({
-        ...task,
-        isOverdue: !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today
-      }))
       .sort((a, b) => {
-        if (a.isOverdue && !b.isOverdue) return -1;
-        if (!a.isOverdue && b.isOverdue) return 1;
         return (a.priority || 99) - (b.priority || 99);
       });
     }
