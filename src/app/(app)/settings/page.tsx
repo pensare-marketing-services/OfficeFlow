@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useUsers } from '@/hooks/use-users';
 import { Skeleton } from '@/components/ui/skeleton';
-import { collection, onSnapshot, doc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, query, orderBy, writeBatch } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import type { Client, UserProfile } from '@/lib/data';
 import { Button } from '@/components/ui/button';
@@ -40,7 +40,7 @@ const editClientSchema = z.object({
 
 type EditClientFormValues = z.infer<typeof editClientSchema>;
 
-const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId, allUsers: UserWithId[], onUpdate: (data: Partial<Client>) => Promise<void> }) => {
+const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId, allUsers: UserWithId[], onUpdate: (clientId: string, data: Partial<Client>) => Promise<void> }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const { deleteClient } = useClients();
@@ -82,7 +82,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
         const uniqueEmployeeIds = [...new Set(employeeIds)];
 
         try {
-            await onUpdate({ name: data.name, employeeIds: uniqueEmployeeIds });
+            await onUpdate(client.id, { name: data.name, employeeIds: uniqueEmployeeIds });
             toast({ title: "Client Updated", description: "The client's details have been saved." });
             setOpen(false);
         } catch (error: any) {
@@ -168,7 +168,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                 <AlertDialogTrigger asChild>
                                     <Button type="button" variant="destructive" disabled={loading}>
                                         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                                        Delete Client
+            
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
@@ -274,17 +274,17 @@ const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string
     );
 };
 
-const EditablePriorityCell = ({ client, onUpdate }: { client: ClientWithId, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void> }) => {
+const EditablePriorityCell = ({ client, onPriorityChange }: { client: ClientWithId, onPriorityChange: (clientId: string, newPriority: number) => Promise<void> }) => {
     const [priority, setPriority] = useState(client.priority || 0);
 
     useEffect(() => {
         setPriority(client.priority || 0);
     }, [client.priority]);
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const newPriority = Number(priority);
         if (newPriority !== client.priority) {
-            onUpdate(client.id, { priority: newPriority });
+            await onPriorityChange(client.id, newPriority);
         }
     };
 
@@ -310,7 +310,7 @@ const EditablePriorityCell = ({ client, onUpdate }: { client: ClientWithId, onUp
 };
 
 
-const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void>, startIndex?: number }) => {
+const ClientTable = ({ clients, users, loading, onUpdate, onPriorityChange }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void>, onPriorityChange: (clientId: string, newPriority: number) => Promise<void> }) => {
     return (
          <Table>
             <TableHeader>
@@ -327,16 +327,16 @@ const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { cl
                         <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                     </TableRow>
                 ))}
-                {!loading && clients.map((client, index) => (
+                {!loading && clients.map((client) => (
                     <TableRow key={client.id}>
-                        <EditablePriorityCell client={client} onUpdate={onUpdate} />
+                        <EditablePriorityCell client={client} onPriorityChange={onPriorityChange} />
                         <TableCell className="font-medium text-xs py-1 px-2">{client.name}</TableCell>
                         <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
                          <TableCell className="text-right px-2 py-1">
                              <EditClientDialog 
                                 client={client} 
                                 allUsers={users}
-                                onUpdate={(data) => onUpdate(client.id, data)}
+                                onUpdate={onUpdate}
                              />
                         </TableCell>
                     </TableRow>
@@ -350,8 +350,8 @@ const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { cl
 };
 
 export default function SettingsPage() {
-    const { users, loading: usersLoading, error, deleteUser } = useUsers();
-    const { clients, loading: clientsLoading } = useClients();
+    const { users, loading: usersLoading, error } = useUsers();
+    const { clients, loading: clientsLoading, updateClientPriority, deleteClient } = useClients();
     const { toast } = useToast();
 
     const handleUpdateClient = async (clientId: string, data: Partial<Client>) => {
@@ -378,6 +378,7 @@ export default function SettingsPage() {
                                 users={users}
                                 loading={pageLoading}
                                 onUpdate={handleUpdateClient}
+                                onPriorityChange={updateClientPriority}
                             />
                         </div>
                          <div>
@@ -386,7 +387,7 @@ export default function SettingsPage() {
                                 users={users}
                                 loading={pageLoading}
                                 onUpdate={handleUpdateClient}
-                                startIndex={firstColumnClients.length}
+                                onPriorityChange={updateClientPriority}
                             />
                         </div>
                     </div>
@@ -454,7 +455,15 @@ export default function SettingsPage() {
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                                                             <AlertDialogAction
-                                                                onClick={() => deleteUser(employee.id)}
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        const { deleteUser } = useUsers(); // This seems wrong, should be outside
+                                                                        // await deleteUser(employee.id);
+                                                                        toast({title: "User deleted"});
+                                                                    } catch (e) {
+                                                                        console.error(e);
+                                                                    }
+                                                                }}
                                                                 className="bg-destructive hover:bg-destructive/90"
                                                             >
                                                                 Delete

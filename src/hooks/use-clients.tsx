@@ -13,6 +13,7 @@ interface ClientContextType {
     loading: boolean;
     error: Error | null;
     deleteClient: (clientId: string) => Promise<void>;
+    updateClientPriority: (clientId: string, newPriority: number) => Promise<void>;
 }
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
@@ -33,7 +34,7 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         setLoading(true);
         setError(null);
 
-        const clientsQuery = query(collection(db, 'clients'), orderBy('name', 'asc'));
+        const clientsQuery = query(collection(db, 'clients'), orderBy('priority', 'asc'));
 
         const unsubClients = onSnapshot(clientsQuery, (snapshot) => {
             const clientsData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as ClientWithId));
@@ -83,12 +84,52 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             throw new Error("Failed to delete client data. Please check your Firestore security rules and network connection.");
         }
     }, []);
+    
+    const updateClientPriority = useCallback(async (clientId: string, newPriority: number) => {
+        const sortedClients = [...clients].sort((a, b) => (a.priority || 0) - (b.priority || 0));
+        const targetClient = sortedClients.find(c => c.id === clientId);
+
+        if (!targetClient) return;
+
+        const oldPriority = targetClient.priority || 0;
+        if (newPriority === oldPriority) return;
+
+        // Clamp newPriority to be within the valid range
+        newPriority = Math.max(1, Math.min(newPriority, sortedClients.length));
+
+        const batch = writeBatch(db);
+
+        if (newPriority < oldPriority) {
+            // Moving up the list (e.g., from 5 to 3)
+            for (let i = newPriority - 1; i < oldPriority - 1; i++) {
+                const clientToUpdate = sortedClients[i];
+                batch.update(doc(db, 'clients', clientToUpdate.id), { priority: clientToUpdate.priority! + 1 });
+            }
+        } else { // newPriority > oldPriority
+            // Moving down the list (e.g., from 3 to 5)
+            for (let i = oldPriority; i < newPriority; i++) {
+                const clientToUpdate = sortedClients[i];
+                batch.update(doc(db, 'clients', clientToUpdate.id), { priority: clientToUpdate.priority! - 1 });
+            }
+        }
+
+        batch.update(doc(db, 'clients', clientId), { priority: newPriority });
+
+        try {
+            await batch.commit();
+        } catch (e: any) {
+            console.error("Error updating client priorities:", e);
+            throw new Error("Failed to reorder clients.");
+        }
+
+    }, [clients]);
 
     const value = {
         clients,
         loading,
         error,
         deleteClient,
+        updateClientPriority,
     };
 
     return (
