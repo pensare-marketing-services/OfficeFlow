@@ -159,17 +159,20 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
 
   const handleStatusChange = (task: Task & {id: string}, newStatus: Task['status']) => {
     let statusToSave = newStatus;
+    let updatePayload: Partial<Task> = {};
+    const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
+
     if (newStatus === 'Running') statusToSave = 'On Work';
     if (newStatus === 'Completed') statusToSave = 'Completed';
-    if (newStatus === 'Overdue') {
-        const currentIsOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
-        if(!currentIsOverdue) return;
-        if(task.status !== 'Overdue') {
-            statusToSave = task.status;
-        }
+
+    if (isAdmin && isOverdue && newStatus === 'On Work') {
+        const newDeadline = new Date();
+        newDeadline.setDate(newDeadline.getDate() + 1);
+        updatePayload.deadline = newDeadline.toISOString();
     }
     
-    updateTask(task.id, { status: statusToSave });
+    updatePayload.status = statusToSave;
+    updateTask(task.id, updatePayload);
   }
 
   const handlePriorityChange = (task: Task & {id: string}, newPriority: number) => {
@@ -178,7 +181,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
 
 
     const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
-        if (!currentUser || !updateTask) return;
+        if (!currentUser) return;
         
         const newNote: ProgressNote = { 
             note: note.note || '',
@@ -252,7 +255,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
           <TableHeader>
             <TableRow>
               <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[10px] h-8">#</TableHead>
-              <TableHead className="py-1  border-r border-t text-[7px] h-8 w-2">Order</TableHead>
+              <TableHead className="py-1  border-r border-t text-[7px] h-8 w-4">Order</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '80px'}}>Client</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '200px'}}>Task</TableHead>
                {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8">Assigned</TableHead>}
@@ -275,8 +278,9 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
                 
                 let statusOptions: TaskStatus[] = allStatuses;
-
-                if (isPromotionTask && isEmployeeView) {
+                if (isAdmin && isOverdue) {
+                    statusOptions = ['On Work', 'Scheduled', 'Hold', 'Overdue'];
+                } else if (isPromotionTask && isEmployeeView) {
                     statusOptions = ['Running', 'Completed'];
                 }
                 
@@ -366,7 +370,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                             </TableCell>
                             )}
                             <TableCell className="py-1 px-2 border-t">
-                                {(isAdmin || isEmployeeView) ? (
+                                {isAdmin || isEmployeeView ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
                                             onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
@@ -382,7 +386,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                     <SelectItem 
                                                         key={status} 
                                                         value={status}
-                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status as TaskStatus)) || (finalDisplayedStatus === 'Overdue' && status !== 'Overdue' && status !== 'On Work' && !isAdmin)}
+                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status as TaskStatus))}
                                                         className="text-xs"
                                                     >
                                                         {status}
