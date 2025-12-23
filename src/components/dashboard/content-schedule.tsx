@@ -273,6 +273,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         if (isPromotionTask) {
              if (newStatus === 'Running') finalStatus = 'On Work';
              if (newStatus === 'Active') finalStatus = 'On Work';
+             if (newStatus === 'Stopped') finalStatus = 'Completed';
         }
 
         if (currentUser?.role === 'employee') {

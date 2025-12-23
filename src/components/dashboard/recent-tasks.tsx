@@ -39,7 +39,7 @@ interface RecentTasksProps {
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
-const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Completed', 'Running', 'Overdue'];
+const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next', 'Completed', 'Running', 'Overdue', 'Active', 'Stopped'];
 
 const adTypes: (Task['contentType'])[] = [
     "EG Whatsapp", 
@@ -159,16 +159,14 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     return clients.find(c => c.id === clientId);
   }
 
-  const handleStatusChange = (task: Task & {id: string}, newStatus: Task['status']) => {
-    let statusToSave = newStatus;
+  const handleStatusChange = (task: Task & {id: string}, newStatus: string) => {
+    let statusToSave: TaskStatus = newStatus as TaskStatus;
     let updatePayload: Partial<Task> = {};
     const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
 
-    if (newStatus === 'Running') statusToSave = 'On Work';
     if (newStatus === 'Active') statusToSave = 'On Work';
     if (newStatus === 'Stopped') statusToSave = 'Completed';
-    if (newStatus === 'Completed') statusToSave = 'Completed';
-
+    
     if (isAdmin && isOverdue && newStatus === 'On Work') {
         const newDeadline = new Date();
         newDeadline.setDate(newDeadline.getDate() + 1);
@@ -260,10 +258,10 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
             <TableRow>
               <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[10px] h-8">#</TableHead>
               <TableHead className="py-1  border-r border-t text-[7px] h-8 w-4">Order</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '80px'}}>Client</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '200px'}}>Task</TableHead>
-               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8">Assigned</TableHead>}
-              <TableHead className="py-1 px-2 border-t w-[90px] text-[10px] h-8">Status</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[7px] h-8" style={{width: '80px'}}>Client</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[7px] h-8" style={{width: '200px'}}>Task</TableHead>
+               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[7px] h-8">Assigned</TableHead>}
+              <TableHead className="py-1 px-2 border-t w-[90px] text-[7px] h-8">Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead className="text-xs h-8">Remarks</TableHead>}
             </TableRow>
           </TableHeader>
@@ -283,7 +281,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 today.setHours(0, 0, 0, 0);
                 const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
                 
-                let statusOptions: string[] = [...allStatuses];
+                let statusOptions: string[] = allStatuses;
                 
                 if (isPromotionTask) {
                     if (isAdmin) {
@@ -295,12 +293,12 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                     statusOptions = ['On Work', 'Scheduled', 'Hold', 'Overdue'];
                 }
                 
-                let currentStatus = isOverdue ? 'Overdue' : task.status;
-                if (!statusOptions.includes(currentStatus as TaskStatus)) {
+                let currentStatus: string = isOverdue ? 'Overdue' : task.status;
+                if (!statusOptions.includes(currentStatus)) {
                     if (currentStatus === 'On Work' && isPromotionTask && isEmployeeView) {
                        // Don't add 'On Work' if 'Started' is the option
                     } else {
-                         statusOptions.unshift(currentStatus as TaskStatus);
+                         statusOptions.unshift(currentStatus);
                     }
                 }
 
@@ -390,7 +388,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 {(isAdmin || isEmployeeView) ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
-                                            onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 
+                                            onValueChange={(newStatus) => handleStatusChange(task, newStatus)} 
                                             value={finalDisplayedStatus}
                                             disabled={(isCompleted && !isAdmin) || (finalDisplayedStatus === 'Overdue' && !isAdmin)}
                                         >
