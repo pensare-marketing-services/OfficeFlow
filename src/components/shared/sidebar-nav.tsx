@@ -101,9 +101,12 @@ export function SidebarNav() {
                         ))}
                         {!clientsLoading && clients.length === 0 && (
                              <SidebarMenuItem>
-                                <SidebarMenuSubButton disabled>
-                                    <span>No clients found</span>
-                                </SidebarMenuSubButton>
+                               <span
+                                  aria-disabled="true"
+                                  className="flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sm text-sidebar-foreground opacity-50 outline-none [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground"
+                                >
+                                  No clients found
+                                </span>
                             </SidebarMenuItem>
                         )}
                    </SidebarMenuSub>
