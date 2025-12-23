@@ -23,6 +23,7 @@ import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
+import { useClients } from '@/hooks/use-clients';
 
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
@@ -42,6 +43,7 @@ type EditClientFormValues = z.infer<typeof editClientSchema>;
 const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId, allUsers: UserWithId[], onUpdate: (data: Partial<Client>) => Promise<void> }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const { deleteClient } = useClients();
     const { toast } = useToast();
 
     const employeeOptions = useMemo(() => {
@@ -85,6 +87,19 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
             setOpen(false);
         } catch (error: any) {
             toast({ variant: 'destructive', title: "Update Failed", description: error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleDelete = async () => {
+        setLoading(true);
+        try {
+            await deleteClient(client.id);
+            toast({ title: "Client Deleted", description: `${client.name} and all associated data have been permanently deleted.` });
+            setOpen(false);
+        } catch(error: any) {
+             toast({ variant: 'destructive', title: "Deletion Failed", description: error.message });
         } finally {
             setLoading(false);
         }
@@ -148,12 +163,37 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                 />
                             )
                         })}
-                        <DialogFooter>
-                            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-                             <Button type="submit" disabled={loading}>
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save Changes
-                            </Button>
+                        <DialogFooter className="justify-between sm:justify-between">
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button type="button" variant="destructive" disabled={loading}>
+                                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                        Delete Client
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete the client <strong>{client.name}</strong> and all of their associated data, including tasks, promotions, and notes.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+                                            Yes, delete client
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+
+                            <div className="flex gap-2">
+                                <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                                <Button type="submit" disabled={loading}>
+                                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Save Changes
+                                </Button>
+                            </div>
                         </DialogFooter>
                     </form>
                 </Form>
@@ -311,29 +351,9 @@ const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { cl
 
 export default function SettingsPage() {
     const { users, loading: usersLoading, error, deleteUser } = useUsers();
-    const [clients, setClients] = useState<ClientWithId[]>([]);
-    const [clientsLoading, setClientsLoading] = useState(true);
+    const { clients, loading: clientsLoading } = useClients();
     const { toast } = useToast();
 
-    useEffect(() => {
-        const clientsQuery = query(collection(db, "clients"), orderBy("priority", "asc"));
-        const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
-            const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
-            setClients(clientsData);
-            setClientsLoading(false);
-        }, (error) => {
-            console.error("Error fetching clients: ", error);
-            setClientsLoading(false);
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-    const employees = useMemo(() => {
-        if (!users) return [];
-        return users.filter(u => u.role === 'employee');
-    }, [users]);
-    
     const handleUpdateClient = async (clientId: string, data: Partial<Client>) => {
         const clientRef = doc(db, 'clients', clientId);
         await updateDoc(clientRef, data);
@@ -403,7 +423,7 @@ export default function SettingsPage() {
                                         </TableRow>
                                     ))}
                                     {error && <TableRow><TableCell colSpan={4} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
-                                    {!usersLoading && employees.map((employee, index) => (
+                                    {!usersLoading && users.filter(u => u.role === 'employee').map((employee, index) => (
                                         <TableRow key={employee.id}>
                                             <TableCell className="px-2 py-1 text-xs">{index + 1}</TableCell>
                                             <TableCell className="py-1 px-2">

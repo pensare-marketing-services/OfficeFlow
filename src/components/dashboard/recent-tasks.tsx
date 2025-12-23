@@ -256,12 +256,12 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[30px]">#</TableHead>
-              <TableHead className="py-1 border-r border-t text-[8px] h-8 w-[50px]">Order</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[10px]">#</TableHead>
+              <TableHead className="py-2 px-1 border-r border-t text-[8px] h-8 w-[15px]">Order</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[80px]">Client</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[120px]">Task</TableHead>
-               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[100px]">Assigned</TableHead>}
-              <TableHead className="py-1 px-2 border-t text-[8px] h-8 w-[100px]">Status</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[100px]">Task</TableHead>
+               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[40px]">Assigned</TableHead>}
+              <TableHead className="py-1 px-2 border-t text-[8px] h-8 w-[50px]">Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead className="text-xs h-8 w-[60px]">Remarks</TableHead>}
             </TableRow>
           </TableHeader>
