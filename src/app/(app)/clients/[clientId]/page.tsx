@@ -133,6 +133,7 @@ export default function ClientIdPage() {
     const handleAddTask = () => {
         if (!currentUser || !client) return;
         const deadline = new Date();
+        deadline.setHours(23, 59, 59, 999); // Set to end of today
 
         const newTask: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
