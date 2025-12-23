@@ -160,7 +160,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   }
 
   const handleStatusChange = (task: Task & {id: string}, newStatus: string) => {
-    let statusToSave: TaskStatus = newStatus as TaskStatus;
+    let statusToSave = newStatus as TaskStatus;
     let updatePayload: Partial<Task> = {};
     const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
 
@@ -253,16 +253,16 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         <CardTitle className="font-headline text-sm">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[10px] h-8">#</TableHead>
-              <TableHead className="py-1  border-r border-t text-[7px] h-8 w-4">Order</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[7px] h-8" style={{width: '80px'}}>Client</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[7px] h-8" style={{width: '200px'}}>Task</TableHead>
-               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[7px] h-8">Assigned</TableHead>}
-              <TableHead className="py-1 px-2 border-t w-[90px] text-[7px] h-8">Status</TableHead>
-              {currentUser?.role === 'employee' && <TableHead className="text-xs h-8">Remarks</TableHead>}
+              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[30px]">#</TableHead>
+              <TableHead className="py-1 border-r border-t text-[8px] h-8 w-[50px]">Order</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[80px]">Client</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[120px]">Task</TableHead>
+               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[100px]">Assigned</TableHead>}
+              <TableHead className="py-1 px-2 border-t text-[8px] h-8 w-[100px]">Status</TableHead>
+              {currentUser?.role === 'employee' && <TableHead className="text-xs h-8 w-[60px]">Remarks</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -325,7 +325,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                <TableCell className="py-1 px-2 border-r border-t text-center text-xs font-bold">{task.priority}</TableCell>
                             )}
 
-                            <TableCell className="py-1 px-2 border-r border-t text-[11px]" style={{maxWidth: '100px'}}>
+                            <TableCell className="py-1 px-2 border-r border-t text-[11px]">
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <p className="truncate">
@@ -341,7 +341,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                     </TooltipContent>
                                 </Tooltip>
                             </TableCell>
-                            <TableCell className="py-1 px-2 border-r border-t" style={{maxWidth: '200px'}}>
+                            <TableCell className="py-1 px-2 border-r border-t">
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div className="font-medium text-[11px] flex items-center gap-2 truncate">
@@ -378,7 +378,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                             {isAdmin && (
                             <TableCell className="py-1 px-2 border-r border-t">
                                 <DropdownMenuTrigger asChild>
-                                    <span className="cursor-pointer hover:underline text-[11px]">
+                                    <span className="cursor-pointer hover:underline text-[11px] truncate">
                                         {assignees.map(a => a.username).join(', ') || '-'}
                                     </span>
                                 </DropdownMenuTrigger>
