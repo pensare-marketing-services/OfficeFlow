@@ -133,7 +133,9 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const sortedTasks = useMemo(() => {
-    return [...tasks].sort((a, b) => (a.priority || 99) - (b.priority || 99));
+    return [...tasks].sort((a, b) => {
+        return (a.priority || 99) - (b.priority || 99);
+    });
   }, [tasks]);
 
   useEffect(() => {
@@ -380,7 +382,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                     <SelectItem 
                                                         key={status} 
                                                         value={status}
-                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status as TaskStatus)) || (finalDisplayedStatus === 'Overdue' && status !== 'Overdue' && !isAdmin)}
+                                                        disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status as TaskStatus)) || (finalDisplayedStatus === 'Overdue' && status !== 'Overdue' && status !== 'On Work' && !isAdmin)}
                                                         className="text-xs"
                                                     >
                                                         {status}
