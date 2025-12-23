@@ -86,6 +86,8 @@ const statusColors: Record<string, string> = {
     'Overdue': 'bg-red-600 text-white',
     'Completed': 'bg-green-600 text-white',
     'Running': 'bg-blue-500 text-white',
+    'Active': 'bg-blue-500 text-white',
+    'Stopped': 'bg-red-500 text-white',
 };
 
 const EditablePriorityCell = ({ task, onUpdate }: { task: Task & {id: string}, onUpdate: (taskId: string, data: Partial<Task>) => void }) => {
@@ -163,6 +165,8 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
 
     if (newStatus === 'Running') statusToSave = 'On Work';
+    if (newStatus === 'Active') statusToSave = 'On Work';
+    if (newStatus === 'Stopped') statusToSave = 'Completed';
     if (newStatus === 'Completed') statusToSave = 'Completed';
 
     if (isAdmin && isOverdue && newStatus === 'On Work') {
@@ -274,14 +278,21 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 const descriptionPreview = descriptionWords.slice(0, 10).join(' ');
 
                 const isCompleted = completedStatuses.includes(task.status);
-                const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
-                const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
+                const isPromotionTask = task.description === 'Paid Promotion';
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
                 
-                let statusOptions: TaskStatus[] = allStatuses;
-                if (isAdmin && isOverdue) {
+                let statusOptions: string[] = [...allStatuses];
+                
+                if (isPromotionTask) {
+                    if (isAdmin) {
+                        statusOptions = ['Scheduled', 'Active', 'Stopped'];
+                    } else if (isEmployeeView) {
+                        statusOptions = ['Running', 'Completed'];
+                    }
+                } else if (isAdmin && isOverdue) {
                     statusOptions = ['On Work', 'Scheduled', 'Hold', 'Overdue'];
-                } else if (isPromotionTask && isEmployeeView) {
-                    statusOptions = ['Running', 'Completed'];
                 }
                 
                 let currentStatus = isOverdue ? 'Overdue' : task.status;
@@ -293,6 +304,12 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                     }
                 }
 
+                 if (currentStatus === 'On Work' && isPromotionTask && isAdmin) {
+                    currentStatus = 'Active';
+                 }
+                 if (currentStatus === 'Completed' && isPromotionTask && isAdmin) {
+                    currentStatus = 'Stopped';
+                 }
                  if (currentStatus === 'On Work' && isPromotionTask && isEmployeeView) {
                     currentStatus = 'Running';
                  }
@@ -370,7 +387,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                             </TableCell>
                             )}
                             <TableCell className="py-1 px-2 border-t">
-                                {isAdmin || isEmployeeView ? (
+                                {(isAdmin || isEmployeeView) ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
                                             onValueChange={(newStatus) => handleStatusChange(task, newStatus as any)} 

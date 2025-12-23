@@ -92,6 +92,8 @@ const statusColors: Record<string, string> = {
     'Overdue': 'bg-red-600 text-white',
     'Running': 'bg-blue-500 text-white',
     'Completed': 'bg-green-600 text-white',
+    'Active': 'bg-blue-500 text-white',
+    'Stopped': 'bg-red-500 text-white',
 };
 
 const statusDotColors: Record<string, string> = {
@@ -107,6 +109,8 @@ const statusDotColors: Record<string, string> = {
     'Overdue': 'bg-red-600',
     'Running': 'bg-blue-500',
     'Completed': 'bg-green-600',
+    'Active': 'bg-blue-500',
+    'Stopped': 'bg-red-500',
 };
 
 const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea', placeholder?: string }> = ({ value, onSave, type = 'text', placeholder }) => {
@@ -210,23 +214,19 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
     const sortedTasks = useMemo(() => {
         let sortableTasks = [...tasks];
-        if (sortConfig !== null) {
-            sortableTasks.sort((a, b) => {
-                if (sortConfig.key === 'priority') {
-                    const aValue = a.priority || 99;
-                    const bValue = b.priority || 99;
-                    if (aValue < bValue) {
-                        return sortConfig.direction === 'ascending' ? -1 : 1;
-                    }
-                    if (aValue > bValue) {
-                        return sortConfig.direction === 'ascending' ? 1 : -1;
-                    }
-                }
-                return 0;
-            });
-        }
+        sortableTasks.sort((a, b) => {
+            const aValue = a.priority || 99;
+            const bValue = b.priority || 99;
+            if (aValue < bValue) {
+                return -1;
+            }
+            if (aValue > bValue) {
+                return 1;
+            }
+            return 0;
+        });
         return sortableTasks;
-    }, [tasks, sortConfig]);
+    }, [tasks]);
 
     const requestSort = (key: 'priority') => {
         let direction: 'ascending' | 'descending' = 'ascending';
@@ -269,9 +269,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         }
 
         let finalStatus = newStatus;
-        const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
+        const isPromotionTask = task.description === 'Paid Promotion';
         if (isPromotionTask) {
              if (newStatus === 'Running') finalStatus = 'On Work';
+             if (newStatus === 'Active') finalStatus = 'On Work';
         }
 
         if (currentUser?.role === 'employee') {
@@ -374,13 +375,18 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     }, [users]);
     
     const getAvailableStatuses = (task: Task) => {
-        const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
+        const isPromotionTask = task.description === 'Paid Promotion';
         
         if (currentUser?.role === 'employee' && isPromotionTask) {
             return ['Running', 'Completed'];
         }
         
-        if (currentUser?.role === 'admin') return allStatuses;
+        if (currentUser?.role === 'admin') {
+            if (isPromotionTask) {
+                return ['Scheduled', 'Active', 'Stopped'];
+            }
+            return allStatuses;
+        };
 
         const { assigneeIds = [], activeAssigneeIndex = 0 } = task;
         const isMyTurn = assigneeIds[activeAssigneeIndex] === currentUser?.uid;
@@ -442,7 +448,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 today.setHours(0, 0, 0, 0);
                                 const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
                                 
-                                const isPromotionTask = task.contentType && adTypes.includes(task.contentType as ContentType);
+                                const isPromotionTask = task.description === 'Paid Promotion';
                                 const isStandardTask = !isPromotionTask;
 
 
@@ -459,7 +465,16 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     return task.status;
                                 }
 
-                                let finalDisplayedStatus = isEmployee ? getDisplayedStatusForEmployee() : (isOverdue ? 'Overdue' : task.status);
+                                const getDisplayedStatusForAdmin = (): string => {
+                                     if (isOverdue) return 'Overdue';
+                                     if(isPromotionTask) {
+                                        if(task.status === 'On Work') return 'Active';
+                                        if(task.status === 'Completed') return 'Stopped';
+                                     }
+                                     return task.status;
+                                }
+
+                                let finalDisplayedStatus = isEmployee ? getDisplayedStatusForEmployee() : getDisplayedStatusForAdmin();
                                 
                                 const availableStatuses = getAvailableStatuses(task);
                                 
@@ -576,7 +591,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 <SelectValue>{finalDisplayedStatus}</SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {isAdmin && !isPromotionTask && (
+                                                {isAdmin && isStandardTask && (
                                                     <SelectGroup>
                                                         <SelectLabel>Actions</SelectLabel>
                                                         <SelectItem value="Reschedule">
@@ -589,16 +604,22 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 )}
                                                 <SelectGroup>
                                                     <SelectLabel>Statuses</SelectLabel>
-                                                    {availableStatuses.map(status => (
+                                                    {availableStatuses.map(status => {
+                                                        let displayStatus = status;
+                                                        if (isAdmin && isPromotionTask) {
+                                                            if(status === 'On Work') displayStatus = 'Active';
+                                                            if(status === 'Completed') displayStatus = 'Stopped';
+                                                        }
+                                                        return (
                                                         <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus)) && status !== finalDisplayedStatus}>
                                                             <div className="flex items-center gap-2">
                                                                 <div className={cn("h-2 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
-                                                                {status}
+                                                                {displayStatus}
                                                             </div>
                                                         </SelectItem>
-                                                    ))}
+                                                    )})}
                                                 </SelectGroup>
-                                                {![...allStatuses, "Reschedule", "Overdue", "Running", "Completed"].includes(finalDisplayedStatus as TaskStatus) && !availableStatuses.includes(finalDisplayedStatus as TaskStatus) && (
+                                                {![...allStatuses, "Reschedule", "Overdue", "Running", "Completed", "Active", "Stopped"].includes(finalDisplayedStatus as TaskStatus) && !availableStatuses.includes(finalDisplayedStatus as TaskStatus) && (
                                                     <SelectItem value={finalDisplayedStatus} disabled>
                                                         <div className="flex items-center gap-2">
                                                             <div className={cn("h-2 w-2 rounded-full", statusColors[finalDisplayedStatus])} />
