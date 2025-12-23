@@ -197,6 +197,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         };
         const updatedRemarks = [...(promo.remarks || []), newNote];
         handlePromotionChange(promoId, 'remarks', updatedRemarks);
+        onSend(capitalizeSentences(note.note || ''));
     };
 
     const handleNewNote = (e: React.KeyboardEvent<HTMLTextAreaElement>, promoId: string) => {
@@ -229,8 +230,13 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     const deletePromotion = async (id: string) => {
         await deleteDoc(doc(db, `clients/${clientId}/promotions`, id));
     };
+    
+    const onSend = (message: string) => {
+        addNote(message, { note: message });
+        setNoteInput('');
+    };
 
-    const employeeUsers = useMemo(() => users.filter(u => u.role === 'employee'), [users]);
+    const employeeUsers = useMemo(() => users.filter(u => u.role === 'employee' && u.username), [users]);
 
     const totalSpent = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.spent) || 0), 0), [promotions]);
     const totalBudget = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.budget) || 0), 0), [promotions]);
@@ -312,7 +318,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                         <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Assign" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="unassigned">Unassigned</SelectItem>
-                                            {employeeUsers.map(user => <SelectItem key={user.id} value={user.username}>{user.username}</SelectItem>)}
+                                            {employeeUsers.map(user => <SelectItem key={user.id} value={user.username!}>{user.username!}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
