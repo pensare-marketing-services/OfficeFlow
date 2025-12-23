@@ -315,7 +315,7 @@ const ClientTable = ({ clients, users, loading, onUpdate, onPriorityChange }: { 
          <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead className="w-[40px] px-2 text-xs h-8">#</TableHead>
+                    <TableHead className="w-[40px] px-2 text-xs h-8">Order</TableHead>
                     <TableHead className="px-2 text-xs h-8">Client Name</TableHead>
                     <TableHead className="px-2 text-xs h-8">Assigned Employees</TableHead>
                     <TableHead className="text-right px-2 text-xs h-8">Actions</TableHead>
