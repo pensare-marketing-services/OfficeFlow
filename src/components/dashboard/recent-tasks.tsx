@@ -250,11 +250,11 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
           <TableHeader>
             <TableRow>
               <TableHead className="py-1 px-2 border-r border-t w-[25px] text-[10px] h-8">#</TableHead>
-              <TableHead className="py-1 px-1 border-r border-t text-[10px] h-8 w-4">Order</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '100px'}}>Client</TableHead>
+              <TableHead className="py-1  border-r border-t text-[7px] h-8 w-2">Order</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '80px'}}>Client</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8" style={{width: '200px'}}>Task</TableHead>
                {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[10px] h-8">Assigned</TableHead>}
-              <TableHead className="py-1 px-2 border-t w-[110px] text-[10px] h-8">Status</TableHead>
+              <TableHead className="py-1 px-2 border-t w-[90px] text-[10px] h-8">Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead className="text-xs h-8">Remarks</TableHead>}
             </TableRow>
           </TableHeader>

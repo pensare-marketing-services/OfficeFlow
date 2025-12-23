@@ -89,12 +89,15 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
     };
 
     const addTask = () => {
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + 1);
+
         const newTask: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
             description: '',
             status: 'Scheduled',
-            priority: 'Medium',
-            deadline: new Date().toISOString(),
+            priority: 99,
+            deadline: deadline.toISOString(),
             assigneeIds: [],
             progressNotes: [],
             clientId,

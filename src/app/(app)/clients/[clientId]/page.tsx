@@ -132,14 +132,16 @@ export default function ClientIdPage() {
     
     const handleAddTask = () => {
         if (!currentUser || !client) return;
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + 1);
 
         const newTask: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
             description: '',
             status: 'Scheduled',
-            priority: 'Medium',
+            priority: 99,
             contentType: 'Image Ad',
-            deadline: new Date().toISOString(),
+            deadline: deadline.toISOString(),
             assigneeIds: [],
             progressNotes: [],
             clientId: client.id,
