@@ -90,7 +90,6 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
 
     const addTask = () => {
         const deadline = new Date();
-        deadline.setDate(deadline.getDate() + 1);
 
         const newTask: Omit<Task, 'id' | 'createdAt'> = {
             title: '',

@@ -32,7 +32,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
   
   const overdueTasks = useMemo(() => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to the beginning of today
+    today.setHours(0, 0, 0, 0); 
 
     return employeeTasks.filter(task => {
       const deadline = new Date(task.deadline);
