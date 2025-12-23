@@ -350,8 +350,8 @@ const ClientTable = ({ clients, users, loading, onUpdate, onPriorityChange }: { 
 };
 
 export default function SettingsPage() {
-    const { users, loading: usersLoading, error } = useUsers();
-    const { clients, loading: clientsLoading, updateClientPriority, deleteClient } = useClients();
+    const { users, loading: usersLoading, error, deleteUser } = useUsers();
+    const { clients, loading: clientsLoading, updateClientPriority } = useClients();
     const { toast } = useToast();
 
     const handleUpdateClient = async (clientId: string, data: Partial<Client>) => {
@@ -457,11 +457,11 @@ export default function SettingsPage() {
                                                             <AlertDialogAction
                                                                 onClick={async () => {
                                                                     try {
-                                                                        const { deleteUser } = useUsers(); // This seems wrong, should be outside
-                                                                        // await deleteUser(employee.id);
+                                                                        await deleteUser(employee.id);
                                                                         toast({title: "User deleted"});
-                                                                    } catch (e) {
+                                                                    } catch (e: any) {
                                                                         console.error(e);
+                                                                        toast({ variant: 'destructive', title: "Deletion Failed", description: e.message });
                                                                     }
                                                                 }}
                                                                 className="bg-destructive hover:bg-destructive/90"
