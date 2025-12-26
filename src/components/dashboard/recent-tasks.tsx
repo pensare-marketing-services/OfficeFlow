@@ -119,7 +119,7 @@ const EditablePriorityCell = ({ task, onUpdate }: { task: Task & {id: string}, o
                 onChange={(e) => setPriority(Number(e.target.value))}
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
-                className="h-7 w-12 text-xs p-1 mx-auto border-0 focus-visible:ring-1"
+                className="h-7 w-6 text-[8px] p-1 mx-auto border-0 focus-visible:ring-1"
             />
         </TableCell>
     );
@@ -257,7 +257,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
           <TableHeader>
             <TableRow>
               <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[40px]">#</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[60px]">Order</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[30px]">Order</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[80px]">Client</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[120px]">Task</TableHead>
                {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[100px]">Assigned</TableHead>}

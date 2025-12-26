@@ -17,7 +17,9 @@ import { useClients } from '@/hooks/use-clients';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { Skeleton } from '../ui/skeleton';
 import { AppLogo } from './app-logo';
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { Button } from '../ui/button';
+import { cn } from '@/lib/utils';
 
 
 const mainNavItems = [
@@ -26,16 +28,26 @@ const mainNavItems = [
 
 const settingsNavItem = { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true };
 
+type CategoryFilter = "all" | "digital marketing" | "seo" | "website";
 
 export function SidebarNav() {
   const pathname = usePathname();
   const { user } = useAuth();
   const { clients, loading: clientsLoading } = useClients();
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
+
 
   const filteredMainNavItems = mainNavItems.filter(item => {
     if (!item.adminOnly) return true;
     return user?.role === 'admin';
   });
+
+  const filteredClients = useMemo(() => {
+    if (categoryFilter === 'all') {
+      return clients;
+    }
+    return clients.filter(client => client.categories?.includes(categoryFilter));
+  }, [clients, categoryFilter]);
   
   return (
     <>
@@ -74,6 +86,12 @@ export function SidebarNav() {
                             <Briefcase className="h-4 w-4"/>
                             <span>Clients</span>
                           </span>
+                           <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden" onClick={(e) => e.preventDefault()}>
+                                <Button size="sm" variant={categoryFilter === 'all' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'all' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => setCategoryFilter('all')}>All</Button>
+                                <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'digital marketing' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => setCategoryFilter('digital marketing')}>DM</Button>
+                                <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'seo' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => setCategoryFilter('seo')}>SEO</Button>
+                                <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'website' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => setCategoryFilter('website')}>Web</Button>
+                            </div>
                           <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
                        </SidebarMenuButton>
                     </CollapsibleTrigger>
@@ -87,7 +105,7 @@ export function SidebarNav() {
                                 <Skeleton className="h-7 w-full" />
                             </>
                         )}
-                        {!clientsLoading && clients.map(client => (
+                        {!clientsLoading && filteredClients.map(client => (
                             <SidebarMenuItem key={client.id}>
                                 <Link href={`/clients/${client.id}`}>
                                     <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
@@ -99,7 +117,7 @@ export function SidebarNav() {
                                 </Link>
                             </SidebarMenuItem>
                         ))}
-                        {!clientsLoading && clients.length === 0 && (
+                        {!clientsLoading && filteredClients.length === 0 && (
                              <SidebarMenuItem>
                                <span
                                   aria-disabled="true"
