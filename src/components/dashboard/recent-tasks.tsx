@@ -112,14 +112,14 @@ const EditablePriorityCell = ({ task, onUpdate }: { task: Task & {id: string}, o
     };
 
     return (
-        <TableCell className="py-1 px-2 border-r border-t text-center">
+        <TableCell className="p-0 border-r border-t text-center">
             <Input
                 type="number"
                 value={priority}
                 onChange={(e) => setPriority(Number(e.target.value))}
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
-                className="h-7 w-4 text-xs p-1 mx-auto"
+                className="h-7 w-12 text-xs p-1 mx-auto border-0 focus-visible:ring-1"
             />
         </TableCell>
     );
@@ -160,7 +160,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   }
 
   const handleStatusChange = (task: Task & {id: string}, newStatus: string) => {
-    let statusToSave = newStatus as TaskStatus;
+    let statusToSave: TaskStatus = newStatus as TaskStatus;
     let updatePayload: Partial<Task> = {};
     const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
 
@@ -256,12 +256,12 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[10px]">#</TableHead>
-              <TableHead className="py-2 px-1 border-r border-t text-[8px] h-8 w-[15px]">Order</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[40px]">#</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[60px]">Order</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[80px]">Client</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[100px]">Task</TableHead>
-               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[40px]">Assigned</TableHead>}
-              <TableHead className="py-1 px-2 border-t text-[8px] h-8 w-[50px]">Status</TableHead>
+              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[120px]">Task</TableHead>
+               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[100px]">Assigned</TableHead>}
+              <TableHead className="py-1 px-2 border-t text-[8px] h-8 w-[100px]">Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead className="text-xs h-8 w-[60px]">Remarks</TableHead>}
             </TableRow>
           </TableHeader>
@@ -281,7 +281,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 today.setHours(0, 0, 0, 0);
                 const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
                 
-                let statusOptions: string[] = allStatuses;
+                let statusOptions: string[] = [...allStatuses];
                 
                 if (isPromotionTask) {
                     if (isAdmin) {
