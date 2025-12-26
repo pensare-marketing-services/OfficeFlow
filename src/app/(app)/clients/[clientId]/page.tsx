@@ -158,8 +158,7 @@ export default function ClientIdPage() {
         if (!tasks || !client) return [];
         return tasks.filter(task => 
             task.clientId === client.id && 
-            !['SEO', 'Website', 'Web Blogs', 'Other'].includes(task.contentType || '') &&
-            task.description !== 'Paid Promotion'
+            task.contentType !== 'Other'
         );
     }, [tasks, client]);
     
@@ -215,8 +214,8 @@ export default function ClientIdPage() {
                 </CardHeader>
             </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 gap-4">
+                <div className="lg:col-span-3">
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
                         <ContentSchedule 
                             tasks={filteredTasks} 
@@ -233,21 +232,9 @@ export default function ClientIdPage() {
                         </Card>
                     )}
                 </div>
-                <div className="lg:col-span-1">
-                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
-                       <OtherTaskTable
-                            clientId={client.id}
-                            users={users as UserWithId[]}
-                            tasks={otherTasks}
-                            onTaskAdd={addTask}
-                            onTaskUpdate={updateTask}
-                            onTaskDelete={deleteTask}
-                        />
-                    )}
-                </div>
             </div>
 
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                  <div className="lg:col-span-2">
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <PaidPromotionsTable 
@@ -259,17 +246,29 @@ export default function ClientIdPage() {
                  </div>
                  <div className="lg:col-span-1">
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                       <OtherTaskTable
+                            clientId={client.id}
+                            users={users as UserWithId[]}
+                            tasks={otherTasks}
+                            onTaskAdd={addTask}
+                            onTaskUpdate={updateTask}
+                            onTaskDelete={deleteTask}
+                        />
+                    )}
+                 </div>
+            </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                 <div className="lg:col-span-2">
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                        <ClientNotesTable 
                             notes={client.notes || []}
                             onUpdate={handleNotesUpdate}
                        />
                     )}
                  </div>
-            </div>
-
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
-                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                 <div className="lg:col-span-1">
+                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <CashInLog
                             clientId={client.id}
                             transactions={cashInTransactions}
@@ -277,7 +276,10 @@ export default function ClientIdPage() {
                         />
                     )}
                  </div>
-                <div className="lg:col-span-1">
+            </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2">
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <SeoTable 
                             clientId={client.id}
@@ -289,8 +291,6 @@ export default function ClientIdPage() {
                         />
                     )}
                 </div>
-            </div>
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="lg:col-span-1">
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                          <WebsiteTable

@@ -1,17 +1,23 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import type { Task, UserProfile as User, ContentType } from '@/lib/data';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import type { Task, UserProfile as User, ContentType, ProgressNote } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, CalendarIcon } from 'lucide-react';
+import { Plus, Trash2, CalendarIcon, MessageSquare } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format, isValid } from 'date-fns';
 import { cn, capitalizeSentences } from '@/lib/utils';
+import { useAuth } from '@/hooks/use-auth';
+import { Textarea } from '../ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+import { LinkifiedText } from '../shared/linkified-text';
+import { InsertLinkPopover } from '../shared/insert-link-popover';
 
 type UserWithId = User & { id: string };
 type TaskWithId = Task & { id: string };
@@ -26,6 +32,7 @@ interface WebsiteTableProps {
 }
 
 const allStatuses: Task['status'][] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
+const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 const statusColors: Record<string, string> = {
     'To Do': 'bg-gray-500 text-white',
@@ -43,11 +50,10 @@ const statusColors: Record<string, string> = {
 };
 
 const EditableCell: React.FC<{
-    value: string | number;
-    onSave: (value: string | number) => void;
-    type?: 'text' | 'number';
+    value: string;
+    onSave: (value: string) => void;
     className?: string;
-}> = ({ value, onSave, type = 'text', className }) => {
+}> = ({ value, onSave, className }) => {
     const [currentValue, setCurrentValue] = useState(value);
 
     useEffect(() => {
@@ -55,24 +61,24 @@ const EditableCell: React.FC<{
     }, [value]);
 
     const handleBlur = () => {
-        const formattedValue = typeof currentValue === 'string' && type === 'text' ? capitalizeSentences(currentValue) : currentValue;
+        const formattedValue = capitalizeSentences(currentValue);
         if (formattedValue !== value) {
-            onSave(type === 'number' ? Number(formattedValue) || 0 : formattedValue);
+            onSave(formattedValue);
         }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            const formattedValue = type === 'text' ? capitalizeSentences(e.currentTarget.value) : e.currentTarget.value;
-            onSave(type === 'number' ? Number(formattedValue) || 0 : formattedValue);
+            const formattedValue = capitalizeSentences(e.currentTarget.value);
+            onSave(formattedValue);
             e.currentTarget.blur();
         }
     };
 
     return (
         <Input
-            type={type}
+            type="text"
             value={currentValue}
             onChange={(e) => setCurrentValue(e.target.value)}
             onBlur={handleBlur}
@@ -83,14 +89,43 @@ const EditableCell: React.FC<{
 };
 
 export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTaskUpdate, onTaskDelete }: WebsiteTableProps) {
+    const { user: currentUser } = useAuth();
+    const [noteInput, setNoteInput] = useState('');
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     
     const handleTaskChange = (id: string, field: keyof Task, value: any) => {
         onTaskUpdate(id, { [field]: value });
     };
 
+    const addNote = (task: TaskWithId, note: Partial<ProgressNote>) => {
+        if (!currentUser) return;
+        if (!note.note?.trim() && !note.imageUrl) return;
+
+        const newNote: ProgressNote = {
+            note: note.note ? capitalizeSentences(note.note) : '',
+            date: new Date().toISOString(),
+            authorId: currentUser.uid,
+            authorName: currentUser.username,
+            imageUrl: note.imageUrl,
+        };
+
+        handleTaskChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
+    };
+
+    const handleNewNote = (e: React.KeyboardEvent<HTMLTextAreaElement>, task: TaskWithId) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const text = noteInput.trim();
+            if (text) {
+                addNote(task, { note: text });
+                setNoteInput('');
+            }
+        }
+    };
+
     const addTask = () => {
         const deadline = new Date();
-        deadline.setHours(23, 59, 59, 999); // Set to end of today
+        deadline.setHours(23, 59, 59, 999);
 
         const newTask: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
@@ -126,7 +161,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                             <TableHead className="w-[150px]">Task</TableHead>
                             <TableHead>Assigned</TableHead>
                             <TableHead>Status</TableHead>
-                            <TableHead className="w-[250px]">Remarks</TableHead>
+                            <TableHead className="w-[100px]">Remarks</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -174,7 +209,59 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
-                                <TableCell className="p-0"><EditableCell value={task.description} onSave={(v) => handleTaskChange(task.id, 'description', v)} type="text" /></TableCell>
+                                <TableCell className="p-0 text-center">
+                                    <Popover onOpenChange={() => setNoteInput('')}>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="relative h-7 w-7">
+                                                <MessageSquare className="h-4 w-4" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-80" side="left" align="end">
+                                            <div className="space-y-2">
+                                                <h4 className="font-medium leading-none text-xs">Remarks for "{task.title}"</h4>
+                                                <div className="max-h-60 space-y-3 overflow-y-auto p-1">
+                                                    {(task.progressNotes || []).map((note, i) => {
+                                                        const author = users.find(u => u.id === note.authorId);
+                                                        const authorName = author ? author.username : note.authorName;
+                                                        return (
+                                                            <div key={i} className={cn("flex items-start gap-2 text-xs", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                                {note.authorId !== currentUser?.uid && (
+                                                                    <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(authorName)}</AvatarFallback></Avatar>
+                                                                )}
+                                                                <div className={cn("max-w-[75%] rounded-lg p-2", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                    <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                                    {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
+                                                                    {note.imageUrl && <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto" />}
+                                                                    <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
+                                                                </div>
+                                                                {note.authorId === currentUser?.uid && (
+                                                                    <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback></Avatar>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                                <div className="relative">
+                                                    <Textarea 
+                                                        ref={textareaRef}
+                                                        placeholder="Add a remark..."
+                                                        value={noteInput}
+                                                        onChange={(e) => setNoteInput(e.target.value)}
+                                                        onKeyDown={(e) => handleNewNote(e, task)}
+                                                        className="pr-8 text-xs"
+                                                    />
+                                                    <div className="absolute bottom-1 right-1">
+                                                        <InsertLinkPopover 
+                                                            textareaRef={textareaRef} 
+                                                            onValueChange={setNoteInput} 
+                                                            onSend={(message) => addNote(task, {note: message})}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
+                                </TableCell>
                                 <TableCell className="p-0 text-center">
                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => onTaskDelete(task.id)}>
                                         <Trash2 className="h-4 w-4" />
