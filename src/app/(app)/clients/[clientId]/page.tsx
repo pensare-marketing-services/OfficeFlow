@@ -199,6 +199,17 @@ export default function ClientIdPage() {
                                 <CardTitle className="font-headline">Client Not Found</CardTitle>
                              )}
                         </CardHeader>
+                        <CardContent className="p-2">
+                         {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
+                                <div className="flex items-start gap-4">
+                                    <ClientPlanSummary 
+                                        client={client} 
+                                        onUpdate={(id, data) => handleClientUpdate(data)} 
+                                    />
+                                    <Button onClick={handleAddTask} disabled={tasksLoading}>Add Task</Button>
+                                </div>
+                            )}
+                        </CardContent>
                     </Card>
 
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
@@ -242,20 +253,6 @@ export default function ClientIdPage() {
 
                 {/* Right Column */}
                 <div className="lg:col-span-2 space-y-4">
-                    <Card>
-                        <CardContent className="p-2">
-                         {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
-                                <div className="flex items-start gap-4">
-                                    <ClientPlanSummary 
-                                        client={client} 
-                                        onUpdate={(id, data) => handleClientUpdate(data)} 
-                                    />
-                                    <Button onClick={handleAddTask} disabled={tasksLoading}>Add Task</Button>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                    
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <PaidPromotionsTable 
                             clientId={client.id}
