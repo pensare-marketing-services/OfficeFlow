@@ -43,11 +43,11 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
     };
 
     return (
-        <Card className="shadow-none border bg-card">
+        <Card className="shadow-none border bg-card flex-grow">
             <CardContent className="p-0">
                 <Table>
                     <TableBody>
-                        <TableRow className="border-0">
+                        <TableRow>
                              <TableCell className="font-bold text-xs p-2 bg-muted/50 w-[120px]">PLAN</TableCell>
                             <TableCell className="p-1">
                                 <EditableField value={client.plan || ''} onSave={(value) => handleSave('plan', value)} />
@@ -56,6 +56,8 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
                             <TableCell className="p-1">
                                 <EditableField value={client.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
                             </TableCell>
+                        </TableRow>
+                        <TableRow>
                              <TableCell className="font-bold text-xs p-2 bg-muted/50 w-[120px]">Social Platforms</TableCell>
                             <TableCell className="p-1">
                                 <EditableField value={client.socialPlatforms || ''} onSave={(value) => handleSave('socialPlatforms', value)} />
