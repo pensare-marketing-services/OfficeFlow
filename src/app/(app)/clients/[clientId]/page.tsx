@@ -214,9 +214,10 @@ export default function ClientIdPage() {
                 </CardHeader>
             </Card>
 
-            <div className="grid grid-cols-1 gap-4">
-                <div className="lg:col-span-3">
-                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
+             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                {/* Left Column */}
+                <div className="lg:col-span-3 space-y-4">
+                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
                         <ContentSchedule 
                             tasks={filteredTasks} 
                             users={users as UserWithId[]} 
@@ -231,55 +232,7 @@ export default function ClientIdPage() {
                             </CardContent>
                         </Card>
                     )}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                 <div className="lg:col-span-2">
-                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
-                        <PaidPromotionsTable 
-                            clientId={client.id}
-                            users={users as UserWithId[]}
-                            totalCashIn={totalCashIn}
-                        />
-                    )}
-                 </div>
-                 <div className="lg:col-span-1">
-                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
-                       <OtherTaskTable
-                            clientId={client.id}
-                            users={users as UserWithId[]}
-                            tasks={otherTasks}
-                            onTaskAdd={addTask}
-                            onTaskUpdate={updateTask}
-                            onTaskDelete={deleteTask}
-                        />
-                    )}
-                 </div>
-            </div>
-
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                 <div className="lg:col-span-2">
-                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
-                       <ClientNotesTable 
-                            notes={client.notes || []}
-                            onUpdate={handleNotesUpdate}
-                       />
-                    )}
-                 </div>
-                 <div className="lg:col-span-1">
-                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
-                        <CashInLog
-                            clientId={client.id}
-                            transactions={cashInTransactions}
-                            totalCashIn={totalCashIn}
-                        />
-                    )}
-                 </div>
-            </div>
-
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
+                    
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <SeoTable 
                             clientId={client.id}
@@ -290,8 +243,7 @@ export default function ClientIdPage() {
                             onTaskDelete={deleteTask}
                         />
                     )}
-                </div>
-                <div className="lg:col-span-1">
+                    
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                          <WebsiteTable
                             clientId={client.id}
@@ -300,6 +252,43 @@ export default function ClientIdPage() {
                             onTaskAdd={addTask}
                             onTaskUpdate={updateTask}
                             onTaskDelete={deleteTask}
+                        />
+                    )}
+                </div>
+
+                {/* Right Column */}
+                <div className="lg:col-span-2 space-y-4">
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                        <PaidPromotionsTable 
+                            clientId={client.id}
+                            users={users as UserWithId[]}
+                            totalCashIn={totalCashIn}
+                        />
+                    )}
+                    
+                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                       <OtherTaskTable
+                            clientId={client.id}
+                            users={users as UserWithId[]}
+                            tasks={otherTasks}
+                            onTaskAdd={addTask}
+                            onTaskUpdate={updateTask}
+                            onTaskDelete={deleteTask}
+                        />
+                    )}
+
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                       <ClientNotesTable 
+                            notes={client.notes || []}
+                            onUpdate={handleNotesUpdate}
+                       />
+                    )}
+
+                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                        <CashInLog
+                            clientId={client.id}
+                            transactions={cashInTransactions}
+                            totalCashIn={totalCashIn}
                         />
                     )}
                 </div>
