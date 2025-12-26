@@ -49,6 +49,10 @@ export function SidebarNav() {
     return clients.filter(client => client.categories?.includes(categoryFilter));
   }, [clients, categoryFilter]);
   
+  const handleFilterClick = (filter: CategoryFilter) => {
+    setCategoryFilter(prev => prev === filter ? 'all' : filter);
+  };
+  
   return (
     <>
       <SidebarHeader>
@@ -87,10 +91,9 @@ export function SidebarNav() {
                             <span>Clients</span>
                           </span>
                            <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden" onClick={(e) => e.preventDefault()}>
-                                <Button size="sm" variant={categoryFilter === 'all' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'all' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => setCategoryFilter('all')}>All</Button>
-                                <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'digital marketing' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => setCategoryFilter('digital marketing')}>DM</Button>
-                                <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'seo' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => setCategoryFilter('seo')}>SEO</Button>
-                                <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'website' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => setCategoryFilter('website')}>Web</Button>
+                                <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'digital marketing' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => handleFilterClick('digital marketing')}>DM</Button>
+                                <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'seo' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => handleFilterClick('seo')}>SEO</Button>
+                                <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'ghost'} className={cn("h-5 px-1.5 text-xs", categoryFilter === 'website' && 'bg-sidebar-primary text-sidebar-primary-foreground')} onClick={() => handleFilterClick('website')}>Web</Button>
                             </div>
                           <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
                        </SidebarMenuButton>
