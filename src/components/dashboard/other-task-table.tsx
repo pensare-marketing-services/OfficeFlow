@@ -143,6 +143,18 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
         onTaskAdd(newTask);
     };
 
+    const handleAssigneeChange = (taskId: string, index: number, newId: string) => {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+        const newAssigneeIds = [...(task.assigneeIds || [])];
+        while (newAssigneeIds.length < 2) {
+            newAssigneeIds.push('');
+        }
+        newAssigneeIds[index] = newId;
+        const finalAssignees = [...new Set(newAssigneeIds.filter(id => id && id !== 'unassigned'))];
+        onTaskUpdate(taskId, { assigneeIds: finalAssignees, activeAssigneeIndex: 0 }); 
+    };
+
     const employeeUsers = useMemo(() => users.filter(u => u.role === 'employee'), [users]);
 
     return (
@@ -195,13 +207,21 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                 </TableCell>
                                 <TableCell className="p-0"><EditableCell value={task.title} onSave={(v) => handleTaskChange(task.id, 'title', v)} /></TableCell>
                                 <TableCell className="p-1">
-                                    <Select value={task.assigneeIds && task.assigneeIds.length > 0 ? task.assigneeIds[0] : 'unassigned'} onValueChange={(v) => handleTaskChange(task.id, 'assigneeIds', v === 'unassigned' ? [] : [v])}>
-                                        <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Assign" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="unassigned">Unassigned</SelectItem>
-                                            {employeeUsers.map(user => <SelectItem key={user.id} value={user.id}>{user.username}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
+                                    <div className="flex items-center gap-1">
+                                        {[0, 1].map(i => (
+                                            <Select 
+                                                key={i}
+                                                value={task.assigneeIds?.[i] || 'unassigned'} 
+                                                onValueChange={(v) => handleAssigneeChange(task.id, i, v)}
+                                            >
+                                                <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Assign" /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                                                    {employeeUsers.filter(u => u.id !== task.assigneeIds?.[1-i]).map(user => <SelectItem key={user.id} value={user.id}>{user.username}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        ))}
+                                    </div>
                                 </TableCell>
                                  <TableCell className="p-1">
                                     <Select value={task.status} onValueChange={(v: Task['status']) => handleTaskChange(task.id, 'status', v)}>
