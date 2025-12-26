@@ -92,7 +92,7 @@ export default function LoginPage() {
                             <FormItem>
                                 <FormLabel>Username</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter your username" {...field} />
+                                    <Input placeholder="Enter your username" {...field} autoComplete="off" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -106,7 +106,7 @@ export default function LoginPage() {
                                 <FormLabel>Password</FormLabel>
                                 <FormControl>
                                     <div className="relative">
-                                        <Input type={isPasswordVisible ? 'text' : 'password'} placeholder="Enter your password" {...field} />
+                                        <Input type={isPasswordVisible ? 'text' : 'password'} placeholder="Enter your password" {...field} autoComplete="off" />
                                         <Button 
                                             type="button"
                                             variant="ghost" 
