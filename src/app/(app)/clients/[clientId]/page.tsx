@@ -185,10 +185,11 @@ export default function ClientIdPage() {
 
     return (
         <div className="space-y-4">
-            <Card>
-                <CardHeader>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                        <div className="flex-1 space-y-1 lg:col-span-1">
+             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
+                {/* Left Column */}
+                <div className="lg:col-span-3 space-y-4">
+                    <Card>
+                        <CardHeader>
                              {pageLoading ? <Skeleton className="h-8 w-48 mb-2" /> : client ? (
                                 <>
                                     <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
@@ -197,26 +198,9 @@ export default function ClientIdPage() {
                              ) : (
                                 <CardTitle className="font-headline">Client Not Found</CardTitle>
                              )}
-                        </div>
-                        
-                        <div className="lg:col-span-2">
-                          {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
-                                <div className="flex items-start gap-4">
-                                    <ClientPlanSummary 
-                                        client={client} 
-                                        onUpdate={(id, data) => handleClientUpdate(data)} 
-                                    />
-                                    <Button onClick={handleAddTask} disabled={tasksLoading}>Add Task</Button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </CardHeader>
-            </Card>
+                        </CardHeader>
+                    </Card>
 
-             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-                {/* Left Column */}
-                <div className="lg:col-span-3 space-y-4">
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
                         <ContentSchedule 
                             tasks={filteredTasks} 
@@ -258,6 +242,20 @@ export default function ClientIdPage() {
 
                 {/* Right Column */}
                 <div className="lg:col-span-2 space-y-4">
+                    <Card>
+                        <CardContent className="p-2">
+                         {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
+                                <div className="flex items-start gap-4">
+                                    <ClientPlanSummary 
+                                        client={client} 
+                                        onUpdate={(id, data) => handleClientUpdate(data)} 
+                                    />
+                                    <Button onClick={handleAddTask} disabled={tasksLoading}>Add Task</Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                    
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <PaidPromotionsTable 
                             clientId={client.id}
