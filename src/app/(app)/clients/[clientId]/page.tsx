@@ -20,7 +20,7 @@ import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
 import CashInLog from '@/components/dashboard/cash-in-log';
 import SeoTable from '@/components/dashboard/seo-table';
 import WebsiteTable from '@/components/dashboard/website-table';
-import OtherTasksTable from '@/components/dashboard/other-tasks-table';
+import OtherTaskTable from '@/components/dashboard/other-task-table';
 
 
 type UserWithId = User & { id: string };
@@ -172,7 +172,7 @@ export default function ClientIdPage() {
         if (!tasks || !client) return [];
         return tasks.filter(task => task.clientId === client.id && (task.contentType === 'Website' || task.contentType === 'Web Blogs'));
     }, [tasks, client]);
-    
+
     const otherTasks = useMemo(() => {
         if (!tasks || !client) return [];
         return tasks.filter(task => task.clientId === client.id && task.contentType === 'Other');
@@ -188,8 +188,8 @@ export default function ClientIdPage() {
         <div className="space-y-4">
             <Card>
                 <CardHeader>
-                    <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
-                        <div className="flex-1 space-y-1">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div className="flex-1 space-y-1 lg:col-span-1">
                              {pageLoading ? <Skeleton className="h-8 w-48 mb-2" /> : client ? (
                                 <>
                                     <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
@@ -200,18 +200,15 @@ export default function ClientIdPage() {
                              )}
                         </div>
                         
-                        <div className="flex-grow">
+                        <div className="lg:col-span-2">
                           {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
-                                <ClientPlanSummary 
-                                    client={client} 
-                                    onUpdate={(id, data) => handleClientUpdate(data)} 
-                                />
-                            )}
-                        </div>
-                        
-                        <div className="flex items-start gap-4">
-                            {client && (
-                                <Button onClick={handleAddTask} disabled={tasksLoading}>Add Task</Button>
+                                <div className="flex items-start gap-4">
+                                    <ClientPlanSummary 
+                                        client={client} 
+                                        onUpdate={(id, data) => handleClientUpdate(data)} 
+                                    />
+                                    <Button onClick={handleAddTask} disabled={tasksLoading}>Add Task</Button>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -236,9 +233,9 @@ export default function ClientIdPage() {
                         </Card>
                     )}
                 </div>
-                 <div className="lg:col-span-1 space-y-4">
-                     {pageLoading ? <Skeleton className="h-48 w-full" /> : client && (
-                       <OtherTasksTable
+                <div className="lg:col-span-1">
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                       <OtherTaskTable
                             clientId={client.id}
                             users={users as UserWithId[]}
                             tasks={otherTasks}
@@ -247,14 +244,9 @@ export default function ClientIdPage() {
                             onTaskDelete={deleteTask}
                         />
                     )}
-                    {pageLoading ? <Skeleton className="h-48 w-full" /> : client && (
-                       <ClientNotesTable 
-                            notes={client.notes || []}
-                            onUpdate={handleNotesUpdate}
-                       />
-                    )}
                 </div>
             </div>
+
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                  <div className="lg:col-span-2">
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
@@ -266,6 +258,17 @@ export default function ClientIdPage() {
                     )}
                  </div>
                  <div className="lg:col-span-1">
+                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                       <ClientNotesTable 
+                            notes={client.notes || []}
+                            onUpdate={handleNotesUpdate}
+                       />
+                    )}
+                 </div>
+            </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2">
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <CashInLog
                             clientId={client.id}
@@ -274,8 +277,6 @@ export default function ClientIdPage() {
                         />
                     )}
                  </div>
-            </div>
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="lg:col-span-1">
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <SeoTable 
@@ -288,6 +289,8 @@ export default function ClientIdPage() {
                         />
                     )}
                 </div>
+            </div>
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="lg:col-span-1">
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                          <WebsiteTable

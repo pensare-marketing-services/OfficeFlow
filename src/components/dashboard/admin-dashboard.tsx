@@ -82,7 +82,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   return (
     
     <div className="space-y-1">
-     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+     <div className="w-3/4 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 
         <StatsCard 
             title="Total Tasks" 

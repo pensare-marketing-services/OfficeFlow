@@ -1,6 +1,7 @@
 
 
 
+
 export type UserProfile = {
   uid?: string;
   name?: string;
@@ -242,11 +243,3 @@ export const tasks: Task[] = [
     activeAssigneeIndex: 1,
   },
 ];
-
-    
-
-    
-
-
-
-    
