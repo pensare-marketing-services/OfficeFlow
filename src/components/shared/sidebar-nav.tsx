@@ -86,18 +86,18 @@ export function SidebarNav() {
                 <SidebarMenuItem>
                    <CollapsibleTrigger asChild>
                        <SidebarMenuButton isActive={pathname.startsWith('/clients')} className="group justify-between">
-                          <span className='flex items-center gap-2'>
-                            <Briefcase className="h-4 w-4"/>
-                            <span>Clients</span>
-                          </span>
-                           <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden">
-                                <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-xs border-sidebar-border", categoryFilter === 'digital marketing' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('digital marketing'); }}>DM</Button>
-                                <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-xs border-sidebar-border", categoryFilter === 'seo' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('seo'); }}>SEO</Button>
-                                <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-xs border-sidebar-border", categoryFilter === 'website' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('website'); }}>Web</Button>
-                            </div>
+                            <span className='flex items-center gap-2'>
+                                <Briefcase className="h-4 w-4"/>
+                                <span>Clients</span>
+                            </span>
                           <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
                        </SidebarMenuButton>
                     </CollapsibleTrigger>
+                    <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden px-2 pt-1">
+                        <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-xs border-sidebar-border w-full", categoryFilter === 'digital marketing' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('digital marketing'); }}>DM</Button>
+                        <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-xs border-sidebar-border w-full", categoryFilter === 'seo' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('seo'); }}>SEO</Button>
+                        <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-xs border-sidebar-border w-full", categoryFilter === 'website' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('website'); }}>Web</Button>
+                    </div>
                 </SidebarMenuItem>
                 <CollapsibleContent>
                    <SidebarMenuSub>
