@@ -201,7 +201,7 @@ export default function ClientIdPage() {
                         </CardHeader>
                         <CardContent className="p-2">
                          {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
-                                <div className="flex items-start gap-4">
+                                <div className="flex flex-row items-center gap-4">
                                     <ClientPlanSummary 
                                         client={client} 
                                         onUpdate={(id, data) => handleClientUpdate(data)} 
