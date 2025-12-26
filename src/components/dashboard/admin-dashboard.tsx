@@ -57,9 +57,10 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
     }
   }, [tasks, taskFilter, viewMode, overdueTasks]);
   
-  const dmTasks = filteredTasks.filter(task => !['SEO', 'Website', 'Web Blogs'].includes(task.contentType || ''));
+  const dmTasks = filteredTasks.filter(task => !['SEO', 'Website', 'Web Blogs', 'Other'].includes(task.contentType || ''));
   const seoTasks = filteredTasks.filter(task => task.contentType === 'SEO');
   const webTasks = filteredTasks.filter(task => task.contentType === 'Website' || task.contentType === 'Web Blogs');
+  const otherTasks = filteredTasks.filter(task => task.contentType === 'Other');
 
 
   const filterTitles: Record<TaskFilter, string> = {
@@ -81,7 +82,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   return (
     
     <div className="space-y-1">
-     <div className="w-3/4 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 
         <StatsCard 
             title="Total Tasks" 
@@ -126,10 +127,11 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskDelete={deleteTask} />
       )}
       {viewMode === 'tasks' && taskFilter === 'total' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 items-start">
             <RecentTasks tasks={dmTasks} users={users} title="Tasks - Digital Marketing" onTaskDelete={deleteTask} />
             <RecentTasks tasks={seoTasks} users={users} title="Tasks - SEO" onTaskDelete={deleteTask} />
             <RecentTasks tasks={webTasks} users={users} title="Tasks - Website" onTaskDelete={deleteTask} />
+            <RecentTasks tasks={otherTasks} users={users} title="Tasks - Other" onTaskDelete={deleteTask} />
         </div>
       )}
 

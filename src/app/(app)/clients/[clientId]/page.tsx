@@ -20,6 +20,7 @@ import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
 import CashInLog from '@/components/dashboard/cash-in-log';
 import SeoTable from '@/components/dashboard/seo-table';
 import WebsiteTable from '@/components/dashboard/website-table';
+import OtherTasksTable from '@/components/dashboard/other-tasks-table';
 
 
 type UserWithId = User & { id: string };
@@ -157,7 +158,7 @@ export default function ClientIdPage() {
         if (!tasks || !client) return [];
         return tasks.filter(task => 
             task.clientId === client.id && 
-            !['SEO', 'Website', 'Web Blogs'].includes(task.contentType || '') &&
+            !['SEO', 'Website', 'Web Blogs', 'Other'].includes(task.contentType || '') &&
             task.description !== 'Paid Promotion'
         );
     }, [tasks, client]);
@@ -170,6 +171,11 @@ export default function ClientIdPage() {
     const websiteTasks = useMemo(() => {
         if (!tasks || !client) return [];
         return tasks.filter(task => task.clientId === client.id && (task.contentType === 'Website' || task.contentType === 'Web Blogs'));
+    }, [tasks, client]);
+    
+    const otherTasks = useMemo(() => {
+        if (!tasks || !client) return [];
+        return tasks.filter(task => task.clientId === client.id && task.contentType === 'Other');
     }, [tasks, client]);
 
     const totalCashIn = useMemo(() => {
@@ -230,8 +236,18 @@ export default function ClientIdPage() {
                         </Card>
                     )}
                 </div>
-                <div className="lg:col-span-1">
-                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                 <div className="lg:col-span-1 space-y-4">
+                     {pageLoading ? <Skeleton className="h-48 w-full" /> : client && (
+                       <OtherTasksTable
+                            clientId={client.id}
+                            users={users as UserWithId[]}
+                            tasks={otherTasks}
+                            onTaskAdd={addTask}
+                            onTaskUpdate={updateTask}
+                            onTaskDelete={deleteTask}
+                        />
+                    )}
+                    {pageLoading ? <Skeleton className="h-48 w-full" /> : client && (
                        <ClientNotesTable 
                             notes={client.notes || []}
                             onUpdate={handleNotesUpdate}
