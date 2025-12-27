@@ -518,37 +518,35 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     </TableCell>
                                     <TableCell className="p-0 border-r" style={{maxWidth: '200px'}}>
                                         {wordCount > 10 ? (
-                                                <Dialog>
-                                                    <DialogTrigger asChild>
-                                                        <p className="text-xs text-muted-foreground p-1 truncate cursor-pointer hover:text-foreground">
-                                                        {descriptionPreview}... <span className="underline">more</span>
-                                                        </p>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="sm:max-w-[60vw]">
-                                                        <DialogHeader>
-                                                            <DialogTitle>{task.title}</DialogTitle>
-                                                        </DialogHeader>
-                                                        <DialogDescription asChild>
-                                                        <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
-                                                            <LinkifiedText text={task.description} />
-                                                        </div>
-                                                        </DialogDescription>
-                                                    </DialogContent>
-                                                </Dialog>
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <p className="text-xs text-muted-foreground p-1 truncate cursor-pointer hover:text-foreground">
+                                                    {descriptionPreview}... <span className="underline">more</span>
+                                                    </p>
+                                                </DialogTrigger>
+                                                <DialogContent className="sm:max-w-[60vw]">
+                                                    <DialogHeader>
+                                                        <DialogTitle>{task.title}</DialogTitle>
+                                                    </DialogHeader>
+                                                    <DialogDescription asChild>
+                                                    <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
+                                                        <LinkifiedText text={task.description} />
+                                                    </div>
+                                                    </DialogDescription>
+                                                </DialogContent>
+                                            </Dialog>
+                                        ) : (
+                                            isAdmin ? (
+                                                <EditableTableCell 
+                                                    value={task.description || ''} 
+                                                    onSave={(value) => handleFieldChange(task.id, 'description', value)}
+                                                    type="text"
+                                                    placeholder="Add a description..."
+                                                />
                                             ) : (
-                                                <>
-                                                    {isAdmin ? (
-                                                        <EditableTableCell 
-                                                            value={task.description || ''} 
-                                                            onSave={(value) => handleFieldChange(task.id, 'description', value)}
-                                                            type="text"
-                                                            placeholder="Add a description..."
-                                                        />
-                                                    ) : (
-                                                        <p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p>
-                                                    )}
-                                                </>
-                                            )}
+                                                <p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p>
+                                            )
+                                        )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
                                         {(isAdmin && isStandardTask) ? (
