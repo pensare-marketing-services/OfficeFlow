@@ -103,10 +103,10 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
 
         const newNote: ProgressNote = {
             note: note.note ? capitalizeSentences(note.note) : '',
+            imageUrl: note.imageUrl || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.username,
-            imageUrl: note.imageUrl,
         };
 
         handleTaskChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);

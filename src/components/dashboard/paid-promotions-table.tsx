@@ -186,19 +186,22 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     
     const addNote = (promoId: string, note: Partial<ProgressNote>) => {
         if (!currentUser) return;
+        if (!note.note?.trim() && !note.imageUrl) return;
+
         const promo = promotions.find(p => p.id === promoId);
         if (!promo) return;
         const newNote: ProgressNote = {
             note: note.note ? capitalizeSentences(note.note) : '',
+            imageUrl: note.imageUrl || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.username,
-            imageUrl: note.imageUrl,
         };
         const updatedRemarks = [...(promo.remarks || []), newNote];
         handlePromotionChange(promoId, 'remarks', updatedRemarks);
         onSend(capitalizeSentences(note.note || ''));
     };
+
 
     const handleNewNote = (e: React.KeyboardEvent<HTMLTextAreaElement>, promoId: string) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -457,4 +460,3 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     
 
     
-

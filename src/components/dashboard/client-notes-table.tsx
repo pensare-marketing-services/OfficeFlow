@@ -100,10 +100,10 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
 
     const newRemark: ProgressNote = {
       note: remark.note ? capitalizeSentences(remark.note) : '',
+      imageUrl: remark.imageUrl || '',
       date: new Date().toISOString(),
       authorId: currentUser.uid,
       authorName: currentUser.username,
-      imageUrl: remark.imageUrl
     };
     
     const existingRemarks = localNotes[noteIndex].remarks || [];

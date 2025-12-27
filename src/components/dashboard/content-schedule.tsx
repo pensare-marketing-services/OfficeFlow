@@ -297,18 +297,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         if (!currentUser) return;
         if (!note.note?.trim() && !note.imageUrl) return;
 
-        const newNote: Partial<ProgressNote> = {
+        const newNote: ProgressNote = {
+            note: note.note ? capitalizeSentences(note.note) : '',
+            imageUrl: note.imageUrl || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.username,
         };
-
-        if (note.note) {
-            newNote.note = capitalizeSentences(note.note);
-        }
-        if (note.imageUrl) {
-            newNote.imageUrl = note.imageUrl;
-        }
         
         // Reset opened state for all users except sender
         setOpenedChats(prev => {
