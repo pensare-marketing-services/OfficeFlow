@@ -17,7 +17,7 @@ import { useClients } from '@/hooks/use-clients';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { Skeleton } from '../ui/skeleton';
 import { AppLogo } from './app-logo';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 
@@ -35,6 +35,11 @@ export function SidebarNav() {
   const { user } = useAuth();
   const { clients, loading: clientsLoading } = useClients();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
+  const [isClientCollapsibleOpen, setClientCollapsibleOpen] = useState(pathname.startsWith('/clients'));
+  
+  useEffect(() => {
+    setClientCollapsibleOpen(pathname.startsWith('/clients'));
+  }, [pathname]);
 
 
   const filteredMainNavItems = mainNavItems.filter(item => {
@@ -53,6 +58,9 @@ export function SidebarNav() {
   
   const handleFilterClick = (filter: CategoryFilter) => {
     setCategoryFilter(prev => prev === filter ? 'all' : filter);
+    if (!isClientCollapsibleOpen) {
+      setClientCollapsibleOpen(true);
+    }
   };
   
   return (
@@ -84,7 +92,11 @@ export function SidebarNav() {
               </SidebarMenuItem>
           ))}
           {user?.role === 'admin' && (
-              <Collapsible className="w-full" defaultOpen={pathname.startsWith('/clients')}>
+              <Collapsible 
+                className="w-full" 
+                open={isClientCollapsibleOpen}
+                onOpenChange={setClientCollapsibleOpen}
+              >
                 <SidebarMenuItem>
                    <CollapsibleTrigger asChild>
                      <SidebarMenuButton asChild isActive={pathname.startsWith('/clients')} className="group justify-between">
