@@ -72,7 +72,7 @@ const mainContentTypes: ContentType[] = [
     'Podcast',
     'SEO',
     'Web Blogs',
-    'Grid',
+    'Grid Insta',
 ];
 
 
