@@ -19,6 +19,7 @@ interface TaskContextType {
     addTask: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
     updateTask: (taskId: string, task: Partial<Task>) => void;
     deleteTask: (taskId: string) => void;
+    deleteMultipleTasks: (taskIds: string[]) => Promise<void>;
     updateTaskStatus: (task: TaskWithId, newStatus: string) => void;
 }
 
@@ -151,6 +152,20 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, []);
 
+    const deleteMultipleTasks = useCallback(async (taskIds: string[]) => {
+        const batch = writeBatch(db);
+        taskIds.forEach(id => {
+            const taskRef = doc(db, 'tasks', id);
+            batch.delete(taskRef);
+        });
+        try {
+            await batch.commit();
+        } catch (e) {
+            console.error("Error deleting multiple documents: ", e);
+            throw new Error('Failed to delete tasks. Please check your network connection.');
+        }
+    }, []);
+
     const updateTaskStatus = useCallback(async (task: TaskWithId, newStatusString: string) => {
         const newStatus = newStatusString as TaskStatus;
         const { id, assigneeIds = [], activeAssigneeIndex = 0, title, clientId } = task;
@@ -202,6 +217,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addTask,
         updateTask,
         deleteTask,
+        deleteMultipleTasks,
         updateTaskStatus,
     };
 

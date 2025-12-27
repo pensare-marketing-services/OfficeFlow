@@ -24,6 +24,7 @@ import { LinkifiedText } from '@/components/shared/linkified-text';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Input } from '../ui/input';
 import { InsertLinkPopover } from '../shared/insert-link-popover';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 
 type UserWithId = User & { id: string };
@@ -131,7 +132,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const [clients, setClients] = useState<ClientWithId[]>([]);
   const [noteInput, setNoteInput] = useState('');
   const { toast } = useToast();
-  const { updateTask } = useTasks();
+  const { updateTask, deleteMultipleTasks } = useTasks();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const sortedTasks = useMemo(() => {
@@ -180,6 +181,16 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const handlePriorityChange = (task: Task & {id: string}, newPriority: number) => {
     updateTask(task.id, { priority: newPriority });
   }
+
+  const handleDeleteAll = async () => {
+    const taskIds = tasks.map(t => t.id);
+    try {
+      await deleteMultipleTasks(taskIds);
+      toast({ title: 'Tasks Deleted', description: `All tasks in "${title}" have been deleted.` });
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Deletion Failed', description: error.message });
+    }
+  };
 
 
     const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {
@@ -249,8 +260,31 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   return (
     <TooltipProvider>
     <Card className="shadow-md">
-      <CardHeader className="py-2 px-3">
+      <CardHeader className="py-2 px-3 flex flex-row items-center justify-between">
         <CardTitle className="font-headline text-sm">{title}</CardTitle>
+        {isAdmin && tasks.length > 0 && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="icon" className="h-6 w-6">
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete all <strong>{tasks.length}</strong> tasks shown in the "{title}" table.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteAll} className="bg-destructive hover:bg-destructive/90">
+                  Yes, delete all
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </CardHeader>
       <CardContent className="p-0">
         <Table className="table-fixed">
