@@ -53,7 +53,8 @@ const EditableCell: React.FC<{
     value: string;
     onSave: (value: string) => void;
     className?: string;
-}> = ({ value, onSave, className }) => {
+    placeholder?: string;
+}> = ({ value, onSave, className, placeholder }) => {
     const [currentValue, setCurrentValue] = useState(value);
 
     useEffect(() => {
@@ -84,6 +85,7 @@ const EditableCell: React.FC<{
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             className={cn("h-7 text-xs p-1 border-transparent hover:border-border focus:border-ring focus:bg-background", className)}
+            placeholder={placeholder}
         />
     );
 };
@@ -97,7 +99,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
         onTaskUpdate(id, { [field]: value });
     };
 
-    const addNote = (task: TaskWithId, note: Partial<ProgressNote>) => {
+    const addNote = (task: TaskWithId, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
         if (!currentUser) return;
         if (!note.note?.trim() && !note.imageUrl) return;
 
@@ -169,10 +171,11 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[40px] px-2 text-xs">Sl.No</TableHead>
-                            <TableHead className="w-[110px]">Date</TableHead>
+                            <TableHead className="w-[90px]">Date</TableHead>
                             <TableHead className="w-[150px]">Task</TableHead>
-                            <TableHead>Assigned</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead className="w-[200px]">Description</TableHead>
+                            <TableHead className="w-[180px]">Assigned</TableHead>
+                            <TableHead className="w-[120px]">Status</TableHead>
                             <TableHead className="w-[100px]">Remarks</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
@@ -189,7 +192,6 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                                                 size="sm"
                                                 className={cn('w-full justify-start text-left font-normal h-7 text-xs px-2', !task.deadline && 'text-muted-foreground')}
                                             >
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
                                                 {task.deadline && isValid(new Date(task.deadline)) ? format(new Date(task.deadline), 'MMM dd') : <span>Pick a date</span>}
                                             </Button>
                                         </PopoverTrigger>
@@ -203,7 +205,8 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                                         </PopoverContent>
                                     </Popover>
                                 </TableCell>
-                                <TableCell className="p-0"><EditableCell value={task.title} onSave={(v) => handleTaskChange(task.id, 'title', v)} /></TableCell>
+                                <TableCell className="p-0"><EditableCell value={task.title} onSave={(v) => handleTaskChange(task.id, 'title', v)} placeholder="New SEO task..." /></TableCell>
+                                <TableCell className="p-0"><EditableCell value={task.description} onSave={(v) => handleTaskChange(task.id, 'description', v)} placeholder="Add description..."/></TableCell>
                                 <TableCell className="p-1">
                                     <div className="flex items-center gap-1">
                                         {[0, 1].map(i => (
@@ -291,7 +294,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                         ))}
                          {tasks.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                                     No SEO tasks added yet.
                                 </TableCell>
                             </TableRow>
