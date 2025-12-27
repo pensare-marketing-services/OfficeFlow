@@ -220,7 +220,7 @@
             "type": "array",
             "items": {
                 "type": "string",
-                "enum": ["seo", "website", "digital marketing"]
+                "enum": ["seo", "website", "digital marketing", "gd"]
             },
             "description": "The service categories this client belongs to."
         }

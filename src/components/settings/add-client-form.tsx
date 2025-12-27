@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Checkbox } from '../ui/checkbox';
 import { Separator } from '../ui/separator';
 
-const categories = ["seo", "website", "digital marketing"] as const;
+const categories = ["seo", "website", "digital marketing", "gd"] as const;
 
 const clientSchema = z.object({
   name: z.string().min(2, 'Client name must be at least 2 characters.'),
