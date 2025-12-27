@@ -127,11 +127,19 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskDelete={deleteTask} />
       )}
       {viewMode === 'tasks' && taskFilter === 'total' && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 items-start">
-            <RecentTasks tasks={dmTasks} users={users} title="Tasks - Digital Marketing" onTaskDelete={deleteTask} />
-            <RecentTasks tasks={seoTasks} users={users} title="Tasks - SEO" onTaskDelete={deleteTask} />
-            <RecentTasks tasks={webTasks} users={users} title="Tasks - Website" onTaskDelete={deleteTask} />
-            <RecentTasks tasks={otherTasks} users={users} title="Tasks - Other" onTaskDelete={deleteTask} />
+        <div className="flex w-full space-x-2 overflow-x-auto p-1">
+            <div className="flex-shrink-0 w-[450px]">
+                <RecentTasks tasks={dmTasks} users={users} title="Tasks - Digital Marketing" onTaskDelete={deleteTask} />
+            </div>
+            <div className="flex-shrink-0 w-[450px]">
+                <RecentTasks tasks={seoTasks} users={users} title="Tasks - SEO" onTaskDelete={deleteTask} />
+            </div>
+            <div className="flex-shrink-0 w-[450px]">
+                <RecentTasks tasks={webTasks} users={users} title="Tasks - Website" onTaskDelete={deleteTask} />
+            </div>
+             <div className="flex-shrink-0 w-[450px]">
+                <RecentTasks tasks={otherTasks} users={users} title="Tasks - Other" onTaskDelete={deleteTask} />
+            </div>
         </div>
       )}
 
