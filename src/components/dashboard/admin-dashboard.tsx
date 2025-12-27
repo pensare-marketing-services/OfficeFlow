@@ -81,7 +81,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
 
   return (
     
-    <div className="space-y-1">
+    <div className="space-y-4">
      <div className="w-3/4 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 
         <StatsCard 
@@ -127,7 +127,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskDelete={deleteTask} />
       )}
       {viewMode === 'tasks' && taskFilter === 'total' && (
-        <div className="flex w-full space-x-2 overflow-x-auto p-1">
+        <div className="flex w-full space-x-4 overflow-x-auto p-1">
             <div className="flex-shrink-0 w-[450px]">
                 <RecentTasks tasks={dmTasks} users={users} title="Tasks - Digital Marketing" onTaskDelete={deleteTask} />
             </div>
