@@ -46,7 +46,9 @@ export function SidebarNav() {
     if (categoryFilter === 'all') {
       return clients;
     }
-    return clients.filter(client => client.categories?.includes(categoryFilter));
+    return clients.filter(client => 
+        client.categories?.some(cat => cat.toLowerCase() === categoryFilter.toLowerCase())
+    );
   }, [clients, categoryFilter]);
   
   const handleFilterClick = (filter: CategoryFilter) => {
