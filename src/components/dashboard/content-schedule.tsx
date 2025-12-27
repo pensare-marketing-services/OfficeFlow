@@ -71,7 +71,8 @@ const mainContentTypes: ContentType[] = [
     'Website',
     'Podcast',
     'SEO',
-    'Web Blogs'
+    'Web Blogs',
+    'Grid',
 ];
 
 
@@ -533,7 +534,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     </DialogHeader>
                                                     <DialogDescription asChild>
                                                     <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
-                                                        <LinkifiedText text={task.description} />
+                                                        <LinkifiedText text={task.description || ''} />
                                                     </div>
                                                     </DialogDescription>
                                                 </DialogContent>
