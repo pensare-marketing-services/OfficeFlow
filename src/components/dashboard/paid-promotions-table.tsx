@@ -95,7 +95,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
     const [oldBalance, setOldBalance] = useState(0);
-    const { addTask, updateTask, tasks } = useTasks();
+    const { addTask, updateTask, deleteTask, tasks } = useTasks();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -228,7 +228,22 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     };
 
     const deletePromotion = async (id: string) => {
+        const promotionToDelete = promotions.find(p => p.id === id);
+        if (!promotionToDelete) return;
+    
+        // First, delete the promotion document
         await deleteDoc(doc(db, `clients/${clientId}/promotions`, id));
+    
+        // Then, find and delete the associated task
+        const linkedTask = tasks.find(t => 
+            t.description === 'Paid Promotion' && 
+            t.title === promotionToDelete.campaign && 
+            t.clientId === clientId
+        );
+    
+        if (linkedTask) {
+            deleteTask(linkedTask.id);
+        }
     };
     
     const onSend = (message: string) => {
@@ -442,3 +457,4 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     
 
     
+
