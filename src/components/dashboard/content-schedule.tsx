@@ -474,10 +474,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 
                                 const availableStatuses = getAvailableStatuses(task);
                                 
-                                const descriptionWords = task.description ? task.description.split(/\s+/).filter(Boolean) : [];
-                                const wordCount = descriptionWords.length;
-                                const descriptionPreview = descriptionWords.slice(0, 10).join(' ');
-
                                 const lastNote = (task.progressNotes?.length ?? 0) > 0 ? task.progressNotes![task.progressNotes!.length - 1] : null;
                                 const hasUnreadMessage = lastNote && lastNote.authorId !== currentUser?.uid && !openedChats.has(task.id);
                                 
@@ -517,11 +513,18 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r" style={{maxWidth: '200px'}}>
-                                        {wordCount > 10 ? (
+                                        {isAdmin ? (
+                                            <EditableTableCell 
+                                                value={task.description || ''} 
+                                                onSave={(value) => handleFieldChange(task.id, 'description', value)}
+                                                type="text"
+                                                placeholder="Add a description..."
+                                            />
+                                        ) : (
                                             <Dialog>
                                                 <DialogTrigger asChild>
                                                     <p className="text-xs text-muted-foreground p-1 truncate cursor-pointer hover:text-foreground">
-                                                    {descriptionPreview}... <span className="underline">more</span>
+                                                        {(task.description || '-').substring(0, 30)}{task.description && task.description.length > 30 ? '...' : ''}
                                                     </p>
                                                 </DialogTrigger>
                                                 <DialogContent className="sm:max-w-[60vw]">
@@ -535,17 +538,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     </DialogDescription>
                                                 </DialogContent>
                                             </Dialog>
-                                        ) : (
-                                            isAdmin ? (
-                                                <EditableTableCell 
-                                                    value={task.description || ''} 
-                                                    onSave={(value) => handleFieldChange(task.id, 'description', value)}
-                                                    type="text"
-                                                    placeholder="Add a description..."
-                                                />
-                                            ) : (
-                                                <p className="text-xs text-muted-foreground p-1 truncate">{task.description || '-'}</p>
-                                            )
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
@@ -746,5 +738,3 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
-
-    
