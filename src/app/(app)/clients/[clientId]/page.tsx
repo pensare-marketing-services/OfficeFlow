@@ -189,19 +189,13 @@ export default function ClientIdPage() {
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-4">
                     <Card>
-                        <CardHeader>
-                             {pageLoading ? <Skeleton className="h-8 w-48 mb-2" /> : client ? (
-                                <>
-                                    <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
-                                    <CardDescription>Manage client plans and progress.</CardDescription>
-                                </>
-                             ) : (
-                                <CardTitle className="font-headline">Client Not Found</CardTitle>
-                             )}
-                        </CardHeader>
                         <CardContent className="p-2">
                          {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
                                 <div className="flex flex-row items-center gap-4">
+                                    <div className="flex-shrink-0">
+                                        <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
+                                        <CardDescription>Manage client plans and progress.</CardDescription>
+                                    </div>
                                     <ClientPlanSummary 
                                         client={client} 
                                         onUpdate={(id, data) => handleClientUpdate(data)} 
