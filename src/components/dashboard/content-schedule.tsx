@@ -218,13 +218,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         sortableTasks.sort((a, b) => {
             const aValue = a.priority || 99;
             const bValue = b.priority || 99;
-            if (aValue < bValue) {
-                return -1;
-            }
-            if (aValue > bValue) {
-                return 1;
-            }
-            return 0;
+            if (aValue < bValue) return -1;
+            if (aValue > bValue) return 1;
+
+            // If priorities are equal, sort by creation time (older first)
+            const aDate = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
+            const bDate = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
+            return aDate - bDate;
         });
         return sortableTasks;
     }, [tasks]);
