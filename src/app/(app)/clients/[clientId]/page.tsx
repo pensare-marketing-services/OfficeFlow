@@ -158,7 +158,10 @@ export default function ClientIdPage() {
         if (!tasks || !client) return [];
         return tasks.filter(task => 
             task.clientId === client.id && 
-            task.contentType !== 'Other'
+            task.contentType !== 'Other' &&
+            task.contentType !== 'SEO' &&
+            task.contentType !== 'Website' &&
+            task.contentType !== 'Web Blogs'
         );
     }, [tasks, client]);
     
@@ -191,16 +194,18 @@ export default function ClientIdPage() {
                     <Card>
                         <CardContent className="p-2">
                          {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
-                                <div className="flex flex-row items-center gap-4">
-                                    <div className="flex-shrink-0">
+                                <div className="flex flex-col gap-2">
+                                     <div className='flex-shrink-0'>
                                         <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
                                         <CardDescription>Manage client plans and progress.</CardDescription>
+                                     </div>
+                                    <div className="flex flex-row items-center gap-4">
+                                        <ClientPlanSummary 
+                                            client={client} 
+                                            onUpdate={(id, data) => handleClientUpdate(data)} 
+                                        />
+                                        <Button onClick={handleAddTask} disabled={tasksLoading}>Add Task</Button>
                                     </div>
-                                    <ClientPlanSummary 
-                                        client={client} 
-                                        onUpdate={(id, data) => handleClientUpdate(data)} 
-                                    />
-                                    <Button onClick={handleAddTask} disabled={tasksLoading}>Add Task</Button>
                                 </div>
                             )}
                         </CardContent>
