@@ -441,9 +441,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const isEmployee = currentUser?.role === 'employee';
                                 const isAdmin = currentUser?.role === 'admin';
                                 
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
-                                const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
+                                const now = new Date();
+                                const deadline = new Date(task.deadline);
+                                deadline.setHours(23, 59, 59, 999);
+                                const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && deadline < now;
                                 
                                 const isPromotionTask = task.description === 'Paid Promotion';
                                 const isStandardTask = !isPromotionTask;

@@ -31,14 +31,13 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const onHoldTasksCount = tasks.filter(t => t.status === 'Hold').length;
   
   const overdueTasks = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to the beginning of today
-
+    const now = new Date();
     return tasks.filter(task => {
-      const deadline = new Date(task.deadline);
-      return deadline < today && !['For Approval', 'Approved', 'Posted'].includes(task.status);
+        const deadline = new Date(task.deadline);
+        deadline.setHours(23, 59, 59, 999); // Consider deadline as end of day
+        return deadline < now && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status);
     });
-  }, [tasks]);
+}, [tasks]);
 
   const overdueCount = overdueTasks.length;
   

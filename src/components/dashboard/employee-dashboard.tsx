@@ -31,14 +31,13 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
   const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
   
   const overdueTasks = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); 
-
+    const now = new Date();
     return employeeTasks.filter(task => {
-      const deadline = new Date(task.deadline);
-      return deadline < today && !['For Approval', 'Approved', 'Posted'].includes(task.status);
+        const deadline = new Date(task.deadline);
+        deadline.setHours(23, 59, 59, 999); // Consider deadline as end of day
+        return deadline < now && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status);
     });
-  }, [employeeTasks]);
+}, [employeeTasks]);
 
   const allNonCompletedTasks = useMemo(() => {
     return employeeTasks.filter(t => !completedStatuses.includes(t.status));

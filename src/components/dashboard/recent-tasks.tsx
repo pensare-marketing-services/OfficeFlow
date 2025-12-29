@@ -170,7 +170,10 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const handleStatusChange = (task: Task & {id: string}, newStatus: string) => {
     let statusToSave: TaskStatus = newStatus as TaskStatus;
     let updatePayload: Partial<Task> = {};
-    const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < new Date();
+    const now = new Date();
+    const deadline = new Date(task.deadline);
+    deadline.setHours(23, 59, 59, 999);
+    const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && deadline < now;
 
     if (newStatus === 'Active') statusToSave = 'On Work';
     if (newStatus === 'Stopped') statusToSave = 'Completed';
@@ -318,9 +321,10 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
 
                 const isCompleted = completedStatuses.includes(task.status);
                 const isPromotionTask = task.description === 'Paid Promotion';
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && new Date(task.deadline) < today;
+                const now = new Date();
+                const deadline = new Date(task.deadline);
+                deadline.setHours(23, 59, 59, 999);
+                const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && deadline < now;
                 
                 let statusOptions: string[] = [...allStatuses];
                 
