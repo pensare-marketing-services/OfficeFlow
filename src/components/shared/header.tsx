@@ -19,17 +19,13 @@ function getPageTitle(pathname: string): string {
 }
 
 const NotificationTime = ({ date }: { date: string | Date }) => {
-  const [timeAgo, setTimeAgo] = useState('');
+  const [timeAgo, setTimeAgo] = useState<string | null>(null);
 
   useEffect(() => {
     setTimeAgo(formatDistanceToNow(new Date(date), { addSuffix: true }));
   }, [date]);
 
-  if (!timeAgo) {
-    return null; // Render nothing on the server and initial client render
-  }
-
-  return <p className="text-xs text-muted-foreground">{timeAgo}</p>;
+  return timeAgo ? <p className="text-xs text-muted-foreground">{timeAgo}</p> : null;
 };
 
 export function Header() {
