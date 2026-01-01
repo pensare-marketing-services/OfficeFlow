@@ -39,7 +39,7 @@ const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() :
 
 const EditablePriorityCell: React.FC<{ user: UserWithId }> = ({ user }) => {
     const { updateUserPriority } = useUsers();
-    const [priority, setPriority] = useState(user.priority || 99);
+    const [priority, setPriority] = useState(user.priority ?? 0);
 
     const handleBlur = () => {
         const newPriority = Number(priority);
@@ -62,7 +62,7 @@ const EditablePriorityCell: React.FC<{ user: UserWithId }> = ({ user }) => {
             onChange={(e) => setPriority(Number(e.target.value))}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            className="h-7 w-16 text-xs text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
+            className="h-7 w-12 text-xs text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
         />
     )
 }
@@ -137,7 +137,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
     const employees = useMemo(() => 
-        users.filter(u => u.role === 'employee').sort((a,b) => (a.priority || 99) - (b.priority || 99))
+        users.filter(u => u.role === 'employee').sort((a,b) => (a.priority ?? 99) - (b.priority ?? 99))
     , [users]);
 
     const dmClients = useMemo(() =>
@@ -166,15 +166,15 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                     <Table className="border-collapse w-full">
                         <TableHeader>
                             <TableRow className="h-10">
-                                <TableHead className="w-[40px] text-center text-xs p-1 border">Sl. No</TableHead>
-                                <TableHead className="min-w-[150px] text-xs p-1 border">Client Name</TableHead>
-                                <TableHead className="min-w-[150px] text-xs p-1 border">Assigned</TableHead>
+                                <TableHead className="text-center text-xs p-1 border" style={{minWidth: '40px'}}>Sl.</TableHead>
+                                <TableHead className="text-xs p-1 border" style={{minWidth: '150px'}}>Client Name</TableHead>
+                                <TableHead className="text-xs p-1 border" style={{minWidth: '150px'}}>Assigned</TableHead>
                                 {employees.map(employee => (
                                     <React.Fragment key={employee.id}>
-                                        <TableHead className="min-w-[100px] text-xs p-1 border text-center">
+                                        <TableHead className="text-xs p-1 border text-center" style={{minWidth: '150px'}}>
                                             {employee.username}
                                         </TableHead>
-                                         <TableHead className="w-[60px] text-xs p-1 border text-center">
+                                         <TableHead className="text-xs p-1 border text-center" style={{minWidth: '60px'}}>
                                             Order
                                         </TableHead>
                                     </React.Fragment>
@@ -208,7 +208,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                                 <TableCell className="p-0 border">
                                                     {task ? <TaskCell task={task} /> : null}
                                                 </TableCell>
-                                                <TableCell className="p-1 border align-middle">
+                                                <TableCell className="p-1 border align-middle text-center">
                                                     <EditablePriorityCell user={employee} />
                                                 </TableCell>
                                             </React.Fragment>
