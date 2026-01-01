@@ -165,9 +165,9 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                     <Table className="border-collapse w-full">
                         <TableHeader>
                             <TableRow className="h-10">
-                                <TableHead className="min-w-12 text-center text-xs p-1 border">Sl. No</TableHead>
-                                <TableHead className="min-w-40 text-xs p-1 border">Client Name</TableHead>
-                                <TableHead className="min-w-40 text-xs p-1 border">Assigned</TableHead>
+                                <TableHead className="min-w-12 text-center text-xs p-1 border sticky left-0 bg-card z-10">Sl. No</TableHead>
+                                <TableHead className="min-w-40 text-xs p-1 border sticky left-12 bg-card z-10">Client Name</TableHead>
+                                <TableHead className="min-w-40 text-xs p-1 border sticky left-52 bg-card z-10">Assigned</TableHead>
                                 {employees.map(employee => (
                                     <React.Fragment key={employee.id}>
                                         <TableHead className="min-w-40 text-xs p-1 border text-center">
@@ -189,9 +189,9 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
 
                                 return (
                                 <TableRow key={client.id} className="h-10">
-                                    <TableCell className="text-center p-1 border text-sm">{index + 1}</TableCell>
-                                    <TableCell className="p-1 border text-xs font-medium">{client.name}</TableCell>
-                                    <TableCell className="p-1 border text-xs">{assignedEmployees}</TableCell>
+                                    <TableCell className="text-center p-1 border text-sm sticky left-0 bg-card">{index + 1}</TableCell>
+                                    <TableCell className="p-1 border text-xs font-medium sticky left-12 bg-card">{client.name}</TableCell>
+                                    <TableCell className="p-1 border text-xs sticky left-52 bg-card">{assignedEmployees}</TableCell>
                                     {employees.map(employee => {
                                         const task = clientTasks.get(`${client.id}-${employee.id}`);
                                         return (
