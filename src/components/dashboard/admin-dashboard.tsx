@@ -155,7 +155,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
       )}
 
       {viewMode === 'employees' && 
-        <div className="overflow-x-auto">
+        <div className="relative w-full">
             <EmployeeMasterView tasks={tasks} users={users} clients={clients} />
         </div>
       }
