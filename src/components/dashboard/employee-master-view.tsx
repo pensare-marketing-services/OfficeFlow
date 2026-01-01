@@ -167,14 +167,14 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                         <TableHeader>
                             <TableRow className="h-10">
                                 <TableHead className="w-[40px] text-center text-xs p-1 border">Sl. No</TableHead>
-                                <TableHead className="w-[150px] text-xs p-1 border">Client Name</TableHead>
-                                <TableHead className="w-[150px] text-xs p-1 border">Assigned</TableHead>
+                                <TableHead className="min-w-[150px] text-xs p-1 border">Client Name</TableHead>
+                                <TableHead className="min-w-[150px] text-xs p-1 border">Assigned</TableHead>
                                 {employees.map(employee => (
                                     <React.Fragment key={employee.id}>
-                                        <TableHead className="min-w-[150px] text-xs p-1 border text-center">
+                                        <TableHead className="min-w-[100px] text-xs p-1 border text-center">
                                             {employee.username}
                                         </TableHead>
-                                         <TableHead className="min-w-[60px] text-xs p-1 border text-center">
+                                         <TableHead className="w-[60px] text-xs p-1 border text-center">
                                             Order
                                         </TableHead>
                                     </React.Fragment>
@@ -192,10 +192,14 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                 <TableRow 
                                     key={client.id} 
                                     className={cn("h-10", selectedClientId === client.id && "bg-accent/50")}
-                                    onClick={() => setSelectedClientId(client.id === selectedClientId ? null : client.id)}
                                 >
                                     <TableCell className="text-center p-1 border text-sm">{index + 1}</TableCell>
-                                    <TableCell className="p-1 border text-xs font-medium cursor-pointer hover:underline">{client.name}</TableCell>
+                                    <TableCell 
+                                        className="p-1 border text-xs font-medium cursor-pointer hover:underline"
+                                        onClick={() => setSelectedClientId(client.id === selectedClientId ? null : client.id)}
+                                    >
+                                        {client.name}
+                                    </TableCell>
                                     <TableCell className="p-1 border text-xs">{assignedEmployees}</TableCell>
                                     {employees.map(employee => {
                                         const task = clientTasks.get(`${client.id}-${employee.id}`);
