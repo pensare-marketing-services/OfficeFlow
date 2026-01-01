@@ -186,42 +186,8 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const { scrollRef, scrollLeft, scrollRight, canScrollLeft, canScrollRight } =
     useHorizontalScroll();
-    
-  const fixedContainerRef = useRef<HTMLDivElement>(null);
-  const isSyncingScroll = useRef(false);
 
-  useEffect(() => {
-    const mainScroller = scrollRef.current;
-    const fixedScroller = fixedContainerRef.current;
-
-    if (!mainScroller || !fixedScroller) return;
-
-    const handleMainScroll = () => {
-      if (isSyncingScroll.current) return;
-      isSyncingScroll.current = true;
-      fixedScroller.scrollTop = mainScroller.scrollTop;
-      requestAnimationFrame(() => {
-        isSyncingScroll.current = false;
-      });
-    };
-
-    const handleFixedScroll = () => {
-       if (isSyncingScroll.current) return;
-       isSyncingScroll.current = true;
-       mainScroller.scrollTop = fixedScroller.scrollTop;
-       requestAnimationFrame(() => {
-        isSyncingScroll.current = false;
-      });
-    }
-
-    mainScroller.addEventListener('scroll', handleMainScroll);
-    fixedScroller.addEventListener('scroll', handleFixedScroll);
-
-    return () => {
-      mainScroller.removeEventListener('scroll', handleMainScroll);
-      fixedScroller.removeEventListener('scroll', handleFixedScroll);
-    };
-  }, [scrollRef]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   /* FILTER EMPLOYEES */
   const employees = useMemo(
@@ -266,7 +232,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
 
   return (
     <Card className="w-full overflow-hidden">
-      <CardContent className="p-0 w-full">
+      <CardContent className="p-0 w-full overflow-x-hidden">
 
         {/* Scroll Buttons */}
         <div className="flex items-center justify-end p-1 border-b">
@@ -292,16 +258,22 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
         </div>
 
         {/* MAIN WRAPPER — Enables vertical scrolling fully */}
-        <div className="flex w-full min-w-0 max-h-[calc(100vh-20rem)]">
+
+        
+        <div
+        
+         className="flex w-full min-w-0 h-full"
+          ref={containerRef}
+        >
           {/* ----------------------------------------------------
              LEFT FIXED COLUMNS
           ---------------------------------------------------- */}
-          <div className="flex-shrink-0 bg-background border-r shadow-sm overflow-y-hidden" ref={fixedContainerRef}>
+          <div className="flex-shrink-0 bg-background border-r shadow-sm">
             <Table className="text-[10px]">
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
-                  <TableHead style={{ width: '40px' }}>Sl.</TableHead>
-                  <TableHead style={{ width: '130px' }}>Client</TableHead>
+                  <TableHead className="border-r" style={{ width: '40px' }}>Sl.</TableHead>
+                  <TableHead className="border-r" style={{ width: '130px' }}>Client</TableHead>
                   <TableHead style={{ width: '180px' }}>Assigned</TableHead>
                 </TableRow>
               </TableHeader>
@@ -322,8 +294,8 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                       )}
                       onClick={() => setSelectedClientId(client.id)}
                     >
-                      <TableCell className="text-center">{index + 1}</TableCell>
-                      <TableCell>{client.name}</TableCell>
+                      <TableCell className="text-center border-r">{index + 1}</TableCell>
+                      <TableCell className="border-r">{client.name}</TableCell>
                       <TableCell>{assignedEmployees}</TableCell>
                     </TableRow>
                   );
@@ -337,7 +309,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
           ---------------------------------------------------- */}
           <div className="flex-grow min-w-0 relative">
             <div
-              className="absolute inset-0 overflow-auto"
+              className="absolute inset-0 overflow-x-auto overflow-y-hidden"
               ref={scrollRef}
             >
               <div
@@ -353,7 +325,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                             style={{
                               width: `${employeeColWidth}px`,
                             }}
-                            className="bg-muted/80"
+                            className="bg-muted/80 border-r"
                           >
                             {employee.username}
                           </TableHead>
@@ -362,7 +334,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                             style={{
                               width: `${orderColWidth}px`,
                             }}
-                            className="bg-muted/80"
+                            className="bg-muted/80 border-r"
                           >
                             Order
                           </TableHead>
@@ -388,7 +360,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                           return (
                             <React.Fragment key={employee.id}>
                               <TableCell
-                                className="p-0"
+                                className="p-0 border-r"
                                 style={{
                                   width: `${employeeColWidth}px`,
                                 }}
@@ -411,10 +383,10 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                               </TableCell>
 
                               <TableCell
-                                className="p-0"
+                                className="p-0 border-r"
                                 style={{ width: `${orderColWidth}px` }}
                               >
-                                <div className="p-1 flex items-center justify-center border-r h-full">
+                                <div className="p-1 flex items-center justify-center">
                                   <EditablePriorityCell user={employee} />
                                 </div>
                               </TableCell>
