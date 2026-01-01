@@ -85,7 +85,7 @@ const TaskCell = ({
         <div
           onClick={onSelect}
           className={cn(
-            'w-full cursor-pointer p-1 text-[10px] font-medium border-r',
+            'cursor-pointer p-1 text-[10px] font-medium border-r',
             statusColors[task.status] || 'bg-transparent',
             isSelected && 'ring-2 ring-accent'
           )}
@@ -376,7 +376,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                     }
                                   />
                                 ) : (
-                                  <div className="w-full flex items-center justify-center text-muted-foreground/40 border-r">
+                                  <div className="flex items-center justify-center text-muted-foreground/40 border-r">
                                     -
                                   </div>
                                 )}
