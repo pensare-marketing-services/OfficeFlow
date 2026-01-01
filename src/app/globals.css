@@ -82,7 +82,12 @@
   body {
     @apply bg-background text-foreground;
   }
-  /* Hide spinner buttons on number inputs */
+
+  input {
+    font-size: inherit !important;
+    line-height: inherit !important;
+  }
+
   input[type='number']::-webkit-outer-spin-button,
   input[type='number']::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -92,3 +97,4 @@
     -moz-appearance: textfield;
   }
 }
+
