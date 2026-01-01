@@ -1,9 +1,4 @@
 
-
-
-
-
-
 export type UserProfile = {
   uid?: string;
   name?: string;
@@ -11,6 +6,7 @@ export type UserProfile = {
   role: 'admin' | 'employee';
   username?: string;
   password?: string;
+  priority?: number;
 };
 
 export type User = UserProfile & { id: string };

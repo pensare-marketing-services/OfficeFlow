@@ -5,7 +5,7 @@ import { StatsCard } from './stats-card';
 import { ClipboardList, Users, CheckCircle2, AlertTriangle, PauseCircle } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
-import EmployeeTasks from './employee-tasks';
+import EmployeeMasterView from './employee-master-view';
 import { useTasks } from '@/hooks/use-tasks';
 
 type UserWithId = User & { id: string };
@@ -43,17 +43,32 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   
   const filteredTasks = useMemo(() => {
     if (viewMode !== 'tasks') return [];
-    switch (taskFilter) {
+    let tasksToFilter = tasks;
+     switch (taskFilter) {
       case 'completed':
-        return tasks.filter(t => t.status === 'Approved' || t.status === 'Posted');
+        tasksToFilter = tasks.filter(t => t.status === 'Approved' || t.status === 'Posted');
+        break;
       case 'overdue':
-        return overdueTasks;
+        tasksToFilter = overdueTasks;
+        break;
       case 'onHold':
-        return tasks.filter(t => t.status === 'Hold');
+        tasksToFilter = tasks.filter(t => t.status === 'Hold');
+        break;
       case 'total':
       default:
-        return tasks;
+        tasksToFilter = tasks;
+        break;
     }
+
+    return tasksToFilter.sort((a,b) => {
+        const priorityA = a.priority || 99;
+        const priorityB = b.priority || 99;
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+        return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0);
+    });
+
   }, [tasks, taskFilter, viewMode, overdueTasks]);
   
   const dmTasks = filteredTasks.filter(task => !['SEO', 'Website', 'Web Blogs', 'Other'].includes(task.contentType || ''));
@@ -122,10 +137,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         />
       </div>
       
-      {viewMode === 'tasks' && taskFilter !== 'total' && (
-        <RecentTasks tasks={filteredTasks} users={users} title={filterTitles[taskFilter]} onTaskDelete={deleteTask} />
-      )}
-      {viewMode === 'tasks' && taskFilter === 'total' && (
+      {viewMode === 'tasks' && (
         <div className="flex w-full space-x-4 overflow-x-auto p-1">
             <div className="flex-shrink-0 w-[470px]">
                 <RecentTasks tasks={dmTasks} users={users} title="Tasks - Digital Marketing" onTaskDelete={deleteTask} />
@@ -142,7 +154,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         </div>
       )}
 
-      {viewMode === 'employees' && <EmployeeTasks tasks={tasks} users={users} />}
+      {viewMode === 'employees' && <EmployeeMasterView tasks={tasks} users={users} clients={clients} />}
 
     </div>
   );

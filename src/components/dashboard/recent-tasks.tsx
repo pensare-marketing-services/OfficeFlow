@@ -91,42 +91,6 @@ const statusColors: Record<string, string> = {
     'Stopped': 'bg-red-500 text-white',
 };
 
-const EditablePriorityCell = ({ task, onUpdate }: { task: Task & {id: string}, onUpdate: (taskId: string, data: Partial<Task>) => void }) => {
-    const [priority, setPriority] = useState(task.priority || 0);
-
-    useEffect(() => {
-        setPriority(task.priority || 0);
-    }, [task.priority]);
-
-    const handleSave = () => {
-        const newPriority = Number(priority);
-        if (newPriority !== task.priority) {
-            onUpdate(task.id, { priority: newPriority });
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleSave();
-            e.currentTarget.blur();
-        }
-    };
-
-    return (
-        <TableCell className="p-0 border-r border-t text-center">
-            <Input
-                type="number"
-                value={priority}
-                onChange={(e) => setPriority(Number(e.target.value))}
-                onBlur={handleSave}
-                onKeyDown={handleKeyDown}
-                className="h-7 w-6 text-[8px] p-1 mx-auto border-0 focus-visible:ring-1"
-            />
-        </TableCell>
-    );
-};
-
-
 export default function RecentTasks({ tasks, users, title, onTaskDelete }: RecentTasksProps) {
   const { user: currentUser } = useAuth();
   const [clients, setClients] = useState<ClientWithId[]>([]);
@@ -136,15 +100,13 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const sortedTasks = useMemo(() => {
-    return [...tasks].sort((a, b) => {
-        const aValue = a.priority || 99;
-        const bValue = b.priority || 99;
-        if (aValue < bValue) return -1;
-        if (aValue > bValue) return 1;
-
-        const aDate = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
-        const bDate = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
-        return aDate - bDate;
+    return [...tasks].sort((a,b) => {
+        const priorityA = a.priority || 99;
+        const priorityB = b.priority || 99;
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+        return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0);
     });
   }, [tasks]);
 
@@ -186,10 +148,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     
     updatePayload.status = statusToSave;
     updateTask(task.id, updatePayload);
-  }
-
-  const handlePriorityChange = (task: Task & {id: string}, newPriority: number) => {
-    updateTask(task.id, { priority: newPriority });
   }
 
   const handleDeleteAll = async () => {
@@ -297,11 +255,11 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         )}
       </CardHeader>
       <CardContent className="p-0">
+        <div className="overflow-x-auto">
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
               <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[40px]">#</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[30px]">Order</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[80px]">Client</TableHead>
               <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[120px]">Task</TableHead>
                {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[100px]">Assigned</TableHead>}
@@ -364,12 +322,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                         <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
                             <TableCell className="py-1 px-2 border-r border-t text-[11px] font-medium text-center">{index + 1}</TableCell>
                             
-                            {isAdmin ? (
-                                <EditablePriorityCell task={task} onUpdate={updateTask} />
-                            ) : (
-                               <TableCell className="py-1 px-2 border-r border-t text-center text-xs font-bold">{task.priority}</TableCell>
-                            )}
-
                             <TableCell className="py-1 px-2 border-r border-t text-[11px]">
                                 <Tooltip>
                                     <TooltipTrigger asChild>
@@ -568,6 +520,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
             })}
           </TableBody>
         </Table>
+        </div>
          {tasks.length === 0 && (
             <div className="text-center text-muted-foreground p-8">No tasks to display.</div>
         )}

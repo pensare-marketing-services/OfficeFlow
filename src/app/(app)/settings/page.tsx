@@ -274,48 +274,11 @@ const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string
     );
 };
 
-const EditablePriorityCell = ({ client, onPriorityChange }: { client: ClientWithId, onPriorityChange: (clientId: string, newPriority: number) => Promise<void> }) => {
-    const [priority, setPriority] = useState(client.priority || 0);
-
-    useEffect(() => {
-        setPriority(client.priority || 0);
-    }, [client.priority]);
-
-    const handleSave = async () => {
-        const newPriority = Number(priority);
-        if (newPriority !== client.priority) {
-            await onPriorityChange(client.id, newPriority);
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleSave();
-            e.currentTarget.blur();
-        }
-    };
-
-    return (
-        <TableCell className="px-2 py-1 text-xs">
-            <Input
-                type="number"
-                value={priority}
-                onChange={(e) => setPriority(Number(e.target.value))}
-                onBlur={handleSave}
-                onKeyDown={handleKeyDown}
-                className="h-7 w-12 text-xs p-1"
-            />
-        </TableCell>
-    );
-};
-
-
-const ClientTable = ({ clients, users, loading, onUpdate, onPriorityChange }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void>, onPriorityChange: (clientId: string, newPriority: number) => Promise<void> }) => {
+const ClientTable = ({ clients, users, loading, onUpdate }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void> }) => {
     return (
          <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead className="w-[40px] px-2 text-xs h-8">Order</TableHead>
                     <TableHead className="px-2 text-xs h-8">Client Name</TableHead>
                     <TableHead className="px-2 text-xs h-8">Assigned Employees</TableHead>
                     <TableHead className="text-right px-2 text-xs h-8">Actions</TableHead>
@@ -324,12 +287,11 @@ const ClientTable = ({ clients, users, loading, onUpdate, onPriorityChange }: { 
             <TableBody>
                 {loading && Array.from({length: 8}).map((_, i) => (
                     <TableRow key={i}>
-                        <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
+                        <TableCell colSpan={3} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                     </TableRow>
                 ))}
                 {!loading && clients.map((client) => (
                     <TableRow key={client.id}>
-                        <EditablePriorityCell client={client} onPriorityChange={onPriorityChange} />
                         <TableCell className="font-medium text-xs py-1 px-2">{client.name}</TableCell>
                         <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
                          <TableCell className="text-right px-2 py-1">
@@ -342,7 +304,7 @@ const ClientTable = ({ clients, users, loading, onUpdate, onPriorityChange }: { 
                     </TableRow>
                 ))}
                 {!loading && clients.length === 0 && (
-                    <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground p-4">No clients in this column.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground p-4">No clients in this column.</TableCell></TableRow>
                 )}
             </TableBody>
         </Table>
@@ -378,7 +340,6 @@ export default function SettingsPage() {
                                 users={users}
                                 loading={pageLoading}
                                 onUpdate={handleUpdateClient}
-                                onPriorityChange={updateClientPriority}
                             />
                         </div>
                          <div>
@@ -387,7 +348,6 @@ export default function SettingsPage() {
                                 users={users}
                                 loading={pageLoading}
                                 onUpdate={handleUpdateClient}
-                                onPriorityChange={updateClientPriority}
                             />
                         </div>
                     </div>
