@@ -11,7 +11,7 @@ import { LinkifiedText } from '../shared/linkified-text';
 import { format } from 'date-fns';
 import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback } from '../ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 
 type UserWithId = UserProfile & { id: string };
