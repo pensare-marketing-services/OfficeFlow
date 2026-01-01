@@ -64,13 +64,13 @@ const EditablePriorityCell: React.FC<{ user: UserWithId }> = ({ user }) => {
             onChange={(e) => setPriority(Number(e.target.value))}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            className="h-7 w-12 text-xs text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
+            className="h-7 w-12 text-[10px] text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
         />
     )
 }
 
 const TaskCell = ({ task, onSelect, isSelected }: { task: TaskWithId; onSelect: () => void; isSelected: boolean }) => {
-    if (!task) return <div className="h-full w-full p-1 border-r"></div>;
+    if (!task) return <div className="h-full w-full p-1"></div>;
     const { user: currentUser } = useAuth();
 
     return (
@@ -79,7 +79,7 @@ const TaskCell = ({ task, onSelect, isSelected }: { task: TaskWithId; onSelect: 
                 <div 
                     onClick={onSelect}
                     className={cn(
-                        "h-full w-full cursor-pointer p-1 text-xs font-medium border-r",
+                        "h-full w-full cursor-pointer p-1 text-xs font-medium",
                          statusColors[task.status] || 'bg-transparent',
                          isSelected && 'ring-2 ring-inset ring-accent'
                     )}
@@ -140,39 +140,41 @@ const TaskCell = ({ task, onSelect, isSelected }: { task: TaskWithId; onSelect: 
 export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
     const {scrollRef, scrollLeft, scrollRight, canScrollLeft, canScrollRight} = useHorizontalScroll();
-    const containerRef = useRef<HTMLDivElement>(null);
-    const fixedTableContainerRef = useRef<HTMLDivElement>(null);
-    const isSyncingScroll = useRef(false);
+    
+    const fixedContainerRef = useRef<HTMLDivElement>(null);
+    const scrollableContainerRef = useRef<HTMLDivElement>(null);
+
+    const isSyncingLeftScroll = useRef(false);
+    const isSyncingRightScroll = useRef(false);
 
     useEffect(() => {
-        const fixedContainer = fixedTableContainerRef.current;
-        const scrollableContainer = scrollRef.current;
+        const fixedEl = fixedContainerRef.current;
+        const scrollableEl = scrollableContainerRef.current;
 
-        if (!fixedContainer || !scrollableContainer) return;
+        if (!fixedEl || !scrollableEl) return;
 
         const handleFixedScroll = () => {
-            if (!isSyncingScroll.current) {
-                isSyncingScroll.current = true;
-                scrollableContainer.scrollTop = fixedContainer.scrollTop;
-                // Allow the other event to fire after a short delay
-                setTimeout(() => { isSyncingScroll.current = false; }, 50);
+            if (!isSyncingLeftScroll.current) {
+                isSyncingRightScroll.current = true;
+                scrollableEl.scrollTop = fixedEl.scrollTop;
             }
+            isSyncingLeftScroll.current = false;
         };
 
         const handleScrollableScroll = () => {
-            if (!isSyncingScroll.current) {
-                isSyncingScroll.current = true;
-                fixedContainer.scrollTop = scrollableContainer.scrollTop;
-                setTimeout(() => { isSyncingScroll.current = false; }, 50);
+            if (!isSyncingRightScroll.current) {
+                isSyncingLeftScroll.current = true;
+                fixedEl.scrollTop = scrollableEl.scrollTop;
             }
+            isSyncingRightScroll.current = false;
         };
 
-        fixedContainer.addEventListener('scroll', handleFixedScroll);
-        scrollableContainer.addEventListener('scroll', handleScrollableScroll);
+        fixedEl.addEventListener('scroll', handleFixedScroll);
+        scrollableEl.addEventListener('scroll', handleScrollableScroll);
 
         return () => {
-            fixedContainer.removeEventListener('scroll', handleFixedScroll);
-            scrollableContainer.removeEventListener('scroll', handleScrollableScroll);
+            fixedEl.removeEventListener('scroll', handleFixedScroll);
+            scrollableEl.removeEventListener('scroll', handleScrollableScroll);
         };
     }, []);
 
@@ -198,13 +200,13 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
         return map;
     }, [tasks]);
 
-    const employeeColWidth = 120;
-    const orderColWidth = 70;
+    const employeeColWidth = 100;
+    const orderColWidth = 60;
     const totalEmployeeWidth = employees.length * (employeeColWidth + orderColWidth);
 
     return (
         <Card className="w-full overflow-hidden">
-            <CardContent className="p-0 w-full overflow-x-hidden">
+            <CardContent className="p-0 w-full">
                 <div className='flex items-center justify-end p-1 border-b'>
                     <div className="flex items-center gap-1">
                         <Button 
@@ -227,18 +229,18 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                         </Button>
                     </div>
                 </div>
-                <div className="flex w-full min-w-0" style={{ height: '500px' }} ref={containerRef}>
-                    {/* Fixed Columns - Client Info */}
+                <div className="flex w-full min-w-0 h-[60vh]">
                     <div 
-                        className="flex-shrink-0 z-10 bg-background border-r shadow-sm overflow-y-hidden"
-                        ref={fixedTableContainerRef}
+                        ref={fixedContainerRef}
+                        className="flex-shrink-0 z-10 bg-background shadow-sm overflow-y-auto"
+                        style={{'--scrollbar-width': '0px'} as React.CSSProperties} // Custom property to hide scrollbar
                     >
                         <Table className="text-xs">
-                            <TableHeader>
+                            <TableHeader className="sticky top-0 z-20 bg-background">
                                 <TableRow className="h-10">
-                                    <TableHead className="bg-muted/80 sticky top-0 z-10" style={{ width: '40px', minWidth: '40px' }}>Sl.</TableHead>
-                                    <TableHead className="bg-muted/80 sticky top-0 z-10" style={{ width: '180px', minWidth: '180px' }}>Client Name</TableHead>
-                                    <TableHead className="bg-muted/80 sticky top-0 z-10" style={{ width: '180px', minWidth: '180px' }}>Assigned</TableHead>
+                                    <TableHead className="bg-muted/80 border-r" style={{ width: '40px' }}>Sl.</TableHead>
+                                    <TableHead className="bg-muted/80 border-r" style={{ width: '150px' }}>Client Name</TableHead>
+                                    <TableHead className="bg-muted/80 border-r" style={{ minWidth: '150px' }}>Assigned</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -253,9 +255,9 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                             className={cn("h-10", selectedClientId === client.id && 'bg-accent/20')}
                                             onClick={() => setSelectedClientId(client.id)}
                                         >
-                                            <TableCell className="text-center font-medium">{index + 1}</TableCell>
-                                            <TableCell className="font-medium text-xs">{client.name}</TableCell>
-                                            <TableCell className="text-xs">{assignedEmployees}</TableCell>
+                                            <TableCell className="text-center font-medium border-r">{index + 1}</TableCell>
+                                            <TableCell className="font-medium text-xs border-r">{client.name}</TableCell>
+                                            <TableCell className="text-xs border-r">{assignedEmployees}</TableCell>
                                         </TableRow>
                                     )
                                 })}
@@ -263,75 +265,81 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                         </Table>
                     </div>
 
-                    {/* Scrollable Employee Columns */}
                     <div 
-                        className="flex-grow min-w-0 overflow-auto"
-                        ref={scrollRef}
+                        ref={scrollableContainerRef}
+                        className="flex-grow min-w-0 relative overflow-auto"
                     >
                         <div 
-                            style={{ 
-                                width: `${totalEmployeeWidth}px`,
-                            }}
+                            className="absolute inset-0 overflow-x-auto overflow-y-hidden"
+                            ref={scrollRef}
                         >
-                            <Table className="text-xs table-fixed">
-                                <TableHeader>
-                                    <TableRow className="h-10">
-                                        {employees.map(employee => (
-                                            <React.Fragment key={employee.id}>
-                                                <TableHead 
-                                                    style={{ width: `${employeeColWidth}px`}}
-                                                    className="bg-muted/80 sticky top-0 z-10"
-                                                >
-                                                    <div className="truncate px-1 font-medium" title={employee.username}>
-                                                        {employee.username}
-                                                    </div>
-                                                </TableHead>
-                                                <TableHead 
-                                                    style={{ width: `${orderColWidth}px`}}
-                                                    className="bg-muted/80 sticky top-0 z-10"
-                                                >
-                                                    Order
-                                                </TableHead>
-                                            </React.Fragment>
-                                        ))}
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {dmClients.map((client) => (
-                                        <TableRow 
-                                            key={client.id}
-                                            className={cn("h-10", selectedClientId === client.id && 'bg-accent/20')}
-                                        >
-                                            {employees.map(employee => {
-                                                const task = clientTasks.get(`${client.id}-${employee.id}`);
-                                                return (
-                                                    <React.Fragment key={employee.id}>
-                                                        <TableCell 
-                                                            className='p-0'
-                                                            style={{ width: `${employeeColWidth}px`}}
-                                                        >
-                                                            {task ? 
-                                                                <TaskCell 
-                                                                    task={task} 
-                                                                    onSelect={() => setSelectedClientId(client.id)}
-                                                                    isSelected={selectedClientId === client.id}
-                                                                />
-                                                                :
-                                                                <div className="h-full w-full p-1 border-r flex items-center justify-center text-muted-foreground/40">-</div>
-                                                            }
-                                                        </TableCell>
-                                                        <TableCell className='p-0'>
-                                                            <div className="p-1 border-r flex items-center justify-center h-full">
-                                                                <EditablePriorityCell user={employee} />
-                                                            </div>
-                                                        </TableCell>
-                                                    </React.Fragment>
-                                                )
-                                            })}
+                            <div 
+                                className="min-w-max"
+                                style={{ width: `${totalEmployeeWidth}px`}}
+                            >
+                                <Table className="text-xs table-fixed">
+                                    <TableHeader className="sticky top-0 z-10 bg-background">
+                                        <TableRow className="h-10">
+                                            {employees.map(employee => (
+                                                <React.Fragment key={employee.id}>
+                                                    <TableHead 
+                                                        style={{ width: `${employeeColWidth}px` }}
+                                                        className="bg-muted/50 border-r"
+                                                    >
+                                                        <div className="truncate px-1" title={employee.username}>
+                                                            {employee.username}
+                                                        </div>
+                                                    </TableHead>
+                                                    <TableHead 
+                                                        style={{ width: `${orderColWidth}px` }}
+                                                        className="bg-muted/50 border-r"
+                                                    >
+                                                        Order
+                                                    </TableHead>
+                                                </React.Fragment>
+                                            ))}
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {dmClients.map((client) => (
+                                            <TableRow 
+                                                key={client.id}
+                                                className={cn("h-10", selectedClientId === client.id && 'bg-accent/20')}
+                                            >
+                                                {employees.map(employee => {
+                                                    const task = clientTasks.get(`${client.id}-${employee.id}`);
+                                                    return (
+                                                        <React.Fragment key={employee.id}>
+                                                            <TableCell 
+                                                                className='p-0 border-r'
+                                                                style={{ width: `${employeeColWidth}px` }}
+                                                            >
+                                                                {task ? 
+                                                                    <TaskCell 
+                                                                        task={task} 
+                                                                        onSelect={() => setSelectedClientId(client.id)}
+                                                                        isSelected={selectedClientId === client.id}
+                                                                    />
+                                                                    :
+                                                                    <div className="h-full w-full p-1"></div>
+                                                                }
+                                                            </TableCell>
+                                                            <TableCell 
+                                                                className='p-0 border-r'
+                                                                style={{ width: `${orderColWidth}px` }}
+                                                            >
+                                                                <div className="p-1 flex items-center justify-center h-full">
+                                                                    <EditablePriorityCell user={employee} />
+                                                                </div>
+                                                            </TableCell>
+                                                        </React.Fragment>
+                                                    )
+                                                })}
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         </div>
                     </div>
                 </div>
