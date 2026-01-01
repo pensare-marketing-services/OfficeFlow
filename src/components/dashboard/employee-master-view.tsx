@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useUsers } from '@/hooks/use-users';
 
 
 type UserWithId = UserProfile & { id: string };
@@ -34,6 +35,37 @@ const statusColors: Record<string, string> = {
 };
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
+
+
+const EditablePriorityCell: React.FC<{ user: UserWithId }> = ({ user }) => {
+    const { updateUserPriority } = useUsers();
+    const [priority, setPriority] = useState(user.priority || 99);
+
+    const handleBlur = () => {
+        const newPriority = Number(priority);
+        if (newPriority !== user.priority) {
+            updateUserPriority(user.id, newPriority);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleBlur();
+            e.currentTarget.blur();
+        }
+    };
+
+    return (
+        <Input 
+            type="number"
+            value={priority}
+            onChange={(e) => setPriority(Number(e.target.value))}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="h-7 w-16 text-xs text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
+        />
+    )
+}
 
 const TaskCell = ({ task }: { task: TaskWithId }) => {
     if (!task) return <TableCell className="p-1"></TableCell>;
@@ -133,13 +165,18 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                     <Table className="border-collapse w-full">
                         <TableHeader>
                             <TableRow className="h-10">
-                                <TableHead className="w-12 text-center text-xs p-1 border">Sl. No</TableHead>
-                                <TableHead className="w-40 text-xs p-1 border">Client Name</TableHead>
-                                <TableHead className="w-40 text-xs p-1 border">Assigned</TableHead>
+                                <TableHead className="min-w-12 text-center text-xs p-1 border">Sl. No</TableHead>
+                                <TableHead className="min-w-40 text-xs p-1 border">Client Name</TableHead>
+                                <TableHead className="min-w-40 text-xs p-1 border">Assigned</TableHead>
                                 {employees.map(employee => (
-                                    <TableHead key={employee.id} className="w-40 text-xs p-1 border text-center">
-                                        {employee.username}
-                                    </TableHead>
+                                    <React.Fragment key={employee.id}>
+                                        <TableHead className="min-w-40 text-xs p-1 border text-center">
+                                            {employee.username}
+                                        </TableHead>
+                                         <TableHead className="min-w-20 text-xs p-1 border text-center">
+                                            Order
+                                        </TableHead>
+                                    </React.Fragment>
                                 ))}
                             </TableRow>
                         </TableHeader>
@@ -153,14 +190,19 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                 return (
                                 <TableRow key={client.id} className="h-10">
                                     <TableCell className="text-center p-1 border text-sm">{index + 1}</TableCell>
-                                    <TableCell className="p-1 border text-sm font-medium">{client.name}</TableCell>
+                                    <TableCell className="p-1 border text-xs font-medium">{client.name}</TableCell>
                                     <TableCell className="p-1 border text-xs">{assignedEmployees}</TableCell>
                                     {employees.map(employee => {
                                         const task = clientTasks.get(`${client.id}-${employee.id}`);
                                         return (
-                                            <TableCell key={employee.id} className="p-0 border">
-                                                {task ? <TaskCell task={task} /> : null}
-                                            </TableCell>
+                                            <React.Fragment key={employee.id}>
+                                                <TableCell className="p-0 border">
+                                                    {task ? <TaskCell task={task} /> : null}
+                                                </TableCell>
+                                                <TableCell className="p-1 border align-middle">
+                                                    <EditablePriorityCell user={employee} />
+                                                </TableCell>
+                                            </React.Fragment>
                                         );
                                     })}
                                 </TableRow>

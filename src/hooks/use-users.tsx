@@ -14,6 +14,7 @@ interface UserContextType {
     error: Error | null;
     deleteUser: (userId: string) => Promise<void>;
     updateUserPassword: (userId: string, newPassword: string) => Promise<void>;
+    updateUserPriority: (userId: string, newPriority: number) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -75,12 +76,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, []);
 
+    const updateUserPriority = useCallback(async (userId: string, newPriority: number) => {
+         try {
+            const userDocRef = doc(db, 'users', userId);
+            await updateDoc(userDocRef, { priority: newPriority });
+        } catch (e: any) {
+            console.error("Error updating user priority:", e);
+            throw new Error("Failed to update priority. Please try again.");
+        }
+    }, []);
+
     const value = {
         users,
         loading,
         error,
         deleteUser,
-        updateUserPassword
+        updateUserPassword,
+        updateUserPriority,
     };
 
     return (

@@ -52,7 +52,25 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
   
   const filteredTasks = useMemo(() => {
     const getSortedTasks = (tasksToSort: (Task & {id: string})[]) => {
+      // Create a map of employee priority
+      const employeePriorityMap = new Map<string, number>();
+      users.forEach(u => {
+        if(u.id && u.priority) {
+          employeePriorityMap.set(u.id, u.priority);
+        }
+      });
+      
       return tasksToSort.sort((a, b) => {
+        const aAssigneeId = a.assigneeIds?.[a.activeAssigneeIndex ?? 0];
+        const bAssigneeId = b.assigneeIds?.[b.activeAssigneeIndex ?? 0];
+
+        const aEmployeePriority = aAssigneeId ? employeePriorityMap.get(aAssigneeId) || 99 : 99;
+        const bEmployeePriority = bAssigneeId ? employeePriorityMap.get(bAssigneeId) || 99 : 99;
+
+        if (aEmployeePriority !== bEmployeePriority) {
+          return aEmployeePriority - bEmployeePriority;
+        }
+
         const aValue = a.priority || 99;
         const bValue = b.priority || 99;
         if (aValue < bValue) return -1;
@@ -77,7 +95,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
       default:
         return getSortedTasks(allNonCompletedTasks);
     }
-  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks]);
+  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks, users]);
 
   const filterTitles: Record<TaskFilter, string> = {
     all: "All My Tasks",
@@ -147,5 +165,3 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
     </div>
   );
 }
-
-    
