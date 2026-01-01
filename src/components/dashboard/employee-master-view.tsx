@@ -165,7 +165,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
         return map;
     }, [tasks]);
 
-    const employeeColWidth = 150;
+    const employeeColWidth = 100;
     const orderColWidth = 60;
     const totalEmployeeSectionWidth = employees.length * (employeeColWidth + orderColWidth);
 
@@ -185,13 +185,13 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                 </div>
                 <div className="flex w-full">
                     {/* Fixed Columns */}
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 z-10 bg-background">
                         <Table className="text-xs border-r">
                             <TableHeader>
                                 <TableRow className="h-10">
-                                    <TableHead className="bg-muted" style={{ width: '40px' }}>Sl.</TableHead>
-                                    <TableHead className="bg-muted" style={{ width: '150px' }}>Client Name</TableHead>
-                                    <TableHead className="bg-muted" style={{ width: '150px' }}>Assigned</TableHead>
+                                    <TableHead className="bg-muted sticky left-0" style={{ width: '40px' }}>Sl.</TableHead>
+                                    <TableHead className="bg-muted sticky left-[40px]" style={{ width: '150px' }}>Client Name</TableHead>
+                                    <TableHead className="bg-muted sticky left-[190px]" style={{ minWidth: '150px' }}>Assigned</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -206,9 +206,9 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                             className={cn("h-10", selectedClientId === client.id && 'bg-accent/20')}
                                             onClick={() => setSelectedClientId(client.id)}
                                         >
-                                            <TableCell className="text-center">{index + 1}</TableCell>
-                                            <TableCell className="font-medium text-xs">{client.name}</TableCell>
-                                            <TableCell className="text-xs">{assignedEmployees}</TableCell>
+                                            <TableCell className="text-center sticky left-0 bg-background">{index + 1}</TableCell>
+                                            <TableCell className="font-medium text-xs sticky left-[40px] bg-background">{client.name}</TableCell>
+                                            <TableCell className="text-xs sticky left-[190px] bg-background">{assignedEmployees}</TableCell>
                                         </TableRow>
                                     )
                                 })}
