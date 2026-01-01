@@ -271,10 +271,10 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
           <div className="flex-shrink-0 bg-background border-r shadow-sm">
             <Table className="text-[10px]">
               <TableHeader className="sticky top-0 z-10 bg-background">
-                <TableRow>
+                <TableRow className="h-8">
                   <TableHead className="border-r" style={{ width: '40px' }}>Sl.</TableHead>
                   <TableHead className="border-r" style={{ width: '130px' }}>Client</TableHead>
-                  <TableHead style={{ width: '180px' }}>Assigned</TableHead>
+                  <TableHead className="border-r" style={{ width: '180px' }}>Assigned</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -289,14 +289,14 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                     <TableRow
                       key={client.id}
                       className={cn(
-                        'h-10 border-b hover:bg-muted/30',
+                        'border-b hover:bg-muted/30',
                         selectedClientId === client.id && 'bg-accent/20'
                       )}
                       onClick={() => setSelectedClientId(client.id)}
                     >
                       <TableCell className="text-center border-r">{index + 1}</TableCell>
                       <TableCell className="border-r">{client.name}</TableCell>
-                      <TableCell>{assignedEmployees}</TableCell>
+                      <TableCell className="border-r">{assignedEmployees}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -318,7 +318,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
               >
                 <Table className="text-[10px]">
                   <TableHeader className="sticky top-0 bg-background z-10">
-                    <TableRow>
+                    <TableRow className="h-8">
                       {employees.map((employee) => (
                         <React.Fragment key={employee.id}>
                           <TableHead
@@ -348,7 +348,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                       <TableRow
                         key={client.id}
                         className={cn(
-                          'h-10 border-b',
+                          'border-b',
                           selectedClientId === client.id && 'bg-accent/20'
                         )}
                       >
