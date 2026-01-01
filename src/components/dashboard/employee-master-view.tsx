@@ -76,7 +76,7 @@ const TaskCell = ({
   onSelect: () => void;
   isSelected: boolean;
 }) => {
-  if (!task) return <div className="w-full p-1 border-r"></div>;
+  if (!task) return <div className="p-1 border-r"></div>;
   const { user: currentUser } = useAuth();
 
   return (
@@ -294,9 +294,9 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                       )}
                       onClick={() => setSelectedClientId(client.id)}
                     >
-                      <TableCell className="text-center border-r">{index + 1}</TableCell>
-                      <TableCell className="border-r">{client.name}</TableCell>
-                      <TableCell className="border-r">{assignedEmployees}</TableCell>
+                      <TableCell className="p-0 px-2 py-1 text-center border-r">{index + 1}</TableCell>
+                      <TableCell className="p-0 px-2 py-1 border-r">{client.name}</TableCell>
+                      <TableCell className="p-0 px-2 py-1 border-r">{assignedEmployees}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -360,7 +360,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                           return (
                             <React.Fragment key={employee.id}>
                               <TableCell
-                                className="p-0 border-r"
+                                className="p-0"
                                 style={{
                                   width: `${employeeColWidth}px`,
                                 }}
