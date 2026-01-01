@@ -14,7 +14,6 @@ import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useUsers } from '@/hooks/use-users';
 
-
 type UserWithId = UserProfile & { id: string };
 type ClientWithId = Client & { id: string };
 type TaskWithId = Task & { id: string };
@@ -67,17 +66,19 @@ const EditablePriorityCell: React.FC<{ user: UserWithId }> = ({ user }) => {
     )
 }
 
-const TaskCell = ({ task }: { task: TaskWithId }) => {
-    if (!task) return <TableCell className="p-1"></TableCell>;
+const TaskCell = ({ task, onSelect, isSelected }: { task: TaskWithId; onSelect: () => void; isSelected: boolean }) => {
+    if (!task) return <div className="h-full w-full p-1 border-r"></div>;
     const { user: currentUser } = useAuth();
 
     return (
         <Popover>
             <PopoverTrigger asChild>
                 <div 
+                    onClick={onSelect}
                     className={cn(
-                        "h-full w-full cursor-pointer p-1 text-xs font-medium hover:bg-opacity-40",
-                         statusColors[task.status] || 'bg-transparent'
+                        "h-full w-full cursor-pointer p-1 text-xs font-medium border-r",
+                         statusColors[task.status] || 'bg-transparent',
+                         isSelected && 'ring-2 ring-inset ring-accent'
                     )}
                 >
                     {task.title}
@@ -134,7 +135,8 @@ const TaskCell = ({ task }: { task: TaskWithId }) => {
 };
 
 export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
-    
+    const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+
     const employees = useMemo(() => 
         users.filter(u => u.role === 'employee').sort((a,b) => (a.priority ?? 99) - (b.priority ?? 99))
     , [users]);
@@ -151,7 +153,6 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
             const activeAssigneeId = task.assigneeIds?.[task.activeAssigneeIndex ?? 0];
             if (task.clientId && activeAssigneeId) {
                 const key = `${task.clientId}-${activeAssigneeId}`;
-                // Simple logic: last task wins for a given client/assignee cell
                 map.set(key, task);
             }
         });
@@ -161,60 +162,99 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     return (
         <Card>
             <CardContent className="p-0">
-                <Table className="border-collapse w-full">
-                    <TableHeader>
-                        <TableRow className="h-10">
-                            <TableHead className="sticky left-0 z-20 bg-background text-center text-xs p-1 border" style={{minWidth: '40px'}}>Sl.</TableHead>
-                            <TableHead className="sticky left-[40px] z-20 bg-background text-xs p-1 border" style={{minWidth: '150px'}}>Client Name</TableHead>
-                            <TableHead className="sticky left-[190px] z-20 bg-background text-xs p-1 border" style={{minWidth: '150px'}}>Assigned</TableHead>
-                            {employees.map(employee => (
-                                <React.Fragment key={employee.id}>
-                                    <TableHead className="text-xs p-1 border text-center" style={{minWidth: '150px'}}>
-                                        {employee.username}
-                                    </TableHead>
-                                     <TableHead className="text-xs p-1 border text-center" style={{minWidth: '60px'}}>
-                                        Order
-                                    </TableHead>
-                                </React.Fragment>
-                            ))}
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {dmClients.map((client, index) => {
-                            const assignedEmployees = (client.employeeIds || [])
-                                .map(id => users.find(u => u.id === id)?.username)
-                                .filter(Boolean)
-                                .join(', ');
-
-                            return (
-                            <TableRow 
-                                key={client.id} 
-                                className="h-10"
-                            >
-                                <TableCell className="sticky left-0 z-10 bg-background text-center p-1 border text-sm">{index + 1}</TableCell>
-                                <TableCell 
-                                    className="sticky left-[40px] z-10 bg-background p-1 border text-xs font-medium cursor-pointer hover:underline"
-                                >
-                                    {client.name}
-                                </TableCell>
-                                <TableCell className="sticky left-[190px] z-10 bg-background p-1 border text-xs">{assignedEmployees}</TableCell>
-                                {employees.map(employee => {
-                                    const task = clientTasks.get(`${client.id}-${employee.id}`);
-                                    return (
-                                        <React.Fragment key={employee.id}>
-                                            <TableCell className="p-0 border">
-                                                {task ? <TaskCell task={task} /> : null}
-                                            </TableCell>
-                                            <TableCell className="p-1 border align-middle text-center">
-                                                <EditablePriorityCell user={employee} />
-                                            </TableCell>
-                                        </React.Fragment>
-                                    );
-                                })}
-                            </TableRow>
-                        )})}
-                    </TableBody>
-                </Table>
+                <div className="flex text-xs">
+                    {/* Fixed Columns */}
+                    <div className="flex-shrink-0 border-r">
+                        {/* Header */}
+                        <div className="flex bg-muted">
+                            <div className="p-1 border-b border-r text-center font-semibold" style={{width: '40px'}}>Sl.</div>
+                            <div className="p-1 border-b border-r font-semibold" style={{width: '150px'}}>Client Name</div>
+                            <div className="p-1 border-b font-semibold" style={{width: '150px'}}>Assigned</div>
+                        </div>
+                        {/* Body */}
+                        <div>
+                            {dmClients.map((client, index) => {
+                                const assignedEmployees = (client.employeeIds || [])
+                                    .map(id => users.find(u => u.id === id)?.username)
+                                    .filter(Boolean)
+                                    .join(', ');
+                                return (
+                                    <div 
+                                        key={client.id}
+                                        className={cn(
+                                            "flex h-10 items-stretch border-b",
+                                            selectedClientId === client.id && 'bg-accent/20'
+                                        )}
+                                    >
+                                        <div className="p-1 border-r text-center self-center" style={{width: '40px'}}>{index + 1}</div>
+                                        <div 
+                                            className="p-1 border-r font-medium text-xs cursor-pointer self-center" 
+                                            style={{width: '150px'}}
+                                            onClick={() => setSelectedClientId(client.id)}
+                                        >
+                                            {client.name}
+                                        </div>
+                                        <div className="p-1 text-xs self-center" style={{width: '150px'}}>{assignedEmployees}</div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                    {/* Scrollable Columns */}
+                    <div className="overflow-x-auto flex-grow">
+                        <div className="flex flex-col" style={{width: employees.length * 210}}>
+                             {/* Header */}
+                            <div className="flex bg-muted flex-shrink-0">
+                                {employees.map(employee => (
+                                    <React.Fragment key={employee.id}>
+                                        <div className="p-1 border-b border-r text-center font-semibold" style={{width: '150px'}}>
+                                            {employee.username}
+                                        </div>
+                                        <div className="p-1 border-b border-r text-center font-semibold" style={{width: '60px'}}>
+                                            Order
+                                        </div>
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                            {/* Body */}
+                            <div>
+                                {dmClients.map((client) => (
+                                    <div key={client.id} className="flex h-10 items-stretch border-b">
+                                        {employees.map(employee => {
+                                            const task = clientTasks.get(`${client.id}-${employee.id}`);
+                                            return (
+                                                <React.Fragment key={employee.id}>
+                                                    <div style={{width: '150px'}}>
+                                                        {task && 
+                                                            <TaskCell 
+                                                                task={task} 
+                                                                onSelect={() => setSelectedClientId(client.id)}
+                                                                isSelected={selectedClientId === client.id}
+                                                            />
+                                                        }
+                                                        {!task && 
+                                                             <div 
+                                                                className={cn("h-full w-full border-r", selectedClientId === client.id && 'bg-accent/20')}
+                                                                onClick={() => setSelectedClientId(client.id)}
+                                                             ></div>
+                                                        }
+                                                    </div>
+                                                    <div 
+                                                        className={cn("p-1 border-r flex items-center justify-center", selectedClientId === client.id && 'bg-accent/20')} 
+                                                        style={{width: '60px'}}
+                                                        onClick={() => setSelectedClientId(client.id)}
+                                                    >
+                                                        <EditablePriorityCell user={employee} />
+                                                    </div>
+                                                </React.Fragment>
+                                            )
+                                        })}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
                  {dmClients.length === 0 && (
                     <div className="text-center text-muted-foreground p-8">No Digital Marketing or GD clients found.</div>
                 )}
