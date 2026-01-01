@@ -5,7 +5,7 @@ import type { Task, UserProfile, Client, ProgressNote } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn, capitalizeSentences } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { LinkifiedText } from '../shared/linkified-text';
 import { format } from 'date-fns';
@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useUsers } from '@/hooks/use-users';
+
 
 type UserWithId = UserProfile & { id: string };
 type ClientWithId = Client & { id: string };
@@ -38,11 +39,11 @@ const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() :
 
 const EditablePriorityCell: React.FC<{ user: UserWithId }> = ({ user }) => {
     const { updateUserPriority } = useUsers();
-    const [priority, setPriority] = useState(user.priority ?? 0);
+    const [priority, setPriority] = useState(user.priority ?? 99);
 
     const handleBlur = () => {
         const newPriority = Number(priority);
-        if (newPriority !== (user.priority ?? 0)) {
+        if (newPriority !== (user.priority ?? 99)) {
             updateUserPriority(user.id, newPriority);
         }
     };
@@ -162,99 +163,72 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     return (
         <Card>
             <CardContent className="p-0">
-                <div className="flex text-xs">
-                    {/* Fixed Columns */}
-                    <div className="flex-shrink-0 border-r">
-                        {/* Header */}
-                        <div className="flex bg-muted">
-                            <div className="p-1 border-b border-r text-center font-semibold" style={{width: '40px'}}>Sl.</div>
-                            <div className="p-1 border-b border-r font-semibold" style={{width: '150px'}}>Client Name</div>
-                            <div className="p-1 border-b font-semibold" style={{width: '150px'}}>Assigned</div>
-                        </div>
-                        {/* Body */}
-                        <div>
-                            {dmClients.map((client, index) => {
-                                const assignedEmployees = (client.employeeIds || [])
-                                    .map(id => users.find(u => u.id === id)?.username)
-                                    .filter(Boolean)
-                                    .join(', ');
-                                return (
-                                    <div 
-                                        key={client.id}
-                                        className={cn(
-                                            "flex h-10 items-stretch border-b",
-                                            selectedClientId === client.id && 'bg-accent/20'
-                                        )}
-                                    >
-                                        <div className="p-1 border-r text-center self-center" style={{width: '40px'}}>{index + 1}</div>
-                                        <div 
-                                            className="p-1 border-r font-medium text-xs cursor-pointer self-center" 
-                                            style={{width: '150px'}}
-                                            onClick={() => setSelectedClientId(client.id)}
-                                        >
-                                            {client.name}
-                                        </div>
-                                        <div className="p-1 text-xs self-center" style={{width: '150px'}}>{assignedEmployees}</div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-                    {/* Scrollable Columns */}
-                    <div className="overflow-x-auto flex-grow">
-                        <div className="flex flex-col" style={{width: employees.length * 210}}>
-                             {/* Header */}
-                            <div className="flex bg-muted flex-shrink-0">
-                                {employees.map(employee => (
-                                    <React.Fragment key={employee.id}>
-                                        <div className="p-1 border-b border-r text-center font-semibold" style={{width: '150px'}}>
-                                            {employee.username}
-                                        </div>
-                                        <div className="p-1 border-b border-r text-center font-semibold" style={{width: '60px'}}>
-                                            Order
-                                        </div>
-                                    </React.Fragment>
-                                ))}
-                            </div>
-                            {/* Body */}
-                            <div>
-                                {dmClients.map((client) => (
-                                    <div key={client.id} className="flex h-10 items-stretch border-b">
-                                        {employees.map(employee => {
-                                            const task = clientTasks.get(`${client.id}-${employee.id}`);
-                                            return (
-                                                <React.Fragment key={employee.id}>
-                                                    <div style={{width: '150px'}}>
-                                                        {task && 
-                                                            <TaskCell 
-                                                                task={task} 
-                                                                onSelect={() => setSelectedClientId(client.id)}
-                                                                isSelected={selectedClientId === client.id}
-                                                            />
-                                                        }
-                                                        {!task && 
-                                                             <div 
-                                                                className={cn("h-full w-full border-r", selectedClientId === client.id && 'bg-accent/20')}
-                                                                onClick={() => setSelectedClientId(client.id)}
-                                                             ></div>
-                                                        }
+                <Table className="text-xs">
+                    <TableHeader>
+                        <TableRow className="h-10">
+                            <TableHead className="sticky left-0 z-10 bg-muted" style={{ minWidth: '40px' }}>Sl.</TableHead>
+                            <TableHead className="sticky left-[40px] z-10 bg-muted" style={{ minWidth: '150px' }}>Client Name</TableHead>
+                            <TableHead className="sticky left-[190px] z-10 bg-muted" style={{ minWidth: '150px' }}>Assigned</TableHead>
+                            {employees.map(employee => (
+                                <React.Fragment key={employee.id}>
+                                    <TableHead style={{ minWidth: '150px' }}>
+                                        {employee.username}
+                                    </TableHead>
+                                    <TableHead style={{ minWidth: '60px' }}>
+                                        Order
+                                    </TableHead>
+                                </React.Fragment>
+                            ))}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                         {dmClients.map((client, index) => {
+                            const assignedEmployees = (client.employeeIds || [])
+                                .map(id => users.find(u => u.id === id)?.username)
+                                .filter(Boolean)
+                                .join(', ');
+                            return (
+                                <TableRow 
+                                    key={client.id}
+                                    className={cn(
+                                        "h-10",
+                                        selectedClientId === client.id && 'bg-accent/20'
+                                    )}
+                                    onClick={() => setSelectedClientId(client.id)}
+                                >
+                                    <TableCell className="sticky left-0 z-10 bg-background border-r text-center">{index + 1}</TableCell>
+                                    <TableCell className="sticky left-[40px] z-10 bg-background border-r font-medium text-xs">
+                                        {client.name}
+                                    </TableCell>
+                                    <TableCell className="sticky left-[190px] z-10 bg-background border-r text-xs">{assignedEmployees}</TableCell>
+                                    {employees.map(employee => {
+                                        const task = clientTasks.get(`${client.id}-${employee.id}`);
+                                        return (
+                                            <React.Fragment key={employee.id}>
+                                                <TableCell>
+                                                     {task ? 
+                                                        <TaskCell 
+                                                            task={task} 
+                                                            onSelect={() => setSelectedClientId(client.id)}
+                                                            isSelected={selectedClientId === client.id}
+                                                        />
+                                                        :
+                                                         <div className="h-full w-full p-1 border-r"></div>
+                                                    }
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="p-1 border-r flex items-center justify-center">
+                                                         <EditablePriorityCell user={employee} />
                                                     </div>
-                                                    <div 
-                                                        className={cn("p-1 border-r flex items-center justify-center", selectedClientId === client.id && 'bg-accent/20')} 
-                                                        style={{width: '60px'}}
-                                                        onClick={() => setSelectedClientId(client.id)}
-                                                    >
-                                                        <EditablePriorityCell user={employee} />
-                                                    </div>
-                                                </React.Fragment>
-                                            )
-                                        })}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                                </TableCell>
+                                            </React.Fragment>
+                                        )
+                                    })}
+                                </TableRow>
+                            )
+                        })}
+                    </TableBody>
+                </Table>
                  {dmClients.length === 0 && (
                     <div className="text-center text-muted-foreground p-8">No Digital Marketing or GD clients found.</div>
                 )}
