@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Task, UserProfile, Client, ProgressNote } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,6 @@ import { useUsers } from '@/hooks/use-users';
 import { useHorizontalScroll } from '@/hooks/use-horizontal-scroll';
 import { Button } from '../ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
 
 type UserWithId = UserProfile & { id: string };
 type ClientWithId = Client & { id: string };
@@ -173,7 +172,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     return (
         <Card>
             <CardContent className="p-0">
-                <div className='flex items-end justify-end p-1'>
+                <div className='flex items-center justify-end p-1 border-b'>
                      <div className="flex items-center gap-1">
                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={scrollLeft} disabled={!canScrollLeft}>
                             <ChevronLeft className="h-4 w-4" />
@@ -185,8 +184,8 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                 </div>
                 <div className="flex w-full">
                     {/* Fixed Columns */}
-                    <div className="flex-shrink-0 z-10 bg-background">
-                        <Table className="text-xs border-r">
+                    <div className="flex-shrink-0 z-10 bg-background border-r">
+                        <Table className="text-xs">
                             <TableHeader>
                                 <TableRow className="h-10">
                                     <TableHead className="bg-muted sticky left-0" style={{ width: '40px' }}>Sl.</TableHead>
@@ -206,7 +205,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                             className={cn("h-10", selectedClientId === client.id && 'bg-accent/20')}
                                             onClick={() => setSelectedClientId(client.id)}
                                         >
-                                            <TableCell className="text-center sticky left-0 bg-background">{index + 1}</TableCell>
+                                            <TableCell className="text-center sticky left-0 bg-background font-medium">{index + 1}</TableCell>
                                             <TableCell className="font-medium text-xs sticky left-[40px] bg-background">{client.name}</TableCell>
                                             <TableCell className="text-xs sticky left-[190px] bg-background">{assignedEmployees}</TableCell>
                                         </TableRow>
