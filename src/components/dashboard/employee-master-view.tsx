@@ -1,7 +1,5 @@
 'use client';
 
-import React, 'use client';
-
 import React, { useState, useMemo } from 'react';
 import type { Task, UserProfile, Client, ProgressNote } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
