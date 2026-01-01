@@ -22,7 +22,7 @@ type ViewMode = 'tasks' | 'employees';
 
 export default function AdminDashboard({ tasks, users, clients }: AdminDashboardProps) {
   const [taskFilter, setTaskFilter] = useState<TaskFilter>('total');
-  const [viewMode, setViewMode] = useState<ViewMode>('tasks');
+  const [viewMode, setViewMode] = useState<ViewMode>('employees');
   const { deleteTask, updateTask } = useTasks();
 
   const totalTasks = tasks.length;
@@ -96,7 +96,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   return (
     
     <div className="space-y-4">
-     <div className="w-3/4 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 
         <StatsCard 
             title="Total Tasks" 
@@ -154,7 +154,11 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         </div>
       )}
 
-      {viewMode === 'employees' && <EmployeeMasterView tasks={tasks} users={users} clients={clients} />}
+      {viewMode === 'employees' && 
+        <div className="overflow-x-auto">
+            <EmployeeMasterView tasks={tasks} users={users} clients={clients} />
+        </div>
+      }
 
     </div>
   );

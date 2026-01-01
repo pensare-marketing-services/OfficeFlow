@@ -1,5 +1,7 @@
 'use client';
 
+import React, 'use client';
+
 import React, { useState, useMemo } from 'react';
 import type { Task, UserProfile, Client, ProgressNote } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -43,7 +45,7 @@ const EditablePriorityCell: React.FC<{ user: UserWithId }> = ({ user }) => {
 
     const handleBlur = () => {
         const newPriority = Number(priority);
-        if (newPriority !== user.priority) {
+        if (newPriority !== (user.priority ?? 0)) {
             updateUserPriority(user.id, newPriority);
         }
     };
@@ -134,8 +136,7 @@ const TaskCell = ({ task }: { task: TaskWithId }) => {
 };
 
 export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
-    const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-
+    
     const employees = useMemo(() => 
         users.filter(u => u.role === 'employee').sort((a,b) => (a.priority ?? 99) - (b.priority ?? 99))
     , [users]);
@@ -162,63 +163,60 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     return (
         <Card>
             <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                    <Table className="border-collapse w-full">
-                        <TableHeader>
-                            <TableRow className="h-10">
-                                <TableHead className="text-center text-xs p-1 border" style={{minWidth: '40px'}}>Sl.</TableHead>
-                                <TableHead className="text-xs p-1 border" style={{minWidth: '150px'}}>Client Name</TableHead>
-                                <TableHead className="text-xs p-1 border" style={{minWidth: '150px'}}>Assigned</TableHead>
-                                {employees.map(employee => (
-                                    <React.Fragment key={employee.id}>
-                                        <TableHead className="text-xs p-1 border text-center" style={{minWidth: '150px'}}>
-                                            {employee.username}
-                                        </TableHead>
-                                         <TableHead className="text-xs p-1 border text-center" style={{minWidth: '60px'}}>
-                                            Order
-                                        </TableHead>
-                                    </React.Fragment>
-                                ))}
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {dmClients.map((client, index) => {
-                                const assignedEmployees = (client.employeeIds || [])
-                                    .map(id => users.find(u => u.id === id)?.username)
-                                    .filter(Boolean)
-                                    .join(', ');
+                <Table className="border-collapse w-full">
+                    <TableHeader>
+                        <TableRow className="h-10">
+                            <TableHead className="sticky left-0 z-20 bg-background text-center text-xs p-1 border" style={{minWidth: '40px'}}>Sl.</TableHead>
+                            <TableHead className="sticky left-[40px] z-20 bg-background text-xs p-1 border" style={{minWidth: '150px'}}>Client Name</TableHead>
+                            <TableHead className="sticky left-[190px] z-20 bg-background text-xs p-1 border" style={{minWidth: '150px'}}>Assigned</TableHead>
+                            {employees.map(employee => (
+                                <React.Fragment key={employee.id}>
+                                    <TableHead className="text-xs p-1 border text-center" style={{minWidth: '150px'}}>
+                                        {employee.username}
+                                    </TableHead>
+                                     <TableHead className="text-xs p-1 border text-center" style={{minWidth: '60px'}}>
+                                        Order
+                                    </TableHead>
+                                </React.Fragment>
+                            ))}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {dmClients.map((client, index) => {
+                            const assignedEmployees = (client.employeeIds || [])
+                                .map(id => users.find(u => u.id === id)?.username)
+                                .filter(Boolean)
+                                .join(', ');
 
-                                return (
-                                <TableRow 
-                                    key={client.id} 
-                                    className={cn("h-10", selectedClientId === client.id && "bg-accent/50")}
+                            return (
+                            <TableRow 
+                                key={client.id} 
+                                className="h-10"
+                            >
+                                <TableCell className="sticky left-0 z-10 bg-background text-center p-1 border text-sm">{index + 1}</TableCell>
+                                <TableCell 
+                                    className="sticky left-[40px] z-10 bg-background p-1 border text-xs font-medium cursor-pointer hover:underline"
                                 >
-                                    <TableCell className="text-center p-1 border text-sm">{index + 1}</TableCell>
-                                    <TableCell 
-                                        className="p-1 border text-xs font-medium cursor-pointer hover:underline"
-                                        onClick={() => setSelectedClientId(client.id === selectedClientId ? null : client.id)}
-                                    >
-                                        {client.name}
-                                    </TableCell>
-                                    <TableCell className="p-1 border text-xs">{assignedEmployees}</TableCell>
-                                    {employees.map(employee => {
-                                        const task = clientTasks.get(`${client.id}-${employee.id}`);
-                                        return (
-                                            <React.Fragment key={employee.id}>
-                                                <TableCell className="p-0 border">
-                                                    {task ? <TaskCell task={task} /> : null}
-                                                </TableCell>
-                                                <TableCell className="p-1 border align-middle text-center">
-                                                    <EditablePriorityCell user={employee} />
-                                                </TableCell>
-                                            </React.Fragment>
-                                        );
-                                    })}
-                                </TableRow>
-                            )})}
-                        </TableBody>
-                    </Table>
-                </div>
+                                    {client.name}
+                                </TableCell>
+                                <TableCell className="sticky left-[190px] z-10 bg-background p-1 border text-xs">{assignedEmployees}</TableCell>
+                                {employees.map(employee => {
+                                    const task = clientTasks.get(`${client.id}-${employee.id}`);
+                                    return (
+                                        <React.Fragment key={employee.id}>
+                                            <TableCell className="p-0 border">
+                                                {task ? <TaskCell task={task} /> : null}
+                                            </TableCell>
+                                            <TableCell className="p-1 border align-middle text-center">
+                                                <EditablePriorityCell user={employee} />
+                                            </TableCell>
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </TableRow>
+                        )})}
+                    </TableBody>
+                </Table>
                  {dmClients.length === 0 && (
                     <div className="text-center text-muted-foreground p-8">No Digital Marketing or GD clients found.</div>
                 )}
