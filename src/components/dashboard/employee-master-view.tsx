@@ -134,6 +134,7 @@ const TaskCell = ({ task }: { task: TaskWithId }) => {
 };
 
 export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
+    const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
     const employees = useMemo(() => 
         users.filter(u => u.role === 'employee').sort((a,b) => (a.priority || 99) - (b.priority || 99))
@@ -165,9 +166,9 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                     <Table className="border-collapse w-full">
                         <TableHeader>
                             <TableRow className="h-10">
-                                <TableHead className="w-[40px] text-center text-xs p-1 border sticky left-0 bg-card z-20">Sl. No</TableHead>
-                                <TableHead className="w-[150px] text-xs p-1 border sticky left-[40px] bg-card z-20">Client Name</TableHead>
-                                <TableHead className="w-[150px] text-xs p-1 border sticky left-[190px] bg-card z-20">Assigned</TableHead>
+                                <TableHead className="w-[40px] text-center text-xs p-1 border">Sl. No</TableHead>
+                                <TableHead className="w-[150px] text-xs p-1 border">Client Name</TableHead>
+                                <TableHead className="w-[150px] text-xs p-1 border">Assigned</TableHead>
                                 {employees.map(employee => (
                                     <React.Fragment key={employee.id}>
                                         <TableHead className="min-w-[150px] text-xs p-1 border text-center">
@@ -188,10 +189,14 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                     .join(', ');
 
                                 return (
-                                <TableRow key={client.id} className="h-10">
-                                    <TableCell className="text-center p-1 border text-sm sticky left-0 bg-card z-10">{index + 1}</TableCell>
-                                    <TableCell className="p-1 border text-xs font-medium sticky left-[40px] bg-card z-10">{client.name}</TableCell>
-                                    <TableCell className="p-1 border text-xs sticky left-[190px] bg-card z-10">{assignedEmployees}</TableCell>
+                                <TableRow 
+                                    key={client.id} 
+                                    className={cn("h-10", selectedClientId === client.id && "bg-accent/50")}
+                                    onClick={() => setSelectedClientId(client.id === selectedClientId ? null : client.id)}
+                                >
+                                    <TableCell className="text-center p-1 border text-sm">{index + 1}</TableCell>
+                                    <TableCell className="p-1 border text-xs font-medium cursor-pointer hover:underline">{client.name}</TableCell>
+                                    <TableCell className="p-1 border text-xs">{assignedEmployees}</TableCell>
                                     {employees.map(employee => {
                                         const task = clientTasks.get(`${client.id}-${employee.id}`);
                                         return (
