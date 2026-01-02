@@ -54,13 +54,15 @@ const EditablePriorityCell: React.FC<{ user: UserWithId }> = ({ user }) => {
   };
 
   return (
-    <Input
-      type="number"
-      value={priority}
-      onChange={(e) => setPriority(Number(e.target.value))}
-      onBlur={handleBlur}
-      className="h-7 w-8 text-[10px] text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
-    />
+    <div className="h-full w-full flex items-center justify-center">
+      <Input
+        type="number"
+        value={priority}
+        onChange={(e) => setPriority(Number(e.target.value))}
+        onBlur={handleBlur}
+        className="h-6 w-8 text-[10px] text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
+      />
+    </div>
   );
 };
 
@@ -76,7 +78,7 @@ const TaskCell = ({
   onSelect: () => void;
   isSelected: boolean;
 }) => {
-  if (!task) return <div className="h-full w-full p-1 border-r"></div>;
+  if (!task) return <div className="h-full w-full flex items-center justify-center border-r">-</div>;
   const { user: currentUser } = useAuth();
 
   return (
@@ -85,13 +87,12 @@ const TaskCell = ({
         <div
           onClick={onSelect}
           className={cn(
-            // The 'flex items-center' and 'h-full' ensure the content div fills the parent TableCell vertically.
-            'flex items-center h-full w-full cursor-pointer p-1 text-[10px] font-medium border-r',
+            'h-full w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-r px-2',
             statusColors[task.status] || 'bg-transparent',
-            isSelected && 'ring-2 ring-accent'
+            isSelected && 'ring-1 ring-accent ring-inset'
           )}
         >
-          {task.title}
+          <span className="truncate">{task.title}</span>
         </div>
       </PopoverTrigger>
 
@@ -228,13 +229,16 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     return map;
   }, [tasks]);
 
-  const employeeColWidth = 120;
-  const orderColWidth = 70;
+  const employeeColWidth = 100;
+  const orderColWidth = 30;
   const totalEmployeeWidth =
     employees.length * (employeeColWidth + orderColWidth);
 
+  // Fixed row height for ALL rows
+  const rowHeight = 'h-7';
+
   return (
-    <Card className="w-full overflow-hidden">
+    <Card className="w-full overflow-hidden mb-4">
       <CardContent className="p-0 w-full overflow-x-hidden">
 
         {/* Scroll Buttons */}
@@ -260,25 +264,21 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
           </Button>
         </div>
 
-        {/* MAIN WRAPPER — Enables vertical scrolling fully */}
-
-        
+        {/* MAIN WRAPPER */}
         <div
-        
-         className="flex w-full min-w-0 h-full"
+          className="flex w-full min-w-0 h-full"
           ref={containerRef}
         >
           {/* ----------------------------------------------------
              LEFT FIXED COLUMNS
           ---------------------------------------------------- */}
-          <div className="flex-shrink-0 bg-background border-r shadow-sm">
-            <Table className="text-[10px]">
+          <div className="flex-shrink-0 bg-background border-r shadow-sm sticky left-0 z-20">
+            <Table className="text-[10px] border-collapse">
               <TableHeader className="sticky top-0 z-10 bg-background">
-                {/* THIS TableRow sets the height for the FIXED header columns. */}
-                <TableRow className='h-8'>
-                  <TableHead className='border-r' style={{ width: '40px' }}>Sl.</TableHead>
-                  <TableHead className='border-r' style={{ width: '130px' }}>Client</TableHead>
-                  <TableHead className='border-r' style={{ width: '180px' }}>Assigned</TableHead>
+                <TableRow className={rowHeight}>
+                  <TableHead className='border-r p-0 w-10'>Sl.</TableHead>
+                  <TableHead className='border-r p-0 w-32'>Client</TableHead>
+                  <TableHead className='border-r p-0 w-36'>Assigned</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -290,19 +290,29 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                     .join(', ');
 
                   return (
-                    // THIS TableRow's 'h-8' class is the KEY to matching the height of the right-side table rows.
                     <TableRow
                       key={client.id}
                       className={cn(
-                        'h-8 border-b hover:bg-muted/30', // 'h-8' (2rem) sets a consistent, compact row height.
+                        `${rowHeight} border-b hover:bg-muted/30`,
                         selectedClientId === client.id && 'bg-accent/20'
                       )}
                       onClick={() => setSelectedClientId(client.id)}
                     >
-                      {/* These TableCells have 'p-0 px-2' to remove default vertical padding and add horizontal spacing. */}
-                      <TableCell className="p-0 px-2 text-center border-r align-middle">{index + 1}</TableCell>
-                      <TableCell className="p-0 px-2 border-r align-middle">{client.name}</TableCell>
-                      <TableCell className="p-0 px-2 border-r align-middle">{assignedEmployees}</TableCell>
+                      <TableCell className="p-0 border-r">
+                        <div className="h-full w-full flex items-center justify-center">
+                          {index + 1}
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-0 border-r">
+                        <div className="h-full w-full flex items-center px-2">
+                          <span className="truncate">{client.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-0 border-r">
+                        <div className="h-full w-full flex items-center px-2">
+                          <span className="truncate">{assignedEmployees}</span>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -322,28 +332,31 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                 className="min-w-max"
                 style={{ width: `${totalEmployeeWidth}px` }}
               >
-                <Table className="text-[10px]">
+                <Table className="text-[10px] border-collapse">
                   <TableHeader className="sticky top-0 bg-background z-10">
-                    {/* THIS TableRow sets the height for the SCROLLABLE header columns. */}
-                    <TableRow className='h-8'>
+                    <TableRow className={rowHeight}>
                       {employees.map((employee) => (
                         <React.Fragment key={employee.id}>
                           <TableHead
                             style={{
                               width: `${employeeColWidth}px`,
                             }}
-                            className="bg-muted/80 border-r"
+                            className="bg-muted/80 border-r p-0"
                           >
-                            {employee.username}
+                            <div className="h-full w-full flex items-center justify-center px-2">
+                              <span className="truncate">{employee.username}</span>
+                            </div>
                           </TableHead>
 
                           <TableHead
                             style={{
                               width: `${orderColWidth}px`,
                             }}
-                            className="bg-muted/80 border-r"
+                            className="bg-muted/80 border-r p-0"
                           >
-                            Order
+                            <div className="h-full w-full flex items-center justify-center">
+                              Order
+                            </div>
                           </TableHead>
                         </React.Fragment>
                       ))}
@@ -352,11 +365,10 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
 
                   <TableBody>
                     {dmClients.map((client) => (
-                      // THIS TableRow's 'h-8' class is the KEY to matching the height of the left-side table rows.
                       <TableRow
                         key={client.id}
                         className={cn(
-                          'h-8 border-b', // 'h-8' (2rem) sets a consistent, compact row height.
+                          `${rowHeight} border-b`,
                           selectedClientId === client.id && 'bg-accent/20'
                         )}
                       >
@@ -367,7 +379,6 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
 
                           return (
                             <React.Fragment key={employee.id}>
-                              {/* These TableCells have 'p-0' to remove ALL padding, allowing the inner div to control it. */}
                               <TableCell
                                 className="p-0 border-r"
                                 style={{
@@ -385,8 +396,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                     }
                                   />
                                 ) : (
-                                  // This div fills the cell. 'h-full' makes it take the full row height.
-                                  <div className="flex items-center justify-center h-full text-muted-foreground/40 border-r">
+                                  <div className="h-full w-full flex items-center justify-center text-muted-foreground/40 border-r">
                                     -
                                   </div>
                                 )}
@@ -396,8 +406,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                 className="p-0 border-r"
                                 style={{ width: `${orderColWidth}px` }}
                               >
-                                {/* This div also uses 'h-full' to fill the cell vertically. */}
-                                <div className="p-1 flex items-center justify-center h-full">
+                                <div className="h-full w-full">
                                   <EditablePriorityCell user={employee} />
                                 </div>
                               </TableCell>
@@ -412,7 +421,6 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
             </div>
           </div>
         </div>
-
 
         {dmClients.length === 0 && (
           <div className="text-center p-8 text-muted-foreground">
