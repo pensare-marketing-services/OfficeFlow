@@ -75,17 +75,17 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'o
 }
 
 const statusColors: Record<string, string> = {
-    'To Do': 'bg-gray-500 text-white',
-    'Scheduled': 'bg-gray-500 text-white',
-    'On Work': 'bg-orange-500 text-white',
-    'For Approval': 'bg-yellow-500 text-black',
+    'Scheduled': 'bg-transparent text-foreground',
+    'On Work': 'bg-gray-500 text-white',
+    'For Approval': 'bg-orange-500 text-white',
     'Approved': 'bg-green-600 text-white',
-    'Posted': 'bg-purple-500 text-white',
+    'Posted': 'bg-blue-500 text-white',
+    'Completed': 'bg-blue-500 text-white',
     'Hold': 'bg-gray-500 text-white',
+    'To Do': 'bg-gray-400 text-white',
     'Ready for Next': 'bg-teal-500 text-white',
     'Reschedule': 'bg-rose-500 text-white',
     'Overdue': 'bg-red-600 text-white',
-    'Completed': 'bg-green-600 text-white',
     'Running': 'bg-blue-500 text-white',
     'Active': 'bg-blue-500 text-white',
     'Stopped': 'bg-red-500 text-white',
@@ -149,16 +149,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     updatePayload.status = statusToSave;
     updateTask(task.id, updatePayload);
   }
-
-  const handleDeleteAll = async () => {
-    const taskIds = tasks.map(t => t.id);
-    try {
-      await deleteMultipleTasks(taskIds);
-      toast({ title: 'Tasks Deleted', description: `All tasks in "${title}" have been deleted.` });
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Deletion Failed', description: error.message });
-    }
-  };
 
 
     const addNote = (task: Task & { id: string }, note: Partial<ProgressNote>) => {

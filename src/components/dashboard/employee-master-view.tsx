@@ -28,13 +28,16 @@ interface EmployeeMasterViewProps {
 }
 
 const statusColors: Record<string, string> = {
-  'On Work': 'bg-orange-500/20',
-  'For Approval': 'bg-yellow-500/20',
+  'Scheduled': 'bg-transparent',
+  'On Work': 'bg-gray-500/20',
+  'For Approval': 'bg-orange-500/20',
   'Approved': 'bg-green-600/20',
-  'Posted': 'bg-purple-500/20',
+  'Posted': 'bg-blue-500/20',
+  'Completed': 'bg-blue-500/20',
   'Hold': 'bg-gray-500/20',
   'Ready for Next': 'bg-teal-500/20',
 };
+
 
 const getInitials = (name: string = '') =>
   name ? name.charAt(0).toUpperCase() : '';
@@ -433,12 +436,12 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     <Card className="w-full overflow-hidden m-0">
       <CardContent className="p-1 space-y-1">
         <div className="flex items-center justify-between p-1 border-b">
-           <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(-1)}>
+           <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => changeMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <h3 className="text-base font-semibold w-28 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
-                 <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(1)}>
+                <h3 className="text-sm font-semibold w-20 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
+                 <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => changeMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                 </Button>
            </div>

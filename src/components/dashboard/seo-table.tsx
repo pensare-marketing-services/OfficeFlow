@@ -35,18 +35,15 @@ const allStatuses: Task['status'][] = ['To Do', 'Scheduled', 'On Work', 'For App
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
 const statusColors: Record<string, string> = {
-    'To Do': 'bg-gray-500 text-white',
-    'Scheduled': 'bg-gray-500 text-white',
-    'On Work': 'bg-orange-500 text-white',
-    'For Approval': 'bg-yellow-500 text-black',
+    'Scheduled': 'bg-transparent text-foreground',
+    'On Work': 'bg-gray-500 text-white',
+    'For Approval': 'bg-orange-500 text-white',
     'Approved': 'bg-green-600 text-white',
-    'Posted': 'bg-purple-500 text-white',
+    'Posted': 'bg-blue-500 text-white',
+    'Completed': 'bg-blue-500 text-white',
     'Hold': 'bg-gray-500 text-white',
+    'To Do': 'bg-gray-400 text-white',
     'Ready for Next': 'bg-teal-500 text-white',
-    'Reschedule': 'bg-rose-500 text-white',
-    'Overdue': 'bg-red-600 text-white',
-    'Running': 'bg-blue-500 text-white',
-    'Completed': 'bg-green-600 text-white',
 };
 
 const EditableCell: React.FC<{
