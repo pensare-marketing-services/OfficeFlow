@@ -377,7 +377,7 @@ const DailyTaskTable: React.FC<{
   const totalEmployeeWidth =
     employees.length * (employeeColWidth + orderColWidth);
 
-  const rowHeight = 'h-6';
+  const rowHeight = 'h-7';
   
   if (tasks.length === 0) {
       return (
