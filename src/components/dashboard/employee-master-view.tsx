@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { LinkifiedText } from '@/components/shared/linkified-text';
-import { format, getDaysInMonth, startOfMonth, isSameDay, setDate } from 'date-fns';
+import { format, getDaysInMonth, startOfMonth, isSameDay, setDate, startOfDay } from 'date-fns';
 import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
@@ -390,14 +390,22 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
   );
   
   const tasksByDate = useMemo(() => {
+    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Approved', 'Hold', 'Ready for Next'];
     const grouped = new Map<string, TaskWithId[]>();
+
     tasks.forEach(task => {
-        if(task.deadline) {
-            const taskDate = new Date(task.deadline);
-            const dateKey = format(taskDate, 'yyyy-MM-dd');
-            if(!grouped.has(dateKey)){
-                grouped.set(dateKey, []);
-            }
+        if (!task.deadline) return;
+
+        const deadline = startOfDay(new Date(task.deadline));
+        const today = startOfDay(new Date());
+        
+        if (incompleteStatuses.includes(task.status) && deadline <= today) {
+            const dateKey = format(today, 'yyyy-MM-dd');
+            if(!grouped.has(dateKey)) grouped.set(dateKey, []);
+            grouped.get(dateKey)!.push(task);
+        } else {
+            const dateKey = format(deadline, 'yyyy-MM-dd');
+            if(!grouped.has(dateKey)) grouped.set(dateKey, []);
             grouped.get(dateKey)!.push(task);
         }
     });
@@ -411,6 +419,8 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     setCurrentMonthDate(prev => {
         const newDate = new Date(prev);
         newDate.setMonth(prev.getMonth() + amount);
+        // If we change month, select the first day of the new month
+        setSelectedDate(newDate);
         return newDate;
     });
   }
@@ -427,9 +437,26 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     });
     return days;
   }, [tasks, currentMonthDate]);
+  
+  const getTasksForSelectedDay = () => {
+    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Approved', 'Hold', 'Ready for Next'];
+    const selectedDayStart = startOfDay(selectedDate);
+    
+    return tasks.filter(task => {
+      if (!task.deadline) return false;
+      const deadlineStart = startOfDay(new Date(task.deadline));
 
-  const selectedDateKey = format(selectedDate, 'yyyy-MM-dd');
-  const tasksForSelectedDay = tasksByDate.get(selectedDateKey) || [];
+      // Condition 1: Task is completed and its deadline is the selected day
+      if (!incompleteStatuses.includes(task.status)) {
+        return isSameDay(deadlineStart, selectedDayStart);
+      }
+
+      // Condition 2: Task is incomplete and its deadline is on or before the selected day
+      return deadlineStart <= selectedDayStart;
+    });
+  };
+
+  const tasksForSelectedDay = getTasksForSelectedDay();
 
 
   return (
