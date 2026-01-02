@@ -381,7 +381,7 @@ const DailyTaskTable: React.FC<{
 
 export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
   const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
 
   const employees = useMemo(
     () =>
@@ -390,20 +390,21 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
   );
   
   const tasksByDate = useMemo(() => {
-    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Approved', 'Hold', 'Ready for Next'];
     const grouped = new Map<string, TaskWithId[]>();
+    const today = startOfDay(new Date());
+    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next'];
 
     tasks.forEach(task => {
         if (!task.deadline) return;
-
         const deadline = startOfDay(new Date(task.deadline));
-        const today = startOfDay(new Date());
-        
-        if (incompleteStatuses.includes(task.status) && deadline <= today) {
+
+        // If task is incomplete and its deadline is in the past, group it under today's date.
+        if (incompleteStatuses.includes(task.status) && deadline < today) {
             const dateKey = format(today, 'yyyy-MM-dd');
             if(!grouped.has(dateKey)) grouped.set(dateKey, []);
             grouped.get(dateKey)!.push(task);
         } else {
+            // Otherwise, group it under its actual deadline.
             const dateKey = format(deadline, 'yyyy-MM-dd');
             if(!grouped.has(dateKey)) grouped.set(dateKey, []);
             grouped.get(dateKey)!.push(task);
@@ -419,8 +420,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     setCurrentMonthDate(prev => {
         const newDate = new Date(prev);
         newDate.setMonth(prev.getMonth() + amount);
-        // If we change month, select the first day of the new month
-        setSelectedDate(newDate);
+        setSelectedDate(startOfDay(newDate));
         return newDate;
     });
   }
@@ -435,25 +435,42 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
             }
         }
     });
+    // Add days for rollover tasks if the current month is the current system month
+    const today = new Date();
+    if(currentMonthDate.getMonth() === today.getMonth() && currentMonthDate.getFullYear() === today.getFullYear()) {
+       days.add(today.getDate());
+    }
+
     return days;
   }, [tasks, currentMonthDate]);
   
   const getTasksForSelectedDay = () => {
-    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Approved', 'Hold', 'Ready for Next'];
-    const selectedDayStart = startOfDay(selectedDate);
+    const selectedDayKey = format(selectedDate, 'yyyy-MM-dd');
+    const todayKey = format(new Date(), 'yyyy-MM-dd');
+    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next', 'Approved'];
     
-    return tasks.filter(task => {
+    let dailyTasks = tasks.filter(task => {
       if (!task.deadline) return false;
-      const deadlineStart = startOfDay(new Date(task.deadline));
+      const deadline = startOfDay(new Date(task.deadline));
 
-      // Condition 1: Task is completed and its deadline is the selected day
-      if (!incompleteStatuses.includes(task.status)) {
-        return isSameDay(deadlineStart, selectedDayStart);
+      // Condition 1: Task's deadline is on the selected day
+      if (isSameDay(deadline, selectedDate)) {
+        return true;
+      }
+      
+      // Condition 2: Task is incomplete, deadline is in the past, and we are viewing today's date
+      if (
+        isSameDay(selectedDate, new Date()) && 
+        deadline < selectedDate &&
+        incompleteStatuses.includes(task.status)
+      ) {
+        return true;
       }
 
-      // Condition 2: Task is incomplete and its deadline is on or before the selected day
-      return deadlineStart <= selectedDayStart;
+      return false;
     });
+    
+    return dailyTasks;
   };
 
   const tasksForSelectedDay = getTasksForSelectedDay();
@@ -462,17 +479,17 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
   return (
     <Card className="w-full overflow-hidden m-0">
       <CardContent className="p-1 space-y-1">
-        <div className="flex items-center justify-between p-1 border-b">
+        <div className="flex items-center justify-between p-1 border-b gap-2">
            <div className="flex items-center gap-1">
                 <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => changeMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <h3 className="text-sm font-semibold w-20 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
+                <h3 className="text-sm font-semibold w-24 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
                  <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => changeMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                 </Button>
            </div>
-            <div className="flex flex-wrap gap-1 justify-center">
+            <div className="flex flex-wrap gap-1 justify-center flex-1">
                 {dateButtons.map(day => (
                     <Button 
                         key={day} 
@@ -480,7 +497,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                         size="sm"
                         className="h-6 w-6 p-0 text-[10px]"
                         onClick={() => {
-                            setSelectedDate(setDate(currentMonthDate, day));
+                            setSelectedDate(startOfDay(setDate(currentMonthDate, day)));
                         }}
                     >
                         {day}
