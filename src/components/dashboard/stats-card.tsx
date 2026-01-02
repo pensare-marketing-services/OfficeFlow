@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 
@@ -11,7 +11,14 @@ interface StatsCardProps {
   isActive?: boolean;
 }
 
-export function StatsCard({ title: title, value, icon: Icon, variant = 'default', onClick, isActive }: StatsCardProps) {
+export function StatsCard({ 
+  title, 
+  value, 
+  icon: Icon, 
+  variant = 'default', 
+  onClick, 
+  isActive 
+}: StatsCardProps) {
   const cardClasses = cn(
     "shadow-sm transition-all",
     onClick && "cursor-pointer hover:shadow-md hover:-translate-y-0.5",
@@ -27,20 +34,34 @@ export function StatsCard({ title: title, value, icon: Icon, variant = 'default'
     }
   );
   
-  const iconClasses = cn("h-4 w-4 text-muted-foreground", {
+  const iconClasses = cn("h-4 w-4", {
     'text-destructive': variant === 'destructive',
     'text-emerald-500': variant === 'success',
     'text-amber-500': variant === 'warning',
+    'text-muted-foreground': variant === 'default',
+  });
+
+  const valueClasses = cn("font-headline font-bold", {
+    'text-destructive': variant === 'destructive',
+    'text-emerald-600': variant === 'success',
+    'text-amber-600': variant === 'warning',
   });
 
   return (
-    <Card className={cardClasses} onClick={onClick} >
-      <CardContent className='p-2'>
-         <div className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-xs font-medium">{title}</CardTitle>
+    <Card className={cardClasses} onClick={onClick}>
+      <CardContent className='p-3'>
+        <div className="flex items-center justify-between">
+          {/* Left side: Title */}
+          <div className="text-xs font-medium text-muted-foreground">
+            {title}
+          </div>
+          
+          {/* Right side: Value and Icon */}
+          <div className="flex items-center gap-2">
+            <span className={valueClasses}>{value}</span>
             <Icon className={iconClasses} />
+          </div>
         </div>
-        <div className="font-headline text-lg font-bold">{value}</div>
       </CardContent>
     </Card>
   );

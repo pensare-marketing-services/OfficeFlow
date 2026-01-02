@@ -46,6 +46,10 @@ const EditablePriorityCell: React.FC<{ user: UserWithId }> = ({ user }) => {
   const { updateUserPriority } = useUsers();
   const [priority, setPriority] = useState(user.priority ?? 0);
 
+  useEffect(() => {
+    setPriority(user.priority ?? 99);
+  }, [user.priority]);
+
   const handleBlur = () => {
     const newPriority = Number(priority);
     if (newPriority !== (user.priority ?? 0)) {
@@ -198,7 +202,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     () =>
       users
         .filter((u) => u.role === 'employee')
-        .sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99)),
+        .sort((a, b) => (a.username || '').localeCompare(b.username || '')),
     [users]
   );
 
