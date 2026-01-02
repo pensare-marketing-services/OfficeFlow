@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { LinkifiedText } from '@/components/shared/linkified-text';
-import { format, getDaysInMonth, startOfMonth, getDay, isSameDay } from 'date-fns';
+import { format, getDaysInMonth, startOfMonth, isSameDay, setDate } from 'date-fns';
 import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
@@ -413,7 +413,8 @@ const DailyTaskTable: React.FC<{
    MAIN COMPONENT
 --------------------------------------------------- */
 export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const employees = useMemo(
     () =>
@@ -436,11 +437,11 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     return grouped;
   }, [tasks]);
   
-  const daysInMonth = getDaysInMonth(currentDate);
+  const daysInMonth = getDaysInMonth(currentMonthDate);
   const dateButtons = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   const changeMonth = (amount: number) => {
-    setCurrentDate(prev => {
+    setCurrentMonthDate(prev => {
         const newDate = new Date(prev);
         newDate.setMonth(prev.getMonth() + amount);
         return newDate;
@@ -452,13 +453,16 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     tasks.forEach(task => {
         if(task.deadline) {
             const taskDate = new Date(task.deadline);
-            if(taskDate.getMonth() === currentDate.getMonth() && taskDate.getFullYear() === currentDate.getFullYear()) {
+            if(taskDate.getMonth() === currentMonthDate.getMonth() && taskDate.getFullYear() === currentMonthDate.getFullYear()) {
                 days.add(taskDate.getDate());
             }
         }
     });
-    return Array.from(days).sort((a,b) => a - b);
-  }, [tasks, currentDate]);
+    return days;
+  }, [tasks, currentMonthDate]);
+
+  const selectedDateKey = format(selectedDate, 'yyyy-MM-dd');
+  const tasksForSelectedDay = tasksByDate.get(selectedDateKey) || [];
 
 
   return (
@@ -469,7 +473,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => changeMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <h3 className="text-lg font-semibold w-32 text-center">{format(currentDate, 'MMMM yyyy')}</h3>
+                <h3 className="text-lg font-semibold w-32 text-center">{format(currentMonthDate, 'MMMM yyyy')}</h3>
                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => changeMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -478,14 +482,11 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                 {dateButtons.map(day => (
                     <Button 
                         key={day} 
-                        variant={daysWithTasksInCurrentMonth.includes(day) ? 'default' : 'outline'}
+                        variant={isSameDay(selectedDate, setDate(currentMonthDate, day)) ? 'default' : daysWithTasksInCurrentMonth.has(day) ? 'secondary' : 'outline'}
                         size="sm"
                         className="h-7 w-7 p-0 text-xs"
                         onClick={() => {
-                            const newDate = new Date(currentDate);
-                            newDate.setDate(day);
-                            const element = document.getElementById(`date-view-${format(newDate, 'yyyy-MM-dd')}`);
-                            element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            setSelectedDate(setDate(currentMonthDate, day));
                         }}
                     >
                         {day}
@@ -494,28 +495,13 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
             </div>
         </div>
         
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
-             {daysWithTasksInCurrentMonth.length > 0 ? daysWithTasksInCurrentMonth.map(day => {
-                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-                const dateKey = format(date, 'yyyy-MM-dd');
-                const dailyTasks = tasksByDate.get(dateKey) || [];
-
-                return (
-                    <div key={dateKey} id={`date-view-${dateKey}`}>
-                        <h2 className="font-bold text-md mb-2 p-2 bg-muted rounded-md">{format(date, 'EEEE, MMMM do, yyyy')}</h2>
-                        <DailyTaskTable 
-                            tasks={dailyTasks}
-                            users={users}
-                            clients={clients}
-                            employees={employees}
-                        />
-                    </div>
-                )
-             }) : (
-                <div className="text-center p-8 text-muted-foreground">
-                    No tasks scheduled for {format(currentDate, 'MMMM yyyy')}.
-                </div>
-             )}
+        <div className="space-y-4 p-1">
+            <DailyTaskTable 
+                tasks={tasksForSelectedDay}
+                users={users}
+                clients={clients}
+                employees={employees}
+            />
         </div>
       </CardContent>
     </Card>
