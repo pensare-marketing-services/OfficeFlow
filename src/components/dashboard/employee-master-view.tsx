@@ -39,9 +39,6 @@ const statusColors: Record<string, string> = {
 const getInitials = (name: string = '') =>
   name ? name.charAt(0).toUpperCase() : '';
 
-/* ---------------------------------------------------
-   Editable Priority Cell - NOW FOR TASK PRIORITY
---------------------------------------------------- */
 const EditablePriorityCell: React.FC<{ task: TaskWithId | null }> = ({ task }) => {
   const { updateTask } = useTasks();
   const [priority, setPriority] = useState(task?.priority ?? 99);
@@ -80,10 +77,6 @@ const EditablePriorityCell: React.FC<{ task: TaskWithId | null }> = ({ task }) =
   );
 };
 
-
-/* ---------------------------------------------------
-   Task Cell Popover
---------------------------------------------------- */
 const TaskCell = ({
   task,
   onSelect,
@@ -102,7 +95,7 @@ const TaskCell = ({
         <div
           onClick={onSelect}
           className={cn(
-            'h-full w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-r px-2',
+            'h-full w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-r px-1',
             statusColors[task.status] || 'bg-transparent',
             isSelected && 'ring-1 ring-accent ring-inset'
           )}
@@ -199,9 +192,6 @@ const TaskCell = ({
 };
 
 
-/* ---------------------------------------------------
-   DAILY TASK TABLE COMPONENT
---------------------------------------------------- */
 const DailyTaskTable: React.FC<{
   tasks: TaskWithId[];
   users: UserWithId[];
@@ -241,7 +231,7 @@ const DailyTaskTable: React.FC<{
   const totalEmployeeWidth =
     employees.length * (employeeColWidth + orderColWidth);
 
-  const rowHeight = 'h-7';
+  const rowHeight = 'h-6';
   
   if (tasks.length === 0) {
       return (
@@ -285,12 +275,12 @@ const DailyTaskTable: React.FC<{
                       </div>
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <div className="h-full w-full flex items-center px-2">
+                      <div className="h-full w-full flex items-center px-1">
                         <span className="truncate">{client.name}</span>
                       </div>
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <div className="h-full w-full flex items-center px-2">
+                      <div className="h-full w-full flex items-center px-1">
                         <span className="truncate">{assignedEmployees}</span>
                       </div>
                     </TableCell>
@@ -321,7 +311,7 @@ const DailyTaskTable: React.FC<{
                           style={{ width: `${employeeColWidth}px` }}
                           className="bg-muted/80 border-r p-0"
                         >
-                          <div className="h-full w-full flex items-center justify-center px-2">
+                          <div className="h-full w-full flex items-center justify-center px-1">
                             <span className="truncate">{employee.username}</span>
                           </div>
                         </TableHead>
@@ -386,16 +376,13 @@ const DailyTaskTable: React.FC<{
 };
 
 
-/* ---------------------------------------------------
-   MAIN COMPONENT
---------------------------------------------------- */
 export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
   const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const employees = useMemo(
     () =>
-      users.filter((u) => u.role === 'employee'),
+      users.filter((u) => u.role === 'employee').sort((a,b) => (a.username || '').localeCompare(b.username || '')),
     [users]
   );
   
@@ -443,15 +430,15 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
 
 
   return (
-    <Card className="w-full overflow-hidden">
-      <CardContent className="p-2 space-y-2">
+    <Card className="w-full overflow-hidden m-0">
+      <CardContent className="p-1 space-y-1">
         <div className="flex items-center justify-between p-1 border-b">
            <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => changeMonth(-1)}>
+                <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <h3 className="text-lg font-semibold w-32 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
-                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => changeMonth(1)}>
+                <h3 className="text-base font-semibold w-28 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
+                 <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                 </Button>
            </div>
@@ -461,7 +448,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                         key={day} 
                         variant={isSameDay(selectedDate, setDate(currentMonthDate, day)) ? 'default' : daysWithTasksInCurrentMonth.has(day) ? 'secondary' : 'outline'}
                         size="sm"
-                        className="h-7 w-7 p-0 text-xs"
+                        className="h-6 w-6 p-0 text-[10px]"
                         onClick={() => {
                             setSelectedDate(setDate(currentMonthDate, day));
                         }}
@@ -472,7 +459,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
             </div>
         </div>
         
-        <div className="space-y-4 p-1">
+        <div>
             <DailyTaskTable 
                 tasks={tasksForSelectedDay}
                 users={users}
