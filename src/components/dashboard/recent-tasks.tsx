@@ -230,29 +230,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     <Card className="shadow-md">
       <CardHeader className="py-2 px-3 flex flex-row items-center justify-between">
         <CardTitle className="font-headline text-sm">{title}</CardTitle>
-        {isAdmin && tasks.length > 0 && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="icon" className="h-6 w-6">
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete all <strong>{tasks.length}</strong> tasks shown in the "{title}" table.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteAll} className="bg-destructive hover:bg-destructive/90">
-                  Yes, delete all
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
