@@ -209,8 +209,7 @@ const DailyTaskTable: React.FC<{
   employees: UserWithId[];
 }> = ({ tasks, users, clients, employees }) => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-  const { scrollRef, scrollLeft, scrollRight, canScrollLeft, canScrollRight } =
-    useHorizontalScroll();
+  const { scrollRef } = useHorizontalScroll();
 
   const dmClients = useMemo(
     () =>
@@ -254,28 +253,6 @@ const DailyTaskTable: React.FC<{
 
   return (
     <div className="border rounded-lg overflow-hidden">
-      <div className="flex items-center justify-end p-1 border-b bg-muted/50">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-6 w-6"
-          disabled={!canScrollLeft}
-          onClick={scrollLeft}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-6 w-6"
-          disabled={!canScrollRight}
-          onClick={scrollRight}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-
       <div className="flex w-full min-w-0 h-full">
         <div className="flex-shrink-0 bg-background border-r shadow-sm sticky left-0 z-10">
           <Table className="text-[10px] border-collapse">
@@ -473,7 +450,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => changeMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <h3 className="text-lg font-semibold w-32 text-center">{format(currentMonthDate, 'MMMM yyyy')}</h3>
+                <h3 className="text-lg font-semibold w-32 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => changeMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                 </Button>
