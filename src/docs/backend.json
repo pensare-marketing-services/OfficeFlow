@@ -37,7 +37,7 @@
         },
         "department": {
           "type": "string",
-          "enum": ["digital marketing", "gd", "seo", "website"],
+          "enum": ["digitalmarketing", "contentwriter", "designers", "videoeditor", "web", "seo"],
           "description": "The department the employee belongs to."
         }
       },

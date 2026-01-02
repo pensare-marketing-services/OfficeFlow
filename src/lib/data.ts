@@ -8,7 +8,7 @@ export type UserProfile = {
   username?: string;
   password?: string;
   priority?: number;
-  department?: 'digital marketing' | 'gd' | 'seo' | 'website';
+  department?: 'digitalmarketing' | 'contentwriter' | 'designers' | 'videoeditor' | 'web' | 'seo';
 };
 
 export type User = UserProfile & { id: string };

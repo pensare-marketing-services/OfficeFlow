@@ -16,7 +16,7 @@ import { CreateUserInput, CreateUserInputSchema } from '@/ai/flows/user-flow-sch
 import { cn } from '@/lib/utils';
 import type { UserProfile } from '@/lib/data';
 
-const departments: UserProfile['department'][] = ['digital marketing', 'gd', 'seo', 'website'];
+const departments: Exclude<UserProfile['department'], undefined>[] = ['digitalmarketing', 'contentwriter', 'designers', 'videoeditor', 'web', 'seo'];
 
 export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,7 @@ export default function AddEmployeeForm() {
       role: 'employee',
       username: '',
       password: '',
-      department: 'digital marketing',
+      department: 'digitalmarketing',
     },
   });
 

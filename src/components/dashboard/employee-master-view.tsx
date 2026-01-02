@@ -195,6 +195,149 @@ const TaskCell = ({
 };
 
 
+export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
+  const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
+  const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
+
+  const employees = useMemo(
+    () =>
+      users
+        .filter((u) => u.role === 'employee' && (u.department === 'digitalmarketing' || u.department === 'designers' || u.department === 'contentwriter' || u.department === 'videoeditor'))
+        .sort((a,b) => (a.username || '').localeCompare(b.username || '')),
+    [users]
+  );
+  
+  const tasksByDate = useMemo(() => {
+    const grouped = new Map<string, TaskWithId[]>();
+    const today = startOfDay(new Date());
+    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next'];
+
+    tasks.forEach(task => {
+        if (!task.deadline) return;
+        const deadline = startOfDay(new Date(task.deadline));
+
+        // If task is incomplete and its deadline is in the past, group it under today's date.
+        if (incompleteStatuses.includes(task.status) && deadline < today) {
+            const dateKey = format(today, 'yyyy-MM-dd');
+            if(!grouped.has(dateKey)) grouped.set(dateKey, []);
+            grouped.get(dateKey)!.push(task);
+        } else {
+            // Otherwise, group it under its actual deadline.
+            const dateKey = format(deadline, 'yyyy-MM-dd');
+            if(!grouped.has(dateKey)) grouped.set(dateKey, []);
+            grouped.get(dateKey)!.push(task);
+        }
+    });
+    return grouped;
+  }, [tasks]);
+  
+  const daysInMonth = getDaysInMonth(currentMonthDate);
+  const dateButtons = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+  const changeMonth = (amount: number) => {
+    setCurrentMonthDate(prev => {
+        const newDate = new Date(prev);
+        newDate.setMonth(prev.getMonth() + amount);
+        setSelectedDate(startOfDay(newDate));
+        return newDate;
+    });
+  }
+  
+  const daysWithTasksInCurrentMonth = useMemo(() => {
+    const days = new Set<number>();
+    tasks.forEach(task => {
+        if(task.deadline) {
+            const taskDate = new Date(task.deadline);
+            if(taskDate.getMonth() === currentMonthDate.getMonth() && taskDate.getFullYear() === currentMonthDate.getFullYear()) {
+                days.add(taskDate.getDate());
+            }
+        }
+    });
+    // Add days for rollover tasks if the current month is the current system month
+    const today = new Date();
+    if(currentMonthDate.getMonth() === today.getMonth() && currentMonthDate.getFullYear() === today.getFullYear()) {
+       days.add(today.getDate());
+    }
+
+    return days;
+  }, [tasks, currentMonthDate]);
+  
+  const getTasksForSelectedDay = () => {
+    const today = startOfDay(new Date());
+    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next', 'Approved'];
+  
+    // 1. Get tasks whose deadline is today.
+    let dailyTasks = tasks.filter(task => {
+      if (!task.deadline) return false;
+      const deadline = startOfDay(new Date(task.deadline));
+      return isSameDay(deadline, selectedDate);
+    });
+  
+    // 2. If we are viewing today's date, also include incomplete tasks from the past.
+    if (isSameDay(selectedDate, today)) {
+      const rolloverTasks = tasks.filter(task => {
+        if (!task.deadline) return false;
+        const deadline = startOfDay(new Date(task.deadline));
+        return deadline < today && incompleteStatuses.includes(task.status);
+      });
+  
+      // Combine and remove duplicates (a task could be in both lists if its deadline was today but it was a rollover)
+      const allTasksForToday = [...dailyTasks, ...rolloverTasks];
+      const uniqueTasks = Array.from(new Map(allTasksForToday.map(task => [task.id, task])).values());
+      return uniqueTasks;
+    }
+  
+    return dailyTasks;
+  };
+
+  const tasksForSelectedDay = getTasksForSelectedDay();
+
+
+  return (
+    <Card className="w-full overflow-hidden m-0">
+      <CardContent className="p-1 space-y-1">
+        <div className="flex items-center justify-between p-1 border-b gap-2">
+           <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(-1)}>
+                    <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <h3 className="text-sm font-semibold w-24 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
+                 <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(1)}>
+                    <ChevronRight className="h-4 w-4" />
+                </Button>
+           </div>
+            <div className="flex flex-wrap gap-1 justify-center flex-1">
+                {dateButtons.map(day => (
+                    <Button 
+                        key={day} 
+                        variant={isSameDay(selectedDate, setDate(currentMonthDate, day)) ? 'default' : daysWithTasksInCurrentMonth.has(day) ? 'secondary' : 'outline'}
+                        size="sm"
+                        className="h-6 w-6 p-0 text-[10px]"
+                        onClick={() => {
+                            setSelectedDate(startOfDay(setDate(currentMonthDate, day)));
+                        }}
+                    >
+                        {day}
+                    </Button>
+                ))}
+            </div>
+        </div>
+        
+        <div>
+            <DailyTaskTable 
+                tasks={tasksForSelectedDay}
+                users={users}
+                clients={clients}
+                employees={employees}
+            />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+
+
 const DailyTaskTable: React.FC<{
   tasks: TaskWithId[];
   users: UserWithId[];
@@ -377,145 +520,3 @@ const DailyTaskTable: React.FC<{
     </div>
   );
 };
-
-
-export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
-  const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
-  const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
-
-  const employees = useMemo(
-    () =>
-      users
-        .filter((u) => u.role === 'employee' && (u.department === 'digital marketing' || u.department === 'gd'))
-        .sort((a,b) => (a.username || '').localeCompare(b.username || '')),
-    [users]
-  );
-  
-  const tasksByDate = useMemo(() => {
-    const grouped = new Map<string, TaskWithId[]>();
-    const today = startOfDay(new Date());
-    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next'];
-
-    tasks.forEach(task => {
-        if (!task.deadline) return;
-        const deadline = startOfDay(new Date(task.deadline));
-
-        // If task is incomplete and its deadline is in the past, group it under today's date.
-        if (incompleteStatuses.includes(task.status) && deadline < today) {
-            const dateKey = format(today, 'yyyy-MM-dd');
-            if(!grouped.has(dateKey)) grouped.set(dateKey, []);
-            grouped.get(dateKey)!.push(task);
-        } else {
-            // Otherwise, group it under its actual deadline.
-            const dateKey = format(deadline, 'yyyy-MM-dd');
-            if(!grouped.has(dateKey)) grouped.set(dateKey, []);
-            grouped.get(dateKey)!.push(task);
-        }
-    });
-    return grouped;
-  }, [tasks]);
-  
-  const daysInMonth = getDaysInMonth(currentMonthDate);
-  const dateButtons = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-
-  const changeMonth = (amount: number) => {
-    setCurrentMonthDate(prev => {
-        const newDate = new Date(prev);
-        newDate.setMonth(prev.getMonth() + amount);
-        setSelectedDate(startOfDay(newDate));
-        return newDate;
-    });
-  }
-  
-  const daysWithTasksInCurrentMonth = useMemo(() => {
-    const days = new Set<number>();
-    tasks.forEach(task => {
-        if(task.deadline) {
-            const taskDate = new Date(task.deadline);
-            if(taskDate.getMonth() === currentMonthDate.getMonth() && taskDate.getFullYear() === currentMonthDate.getFullYear()) {
-                days.add(taskDate.getDate());
-            }
-        }
-    });
-    // Add days for rollover tasks if the current month is the current system month
-    const today = new Date();
-    if(currentMonthDate.getMonth() === today.getMonth() && currentMonthDate.getFullYear() === today.getFullYear()) {
-       days.add(today.getDate());
-    }
-
-    return days;
-  }, [tasks, currentMonthDate]);
-  
-  const getTasksForSelectedDay = () => {
-    const today = startOfDay(new Date());
-    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next', 'Approved'];
-  
-    // 1. Get tasks whose deadline is today.
-    let dailyTasks = tasks.filter(task => {
-      if (!task.deadline) return false;
-      const deadline = startOfDay(new Date(task.deadline));
-      return isSameDay(deadline, selectedDate);
-    });
-  
-    // 2. If we are viewing today's date, also include incomplete tasks from the past.
-    if (isSameDay(selectedDate, today)) {
-      const rolloverTasks = tasks.filter(task => {
-        if (!task.deadline) return false;
-        const deadline = startOfDay(new Date(task.deadline));
-        return deadline < today && incompleteStatuses.includes(task.status);
-      });
-  
-      // Combine and remove duplicates (a task could be in both lists if its deadline was today but it was a rollover)
-      const allTasksForToday = [...dailyTasks, ...rolloverTasks];
-      const uniqueTasks = Array.from(new Map(allTasksForToday.map(task => [task.id, task])).values());
-      return uniqueTasks;
-    }
-  
-    return dailyTasks;
-  };
-
-  const tasksForSelectedDay = getTasksForSelectedDay();
-
-
-  return (
-    <Card className="w-full overflow-hidden m-0">
-      <CardContent className="p-1 space-y-1">
-        <div className="flex items-center justify-between p-1 border-b gap-2">
-           <div className="flex items-center gap-1">
-                <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(-1)}>
-                    <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <h3 className="text-sm font-semibold w-24 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
-                 <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(1)}>
-                    <ChevronRight className="h-4 w-4" />
-                </Button>
-           </div>
-            <div className="flex flex-wrap gap-1 justify-center flex-1">
-                {dateButtons.map(day => (
-                    <Button 
-                        key={day} 
-                        variant={isSameDay(selectedDate, setDate(currentMonthDate, day)) ? 'default' : daysWithTasksInCurrentMonth.has(day) ? 'secondary' : 'outline'}
-                        size="sm"
-                        className="h-6 w-6 p-0 text-[10px]"
-                        onClick={() => {
-                            setSelectedDate(startOfDay(setDate(currentMonthDate, day)));
-                        }}
-                    >
-                        {day}
-                    </Button>
-                ))}
-            </div>
-        </div>
-        
-        <div>
-            <DailyTaskTable 
-                tasks={tasksForSelectedDay}
-                users={users}
-                clients={clients}
-                employees={employees}
-            />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
