@@ -35,12 +35,12 @@ export function StatsCard({ title: title, value, icon: Icon, variant = 'default'
 
   return (
     <Card className={cardClasses} onClick={onClick} >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 px-2 pt-2 pb-1">
-        <CardTitle className="text-xs font-medium">{title}</CardTitle>
-        <Icon className={iconClasses} />
-      </CardHeader>
-      <CardContent className='p-2 pt-0'>
-        <div className="font-headline text-xl font-bold">{value}</div>
+      <CardContent className='p-2'>
+         <div className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-xs font-medium">{title}</CardTitle>
+            <Icon className={iconClasses} />
+        </div>
+        <div className="font-headline text-lg font-bold">{value}</div>
       </CardContent>
     </Card>
   );
