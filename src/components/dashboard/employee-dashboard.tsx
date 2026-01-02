@@ -52,7 +52,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
   
   const filteredTasks = useMemo(() => {
     const getSortedTasks = (tasksToSort: (Task & {id: string})[]) => {
-      // Create a map of employee priority
+      // Create a map of employee priority for quick lookup
       const employeePriorityMap = new Map<string, number>();
       users.forEach(u => {
         if(u.id && u.priority) {
@@ -61,21 +61,27 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
       });
       
       return tasksToSort.sort((a, b) => {
+        // Get the active assignee for each task
         const aAssigneeId = a.assigneeIds?.[a.activeAssigneeIndex ?? 0];
         const bAssigneeId = b.assigneeIds?.[b.activeAssigneeIndex ?? 0];
 
+        // Get the priority of the assigned employee (default to a high number if not found)
         const aEmployeePriority = aAssigneeId ? employeePriorityMap.get(aAssigneeId) || 99 : 99;
         const bEmployeePriority = bAssigneeId ? employeePriorityMap.get(bAssigneeId) || 99 : 99;
 
+        // First, sort by employee priority. A lower number means higher priority.
         if (aEmployeePriority !== bEmployeePriority) {
           return aEmployeePriority - bEmployeePriority;
         }
 
-        const aValue = a.priority || 99;
-        const bValue = b.priority || 99;
-        if (aValue < bValue) return -1;
-        if (aValue > bValue) return 1;
+        // If employee priorities are the same, then sort by task priority
+        const aTaskPriority = a.priority || 99;
+        const bTaskPriority = b.priority || 99;
+        if (aTaskPriority !== bTaskPriority) {
+            return aTaskPriority - bTaskPriority;
+        }
 
+        // As a final tie-breaker, sort by creation date (older first)
         const aDate = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
         const bDate = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
         return aDate - bDate;
