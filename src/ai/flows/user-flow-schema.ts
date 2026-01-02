@@ -7,6 +7,7 @@ export const CreateUserInputSchema = z.object({
   role: z.enum(['admin', 'employee']),
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  department: z.enum(['digital marketing', 'gd', 'seo', 'website']).optional(),
 });
 
 export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;

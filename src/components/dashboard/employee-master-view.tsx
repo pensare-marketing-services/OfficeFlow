@@ -385,7 +385,9 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
 
   const employees = useMemo(
     () =>
-      users.filter((u) => u.role === 'employee').sort((a,b) => (a.username || '').localeCompare(b.username || '')),
+      users
+        .filter((u) => u.role === 'employee' && (u.department === 'digital marketing' || u.department === 'gd'))
+        .sort((a,b) => (a.username || '').localeCompare(b.username || '')),
     [users]
   );
   
@@ -445,31 +447,30 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
   }, [tasks, currentMonthDate]);
   
   const getTasksForSelectedDay = () => {
-    const selectedDayKey = format(selectedDate, 'yyyy-MM-dd');
-    const todayKey = format(new Date(), 'yyyy-MM-dd');
+    const today = startOfDay(new Date());
     const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next', 'Approved'];
-    
+  
+    // 1. Get tasks whose deadline is today.
     let dailyTasks = tasks.filter(task => {
       if (!task.deadline) return false;
       const deadline = startOfDay(new Date(task.deadline));
-
-      // Condition 1: Task's deadline is on the selected day
-      if (isSameDay(deadline, selectedDate)) {
-        return true;
-      }
-      
-      // Condition 2: Task is incomplete, deadline is in the past, and we are viewing today's date
-      if (
-        isSameDay(selectedDate, new Date()) && 
-        deadline < selectedDate &&
-        incompleteStatuses.includes(task.status)
-      ) {
-        return true;
-      }
-
-      return false;
+      return isSameDay(deadline, selectedDate);
     });
-    
+  
+    // 2. If we are viewing today's date, also include incomplete tasks from the past.
+    if (isSameDay(selectedDate, today)) {
+      const rolloverTasks = tasks.filter(task => {
+        if (!task.deadline) return false;
+        const deadline = startOfDay(new Date(task.deadline));
+        return deadline < today && incompleteStatuses.includes(task.status);
+      });
+  
+      // Combine and remove duplicates (a task could be in both lists if its deadline was today but it was a rollover)
+      const allTasksForToday = [...dailyTasks, ...rolloverTasks];
+      const uniqueTasks = Array.from(new Map(allTasksForToday.map(task => [task.id, task])).values());
+      return uniqueTasks;
+    }
+  
     return dailyTasks;
   };
 
@@ -481,11 +482,11 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
       <CardContent className="p-1 space-y-1">
         <div className="flex items-center justify-between p-1 border-b gap-2">
            <div className="flex items-center gap-1">
-                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => changeMonth(-1)}>
+                <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <h3 className="text-sm font-semibold w-24 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
-                 <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => changeMonth(1)}>
+                 <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                 </Button>
            </div>

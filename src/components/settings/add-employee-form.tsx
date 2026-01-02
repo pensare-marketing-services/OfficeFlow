@@ -14,6 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { createUser } from '@/ai/flows/user-flow';
 import { CreateUserInput, CreateUserInputSchema } from '@/ai/flows/user-flow-schema';
 import { cn } from '@/lib/utils';
+import type { UserProfile } from '@/lib/data';
+
+const departments: UserProfile['department'][] = ['digital marketing', 'gd', 'seo', 'website'];
 
 export default function AddEmployeeForm() {
   const [loading, setLoading] = useState(false);
@@ -27,6 +30,7 @@ export default function AddEmployeeForm() {
       role: 'employee',
       username: '',
       password: '',
+      department: 'digital marketing',
     },
   });
 
@@ -100,6 +104,24 @@ export default function AddEmployeeForm() {
                                     <SelectContent>
                                         <SelectItem value="employee">Employee</SelectItem>
                                         <SelectItem value="admin">Admin</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                             <div className="col-span-3"><FormMessage /></div>
+                        </FormItem>
+                    )} />
+                     <FormField control={form.control} name="department" render={({ field }) => (
+                        <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
+                            <FormLabel className="col-span-1">Department</FormLabel>
+                            <div className="col-span-2">
+                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger className="h-8 text-xs">
+                                        <SelectValue placeholder="Select a department" />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {departments.map(dep => dep && <SelectItem key={dep} value={dep} className="capitalize">{dep}</SelectItem>)}
                                     </SelectContent>
                                 </Select>
                             </div>

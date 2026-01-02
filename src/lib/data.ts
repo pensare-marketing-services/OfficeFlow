@@ -1,4 +1,5 @@
 
+
 export type UserProfile = {
   uid?: string;
   name?: string;
@@ -7,6 +8,7 @@ export type UserProfile = {
   username?: string;
   password?: string;
   priority?: number;
+  department?: 'digital marketing' | 'gd' | 'seo' | 'website';
 };
 
 export type User = UserProfile & { id: string };

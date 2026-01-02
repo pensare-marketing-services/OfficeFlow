@@ -34,6 +34,11 @@
         "priority": {
           "type": "number",
           "description": "A number used to sort employees. Lower numbers appear first."
+        },
+        "department": {
+          "type": "string",
+          "enum": ["digital marketing", "gd", "seo", "website"],
+          "description": "The department the employee belongs to."
         }
       },
       "required": [
