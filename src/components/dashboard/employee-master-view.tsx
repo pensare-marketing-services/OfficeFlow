@@ -300,9 +300,9 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                       onClick={() => setSelectedClientId(client.id)}
                     >
                       {/* These TableCells have 'p-0 px-2' to remove default vertical padding and add horizontal spacing. */}
-                      <TableCell className="p-0 px-2 text-center border-r">{index + 1}</TableCell>
-                      <TableCell className="p-0 px-2 border-r">{client.name}</TableCell>
-                      <TableCell className="p-0 px-2 border-r">{assignedEmployees}</TableCell>
+                      <TableCell className="p-0 px-2 text-center border-r align-middle">{index + 1}</TableCell>
+                      <TableCell className="p-0 px-2 border-r align-middle">{client.name}</TableCell>
+                      <TableCell className="p-0 px-2 border-r align-middle">{assignedEmployees}</TableCell>
                     </TableRow>
                   );
                 })}
