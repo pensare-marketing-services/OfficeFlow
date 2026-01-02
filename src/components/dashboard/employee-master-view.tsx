@@ -76,7 +76,7 @@ const TaskCell = ({
   onSelect: () => void;
   isSelected: boolean;
 }) => {
-  if (!task) return <div className="p-1 border-r"></div>;
+  if (!task) return <div className="h-full w-full p-1 border-r"></div>;
   const { user: currentUser } = useAuth();
 
   return (
@@ -85,7 +85,7 @@ const TaskCell = ({
         <div
           onClick={onSelect}
           className={cn(
-            'cursor-pointer p-1 text-[10px] font-medium border-r',
+            'flex items-center h-full w-full cursor-pointer p-1 text-[10px] font-medium border-r',
             statusColors[task.status] || 'bg-transparent',
             isSelected && 'ring-2 ring-accent'
           )}
@@ -139,12 +139,14 @@ const TaskCell = ({
                         <DialogTrigger asChild>
                           <img
                             src={note.imageUrl}
+                            alt="remark"
                             className="mt-1 rounded-md max-w-full h-auto cursor-pointer"
                           />
                         </DialogTrigger>
                         <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center">
                           <img
                             src={note.imageUrl}
+                            alt="remark full view"
                             className="max-w-full max-h-full object-contain"
                           />
                         </DialogContent>
@@ -262,7 +264,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
         
         <div
         
-         className="flex w-full min-w-0"
+         className="flex w-full min-w-0 h-full"
           ref={containerRef}
         >
           {/* ----------------------------------------------------
@@ -271,10 +273,10 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
           <div className="flex-shrink-0 bg-background border-r shadow-sm">
             <Table className="text-[10px]">
               <TableHeader className="sticky top-0 z-10 bg-background">
-                <TableRow>
-                  <TableHead className="border-r" style={{ width: '40px' }}>Sl.</TableHead>
-                  <TableHead className="border-r" style={{ width: '130px' }}>Client</TableHead>
-                  <TableHead className="border-r" style={{ width: '180px' }}>Assigned</TableHead>
+                <TableRow className='h-8'>
+                  <TableHead className='border-r' style={{ width: '40px' }}>Sl.</TableHead>
+                  <TableHead className='border-r' style={{ width: '130px' }}>Client</TableHead>
+                  <TableHead className='border-r' style={{ width: '180px' }}>Assigned</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -289,14 +291,14 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                     <TableRow
                       key={client.id}
                       className={cn(
-                        'border-b hover:bg-muted/30',
+                        'h-8 border-b hover:bg-muted/30',
                         selectedClientId === client.id && 'bg-accent/20'
                       )}
                       onClick={() => setSelectedClientId(client.id)}
                     >
-                      <TableCell className="p-0 px-2 py-1 text-center border-r">{index + 1}</TableCell>
-                      <TableCell className="p-0 px-2 py-1 border-r">{client.name}</TableCell>
-                      <TableCell className="p-0 px-2 py-1 border-r">{assignedEmployees}</TableCell>
+                      <TableCell className="p-0 px-2 text-center border-r">{index + 1}</TableCell>
+                      <TableCell className="p-0 px-2 border-r">{client.name}</TableCell>
+                      <TableCell className="p-0 px-2 border-r">{assignedEmployees}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -318,7 +320,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
               >
                 <Table className="text-[10px]">
                   <TableHeader className="sticky top-0 bg-background z-10">
-                    <TableRow>
+                    <TableRow className='h-8'>
                       {employees.map((employee) => (
                         <React.Fragment key={employee.id}>
                           <TableHead
@@ -348,7 +350,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                       <TableRow
                         key={client.id}
                         className={cn(
-                          'border-b',
+                          'h-8 border-b',
                           selectedClientId === client.id && 'bg-accent/20'
                         )}
                       >
@@ -360,7 +362,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                           return (
                             <React.Fragment key={employee.id}>
                               <TableCell
-                                className="p-0"
+                                className="p-0 border-r"
                                 style={{
                                   width: `${employeeColWidth}px`,
                                 }}
@@ -376,7 +378,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                     }
                                   />
                                 ) : (
-                                  <div className="flex items-center justify-center text-muted-foreground/40 border-r">
+                                  <div className="flex items-center justify-center h-full text-muted-foreground/40 border-r">
                                     -
                                   </div>
                                 )}
@@ -386,7 +388,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                                 className="p-0 border-r"
                                 style={{ width: `${orderColWidth}px` }}
                               >
-                                <div className="p-1 flex items-center justify-center">
+                                <div className="p-1 flex items-center justify-center h-full">
                                   <EditablePriorityCell user={employee} />
                                 </div>
                               </TableCell>
