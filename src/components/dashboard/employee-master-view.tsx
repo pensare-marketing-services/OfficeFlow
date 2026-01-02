@@ -238,7 +238,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
   const rowHeight = 'h-7';
 
   return (
-    <Card className="w-full overflow-hidden mb-4">
+    <Card className="w-full overflow-hidden">
       <CardContent className="p-0 w-full overflow-x-hidden">
 
         {/* Scroll Buttons */}
@@ -316,6 +316,10 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                     </TableRow>
                   );
                 })}
+                {/* Spacer row for the fixed table */}
+                <TableRow className="h-4">
+                  <TableCell colSpan={3}></TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </div>
@@ -415,6 +419,10 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                         })}
                       </TableRow>
                     ))}
+                    {/* Spacer row for the scrollable table */}
+                    <TableRow className="h-4">
+                        <TableCell colSpan={employees.length * 2}></TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </div>
