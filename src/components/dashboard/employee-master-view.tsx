@@ -185,9 +185,11 @@ const TaskCell = ({
                             const taskStatusColor = statusPopupColors[task.status] || 'bg-gray-200 text-foreground';
                             return (
                             <AccordionItem value={task.id} key={task.id} className="border-b-0">
-                                <AccordionTrigger className={cn("py-0 text-xs hover:no-underline rounded-md px-2", taskStatusColor)}>
-                                    <div className="w-full flex justify-between items-center pr-2 h-7">
-                                        <span className="truncate flex-1 text-left">{task.title}</span>
+                                <AccordionTrigger className={cn("py-0 text-xs hover:no-underline rounded-md px-0 flex justify-between hover:bg-muted/50", )}>
+                                    <span className={cn("truncate flex-1 text-left h-7 flex items-center px-2 rounded-l-md", taskStatusColor)}>
+                                        {task.title}
+                                    </span>
+                                    <div className="flex items-center gap-2 px-2">
                                         <EditablePriorityInPopover task={task} />
                                     </div>
                                 </AccordionTrigger>
