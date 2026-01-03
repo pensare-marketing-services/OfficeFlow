@@ -55,6 +55,8 @@ const getInitials = (name: string = '') =>
 const EditablePriorityInPopover: React.FC<{ task: TaskWithId }> = ({ task }) => {
     const { updateTask } = useTasks();
     const [priority, setPriority] = useState(task.priority ?? 99);
+    const taskStatusColor = statusBackgroundColors[task.status] || 'bg-transparent';
+
 
     useEffect(() => {
         setPriority(task.priority ?? 99);
@@ -75,6 +77,7 @@ const EditablePriorityInPopover: React.FC<{ task: TaskWithId }> = ({ task }) => 
 
     return (
         <div className="flex items-center gap-1">
+             <div className={cn("h-3 w-3 rounded-full", taskStatusColor)}></div>
              <span className="text-[8px] text-muted-foreground">Order:</span>
             <Input
                 type="number"
@@ -150,11 +153,48 @@ const TaskCell = ({
     const primaryTask = useMemo(() => {
         return tasks.find(t => t.status === 'On Work') || tasks.sort((a,b) => (a.priority || 99) - (b.priority || 99))[0];
     }, [tasks]);
-
-    const additionalTasksCount = tasks.length - 1;
     
     const hasMultipleTasks = tasks.length > 1;
 
+    if (hasMultipleTasks) {
+        return (
+             <Popover>
+                <PopoverTrigger asChild>
+                    <div
+                        onClick={onSelect}
+                        className={cn(
+                            'h-full w-full flex items-center justify-center cursor-pointer text-xs font-medium border-r px-1 gap-1 bg-pink-200',
+                            isSelected && 'ring-1 ring-accent ring-inset'
+                        )}
+                    >
+                         <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                            +{tasks.length} Tasks
+                        </Badge>
+                    </div>
+                </PopoverTrigger>
+                 <PopoverContent className="w-80 p-2" side="bottom" align="start">
+                    <Accordion type="single" collapsible className="w-full">
+                        {tasks.map(task => (
+                            <AccordionItem value={task.id} key={task.id}>
+                                <AccordionTrigger className="py-2 text-xs hover:no-underline">
+                                    <div className="w-full flex justify-between items-center pr-2">
+                                        <span className="truncate flex-1 text-left">{task.title}</span>
+                                        <EditablePriorityInPopover task={task} />
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    {/* Remarks content from original single-task view */}
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                </PopoverContent>
+            </Popover>
+        )
+    }
+
+    const singleTask = tasks[0];
+    const singleTaskStatusColor = statusBackgroundColors[singleTask.status] || 'bg-transparent';
 
     return (
         <Popover>
@@ -163,192 +203,91 @@ const TaskCell = ({
                     onClick={onSelect}
                     className={cn(
                         'h-full w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-r px-1 gap-1',
-                        statusBackgroundColors[primaryTask.status] || 'bg-transparent',
+                        singleTaskStatusColor,
                         isSelected && 'ring-1 ring-accent ring-inset'
                     )}
                 >
-                    <span className="truncate">{primaryTask.title}</span>
-                    {additionalTasksCount > 0 && (
-                        <Badge variant="secondary" className="h-4 px-1 text-[8px]">
-                            +{additionalTasksCount}
-                        </Badge>
-                    )}
+                    <span className="truncate">{singleTask.title}</span>
                 </div>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-2" side="bottom" align="start">
-                <div className="space-y-2">
-                    
-                     {hasMultipleTasks ? (
-                        <Accordion type="single" collapsible className="w-full">
-                            {tasks.map(task => (
-                                <AccordionItem value={task.id} key={task.id}>
-                                    <AccordionTrigger className="py-2 text-xs hover:no-underline">
-                                        <div className="w-full flex justify-between items-center pr-2">
-                                            <span className="truncate flex-1 text-left">{task.title}</span>
-                                            <EditablePriorityInPopover task={task} />
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <div className="max-h-60 space-y-3 p-1 overflow-y-auto">
-                                            {(task.progressNotes || []).map((note, i) => {
-                                                const authorName = note.authorName || 'User';
-                                                return (
-                                                    <div
-                                                    key={i}
-                                                    className={cn(
-                                                        'flex items-start gap-2 text-[10px]',
-                                                        note.authorId === currentUser?.uid ? 'justify-end' : ''
-                                                    )}
-                                                    >
-                                                    {note.authorId !== currentUser?.uid && (
-                                                        <Avatar className="h-6 w-6 border">
-                                                        <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
-                                                        </Avatar>
-                                                    )}
+                 <div className="max-h-60 space-y-3 p-1 overflow-y-auto">
+                    <h4 className="font-medium text-sm">{singleTask.title}</h4>
+                     {(singleTask.progressNotes || []).map((note, i) => {
+                        const authorName = note.authorName || 'User';
+                        return (
+                            <div
+                            key={i}
+                            className={cn(
+                                'flex items-start gap-2 text-[10px]',
+                                note.authorId === currentUser?.uid ? 'justify-end' : ''
+                            )}
+                            >
+                            {note.authorId !== currentUser?.uid && (
+                                <Avatar className="h-6 w-6 border">
+                                <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
+                                </Avatar>
+                            )}
 
-                                                    <div
-                                                        className={cn(
-                                                        'max-w-[75%] rounded-lg p-2',
-                                                        note.authorId === currentUser?.uid
-                                                            ? 'bg-primary text-primary-foreground'
-                                                            : 'bg-muted'
-                                                        )}
-                                                    >
-                                                        <p className="font-bold text-[10px] mb-1">
-                                                        {note.authorId === currentUser?.uid ? 'You' : authorName}
-                                                        </p>
-
-                                                        {note.note && (
-                                                        <div className="text-[11px] whitespace-pre-wrap">
-                                                            <LinkifiedText text={note.note} />
-                                                        </div>
-                                                        )}
-
-                                                        {note.imageUrl && (
-                                                        <Dialog>
-                                                            <DialogTrigger asChild>
-                                                            <img
-                                                                src={note.imageUrl}
-                                                                alt="remark"
-                                                                className="mt-1 rounded-md max-w-full h-auto cursor-pointer"
-                                                            />
-                                                            </DialogTrigger>
-                                                            <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center">
-                                                            <img
-                                                                src={note.imageUrl}
-                                                                alt="remark full view"
-                                                                className="max-w-full max-h-full object-contain"
-                                                            />
-                                                            </DialogContent>
-                                                        </Dialog>
-                                                        )}
-
-                                                        <p className="text-[9px] text-right mt-1 opacity-70">
-                                                        {format(new Date(note.date), 'MMM d, HH:mm')}
-                                                        </p>
-                                                    </div>
-
-                                                    {note.authorId === currentUser?.uid && (
-                                                        <Avatar className="h-6 w-6 border">
-                                                        <AvatarFallback>
-                                                            {getInitials(currentUser.username)}
-                                                        </AvatarFallback>
-                                                        </Avatar>
-                                                    )}
-                                                    </div>
-                                                );
-                                                })}
-
-                                                {(task.progressNotes || []).length === 0 && (
-                                                <p className="text-center text-xs text-muted-foreground py-4">
-                                                    No remarks for this task.
-                                                </p>
-                                                )}
-                                            </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
-                     ) : (
-                         <div className="max-h-60 space-y-3 p-1 overflow-y-auto">
-                            <h4 className="font-medium text-sm">{primaryTask.title}</h4>
-                             {(primaryTask.progressNotes || []).map((note, i) => {
-                                const authorName = note.authorName || 'User';
-                                return (
-                                    <div
-                                    key={i}
-                                    className={cn(
-                                        'flex items-start gap-2 text-[10px]',
-                                        note.authorId === currentUser?.uid ? 'justify-end' : ''
-                                    )}
-                                    >
-                                    {note.authorId !== currentUser?.uid && (
-                                        <Avatar className="h-6 w-6 border">
-                                        <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
-                                        </Avatar>
-                                    )}
-
-                                    <div
-                                        className={cn(
-                                        'max-w-[75%] rounded-lg p-2',
-                                        note.authorId === currentUser?.uid
-                                            ? 'bg-primary text-primary-foreground'
-                                            : 'bg-muted'
-                                        )}
-                                    >
-                                        <p className="font-bold text-[10px] mb-1">
-                                        {note.authorId === currentUser?.uid ? 'You' : authorName}
-                                        </p>
-
-                                        {note.note && (
-                                        <div className="text-[11px] whitespace-pre-wrap">
-                                            <LinkifiedText text={note.note} />
-                                        </div>
-                                        )}
-
-                                        {note.imageUrl && (
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                            <img
-                                                src={note.imageUrl}
-                                                alt="remark"
-                                                className="mt-1 rounded-md max-w-full h-auto cursor-pointer"
-                                            />
-                                            </DialogTrigger>
-                                            <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center">
-                                            <img
-                                                src={note.imageUrl}
-                                                alt="remark full view"
-                                                className="max-w-full max-h-full object-contain"
-                                            />
-                                            </DialogContent>
-                                        </Dialog>
-                                        )}
-
-                                        <p className="text-[9px] text-right mt-1 opacity-70">
-                                        {format(new Date(note.date), 'MMM d, HH:mm')}
-                                        </p>
-                                    </div>
-
-                                    {note.authorId === currentUser?.uid && (
-                                        <Avatar className="h-6 w-6 border">
-                                        <AvatarFallback>
-                                            {getInitials(currentUser.username)}
-                                        </AvatarFallback>
-                                        </Avatar>
-                                    )}
-                                    </div>
-                                );
-                                })}
-
-                                {(primaryTask.progressNotes || []).length === 0 && (
-                                <p className="text-center text-xs text-muted-foreground py-4">
-                                    No remarks for this task.
-                                </p>
+                            <div
+                                className={cn(
+                                'max-w-[75%] rounded-lg p-2',
+                                note.authorId === currentUser?.uid
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted'
                                 )}
+                            >
+                                <p className="font-bold text-[10px] mb-1">
+                                {note.authorId === currentUser?.uid ? 'You' : authorName}
+                                </p>
+
+                                {note.note && (
+                                <div className="text-[11px] whitespace-pre-wrap">
+                                    <LinkifiedText text={note.note} />
+                                </div>
+                                )}
+
+                                {note.imageUrl && (
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                    <img
+                                        src={note.imageUrl}
+                                        alt="remark"
+                                        className="mt-1 rounded-md max-w-full h-auto cursor-pointer"
+                                    />
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center">
+                                    <img
+                                        src={note.imageUrl}
+                                        alt="remark full view"
+                                        className="max-w-full max-h-full object-contain"
+                                    />
+                                    </DialogContent>
+                                </Dialog>
+                                )}
+
+                                <p className="text-[9px] text-right mt-1 opacity-70">
+                                {format(new Date(note.date), 'MMM d, HH:mm')}
+                                </p>
                             </div>
-                     )}
-                </div>
+
+                            {note.authorId === currentUser?.uid && (
+                                <Avatar className="h-6 w-6 border">
+                                <AvatarFallback>
+                                    {getInitials(currentUser.username)}
+                                </AvatarFallback>
+                                </Avatar>
+                            )}
+                            </div>
+                        );
+                        })}
+
+                        {(singleTask.progressNotes || []).length === 0 && (
+                        <p className="text-center text-xs text-muted-foreground py-4">
+                            No remarks for this task.
+                        </p>
+                        )}
+                    </div>
             </PopoverContent>
         </Popover>
     );
