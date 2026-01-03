@@ -227,7 +227,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="p-1 border-r border-t text-[8px] h-6 w-[8px]">#</TableHead>
+              <TableHead className="p-1 border-r border-t text-[8px] h-3 w-[8px]">#</TableHead>
               <TableHead className="py-1 px-1 border-r border-t text-[8px] h-6 w-[30px]">Client</TableHead>
               <TableHead className="py-1 px-1 border-r border-t text-[8px] h-8 w-[40px]">Task</TableHead>
                {isAdmin && <TableHead className="py-1 px-1 border-r border-t text-[8px] h-8 w-[30px]">Assigned</TableHead>}
