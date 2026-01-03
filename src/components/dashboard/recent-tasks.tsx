@@ -241,10 +241,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 const client = getClient(task.clientId);
                 const isEmployeeView = currentUser?.role === 'employee';
                 
-                const descriptionWords = task.description ? task.description.split(/\s+/).filter(Boolean) : [];
-                const wordCount = descriptionWords.length;
-                const descriptionPreview = descriptionWords.slice(0, 10).join(' ');
-
                 const isCompleted = completedStatuses.includes(task.status);
                 const isPromotionTask = task.description === 'Paid Promotion';
                 const now = new Date();
@@ -317,28 +313,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                         <p>{task.title}</p>
                                     </TooltipContent>
                                 </Tooltip>
-
-                                {wordCount > 10 ? (
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <p className="text-[8px] text-muted-foreground cursor-pointer hover:text-foreground truncate">
-                                            {descriptionPreview}... <span className="underline">more</span>
-                                            </p>
-                                        </DialogTrigger>
-                                        <DialogContent className="sm:max-w-[60vw]">
-                                            <DialogHeader>
-                                                <DialogTitle>{task.title}</DialogTitle>
-                                            </DialogHeader>
-                                            <DialogDescription asChild>
-                                            <div className="whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto p-4">
-                                                <LinkifiedText text={task.description} />
-                                            </div>
-                                            </DialogDescription>
-                                        </DialogContent>
-                                    </Dialog>
-                                ) : (
-                                    <p className="text-[8px] text-muted-foreground truncate">{task.description}</p>
-                                )}
                             </TableCell>
                             {isAdmin && (
                             <TableCell className="px-2 border-r border-t">
