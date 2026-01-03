@@ -139,16 +139,16 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
       
       {viewMode === 'tasks' && (
         <div className="flex w-full space-x-2 overflow-x-auto p-1">
-            <div className="flex-shrink-0 w-[420px]">
+            <div className="flex-shrink-0 w-[360px]">
                 <RecentTasks tasks={dmTasks} users={users} title="Tasks - Digital Marketing" onTaskDelete={deleteTask} />
             </div>
-            <div className="flex-shrink-0 w-[420px]">
+            <div className="flex-shrink-0 w-[360px]">
                 <RecentTasks tasks={seoTasks} users={users} title="Tasks - SEO" onTaskDelete={deleteTask} />
             </div>
-            <div className="flex-shrink-0 w-[420px]">
+            <div className="flex-shrink-0 w-[360px]">
                 <RecentTasks tasks={webTasks} users={users} title="Tasks - Website" onTaskDelete={deleteTask} />
             </div>
-             <div className="flex-shrink-0 w-[420px]">
+             <div className="flex-shrink-0 w-[360px]">
                 <RecentTasks tasks={otherTasks} users={users} title="Tasks - Other" onTaskDelete={deleteTask} />
             </div>
         </div>

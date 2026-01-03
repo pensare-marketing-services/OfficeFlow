@@ -46,6 +46,11 @@ const statusColors: Record<string, string> = {
     'Hold': 'bg-gray-500 text-white',
     'To Do': 'bg-gray-400 text-white',
     'Ready for Next': 'bg-teal-500 text-white',
+    'Reschedule': 'bg-rose-500 text-white',
+    'Overdue': 'bg-red-600 text-white',
+    'Running': 'bg-blue-500 text-white',
+    'Active': 'bg-blue-500 text-white',
+    'Stopped': 'bg-red-500 text-white',
 };
 
 const EditableCell: React.FC<{

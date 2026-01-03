@@ -28,14 +28,20 @@ interface EmployeeMasterViewProps {
 }
 
 const statusColors: Record<string, string> = {
-  'Scheduled': 'bg-transparent',
-  'On Work': 'bg-gray-500/20',
-  'For Approval': 'bg-orange-500/20',
-  'Approved': 'bg-green-600/20',
-  'Posted': 'bg-blue-500/20',
-  'Completed': 'bg-blue-500/20',
-  'Hold': 'bg-gray-500/20',
-  'Ready for Next': 'bg-teal-500/20',
+  'Scheduled': 'bg-transparent text-foreground',
+  'On Work': 'bg-gray-500 text-white',
+  'For Approval': 'bg-orange-500 text-white',
+  'Approved': 'bg-green-600 text-white',
+  'Posted': 'bg-blue-500 text-white',
+  'Completed': 'bg-blue-500 text-white',
+  'Hold': 'bg-gray-500 text-white',
+  'To Do': 'bg-gray-400 text-white',
+  'Ready for Next': 'bg-teal-500 text-white',
+  'Reschedule': 'bg-rose-500 text-white',
+  'Overdue': 'bg-red-600 text-white',
+  'Running': 'bg-blue-500 text-white',
+  'Active': 'bg-blue-500 text-white',
+  'Stopped': 'bg-red-500 text-white',
 };
 
 
@@ -92,6 +98,11 @@ const TaskCell = ({
   if (!task) return <div className="h-full w-full flex items-center justify-center border-r">-</div>;
   const { user: currentUser } = useAuth();
 
+  // Find the color from statusColors, apply transparency, and remove text color part
+  const baseColorClass = statusColors[task.status] || 'bg-transparent';
+  const colorClassWithOpacity = baseColorClass.split(' ')[0] + '/20';
+
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -99,7 +110,7 @@ const TaskCell = ({
           onClick={onSelect}
           className={cn(
             'h-full w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-r px-1',
-            statusColors[task.status] || 'bg-transparent',
+            task.status === 'Scheduled' ? 'bg-transparent' : colorClassWithOpacity,
             isSelected && 'ring-1 ring-accent ring-inset'
           )}
         >
