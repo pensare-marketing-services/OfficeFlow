@@ -104,14 +104,6 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
     
     <div className="space-y-4">
      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-
-        <StatsCard 
-            title="Total Tasks" 
-            value={totalTasks} 
-            icon={ClipboardList} 
-            onClick={() => handleTaskFilterClick('total')}
-            isActive={viewMode === 'tasks' && taskFilter === 'total'}
-        />
         <StatsCard 
             title="Employees" 
             value={totalEmployees - seoWebEmployeesCount} 
@@ -125,6 +117,13 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
             icon={Users}
             onClick={handleSeoWebViewClick}
             isActive={viewMode === 'employees-seo-web'} 
+        />
+        <StatsCard 
+            title="Total Tasks" 
+            value={totalTasks} 
+            icon={ClipboardList} 
+            onClick={() => handleTaskFilterClick('total')}
+            isActive={viewMode === 'tasks' && taskFilter === 'total'}
         />
         <StatsCard 
             title="Completed Tasks" 
