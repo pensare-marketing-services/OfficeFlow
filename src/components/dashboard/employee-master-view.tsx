@@ -134,7 +134,7 @@ const TaskCell = ({
             </PopoverTrigger>
             <PopoverContent className="w-80 p-2" side="bottom" align="start">
                 <div className="space-y-2">
-                    <h4 className="font-medium text-sm border-b pb-2">Tasks ({tasks.length})</h4>
+                    
                      <Accordion type="single" collapsible className="w-full">
                         {tasks.map(task => (
                              <AccordionItem value={task.id} key={task.id}>
