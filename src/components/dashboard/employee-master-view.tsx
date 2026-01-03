@@ -380,6 +380,19 @@ const DailyTaskTable: React.FC<{
 }> = ({ tasks, users, clients, employees }) => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const { scrollRef } = useHorizontalScroll();
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (tableRef.current && !tableRef.current.contains(event.target as Node)) {
+        setSelectedClientId(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [tableRef]);
 
   const dmClients = useMemo(
     () =>
@@ -423,7 +436,7 @@ const DailyTaskTable: React.FC<{
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border rounded-lg overflow-hidden" ref={tableRef}>
       <div className="flex w-full min-w-0 h-full">
         <div className="flex-shrink-0 bg-background border-r shadow-sm sticky left-0 z-10">
           <Table className="text-[10px] border-collapse">
