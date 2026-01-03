@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -260,6 +261,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     };
     
     const handleLocalStatusChange = (task: Task & { id: string }, newStatus: string) => {
+        let updatePayload: Partial<Task> = {};
+        
         if (currentUser?.role === 'admin' && newStatus === 'Reschedule') {
             onTaskUpdate({ 
                 id: task.id, 
@@ -277,10 +280,15 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
              if (newStatus === 'Stopped') finalStatus = 'Completed';
         }
 
+        if (['Posted', 'Completed'].includes(finalStatus)) {
+            updatePayload.deadline = new Date().toISOString();
+        }
+
         if (currentUser?.role === 'employee') {
             updateTaskStatus(task, finalStatus);
         } else {
-            handleFieldChange(task.id, 'status', finalStatus as TaskStatus);
+            updatePayload.status = finalStatus as TaskStatus;
+            handleFieldChange(task.id, 'status', updatePayload);
         }
     }
 
@@ -740,3 +748,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
+
+
+    
