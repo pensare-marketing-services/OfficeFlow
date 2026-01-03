@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -281,14 +280,14 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[40px] px-2 text-xs">Sl.No</TableHead>
-                            <TableHead className="w-[90px]">Date</TableHead>
-                            <TableHead className="w-[200px]">Campaign</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead className="w-[80px]">Budget</TableHead>
-                            <TableHead className="w-[100px]">Status</TableHead>
-                            <TableHead className="w-[100px]">Assign</TableHead>
-                            <TableHead className="w-[80px]">Spent</TableHead>
-                            <TableHead>Note</TableHead>
+                            <TableHead className="w-[80px]">Date</TableHead>
+                            <TableHead className="w-[120px]">Campaign</TableHead>
+                            <TableHead className="w-[110px]">Type</TableHead>
+                            <TableHead className="w-[70px]">Budget</TableHead>
+                            <TableHead className="w-[90px]">Status</TableHead>
+                            <TableHead className="w-[90px]">Assign</TableHead>
+                            <TableHead className="w-[70px]">Spent</TableHead>
+                            <TableHead className="w-[40px]">Note</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
                     </TableHeader>
