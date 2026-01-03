@@ -51,41 +51,38 @@ const statusColors: Record<string, string> = {
 const getInitials = (name: string = '') =>
   name ? name.charAt(0).toUpperCase() : '';
 
-const EditablePriorityCell: React.FC<{ tasks: TaskWithId[] | null }> = ({ tasks }) => {
+const EditablePriority: React.FC<{ task: TaskWithId }> = ({ task }) => {
     const { updateTask } = useTasks();
-
-    if (!tasks || tasks.length === 0) {
-        return (
-            <div className="h-full w-full flex items-center justify-center">
-                <span className="text-muted-foreground/40">-</span>
-            </div>
-        );
-    }
-    
-    // For simplicity, we edit the priority of the first task in the list.
-    // A more complex UI would be needed to edit priorities for multiple tasks in one cell.
-    const firstTask = tasks[0];
-    const [priority, setPriority] = useState(firstTask.priority ?? 99);
+    const [priority, setPriority] = useState(task.priority ?? 99);
 
     useEffect(() => {
-        setPriority(firstTask.priority ?? 99);
-    }, [firstTask.priority]);
+        setPriority(task.priority ?? 99);
+    }, [task.priority]);
 
     const handleBlur = () => {
         const newPriority = Number(priority);
-        if (newPriority !== (firstTask.priority ?? 99)) {
-            updateTask(firstTask.id, { priority: newPriority });
+        if (newPriority !== (task.priority ?? 99)) {
+            updateTask(task.id, { priority: newPriority });
         }
     };
+    
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.currentTarget.blur();
+        }
+    }
 
     return (
-        <div className="h-full w-full flex items-center justify-center">
+        <div className="flex items-center gap-1">
+             <span className="text-[10px] text-muted-foreground">Order:</span>
             <Input
                 type="number"
                 value={priority}
                 onChange={(e) => setPriority(Number(e.target.value))}
                 onBlur={handleBlur}
-                className="h-6 w-8 text-[10px] text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
+                onKeyDown={handleKeyDown}
+                onClick={(e) => e.stopPropagation()}
+                className="h-5 w-10 text-[10px] text-center p-0 bg-transparent border-border rounded"
             />
         </div>
     );
@@ -139,7 +136,10 @@ const TaskCell = ({
                         {tasks.map(task => (
                              <AccordionItem value={task.id} key={task.id}>
                                 <AccordionTrigger className="py-2 text-xs hover:no-underline">
-                                    <span className="truncate flex-1 text-left">{task.title}</span>
+                                    <div className="w-full flex justify-between items-center pr-2">
+                                        <span className="truncate flex-1 text-left">{task.title}</span>
+                                        <EditablePriority task={task} />
+                                    </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="max-h-60 space-y-3 p-1 overflow-y-auto">
@@ -409,9 +409,8 @@ const DailyTaskTable: React.FC<{
     }, [tasks]);
 
   const employeeColWidth = 100;
-  const orderColWidth = 30;
   const totalEmployeeWidth =
-    employees.length * (employeeColWidth + orderColWidth);
+    employees.length * (employeeColWidth);
 
   const rowHeight = 'h-7';
   
@@ -497,15 +496,6 @@ const DailyTaskTable: React.FC<{
                             <span className="truncate">{employee.username}</span>
                           </div>
                         </TableHead>
-
-                        <TableHead
-                          style={{ width: `${orderColWidth}px` }}
-                          className="bg-muted/80 border-r p-0"
-                        >
-                          <div className="h-full w-full flex items-center justify-center">
-                            Order
-                          </div>
-                        </TableHead>
                       </React.Fragment>
                     ))}
                   </TableRow>
@@ -533,11 +523,6 @@ const DailyTaskTable: React.FC<{
                               ) : (
                                 <div className="h-full w-full flex items-center justify-center text-muted-foreground/40 border-r">-</div>
                               )}
-                            </TableCell>
-                            <TableCell className="p-0 border-r" style={{ width: `${orderColWidth}px` }}>
-                              <div className="h-full w-full">
-                                <EditablePriorityCell tasks={tasks || null} />
-                              </div>
                             </TableCell>
                           </React.Fragment>
                         );
