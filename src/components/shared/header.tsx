@@ -3,7 +3,6 @@
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { UserNav } from '@/components/shared/user-nav';
 import { usePathname, useRouter } from 'next/navigation';
-import { Bell, CircleDot, Mail } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Separator } from '../ui/separator';

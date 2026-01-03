@@ -76,14 +76,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 activeAssigneeIndex: 0,
             });
 
-            if (task.assigneeIds && task.assigneeIds.length > 0) {
-                 const client = (await getDoc(doc(db, 'clients', task.clientId!))).data();
-                 const clientName = client?.name || 'a client';
-                task.assigneeIds.forEach(userId => {
-                     createNotification(userId, `You have been assigned a new task: "${task.title}" for ${clientName}.`);
-                });
-            }
-
         } catch (e) {
             console.error("Error adding document: ", e);
             setError(new Error('Failed to add task. Please check your network connection.'));
@@ -106,25 +98,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 
                 await updateDoc(taskRef, dataToUpdate);
 
-                const client = (await getDoc(doc(db, 'clients', (dataToUpdate.clientId || existingData.clientId)!))).data();
-                const clientName = client?.name || 'a client';
-                const taskTitle = dataToUpdate.title || existingData.title;
-
-                const wasRescheduled = currentUser?.role === 'admin' && 'status' in dataToUpdate && dataToUpdate.status === 'Scheduled' && 'activeAssigneeIndex' in dataToUpdate && dataToUpdate.activeAssigneeIndex === 0 && existingData.status !== 'Scheduled';
-                if (wasRescheduled && (existingData.assigneeIds?.length ?? 0) > 0) {
-                     const firstAssigneeId = existingData.assigneeIds![0];
-                     createNotification(firstAssigneeId, `Task "${taskTitle}" for ${clientName} has been rescheduled and is back in your queue.`);
-                }
-
-                const oldAssignees = new Set(existingData.assigneeIds || []);
-                const newAssignees = new Set(dataToUpdate.assigneeIds || []);
-                const addedAssignees = [...newAssignees].filter(x => !oldAssignees.has(x));
-
-                if (addedAssignees.length > 0) {
-                    addedAssignees.forEach(userId => {
-                         createNotification(userId, `You've been assigned a new task: "${taskTitle}" for ${clientName}.`);
-                    });
-                }
             }
 
         } catch (e) {
@@ -175,14 +148,8 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
              if (newStatus === 'Ready for Next' && !isLastAssignee) {
                 updateData.activeAssigneeIndex = activeAssigneeIndex + 1;
                 updateData.status = 'On Work';
-                const nextAssigneeId = assigneeIds[activeAssigneeIndex + 1];
-                createNotification(nextAssigneeId, `Task "${title}" for ${clientName} is now ready for you.`);
             } else if (newStatus === 'For Approval') {
                 updateData.status = 'For Approval';
-                const admins = allUsers.filter(u => u.role === 'admin');
-                 admins.forEach(admin => {
-                    createNotification(admin.id, `Task by ${currentUser.username}: "${title}" for ${clientName} is ready for approval.`);
-                });
             } else {
                 updateData.status = newStatus;
             }
