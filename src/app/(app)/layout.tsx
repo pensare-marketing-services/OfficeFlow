@@ -10,7 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TaskProvider } from '@/hooks/use-tasks';
 import { UserProvider } from '@/hooks/use-users';
 import { ClientProvider } from '@/hooks/use-clients';
-import { NotificationProvider } from '@/hooks/use-notifications';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -40,7 +39,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <UserProvider>
       <TaskProvider>
         <ClientProvider>
-          <NotificationProvider>
             <SidebarProvider>
               <Sidebar>
                 <SidebarNav />
@@ -50,7 +48,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <main className="p-2 sm:p-3 lg:p-4">{children}</main>
               </SidebarInset>
             </SidebarProvider>
-          </NotificationProvider>
         </ClientProvider>
       </TaskProvider>
     </UserProvider>

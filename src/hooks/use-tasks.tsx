@@ -27,17 +27,7 @@ const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 
 const createNotification = async (userId: string, message: string) => {
-    if (!userId) return;
-    try {
-        await addDoc(collection(db, 'notifications'), {
-            userId,
-            message,
-            read: false,
-            createdAt: serverTimestamp(),
-        });
-    } catch (error) {
-        console.error('Error creating notification:', error);
-    }
+    // This function is now a no-op since notifications are removed.
 };
 
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

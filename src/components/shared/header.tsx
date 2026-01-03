@@ -18,16 +18,6 @@ function getPageTitle(pathname: string): string {
   return 'OfficeFlow';
 }
 
-const NotificationTime = ({ date }: { date: string | Date }) => {
-  const [timeAgo, setTimeAgo] = useState<string | null>(null);
-
-  useEffect(() => {
-    setTimeAgo(formatDistanceToNow(new Date(date), { addSuffix: true }));
-  }, [date]);
-
-  return timeAgo ? <p className="text-xs text-muted-foreground">{timeAgo}</p> : null;
-};
-
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();

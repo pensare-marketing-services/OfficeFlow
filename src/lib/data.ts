@@ -84,14 +84,6 @@ export type CashInTransaction = {
     status: CashInTransactionStatus;
 }
 
-export type Notification = {
-  id: string;
-  userId: string;
-  message: string;
-  link?: string;
-  read: boolean;
-  createdAt: any; // Allow serverTimestamp
-};
 
 // This is now primarily for seeding the database or local testing.
 // In a production app, user creation would happen through a registration flow.

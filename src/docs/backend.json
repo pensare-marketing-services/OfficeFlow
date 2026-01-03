@@ -263,37 +263,6 @@
         }
       }
     },
-    "Notification": {
-      "title": "Notification",
-      "description": "Represents a single notification for a user.",
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "description": "The UID of the user this notification is for."
-        },
-        "message": {
-          "type": "string"
-        },
-        "link": {
-          "type": "string",
-          "format": "uri"
-        },
-        "read": {
-          "type": "boolean"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "userId",
-        "message",
-        "read",
-        "createdAt"
-      ]
-    },
      "PaidPromotion": {
       "title": "Paid Promotion",
       "description": "Represents a single paid promotion campaign for a client.",
@@ -454,12 +423,6 @@
         "$ref": "#/entities/SeoTask"
       },
       "description": "Stores all SEO tasks for a specific client."
-    },
-    "/notifications/{notificationId}": {
-      "schema": {
-        "$ref": "#/entities/Notification"
-      },
-      "description": "Stores notifications for users."
     }
   }
 }
