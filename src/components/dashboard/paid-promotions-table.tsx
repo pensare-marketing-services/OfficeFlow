@@ -240,14 +240,16 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         await deleteDoc(doc(db, `clients/${clientId}/promotions`, id));
     
         // Then, find and delete the associated task
-        const linkedTask = tasks.find(t => 
-            t.description === 'Paid Promotion' && 
-            t.title === promotionToDelete.campaign && 
-            t.clientId === clientId
-        );
-    
-        if (linkedTask) {
-            deleteTask(linkedTask.id);
+        if (promotionToDelete.campaign) {
+            const linkedTask = tasks.find(t => 
+                t.description === 'Paid Promotion' && 
+                t.title === promotionToDelete.campaign && 
+                t.clientId === clientId
+            );
+        
+            if (linkedTask) {
+                deleteTask(linkedTask.id);
+            }
         }
     };
     
@@ -279,13 +281,13 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                         <TableRow>
                             <TableHead className="w-[40px] px-2 text-xs">Sl.No</TableHead>
                             <TableHead className="w-[90px]">Date</TableHead>
-                            <TableHead className="w-[300px]">Campaign</TableHead>
-                            <TableHead>Ad Type</TableHead>
-                            <TableHead className="w-[100px]">Budget</TableHead>
-                            <TableHead>Ad Status</TableHead>
-                            <TableHead>Assigned</TableHead>
-                            <TableHead className="w-[100px]">Spent</TableHead>
-                            <TableHead>Remarks</TableHead>
+                            <TableHead className="w-[200px]">Campaign</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead className="w-[80px]">Budget</TableHead>
+                            <TableHead className="w-[100px]">Status</TableHead>
+                            <TableHead className="w-[100px]">Assign</TableHead>
+                            <TableHead className="w-[80px]">Spent</TableHead>
+                            <TableHead>Note</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -458,6 +460,8 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         </Card>
     );
 }
+
+    
 
     
 
