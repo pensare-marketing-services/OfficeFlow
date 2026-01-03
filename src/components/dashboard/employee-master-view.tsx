@@ -15,7 +15,7 @@ import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
 import { useTasks } from '@/hooks/use-tasks';
 import { useHorizontalScroll } from '@/hooks/use-horizontal-scroll';
 import { Button } from '../ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Badge } from '../ui/badge';
 
