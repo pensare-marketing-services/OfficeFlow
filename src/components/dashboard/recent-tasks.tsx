@@ -223,15 +223,16 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
+            
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[40px]">#</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[80px]">Client</TableHead>
-              <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[120px]">Task</TableHead>
-               {isAdmin && <TableHead className="py-1 px-2 border-r border-t text-[8px] h-8 w-[100px]">Assigned</TableHead>}
-              <TableHead className="py-1 px-2 border-t text-[8px] h-8 w-[100px]">Status</TableHead>
-              {currentUser?.role === 'employee' && <TableHead className="text-xs h-8 w-[60px]">Remarks</TableHead>}
+              <TableHead className="p-1 border-r border-t text-[8px] h-6 w-[8px]">#</TableHead>
+              <TableHead className="py-1 px-1 border-r border-t text-[8px] h-6 w-[30px]">Client</TableHead>
+              <TableHead className="py-1 px-1 border-r border-t text-[8px] h-8 w-[40px]">Task</TableHead>
+               {isAdmin && <TableHead className="py-1 px-1 border-r border-t text-[8px] h-8 w-[30px]">Assigned</TableHead>}
+              <TableHead className="py-1 px-1 border-t text-[8px] h-8 w-[30px]">Status</TableHead>
+              {currentUser?.role === 'employee' && <TableHead className="text-xs h-8 w-[30px]">Remarks</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -287,9 +288,9 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 return (
                     <DropdownMenu key={task.id}>
                         <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
-                            <TableCell className="py-1 px-2 border-r border-t text-[11px] font-medium text-center">{index + 1}</TableCell>
+                            <TableCell className="py-1 px-2 border-r border-t text-[8px] font-medium text-center">{index + 1}</TableCell>
                             
-                            <TableCell className="py-1 px-2 border-r border-t text-[11px]">
+                            <TableCell className="py-1 px-2 border-r border-t text-[8px]">
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <p className="truncate">
@@ -308,7 +309,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                             <TableCell className="py-1 px-2 border-r border-t">
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <div className="font-medium text-[11px] flex items-center gap-2 truncate">
+                                        <div className="font-medium text-[8px] flex items-center gap-2 truncate">
                                             {task.title}
                                         </div>
                                     </TooltipTrigger>
@@ -320,7 +321,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 {wordCount > 10 ? (
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <p className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground truncate">
+                                            <p className="text-[8px] text-muted-foreground cursor-pointer hover:text-foreground truncate">
                                             {descriptionPreview}... <span className="underline">more</span>
                                             </p>
                                         </DialogTrigger>
@@ -336,13 +337,13 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                         </DialogContent>
                                     </Dialog>
                                 ) : (
-                                    <p className="text-[10px] text-muted-foreground truncate">{task.description}</p>
+                                    <p className="text-[8px] text-muted-foreground truncate">{task.description}</p>
                                 )}
                             </TableCell>
                             {isAdmin && (
                             <TableCell className="py-1 px-2 border-r border-t">
                                 <DropdownMenuTrigger asChild>
-                                    <span className="cursor-pointer hover:underline text-[11px] truncate">
+                                    <span className="cursor-pointer hover:underline text-[8px] truncate">
                                         {assignees.map(a => a.username).join(', ') || '-'}
                                     </span>
                                 </DropdownMenuTrigger>
@@ -356,7 +357,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                             value={finalDisplayedStatus}
                                             disabled={(isCompleted && !isAdmin) || (finalDisplayedStatus === 'Overdue' && !isAdmin)}
                                         >
-                                            <SelectTrigger className={cn("w-full h-7 text-[10px] px-2 focus:ring-accent", statusColors[finalDisplayedStatus])}>
+                                            <SelectTrigger className={cn("w-full h-7 text-[8px] px-2 focus:ring-accent", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>{finalDisplayedStatus}</SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
