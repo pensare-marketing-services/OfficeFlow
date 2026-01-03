@@ -24,7 +24,7 @@ type UserWithId = UserProfile & { id: string };
 type ClientWithId = Client & { id: string };
 type TaskWithId = Task & { id: string };
 
-interface EmployeeMasterViewProps {
+interface SeoWebEmployeeMasterViewProps {
   tasks: TaskWithId[];
   users: UserWithId[];
   clients: ClientWithId[];
@@ -321,10 +321,10 @@ const TaskCell = ({
 };
 
 
-export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
+export default function SeoWebEmployeeMasterView({ tasks, users, clients }: SeoWebEmployeeMasterViewProps) {
   const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
-  const departmentOrder = ['digitalmarketing', 'contentwriter', 'designers'];
+  const departmentOrder = ['seo', 'web'];
 
   const employees = useMemo(() => {
     return users
@@ -352,13 +352,11 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
         if (!task.deadline) return;
         const deadline = startOfDay(new Date(task.deadline));
 
-        // If task is incomplete and its deadline is in the past, group it under today's date.
         if (incompleteStatuses.includes(task.status) && deadline < today) {
             const dateKey = format(today, 'yyyy-MM-dd');
             if(!grouped.has(dateKey)) grouped.set(dateKey, []);
             grouped.get(dateKey)!.push(task);
         } else {
-            // Otherwise, group it under its actual deadline.
             const dateKey = format(deadline, 'yyyy-MM-dd');
             if(!grouped.has(dateKey)) grouped.set(dateKey, []);
             grouped.get(dateKey)!.push(task);
@@ -389,7 +387,6 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
             }
         }
     });
-    // Add days for rollover tasks if the current month is the current system month
     const today = new Date();
     if(currentMonthDate.getMonth() === today.getMonth() && currentMonthDate.getFullYear() === today.getFullYear()) {
        days.add(today.getDate());
@@ -402,14 +399,12 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     const today = startOfDay(new Date());
     const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next', 'Approved'];
   
-    // 1. Get tasks whose deadline is today.
     let dailyTasks = tasks.filter(task => {
       if (!task.deadline) return false;
       const deadline = startOfDay(new Date(task.deadline));
       return isSameDay(deadline, selectedDate);
     });
   
-    // 2. If we are viewing today's date, also include incomplete tasks from the past.
     if (isSameDay(selectedDate, today)) {
       const rolloverTasks = tasks.filter(task => {
         if (!task.deadline) return false;
@@ -417,7 +412,6 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
         return deadline < today && incompleteStatuses.includes(task.status);
       });
   
-      // Combine and remove duplicates (a task could be in both lists if its deadline was today but it was a rollover)
       const allTasksForToday = [...dailyTasks, ...rolloverTasks];
       const uniqueTasks = Array.from(new Map(allTasksForToday.map(task => [task.id, task])).values());
       return uniqueTasks;
@@ -496,13 +490,13 @@ const DailyTaskTable: React.FC<{
     };
   }, [tableRef]);
 
-  const dmClients = useMemo(
+  const seoWebClients = useMemo(
     () =>
       clients
         .filter(
           (c) =>
-            c.categories?.includes('digital marketing') ||
-            c.categories?.includes('gd')
+            c.categories?.includes('seo') ||
+            c.categories?.includes('website')
         )
         .sort((a, b) => (a.priority || 0) - (b.priority || 0)),
     [clients]
@@ -534,7 +528,7 @@ const DailyTaskTable: React.FC<{
   if (tasks.length === 0) {
       return (
           <div className="text-center p-8 text-muted-foreground">
-              No tasks scheduled for this day.
+              No tasks scheduled for this day for SEO/Web teams.
           </div>
       );
   }
@@ -552,7 +546,7 @@ const DailyTaskTable: React.FC<{
               </TableRow>
             </TableHeader>
             <TableBody>
-              {dmClients.map((client, index) => {
+              {seoWebClients.map((client, index) => {
                 const assignedEmployees = (client.employeeIds || [])
                   .map((id) => users.find((u) => u.id === id)?.username)
                   .filter(Boolean)
@@ -627,7 +621,7 @@ const DailyTaskTable: React.FC<{
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {dmClients.map((client) => (
+                  {seoWebClients.map((client) => (
                     <TableRow
                       key={client.id}
                       className={cn(

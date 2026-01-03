@@ -7,6 +7,7 @@ import RecentTasks from './recent-tasks';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
 import EmployeeMasterView from './employee-master-view';
 import { useTasks } from '@/hooks/use-tasks';
+import SeoWebEmployeeMasterView from './seo-web-employee-master-view';
 
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
@@ -18,7 +19,7 @@ interface AdminDashboardProps {
 }
 
 type TaskFilter = 'total' | 'completed' | 'overdue' | 'onHold';
-type ViewMode = 'tasks' | 'employees';
+type ViewMode = 'tasks' | 'employees' | 'employees-seo-web';
 
 export default function AdminDashboard({ tasks, users, clients }: AdminDashboardProps) {
   const [taskFilter, setTaskFilter] = useState<TaskFilter>('total');
@@ -27,6 +28,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
 
   const totalTasks = tasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
+  const seoWebEmployeesCount = users.filter(u => u.role === 'employee' && (u.department === 'seo' || u.department === 'web')).length;
   const completedTasks = tasks.filter(t => t.status === 'Approved' || t.status === 'Posted').length;
   const onHoldTasksCount = tasks.filter(t => t.status === 'Hold').length;
   
@@ -93,10 +95,15 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
     setViewMode('employees');
   };
 
+  const handleSeoWebViewClick = () => {
+    setViewMode('employees-seo-web');
+  };
+
+
   return (
     
     <div className="space-y-4">
-     <div className="w-3/4 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
 
         <StatsCard 
             title="Total Tasks" 
@@ -107,10 +114,17 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         />
         <StatsCard 
             title="Employees" 
-            value={totalEmployees} 
+            value={totalEmployees - seoWebEmployeesCount} 
             icon={Users}
             onClick={handleEmployeeViewClick}
             isActive={viewMode === 'employees'} 
+        />
+        <StatsCard 
+            title="Employees 2" 
+            value={seoWebEmployeesCount} 
+            icon={Users}
+            onClick={handleSeoWebViewClick}
+            isActive={viewMode === 'employees-seo-web'} 
         />
         <StatsCard 
             title="Completed Tasks" 
@@ -157,6 +171,12 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
       {viewMode === 'employees' && 
         <div className="w-full overflow-x-auto">
             <EmployeeMasterView tasks={tasks} users={users} clients={clients} />
+        </div>
+      }
+
+      {viewMode === 'employees-seo-web' && 
+        <div className="w-full overflow-x-auto">
+            <SeoWebEmployeeMasterView tasks={tasks} users={users} clients={clients} />
         </div>
       }
 
