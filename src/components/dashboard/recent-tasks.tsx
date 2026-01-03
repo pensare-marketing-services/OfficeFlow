@@ -227,12 +227,12 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="p-1 border-r border-t text-[8px] h-3 w-[8px]">#</TableHead>
-              <TableHead className="py-1 px-1 border-r border-t text-[8px] h-6 w-[30px]">Client</TableHead>
-              <TableHead className="py-1 px-1 border-r border-t text-[8px] h-8 w-[40px]">Task</TableHead>
-               {isAdmin && <TableHead className="py-1 px-1 border-r border-t text-[8px] h-8 w-[30px]">Assigned</TableHead>}
-              <TableHead className="py-1 px-1 border-t text-[8px] h-8 w-[30px]">Status</TableHead>
-              {currentUser?.role === 'employee' && <TableHead className="text-xs h-8 w-[30px]">Remarks</TableHead>}
+              <TableHead className="p-1 border-r border-t text-[8px] h-6 w-[8px]">#</TableHead>
+              <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[30px]">Client</TableHead>
+              <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[40px]">Task</TableHead>
+               {isAdmin && <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[30px]">Assigned</TableHead>}
+              <TableHead className="px-1 border-t text-[8px] h-6 w-[30px]">Status</TableHead>
+              {currentUser?.role === 'employee' && <TableHead className="text-xs h-6 w-[30px]">Remarks</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -288,9 +288,9 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 return (
                     <DropdownMenu key={task.id}>
                         <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
-                            <TableCell className="py-1 px-2 border-r border-t text-[8px] font-medium text-center">{index + 1}</TableCell>
+                            <TableCell className="px-2 border-r border-t text-[8px] font-medium text-center">{index + 1}</TableCell>
                             
-                            <TableCell className="py-1 px-2 border-r border-t text-[8px]">
+                            <TableCell className="px-2 border-r border-t text-[8px]">
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <p className="truncate">
@@ -306,7 +306,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                     </TooltipContent>
                                 </Tooltip>
                             </TableCell>
-                            <TableCell className="py-1 px-2 border-r border-t">
+                            <TableCell className="px-2 border-r border-t">
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div className="font-medium text-[8px] flex items-center gap-2 truncate">
@@ -341,7 +341,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 )}
                             </TableCell>
                             {isAdmin && (
-                            <TableCell className="py-1 px-2 border-r border-t">
+                            <TableCell className="px-2 border-r border-t">
                                 <DropdownMenuTrigger asChild>
                                     <span className="cursor-pointer hover:underline text-[8px] truncate">
                                         {assignees.map(a => a.username).join(', ') || '-'}
@@ -349,7 +349,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 </DropdownMenuTrigger>
                             </TableCell>
                             )}
-                            <TableCell className="py-1 px-2 border-t">
+                            <TableCell className="px-2 border-t">
                                 {(isAdmin || isEmployeeView) ? (
                                     <div className="flex items-center gap-2">
                                         <Select 
@@ -357,7 +357,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                             value={finalDisplayedStatus}
                                             disabled={(isCompleted && !isAdmin) || (finalDisplayedStatus === 'Overdue' && !isAdmin)}
                                         >
-                                            <SelectTrigger className={cn("w-full h-7 text-[8px] px-2 focus:ring-accent", statusColors[finalDisplayedStatus])}>
+                                            <SelectTrigger className={cn("w-full h-6 text-[8px] px-2 focus:ring-accent", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>{finalDisplayedStatus}</SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
@@ -384,7 +384,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                 )}
                             </TableCell>
                             {isEmployeeView && (
-                                <TableCell className="text-center py-1 px-3 border-t">
+                                <TableCell className="text-center px-3 border-t">
                                     <Popover onOpenChange={(open) => {
                                         if (open) {
                                             setNoteInput('');
