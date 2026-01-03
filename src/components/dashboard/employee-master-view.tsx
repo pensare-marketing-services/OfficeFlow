@@ -30,21 +30,21 @@ interface EmployeeMasterViewProps {
   clients: ClientWithId[];
 }
 
-const statusColors: Record<string, string> = {
-  'Scheduled': 'bg-transparent text-foreground',
-  'On Work': 'bg-gray-500 text-white',
-  'For Approval': 'bg-orange-500 text-white',
-  'Approved': 'bg-green-600 text-white',
-  'Posted': 'bg-blue-500 text-white',
-  'Completed': 'bg-blue-500 text-white',
-  'Hold': 'bg-gray-500 text-white',
-  'To Do': 'bg-gray-400 text-white',
-  'Ready for Next': 'bg-teal-500 text-white',
-  'Reschedule': 'bg-rose-500 text-white',
-  'Overdue': 'bg-red-600 text-white',
-  'Running': 'bg-blue-500 text-white',
-  'Active': 'bg-blue-500 text-white',
-  'Stopped': 'bg-red-500 text-white',
+const statusBackgroundColors: Record<string, string> = {
+  'Scheduled': 'bg-transparent',
+  'On Work': 'bg-gray-500/40',
+  'For Approval': 'bg-orange-500/40',
+  'Approved': 'bg-green-600/40',
+  'Posted': 'bg-blue-500/40',
+  'Completed': 'bg-blue-500/40',
+  'Hold': 'bg-gray-500/40',
+  'To Do': 'bg-gray-400/40',
+  'Ready for Next': 'bg-teal-500/40',
+  'Reschedule': 'bg-rose-500/40',
+  'Overdue': 'bg-red-600/40',
+  'Running': 'bg-blue-500/40',
+  'Active': 'bg-blue-500/40',
+  'Stopped': 'bg-red-500/40',
 };
 
 
@@ -152,9 +152,6 @@ const TaskCell = ({
     }, [tasks]);
 
     const additionalTasksCount = tasks.length - 1;
-
-    const baseColorClass = statusColors[primaryTask.status] || 'bg-transparent';
-    const colorClassWithOpacity = baseColorClass.split(' ')[0] + '/40';
     
     const hasMultipleTasks = tasks.length > 1;
 
@@ -166,7 +163,7 @@ const TaskCell = ({
                     onClick={onSelect}
                     className={cn(
                         'h-full w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-r px-1 gap-1',
-                        colorClassWithOpacity,
+                        statusBackgroundColors[primaryTask.status] || 'bg-transparent',
                         isSelected && 'ring-1 ring-accent ring-inset'
                     )}
                 >
@@ -361,7 +358,7 @@ const TaskCell = ({
 export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
   const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
-  const departmentOrder = ['digitalmarketing', 'contentwriter', 'designers', 'videoeditor'];
+  const departmentOrder = ['digitalmarketing', 'contentwriter', 'designers', 'videoeditor', 'web', 'seo'];
 
   const employees = useMemo(() => {
     return users
