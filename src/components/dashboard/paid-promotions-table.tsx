@@ -23,6 +23,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, Dialog
 import { LinkifiedText } from '@/components/shared/linkified-text';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { InsertLinkPopover } from '../shared/insert-link-popover';
+import * as SelectPrimitive from "@radix-ui/react-select"
 
 
 type UserWithId = User & { id: string };
@@ -320,7 +321,12 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                 <TableCell className="p-0"><EditableCell value={promo.campaign} onSave={(v) => handlePromotionChange(promo.id, 'campaign', v)} /></TableCell>
                                 <TableCell className="p-1">
                                     <Select value={promo.adType} onValueChange={(v: PaidPromotion['adType']) => handlePromotionChange(promo.id, 'adType', v)}>
-                                        <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                                        <SelectTrigger className="h-7 text-xs">
+                                             <SelectValue />
+                                             <SelectPrimitive.Icon asChild>
+                                                <span />
+                                             </SelectPrimitive.Icon>
+                                        </SelectTrigger>
                                         <SelectContent>
                                             {adTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                                         </SelectContent>
@@ -329,7 +335,12 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                 <TableCell className="p-0"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" /></TableCell>
                                 <TableCell className="p-1">
                                     <Select value={promo.status} onValueChange={(v: PaidPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-xs", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}><SelectValue /></SelectTrigger>
+                                        <SelectTrigger className={cn("h-7 text-xs", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
+                                            <SelectValue />
+                                             <SelectPrimitive.Icon asChild>
+                                                <span />
+                                             </SelectPrimitive.Icon>
+                                        </SelectTrigger>
                                         <SelectContent>
                                             {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
@@ -337,7 +348,12 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                 </TableCell>
                                 <TableCell className="p-1">
                                      <Select value={promo.assignedTo || 'unassigned'} onValueChange={(v) => handlePromotionChange(promo.id, 'assignedTo', v)}>
-                                        <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Assign" /></SelectTrigger>
+                                        <SelectTrigger className="h-7 text-xs">
+                                            <SelectValue placeholder="Assign" />
+                                             <SelectPrimitive.Icon asChild>
+                                                <span />
+                                             </SelectPrimitive.Icon>
+                                        </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="unassigned">Unassigned</SelectItem>
                                             {employeeUsers.map(user => <SelectItem key={user.id} value={user.username!}>{user.username!}</SelectItem>)}
@@ -460,11 +476,3 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         </Card>
     );
 }
-
-    
-
-    
-
-    
-
-    
