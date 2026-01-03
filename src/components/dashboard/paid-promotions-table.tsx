@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -142,27 +143,28 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         const promotionRef = doc(db, `clients/${clientId}/promotions`, id);
         await updateDoc(promotionRef, { [field]: value });
 
-        const promotion = promotions.find(p => p.id === id);
-        if (!promotion) return;
+        const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PaidPromotion & {id: string};
+        if (!updatedPromotion) return;
         
-        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === promotion.campaign && t.clientId === clientId);
+        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === updatedPromotion.campaign && t.clientId === clientId);
 
         if (field === 'assignedTo') {
             const employee = users.find(u => u.username === value);
-            if (employee) {
+            // Only create a task if an employee is assigned AND the campaign has a name
+            if (employee && updatedPromotion.campaign) {
                 if(linkedTask) {
                     updateTask(linkedTask.id, { assigneeIds: [employee.id] });
                 } else {
                      const newTask: Omit<Task, 'id' | 'createdAt'> = {
-                        title: promotion.campaign,
+                        title: updatedPromotion.campaign,
                         description: 'Paid Promotion',
                         status: 'Scheduled',
                         priority: 2,
-                        deadline: promotion.date,
+                        deadline: updatedPromotion.date,
                         assigneeIds: [employee.id],
                         progressNotes: [],
                         clientId: clientId,
-                        contentType: promotion.adType,
+                        contentType: updatedPromotion.adType as ContentType,
                     };
                     addTask(newTask);
                 }
@@ -456,6 +458,8 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         </Card>
     );
 }
+
+    
 
     
 
