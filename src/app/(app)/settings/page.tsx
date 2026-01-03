@@ -140,11 +140,11 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                         <Select onValueChange={field.onChange} value={field.value || 'unassigned'}>
                                             <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select an employee" />
+                                                <SelectValue placeholder="Unassigned" />
                                             </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="unassigned">None</SelectItem>
+                                                <SelectItem value="unassigned">Unassigned</SelectItem>
                                                 {filteredOptions.map((employee) => (
                                                     <SelectItem key={employee.id} value={employee.id}>
                                                         <div className="flex items-center gap-2">

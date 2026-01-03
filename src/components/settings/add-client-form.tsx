@@ -126,11 +126,11 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
                                             <Select onValueChange={field.onChange} value={field.value || 'unassigned'} disabled={usersLoading}>
                                                 <FormControl>
                                                 <SelectTrigger className="h-8 text-xs">
-                                                    <SelectValue placeholder={usersLoading ? "..." : `Emp ${num}`} />
+                                                    <SelectValue placeholder="Unassigned" />
                                                 </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    <SelectItem value="unassigned">None</SelectItem>
+                                                    <SelectItem value="unassigned">Unassigned</SelectItem>
                                                     {filteredOptions.map((employee) => (
                                                         <SelectItem key={employee.id} value={employee.id}>
                                                             <div className="flex items-center gap-2">
