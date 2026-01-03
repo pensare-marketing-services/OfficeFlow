@@ -74,7 +74,7 @@ const EditablePriorityInPopover: React.FC<{ task: TaskWithId }> = ({ task }) => 
 
     return (
         <div className="flex items-center gap-1">
-             <span className="text-[10px] text-muted-foreground">Order:</span>
+             <span className="text-[8px] text-muted-foreground">Order:</span>
             <Input
                 type="number"
                 value={priority}
@@ -82,7 +82,7 @@ const EditablePriorityInPopover: React.FC<{ task: TaskWithId }> = ({ task }) => 
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
                 onClick={(e) => e.stopPropagation()}
-                className="h-5 w-10 text-[10px] text-center p-0 bg-transparent border-border rounded"
+                className="h-5 w-5 text-[8px] text-center p-0 bg-transparent border-border rounded"
             />
         </div>
     );
@@ -549,8 +549,8 @@ const DailyTaskTable: React.FC<{
         return map;
     }, [tasks]);
 
-  const employeeColWidth = 100;
-  const orderColWidth = 40;
+  const employeeColWidth = 80;
+  const orderColWidth = 25;
   const totalEmployeeWidth =
     employees.length * (employeeColWidth + orderColWidth);
 
