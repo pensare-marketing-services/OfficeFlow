@@ -48,6 +48,7 @@ const statusColors: Record<string, string> = {
 };
 
 
+
 const getInitials = (name: string = '') =>
   name ? name.charAt(0).toUpperCase() : '';
 
@@ -153,7 +154,7 @@ const TaskCell = ({
     const additionalTasksCount = tasks.length - 1;
 
     const baseColorClass = statusColors[primaryTask.status] || 'bg-transparent';
-    const colorClassWithOpacity = baseColorClass.split(' ')[0] + '/20';
+    const colorClassWithOpacity = baseColorClass.split(' ')[0] + '/40';
     
     const hasMultipleTasks = tasks.length > 1;
 
@@ -165,7 +166,7 @@ const TaskCell = ({
                     onClick={onSelect}
                     className={cn(
                         'h-full w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-r px-1 gap-1',
-                        primaryTask.status === 'Scheduled' ? 'bg-transparent' : colorClassWithOpacity,
+                        colorClassWithOpacity,
                         isSelected && 'ring-1 ring-accent ring-inset'
                     )}
                 >
