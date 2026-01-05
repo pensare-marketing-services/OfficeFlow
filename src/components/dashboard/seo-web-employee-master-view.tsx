@@ -324,9 +324,9 @@ const TaskCell = ({
 export default function SeoWebEmployeeMasterView({ tasks, users, clients }: SeoWebEmployeeMasterViewProps) {
   const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
-  const departmentOrder = ['seo', 'web'];
-
+  
   const employees = useMemo(() => {
+    const departmentOrder: Exclude<UserProfile['department'], undefined>[] = ['seo', 'web'];
     return users
       .filter((u) => u.role === 'employee' && u.department && departmentOrder.includes(u.department))
       .sort((a, b) => {
@@ -336,10 +336,10 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients }: SeoW
             return priorityA - priorityB;
         }
 
-        const depA = a.department || '';
-        const depB = b.department || '';
-        const indexA = departmentOrder.indexOf(depA);
-        const indexB = departmentOrder.indexOf(depB);
+        const depA = a.department;
+        const depB = b.department;
+        const indexA = depA ? departmentOrder.indexOf(depA) : -1;
+        const indexB = depB ? departmentOrder.indexOf(depB) : -1;
 
         if (indexA !== indexB) {
             return indexA - indexB;

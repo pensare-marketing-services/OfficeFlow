@@ -324,17 +324,16 @@ const TaskCell = ({
 export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
   const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
-  const departmentOrder = ['digitalmarketing', 'contentwriter', 'designers', 'videoeditor'];
-
+  
   const employees = useMemo(() => {
-    const departmentOrder: (UserProfile['department'])[] = ['digitalmarketing', 'contentwriter', 'designers', 'videoeditor'];
+    const departmentOrder: Exclude<UserProfile['department'], undefined>[] = ['digitalmarketing', 'contentwriter', 'designers', 'videoeditor'];
     const filteredUsers = users.filter(u => u.role === 'employee' && u.department && departmentOrder.includes(u.department));
 
     return filteredUsers.sort((a, b) => {
-        const depA = a.department || '';
-        const depB = b.department || '';
-        const indexA = departmentOrder.indexOf(depA);
-        const indexB = departmentOrder.indexOf(depB);
+        const depA = a.department;
+        const depB = b.department;
+        const indexA = depA ? departmentOrder.indexOf(depA) : -1;
+        const indexB = depB ? departmentOrder.indexOf(depB) : -1;
 
         // Sort by department first
         if (indexA !== indexB) {
