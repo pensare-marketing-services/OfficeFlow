@@ -324,7 +324,7 @@ const TaskCell = ({
 export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
   const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
-  const departmentOrder = ['digitalmarketing', 'contentwriter', 'designers'];
+  const departmentOrder = ['digitalmarketing', 'contentwriter', 'designers', 'videoeditor'];
 
   const employees = useMemo(() => {
     return users
