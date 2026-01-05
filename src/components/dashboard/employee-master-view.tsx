@@ -451,7 +451,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                     <ChevronRight className="h-4 w-4" />
                 </Button>
            </div>
-            <div className="flex-grow flex flex-wrap gap-1 justify-start">
+            <div className="flex-grow flex flex-wrap gap-1 justify-around">
                 {dateButtons.map(day => (
                     <Button 
                         key={day} 
