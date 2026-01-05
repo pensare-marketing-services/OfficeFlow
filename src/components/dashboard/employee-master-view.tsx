@@ -330,6 +330,12 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
     return users
       .filter((u) => u.role === 'employee' && u.department && departmentOrder.includes(u.department))
       .sort((a, b) => {
+        const priorityA = a.priority ?? 99;
+        const priorityB = b.priority ?? 99;
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+
         const depA = a.department || '';
         const depB = b.department || '';
         const indexA = departmentOrder.indexOf(depA);
@@ -672,3 +678,5 @@ const DailyTaskTable: React.FC<{
     </div>
   );
 };
+
+    

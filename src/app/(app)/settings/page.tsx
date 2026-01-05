@@ -257,6 +257,44 @@ const EditablePasswordCell = ({ userId, initialPassword }: { userId: string, ini
     )
 }
 
+const EditablePriorityCell = ({ userId, initialPriority }: { userId: string, initialPriority?: number }) => {
+    const { updateUserPriority } = useUsers();
+    const [priority, setPriority] = useState(initialPriority ?? 99);
+    const { toast } = useToast();
+
+    const handleSave = async () => {
+        const newPriority = Number(priority);
+        if (newPriority !== (initialPriority ?? 99)) {
+            try {
+                await updateUserPriority(userId, newPriority);
+                toast({ title: "Priority Updated", description: "The user's priority has been saved." });
+            } catch (error: any) {
+                toast({ variant: "destructive", title: "Update Failed", description: error.message });
+            }
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.currentTarget.blur();
+        } else if (e.key === 'Escape') {
+            setPriority(initialPriority ?? 99);
+            (e.target as HTMLInputElement).blur();
+        }
+    };
+
+    return (
+        <Input
+            type="number"
+            value={priority}
+            onChange={(e) => setPriority(Number(e.target.value) || 99)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            className="h-7 text-xs w-16 text-center"
+        />
+    );
+};
+
 const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string[], allUsers: UserWithId[] }) => {
     const assignedEmployees = useMemo(() => {
         if (!employeeIds) return [];
@@ -374,16 +412,17 @@ export default function SettingsPage() {
                                         <TableHead className="w-[40px] px-2 text-xs h-8">#</TableHead>
                                         <TableHead className="px-2 text-xs h-8">Username</TableHead>
                                         <TableHead className="px-2 text-xs h-8">Password</TableHead>
+                                        <TableHead className="px-2 text-xs h-8">Priority</TableHead>
                                         <TableHead className="text-right px-2 text-xs h-8">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {usersLoading && Array.from({length: 3}).map((_, i) => (
                                         <TableRow key={i}>
-                                             <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
+                                             <TableCell colSpan={5} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                                         </TableRow>
                                     ))}
-                                    {error && <TableRow><TableCell colSpan={4} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
+                                    {error && <TableRow><TableCell colSpan={5} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
                                     {!usersLoading && users.filter(u => u.role === 'employee').map((employee, index) => (
                                         <TableRow key={employee.id}>
                                             <TableCell className="px-2 py-1 text-xs">{index + 1}</TableCell>
@@ -397,6 +436,9 @@ export default function SettingsPage() {
                                             </TableCell>
                                             <TableCell className="py-1 px-2">
                                                 <EditablePasswordCell userId={employee.id} initialPassword={employee.password} />
+                                            </TableCell>
+                                            <TableCell className="py-1 px-2">
+                                                <EditablePriorityCell userId={employee.id} initialPriority={employee.priority} />
                                             </TableCell>
                                             <TableCell className="text-right px-2 py-1">
                                                 <AlertDialog>
@@ -443,3 +485,5 @@ export default function SettingsPage() {
         </div>
     );
 }
+
+    
