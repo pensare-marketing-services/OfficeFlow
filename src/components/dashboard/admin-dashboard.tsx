@@ -105,14 +105,14 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
     <div className="space-y-4">
      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
         <StatsCard 
-            title="Employees" 
+            title="Digital Marketing" 
             value={totalEmployees - seoWebEmployeesCount} 
             icon={Users}
             onClick={handleEmployeeViewClick}
             isActive={viewMode === 'employees'} 
         />
         <StatsCard 
-            title="Employees 2" 
+            title="Web - Seo" 
             value={seoWebEmployeesCount} 
             icon={Users}
             onClick={handleSeoWebViewClick}

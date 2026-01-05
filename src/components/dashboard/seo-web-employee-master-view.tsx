@@ -433,16 +433,16 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients }: SeoW
     <Card className="w-full overflow-hidden m-0">
       <CardContent className="p-1 space-y-1">
         <div className="flex items-center justify-between p-1 border-b gap-2">
-           <div className="flex items-center gap-1">
+           <div className="flex-shrink-0 flex items-center gap-1">
                 <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <h3 className="text-sm font-semibold w-24 text-center">{format(currentMonthDate, 'MMM yyyy')}</h3>
+                <h3 className="text-sm font-semibold w-24 text-center">{format(currentMonthDate, 'MMMM yyyy')}</h3>
                  <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                 </Button>
            </div>
-            <div className="flex flex-wrap gap-1 justify-center flex-1">
+            <div className="flex-grow flex flex-wrap gap-1 justify-start">
                 {dateButtons.map(day => (
                     <Button 
                         key={day} 
@@ -672,5 +672,3 @@ const DailyTaskTable: React.FC<{
     </div>
   );
 };
-
-    
