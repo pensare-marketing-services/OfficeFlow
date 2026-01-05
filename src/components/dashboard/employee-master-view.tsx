@@ -327,26 +327,30 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
   const departmentOrder = ['digitalmarketing', 'contentwriter', 'designers', 'videoeditor'];
 
   const employees = useMemo(() => {
-    return users
-      .filter((u) => u.role === 'employee' && u.department && departmentOrder.includes(u.department))
-      .sort((a, b) => {
+    const departmentOrder: (UserProfile['department'])[] = ['digitalmarketing', 'contentwriter', 'designers', 'videoeditor'];
+    const filteredUsers = users.filter(u => u.role === 'employee' && u.department && departmentOrder.includes(u.department));
+
+    return filteredUsers.sort((a, b) => {
+        const depA = a.department || '';
+        const depB = b.department || '';
+        const indexA = departmentOrder.indexOf(depA);
+        const indexB = departmentOrder.indexOf(depB);
+
+        // Sort by department first
+        if (indexA !== indexB) {
+            return indexA - indexB;
+        }
+
+        // Then sort by priority within the same department
         const priorityA = a.priority ?? 99;
         const priorityB = b.priority ?? 99;
         if (priorityA !== priorityB) {
             return priorityA - priorityB;
         }
 
-        const depA = a.department || '';
-        const depB = b.department || '';
-        const indexA = departmentOrder.indexOf(depA);
-        const indexB = departmentOrder.indexOf(depB);
-
-        if (indexA !== indexB) {
-            return indexA - indexB;
-        }
-
+        // Finally, sort by username as a tie-breaker
         return (a.username || '').localeCompare(b.username || '');
-      });
+    });
   }, [users]);
   
   const tasksByDate = useMemo(() => {
@@ -678,5 +682,3 @@ const DailyTaskTable: React.FC<{
     </div>
   );
 };
-
-    
