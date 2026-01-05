@@ -157,7 +157,8 @@ export default function ClientIdPage() {
     const filteredTasks = useMemo(() => {
         if (!tasks || !client) return [];
         return tasks.filter(task => 
-            task.clientId === client.id && 
+            task.clientId === client.id &&
+            task.description !== 'Paid Promotion' && 
             task.contentType !== 'Other' &&
             task.contentType !== 'SEO' &&
             task.contentType !== 'Website' &&
