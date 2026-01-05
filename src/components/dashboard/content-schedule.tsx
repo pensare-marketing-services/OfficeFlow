@@ -263,12 +263,12 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     
     const handleLocalStatusChange = (task: Task & { id: string }, newStatus: string) => {
         let updatePayload: Partial<Task> = {};
-        
+
         if (currentUser?.role === 'admin' && newStatus === 'Reschedule') {
-            onTaskUpdate({ 
-                id: task.id, 
-                status: 'Scheduled', 
-                activeAssigneeIndex: 0 
+            onTaskUpdate({
+                id: task.id,
+                status: 'Scheduled',
+                activeAssigneeIndex: 0
             });
             return;
         }
@@ -276,9 +276,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         let finalStatus = newStatus;
         const isPromotionTask = task.description === 'Paid Promotion';
         if (isPromotionTask) {
-             if (newStatus === 'Running') finalStatus = 'On Work';
-             if (newStatus === 'Active') finalStatus = 'On Work';
-             if (newStatus === 'Stopped') finalStatus = 'Completed';
+            if (newStatus === 'Running') finalStatus = 'On Work';
+            if (newStatus === 'Active') finalStatus = 'On Work';
+            if (newStatus === 'Stopped') finalStatus = 'Completed';
         }
 
         if (['Posted', 'Completed'].includes(finalStatus)) {
@@ -289,7 +289,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             updateTaskStatus(task, finalStatus);
         } else {
             updatePayload.status = finalStatus as TaskStatus;
-            handleFieldChange(task.id, 'status', finalStatus);
+            onTaskUpdate({ id: task.id, ...updatePayload });
         }
     }
 
