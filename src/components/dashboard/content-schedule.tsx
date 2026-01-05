@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -288,7 +289,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             updateTaskStatus(task, finalStatus);
         } else {
             updatePayload.status = finalStatus as TaskStatus;
-            handleFieldChange(task.id, 'status', updatePayload);
+            handleFieldChange(task.id, 'status', finalStatus);
         }
     }
 
