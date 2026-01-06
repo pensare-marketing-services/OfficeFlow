@@ -289,9 +289,13 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
 
     const totalSpent = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.spent) || 0), 0), [promotions]);
     const totalBudget = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.budget) || 0), 0), [promotions]);
-    const gst = (totalBudget - totalSpent) * 0.18;
-    const grandTotal = (totalBudget - totalSpent) + gst;
-    const balance = (oldBalance + totalCashIn) - (manualTotal ?? grandTotal);
+
+    const gst = totalSpent * 0.18;
+    const grandTotal = totalSpent + gst;
+    
+    const clientProvidedTotal = (manualTotal ?? 0) + oldBalance + totalCashIn;
+    const balance = clientProvidedTotal - grandTotal;
+
 
     return (
         <Card>
@@ -491,54 +495,60 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                     </TableBody>
                     <TableFooter>
                         <TableRow>
-                            <TableCell colSpan={4} />
+                            <TableCell colSpan={4} className="text-right font-bold text-sm pr-4">Total Budget</TableCell>
                             <TableCell className="p-1 font-bold text-sm text-right">{totalBudget.toFixed(2)}</TableCell>
-                            <TableCell colSpan={2} />
+                            <TableCell colSpan={2} className="text-right font-bold text-sm pr-4">Total Spent</TableCell>
                             <TableCell className="p-1 font-bold text-sm text-right">{totalSpent.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
-                         <TableRow><TableCell colSpan={10} className="p-0 h-2"><Separator /></TableCell></TableRow>
+
+                        <TableRow><TableCell colSpan={10} className="p-0 h-2"><Separator /></TableCell></TableRow>
+
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-sm">Old bal</TableCell>
-                            <TableCell className="p-0 text-right" colSpan={2}>
+                            <TableCell colSpan={4} className="text-right font-bold text-sm pr-4">Manual Total</TableCell>
+                            <TableCell className="p-0 text-right">
+                                <Input 
+                                    type="number" 
+                                    value={manualTotal ?? ''}
+                                    onChange={(e) => setManualTotal(e.target.value === '' ? null : Number(e.target.value))} 
+                                    className="h-7 text-xs p-1 bg-blue-100 font-bold border-0 text-right w-full"
+                                    placeholder="Enter Total"
+                                />
+                            </TableCell>
+                             <TableCell colSpan={2} className="text-right font-bold text-sm pr-4">Old Balance</TableCell>
+                            <TableCell className="p-0 text-right">
                                 <Input 
                                     type="number" 
                                     value={oldBalance} 
                                     onChange={(e) => setOldBalance(Number(e.target.value))} 
-                                    className="h-7 text-xs p-1 bg-yellow-200 font-bold border-0 text-right"
+                                    className="h-7 text-xs p-1 bg-yellow-100 font-bold border-0 text-right w-full"
                                 />
                             </TableCell>
-                            <TableCell />
+                            <TableCell colSpan={2} />
                         </TableRow>
-                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-sm">GST 18%</TableCell>
-                            <TableCell className="p-1 font-bold text-sm text-right" colSpan={2}>{gst.toFixed(2)}</TableCell>
-                            <TableCell />
-                        </TableRow>
+                        
                         <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
-                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-sm">Grand Total</TableCell>
-                            <TableCell className="p-1 font-bold text-sm text-right" colSpan={2}>{grandTotal.toFixed(2)}</TableCell>
-                            <TableCell />
-                        </TableRow>
-                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-sm">Total</TableCell>
-                            <TableCell className="p-0 text-right" colSpan={2}>
-                                <Input 
-                                    type="number" 
-                                    value={manualTotal ?? ''}
-                                    placeholder="Manual Total"
-                                    onChange={(e) => setManualTotal(e.target.value === '' ? null : Number(e.target.value))} 
-                                    className="h-7 text-xs p-1 bg-blue-100 font-bold border-0 text-right"
-                                />
-                            </TableCell>
-                            <TableCell />
-                        </TableRow>
-                        <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
+
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-sm">Balance</TableCell>
-                            <TableCell className="p-1 font-bold text-sm text-red-600 text-right" colSpan={2}>{balance.toFixed(2)}</TableCell>
-                             <TableCell />
+                            <TableCell colSpan={7} className="text-right font-bold text-sm pr-4">GST 18%</TableCell>
+                            <TableCell className="p-1 font-bold text-sm text-right">{gst.toFixed(2)}</TableCell>
+                            <TableCell colSpan={2} />
+                        </TableRow>
+                        
+                        <TableRow>
+                            <TableCell colSpan={7} className="text-right font-bold text-sm pr-4">Grand Total</TableCell>
+                            <TableCell className="p-1 font-bold text-sm text-right">{grandTotal.toFixed(2)}</TableCell>
+                            <TableCell colSpan={2} />
+                        </TableRow>
+                        
+                        <TableRow>
+                            <TableCell colSpan={7} className="text-right font-bold text-sm pr-4">Balance</TableCell>
+                            <TableCell className="p-1 font-bold text-sm text-right">
+                                <span className={cn(balance < 0 ? "text-red-600" : "text-green-600")}>
+                                    {balance.toFixed(2)}
+                                </span>
+                            </TableCell>
+                            <TableCell colSpan={2} />
                         </TableRow>
                     </TableFooter>
                 </Table>
