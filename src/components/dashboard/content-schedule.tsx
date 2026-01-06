@@ -411,7 +411,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         const isPromotionTask = task.description === 'Paid Promotion';
         
         if (currentUser?.role === 'employee' && isPromotionTask) {
-            return ['Running', 'Completed'];
+            return ['Running'];
         }
         
         if (currentUser?.role === 'admin') {

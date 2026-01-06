@@ -103,6 +103,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
     const [editingRemark, setEditingRemark] = useState<{ promoId: string; remarkIndex: number } | null>(null);
     const [editingText, setEditingText] = useState('');
+    const isAdmin = currentUser?.role === 'admin';
 
 
     useEffect(() => {
@@ -137,16 +138,18 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                     }
                     
                     if (promotionStatus && promotionStatus !== promotion.status) {
-                        handlePromotionChange(promotion.id, 'status', promotionStatus);
+                        handlePromotionChange(promotion.id, 'status', promotionStatus, true); // Pass syncFromTask = true
                     }
                 }
             }
         });
     }, [tasks, promotions, clientId]);
 
-    const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any) => {
+    const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any, syncFromTask = false) => {
         const promotionRef = doc(db, `clients/${clientId}/promotions`, id);
         await updateDoc(promotionRef, { [field]: value });
+
+        if (syncFromTask) return; // Prevent feedback loop
 
         const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PaidPromotion & {id: string};
         if (!updatedPromotion) return;
@@ -188,6 +191,9 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         }
         if (field === 'adType' && linkedTask) {
             updateTask(linkedTask.id, { contentType: value as ContentType });
+        }
+        if (field === 'date' && linkedTask) {
+            updateTask(linkedTask.id, { deadline: value });
         }
     };
     
@@ -333,6 +339,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                             <Button
                                                 variant={'ghost'}
                                                 size="sm"
+                                                disabled={!isAdmin}
                                                 className={cn('w-full justify-start text-left font-normal h-7 text-xs px-2', !promo.date && 'text-muted-foreground')}
                                             >
                                                 {promo.date && isValid(new Date(promo.date)) ? format(new Date(promo.date), 'MMM dd') : <span>Pick a date</span>}
