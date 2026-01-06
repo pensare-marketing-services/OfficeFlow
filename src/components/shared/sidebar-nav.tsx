@@ -125,12 +125,12 @@ export function SidebarNav() {
                                 <Skeleton className="h-7 w-full" />
                             </>
                         )}
-                        {!clientsLoading && filteredClients.map(client => (
+                        {!clientsLoading && filteredClients.map((client, index) => (
                             <SidebarMenuItem key={client.id}>
                                 <Link href={`/clients/${client.id}`}>
                                     <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
                                         <span>
-                                            <Building />
+                                            <span className="flex h-4 w-4 items-center justify-center text-xs">{index + 1}</span>
                                             <span>{client.name}</span>
                                         </span>
                                     </SidebarMenuSubButton>
