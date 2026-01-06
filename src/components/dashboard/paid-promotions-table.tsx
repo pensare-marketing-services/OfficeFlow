@@ -96,6 +96,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
     const [oldBalance, setOldBalance] = useState(0);
+    const [manualTotal, setManualTotal] = useState<number | null>(null);
     const { addTask, updateTask, deleteTask, tasks } = useTasks();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -205,7 +206,13 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         };
         const updatedRemarks = [...(promo.remarks || []), newNote];
         handlePromotionChange(promoId, 'remarks', updatedRemarks);
-        onSend(capitalizeSentences(note.note || ''));
+
+        // Sync with task
+        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === promo.campaign && t.clientId === clientId);
+        if (linkedTask) {
+            const updatedTaskNotes = [...(linkedTask.progressNotes || []), newNote];
+            updateTask(linkedTask.id, { progressNotes: updatedTaskNotes });
+        }
     };
 
 
@@ -278,18 +285,13 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         }
     };
     
-    const onSend = (message: string) => {
-        addNote(message, { note: message });
-        setNoteInput('');
-    };
-
     const employeeUsers = useMemo(() => users.filter(u => u.role === 'employee' && u.username), [users]);
 
     const totalSpent = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.spent) || 0), 0), [promotions]);
     const totalBudget = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.budget) || 0), 0), [promotions]);
-    const gst = totalSpent * 0.18;
-    const totalWithGst = totalSpent + gst;
-    const balance = (oldBalance + totalCashIn) - totalWithGst;
+    const gst = (totalBudget - totalSpent) * 0.18;
+    const grandTotal = (totalBudget - totalSpent) + gst;
+    const balance = (oldBalance + totalCashIn) - (manualTotal ?? grandTotal);
 
     return (
         <Card>
@@ -308,10 +310,10 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                             <TableHead className="w-[40px]">Date</TableHead>
                             <TableHead className="w-[120px]">Campaign</TableHead>
                             <TableHead className="w-[110px]">Type</TableHead>
-                            <TableHead className="w-[20px]">Budget</TableHead>
+                            <TableHead className="w-[20px] text-right">Budget</TableHead>
                             <TableHead className="w-[90px]">Status</TableHead>
                             <TableHead className="w-[90px]">Assign</TableHead>
-                            <TableHead className="w-[70px]">Spent</TableHead>
+                            <TableHead className="w-[70px] text-right">Spent</TableHead>
                             <TableHead className="w-[40px]">Note</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
@@ -359,7 +361,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
-                                <TableCell className="p-0"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" /></TableCell>
+                                <TableCell className="p-0"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" className="text-right" /></TableCell>
                                 <TableCell className="p-1">
                                     <Select value={promo.status} onValueChange={(v: PaidPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
                                         <SelectTrigger className={cn("h-7 text-xs", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
@@ -387,7 +389,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
-                                <TableCell className="p-0"><EditableCell value={promo.spent} onSave={(v) => handlePromotionChange(promo.id, 'spent', v)} type="number" /></TableCell>
+                                <TableCell className="p-0"><EditableCell value={promo.spent} onSave={(v) => handlePromotionChange(promo.id, 'spent', v)} type="number" className="text-right" /></TableCell>
                                 <TableCell className="p-0 text-center">
                                     <Popover onOpenChange={(open) => { if (open) setNoteInput(''); }}>
                                         <PopoverTrigger asChild>
@@ -490,9 +492,9 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                     <TableFooter>
                         <TableRow>
                             <TableCell colSpan={4} />
-                            <TableCell className="p-1 font-bold text-sm text-center">{totalBudget.toFixed(2)}</TableCell>
+                            <TableCell className="p-1 font-bold text-sm text-right">{totalBudget.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
-                            <TableCell className="p-1 font-bold text-sm text-center">{totalSpent.toFixed(2)}</TableCell>
+                            <TableCell className="p-1 font-bold text-sm text-right">{totalSpent.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
                          <TableRow><TableCell colSpan={10} className="p-0 h-2"><Separator /></TableCell></TableRow>
@@ -516,7 +518,20 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                         <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
                          <TableRow>
                             <TableCell colSpan={7} className="text-right font-bold text-sm">Grand Total</TableCell>
-                            <TableCell className="p-1 font-bold text-sm text-right" colSpan={2}>{totalWithGst.toFixed(2)}</TableCell>
+                            <TableCell className="p-1 font-bold text-sm text-right" colSpan={2}>{grandTotal.toFixed(2)}</TableCell>
+                            <TableCell />
+                        </TableRow>
+                         <TableRow>
+                            <TableCell colSpan={7} className="text-right font-bold text-sm">Total</TableCell>
+                            <TableCell className="p-0 text-right" colSpan={2}>
+                                <Input 
+                                    type="number" 
+                                    value={manualTotal ?? ''}
+                                    placeholder="Manual Total"
+                                    onChange={(e) => setManualTotal(e.target.value === '' ? null : Number(e.target.value))} 
+                                    className="h-7 text-xs p-1 bg-blue-100 font-bold border-0 text-right"
+                                />
+                            </TableCell>
                             <TableCell />
                         </TableRow>
                         <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
