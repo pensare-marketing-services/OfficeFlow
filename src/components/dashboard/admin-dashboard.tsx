@@ -126,7 +126,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
             isActive={viewMode === 'tasks' && taskFilter === 'total'}
         />
         <StatsCard 
-            title="Completed Tasks" 
+            title="Approved Tasks" 
             value={completedTasks} 
             icon={CheckCircle2} 
             variant="success"

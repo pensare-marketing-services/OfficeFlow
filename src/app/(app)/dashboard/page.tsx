@@ -53,5 +53,10 @@ export default function DashboardPage() {
 
   return user.role === 'admin' ? 
     <AdminDashboard tasks={tasks || []} users={allUsers} clients={clients || []} /> : 
-    <EmployeeDashboard employeeTasks={employeeTasks} users={allUsers} onTaskUpdate={handleTaskUpdate} />;
+    <EmployeeDashboard 
+      employeeTasks={employeeTasks} 
+      users={allUsers} 
+      clients={clients || []}
+      onTaskUpdate={handleTaskUpdate} 
+    />;
 }

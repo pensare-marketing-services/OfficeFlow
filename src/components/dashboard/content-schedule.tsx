@@ -38,6 +38,7 @@ const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
     users: UserWithId[];
+    clients?: ClientWithId[];
     onTaskUpdate: (task: Partial<Task> & { id: string }) => void;
     onTaskDelete?: (taskId: string) => void;
     showClient?: boolean;
@@ -205,11 +206,11 @@ const AssigneeSelect = ({
 };
 
 
-export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDelete, showClient = true }: ContentScheduleProps) {
+export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDelete, showClient = true, clients: propClients }: ContentScheduleProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const { toast } = useToast();
-    const [clients, setClients] = useState<ClientWithId[]>([]);
+    const [clients, setClients] = useState<ClientWithId[]>(propClients || []);
     const [sortConfig, setSortConfig] = useState<{ key: 'priority'; direction: 'ascending' | 'descending' } | null>(null);
     const [openedChats, setOpenedChats] = useState<Set<string>>(new Set());
     const { updateTaskStatus } = useTasks();
@@ -245,14 +246,18 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     };
 
     useEffect(() => {
-        const clientsQuery = collection(db, "clients");
-        const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
-            const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
-            setClients(clientsData);
-        });
+        if (propClients) {
+            setClients(propClients);
+        } else {
+            const clientsQuery = collection(db, "clients");
+            const unsubscribe = onSnapshot(clientsQuery, (querySnapshot) => {
+                const clientsData = querySnapshot.docs.map(doc => ({ ...doc.data() as Client, id: doc.id }));
+                setClients(clientsData);
+            });
 
-        return () => unsubscribe();
-    }, []);
+            return () => unsubscribe();
+        }
+    }, [propClients]);
     
     const getClient = (clientId?: string): ClientWithId | undefined => {
       if (!clientId) return undefined;
@@ -430,6 +435,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 <TableHead className="w-[40px] p-1 border-r h-8 text-center">#</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Date</TableHead>
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
+                                {currentUser?.role === 'employee' && <TableHead className="w-[120px] p-1 border-r h-8">Client Assigned</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
                                 <TableHead className="p-1 border-r h-8 w-[200px]">Description</TableHead>
                                 <TableHead className="w-[100px] p-1 border-r h-8">Type</TableHead>
@@ -458,6 +464,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 
                                 const isPromotionTask = task.description === 'Paid Promotion';
                                 const isStandardTask = !isPromotionTask;
+                                
+                                const clientAssignedEmployees = client?.employeeIds
+                                    ?.map(id => users.find(u => u.id === id)?.username)
+                                    .filter(Boolean)
+                                    .join(', ');
 
 
                                 const getDisplayedStatusForEmployee = (): string => {
@@ -520,6 +531,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         </Popover>
                                     </TableCell>
                                     {showClient && <TableCell className="p-1 border-r font-medium text-xs">{client?.name || '-'}</TableCell>}
+                                    {currentUser?.role === 'employee' && (
+                                        <TableCell className="p-1 border-r text-xs text-muted-foreground">
+                                            {clientAssignedEmployees || '-'}
+                                        </TableCell>
+                                    )}
                                     <TableCell className="p-0 border-r">
                                         {isAdmin ? (
                                             <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Title"/>

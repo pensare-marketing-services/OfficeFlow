@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import type { Task, UserProfile as User } from '@/lib/data';
+import type { Task, UserProfile as User, Client } from '@/lib/data';
 import { StatsCard } from './stats-card';
 import { ClipboardList, CheckCircle2, Hourglass, AlertTriangle, PauseCircle } from 'lucide-react';
 import ContentSchedule from './content-schedule';
@@ -10,17 +10,19 @@ import { useTasks } from '@/hooks/use-tasks';
 import { useUsers } from '@/hooks/use-users';
 
 type UserWithId = User & { id: string };
+type ClientWithId = Client & { id: string };
 
 interface EmployeeDashboardProps {
   employeeTasks: (Task & {id: string})[];
   users: UserWithId[];
+  clients: ClientWithId[];
   onTaskUpdate: (taskId: string, updatedData: Partial<Task>) => void;
 }
 
 
 type TaskFilter = 'all' | 'inProgress' | 'completed' | 'overdue' | 'onHold';
 
-export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: EmployeeDashboardProps) {
+export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients }: EmployeeDashboardProps) {
   const { user } = useAuth();
   const [taskFilter, setTaskFilter] = useState<TaskFilter>('all');
   const { users } = useUsers();
@@ -105,7 +107,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
   const filterTitles: Record<TaskFilter, string> = {
     all: "All My Tasks",
     inProgress: "My In Progress Tasks",
-    completed: "My Completed Tasks",
+    completed: "My Approved Tasks",
     overdue: "My Overdue Tasks",
     onHold: "My On Hold Tasks",
   };
@@ -165,6 +167,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate }: Emplo
             users={users}
             onTaskUpdate={handleTaskUpdate}
             showClient={true}
+            clients={clients}
         />
       </div>
     </div>
