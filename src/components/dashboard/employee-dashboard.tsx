@@ -54,31 +54,15 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
   
   const filteredTasks = useMemo(() => {
     const getSortedTasks = (tasksToSort: (Task & {id: string})[]) => {
-      const employeePriorityMap = new Map<string, number>();
-      users.forEach(u => {
-        if(u.id && u.priority !== undefined) {
-          employeePriorityMap.set(u.id, u.priority);
-        }
-      });
-      
       return tasksToSort.sort((a, b) => {
-        // Primary sort: by active employee priority
-        const aActiveAssigneeId = a.assigneeIds?.[a.activeAssigneeIndex || 0];
-        const bActiveAssigneeId = b.assigneeIds?.[b.activeAssigneeIndex || 0];
-        const aEmployeePriority = aActiveAssigneeId ? employeePriorityMap.get(aActiveAssigneeId) ?? 99 : 99;
-        const bEmployeePriority = bActiveAssigneeId ? employeePriorityMap.get(bActiveAssigneeId) ?? 99 : 99;
-        if (aEmployeePriority !== bEmployeePriority) {
-          return aEmployeePriority - bEmployeePriority;
-        }
-
-        // Secondary sort: by deadline, latest first
+        // Primary sort: by deadline, latest first
         const dateA = new Date(a.deadline).getTime();
         const dateB = new Date(b.deadline).getTime();
         if (dateA !== dateB) {
             return dateB - dateA;
         }
 
-        // Tertiary sort: by task's own priority
+        // Secondary sort: by task's own priority
         const aTaskPriority = a.priority || 99;
         const bTaskPriority = b.priority || 99;
         if (aTaskPriority !== bTaskPriority) {
