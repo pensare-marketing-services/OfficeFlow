@@ -62,20 +62,20 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
       });
       
       return tasksToSort.sort((a, b) => {
-        // Primary sort: by deadline, latest first
-        const dateA = new Date(a.deadline).getTime();
-        const dateB = new Date(b.deadline).getTime();
-        if (dateA !== dateB) {
-            return dateB - dateA;
-        }
-
-        // Secondary sort: by active employee priority
+        // Primary sort: by active employee priority
         const aActiveAssigneeId = a.assigneeIds?.[a.activeAssigneeIndex || 0];
         const bActiveAssigneeId = b.assigneeIds?.[b.activeAssigneeIndex || 0];
         const aEmployeePriority = aActiveAssigneeId ? employeePriorityMap.get(aActiveAssigneeId) ?? 99 : 99;
         const bEmployeePriority = bActiveAssigneeId ? employeePriorityMap.get(bActiveAssigneeId) ?? 99 : 99;
         if (aEmployeePriority !== bEmployeePriority) {
           return aEmployeePriority - bEmployeePriority;
+        }
+
+        // Secondary sort: by deadline, latest first
+        const dateA = new Date(a.deadline).getTime();
+        const dateB = new Date(b.deadline).getTime();
+        if (dateA !== dateB) {
+            return dateB - dateA;
         }
 
         // Tertiary sort: by task's own priority
