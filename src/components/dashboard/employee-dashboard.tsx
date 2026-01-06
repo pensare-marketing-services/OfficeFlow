@@ -58,21 +58,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
         // Primary sort: by deadline, latest first
         const dateA = new Date(a.deadline).getTime();
         const dateB = new Date(b.deadline).getTime();
-        if (dateA !== dateB) {
-            return dateB - dateA;
-        }
-
-        // Secondary sort: by task's own priority
-        const aTaskPriority = a.priority || 99;
-        const bTaskPriority = b.priority || 99;
-        if (aTaskPriority !== bTaskPriority) {
-            return aTaskPriority - bTaskPriority;
-        }
-
-        // Final tie-breaker: by creation date (newer first)
-        const aCreationDate = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
-        const bCreationDate = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
-        return bCreationDate - aCreationDate;
+        return dateB - dateA; // Sort by latest deadline first
       });
     }
 
@@ -89,7 +75,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
       default:
         return getSortedTasks(allNonCompletedTasks);
     }
-  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks, users]);
+  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks]);
 
   const filterTitles: Record<TaskFilter, string> = {
     all: "All My Tasks",
