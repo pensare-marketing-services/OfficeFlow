@@ -99,6 +99,8 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     const { addTask, updateTask, deleteTask, tasks } = useTasks();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+
 
     useEffect(() => {
         if (!clientId) return;
@@ -297,7 +299,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                             <TableRow key={promo.id}>
                                 <TableCell className="px-2 py-1 text-xs text-center">{index + 1}</TableCell>
                                 <TableCell className="p-0">
-                                     <Popover>
+                                     <Popover open={openPopoverId === promo.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? promo.id : null)}>
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant={'ghost'}
@@ -311,7 +313,10 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                             <Calendar
                                                 mode="single"
                                                 selected={promo.date ? new Date(promo.date) : undefined}
-                                                onSelect={(date) => handlePromotionChange(promo.id, 'date', date ? date.toISOString() : '')}
+                                                onSelect={(date) => {
+                                                    handlePromotionChange(promo.id, 'date', date ? date.toISOString() : '');
+                                                    setOpenPopoverId(null);
+                                                }}
                                                 initialFocus
                                             />
                                         </PopoverContent>

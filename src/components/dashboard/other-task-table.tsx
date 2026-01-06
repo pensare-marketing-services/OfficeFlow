@@ -96,6 +96,8 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+
     
     const handleTaskChange = (id: string, field: keyof Task, value: any) => {
         onTaskUpdate(id, { [field]: value });
@@ -186,7 +188,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                             <TableRow key={task.id}>
                                 <TableCell className="px-2 py-1 text-xs text-center">{index + 1}</TableCell>
                                 <TableCell className="p-0">
-                                     <Popover>
+                                     <Popover open={openPopoverId === task.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? task.id : null)}>
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant={'ghost'}
@@ -201,7 +203,10 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                             <Calendar
                                                 mode="single"
                                                 selected={task.deadline ? new Date(task.deadline) : undefined}
-                                                onSelect={(date) => handleTaskChange(task.id, 'deadline', date ? date.toISOString() : '')}
+                                                onSelect={(date) => {
+                                                    handleTaskChange(task.id, 'deadline', date ? date.toISOString() : '');
+                                                    setOpenPopoverId(null);
+                                                }}
                                                 initialFocus
                                             />
                                         </PopoverContent>

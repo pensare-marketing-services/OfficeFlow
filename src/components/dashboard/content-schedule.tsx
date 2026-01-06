@@ -214,6 +214,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     const [openedChats, setOpenedChats] = useState<Set<string>>(new Set());
     const { updateTaskStatus } = useTasks();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+
 
     const sortedTasks = useMemo(() => {
         let sortableTasks = [...tasks];
@@ -262,8 +264,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     };
     
     const handleLocalStatusChange = (task: Task & { id: string }, newStatus: string) => {
-        let updatePayload: Partial<Task> = {};
-
         if (currentUser?.role === 'admin' && newStatus === 'Reschedule') {
             onTaskUpdate({
                 id: task.id,
@@ -273,13 +273,15 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             return;
         }
 
-        let finalStatus = newStatus;
         const isPromotionTask = task.description === 'Paid Promotion';
+        let finalStatus = newStatus;
         if (isPromotionTask) {
             if (newStatus === 'Running') finalStatus = 'On Work';
             if (newStatus === 'Active') finalStatus = 'On Work';
             if (newStatus === 'Stopped') finalStatus = 'Completed';
         }
+        
+        let updatePayload: Partial<Task> = { status: finalStatus as TaskStatus };
 
         if (['Posted', 'Completed'].includes(finalStatus)) {
             updatePayload.deadline = new Date().toISOString();
@@ -288,8 +290,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         if (currentUser?.role === 'employee') {
             updateTaskStatus(task, finalStatus);
         } else {
-            updatePayload.status = finalStatus as TaskStatus;
-            onTaskUpdate({ id: task.id, ...updatePayload });
+             onTaskUpdate({ id: task.id, ...updatePayload });
         }
     }
 
@@ -493,7 +494,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 <TableRow key={task.id} className="border-b">
                                     <TableCell className="p-0 px-1 border-r text-center font-medium">{index + 1}</TableCell>
                                     <TableCell className="p-0 px-1 border-r">
-                                        <Popover>
+                                        <Popover open={openPopoverId === task.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? task.id : null)}>
                                             <PopoverTrigger asChild>
                                                 <Button
                                                     variant={'ghost'}
@@ -509,7 +510,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 <Calendar
                                                     mode="single"
                                                     selected={task.deadline ? new Date(task.deadline) : undefined}
-                                                    onSelect={(date) => handleFieldChange(task.id, 'deadline', date ? date.toISOString() : '')}
+                                                    onSelect={(date) => {
+                                                        handleFieldChange(task.id, 'deadline', date ? date.toISOString() : '');
+                                                        setOpenPopoverId(null);
+                                                    }}
                                                     initialFocus
                                                 />
                                             </PopoverContent>

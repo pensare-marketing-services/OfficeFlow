@@ -27,6 +27,8 @@ const statuses: CashInTransactionStatus[] = ['Received', 'Not Received'];
 export default function CashInLog({ clientId, transactions, totalCashIn }: CashInLogProps) {
     const [newDate, setNewDate] = React.useState<Date | undefined>(new Date());
     const [newAmount, setNewAmount] = React.useState<number | ''>('');
+    const [openPopover, setOpenPopover] = React.useState(false);
+
 
     const addTransaction = async () => {
         if (!newDate || newAmount === '' || newAmount <= 0) return;
@@ -100,7 +102,7 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
             <CardFooter className="p-3 flex-col items-stretch gap-2">
                  <Separator className="my-1" />
                  <div className="flex items-center gap-2">
-                    <Popover>
+                    <Popover open={openPopover} onOpenChange={setOpenPopover}>
                         <PopoverTrigger asChild>
                             <Button
                                 variant={'outline'}
@@ -112,7 +114,15 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
-                            <Calendar mode="single" selected={newDate} onSelect={setNewDate} initialFocus />
+                            <Calendar
+                                mode="single"
+                                selected={newDate}
+                                onSelect={(date) => {
+                                    setNewDate(date);
+                                    setOpenPopover(false);
+                                }}
+                                initialFocus
+                            />
                         </PopoverContent>
                     </Popover>
                     <Input 
