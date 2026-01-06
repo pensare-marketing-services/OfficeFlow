@@ -55,10 +55,15 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
   const filteredTasks = useMemo(() => {
     const getSortedTasks = (tasksToSort: (Task & {id: string})[]) => {
       return tasksToSort.sort((a, b) => {
-        // Primary sort: by deadline, latest first
-        const dateA = new Date(a.deadline).getTime();
-        const dateB = new Date(b.deadline).getTime();
-        return dateB - dateA; // Sort by latest deadline first
+        // Sort by deadline: furthest/latest date first (descending)
+        const dateA = new Date(a.deadline);
+        const dateB = new Date(b.deadline);
+        
+        // Debug logging to check dates
+        console.log(`Sorting: ${a.deadline} (${dateA.toISOString()}) vs ${b.deadline} (${dateB.toISOString()})`);
+        
+        // Latest/furthest date first: Jan 7 before Jan 6
+        return dateB.getTime() - dateA.getTime();
       });
     }
 
@@ -109,7 +114,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
             isActive={taskFilter === 'inProgress'}
         />
         <StatsCard 
-            title="Completed" 
+            title="Approved" 
             value={completedTasksCount} 
             icon={CheckCircle2} 
             variant="success"

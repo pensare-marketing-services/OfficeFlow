@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, CalendarIcon, MessageSquare } from 'lucide-react';
+import { Plus, Trash2, CalendarIcon, MessageSquare, Pen } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -100,6 +100,8 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+    const [editingRemark, setEditingRemark] = useState<{ promoId: string; remarkIndex: number } | null>(null);
+    const [editingText, setEditingText] = useState('');
 
 
     useEffect(() => {
@@ -218,6 +220,27 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         }
     };
 
+    const handleEditRemark = (promo: PaidPromotion & {id:string}, remarkIndex: number) => {
+      const remark = promo.remarks?.[remarkIndex];
+      if (!remark) return;
+      setEditingRemark({ promoId: promo.id, remarkIndex });
+      setEditingText(remark.note || '');
+    };
+  
+    const handleSaveRemark = (promoId: string, remarkIndex: number) => {
+        if (!editingRemark) return;
+        const promo = promotions.find(p => p.id === promoId);
+        if (!promo || !promo.remarks) return;
+    
+        const updatedRemarks = [...promo.remarks];
+        updatedRemarks[remarkIndex] = { ...updatedRemarks[remarkIndex], note: editingText };
+    
+        handlePromotionChange(promoId, 'remarks', updatedRemarks);
+    
+        setEditingRemark(null);
+        setEditingText('');
+    };
+
 
     const addPromotion = async () => {
         const newPromotion: Omit<PaidPromotion, 'id'> = {
@@ -281,11 +304,11 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[40px] px-2 text-xs">Sl.No</TableHead>
-                            <TableHead className="w-[80px]">Date</TableHead>
+                            <TableHead className="w-[10px] px-2 text-xs">No</TableHead>
+                            <TableHead className="w-[40px]">Date</TableHead>
                             <TableHead className="w-[120px]">Campaign</TableHead>
                             <TableHead className="w-[110px]">Type</TableHead>
-                            <TableHead className="w-[70px]">Budget</TableHead>
+                            <TableHead className="w-[20px]">Budget</TableHead>
                             <TableHead className="w-[90px]">Status</TableHead>
                             <TableHead className="w-[90px]">Assign</TableHead>
                             <TableHead className="w-[70px]">Spent</TableHead>
@@ -376,19 +399,47 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                             <div className="space-y-2">
                                                  <h4 className="font-medium leading-none text-xs">Remarks</h4>
                                                  <div className="max-h-60 space-y-3 overflow-y-auto p-1">
-                                                     {(promo.remarks || []).map((note: ProgressNote, i: number) => {
+                                                     {(promo.remarks || []).map((note: ProgressNote, remarkIndex: number) => {
                                                         const author = users.find(u => u.id === note.authorId);
                                                         const authorName = author ? author.username : note.authorName;
+                                                        const isEditing = editingRemark?.promoId === promo.id && editingRemark?.remarkIndex === remarkIndex;
+
                                                         return (
-                                                             <div key={i} className={cn("flex items-start gap-2 text-xs", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                             <div key={remarkIndex} className={cn("flex items-start gap-2 text-xs group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                 {note.authorId !== currentUser?.uid && (
                                                                     <Avatar className="h-6 w-6 border">
                                                                         <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
                                                                     </Avatar>
                                                                 )}
-                                                                <div className={cn("max-w-[75%] rounded-lg p-2", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                     {currentUser?.role === 'admin' && !isEditing && (
+                                                                        <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(promo, remarkIndex)}>
+                                                                            <Pen className="h-3 w-3"/>
+                                                                        </Button>
+                                                                    )}
                                                                     <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                    {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
+                                                                    
+                                                                    {isEditing ? (
+                                                                        <Textarea
+                                                                            value={editingText}
+                                                                            onChange={(e) => setEditingText(e.target.value)}
+                                                                            onBlur={() => handleSaveRemark(promo.id, remarkIndex)}
+                                                                            onKeyDown={(e) => {
+                                                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                                                    e.preventDefault();
+                                                                                    handleSaveRemark(promo.id, remarkIndex);
+                                                                                } else if (e.key === 'Escape') {
+                                                                                    setEditingRemark(null);
+                                                                                }
+                                                                            }}
+                                                                            autoFocus
+                                                                            className="text-xs h-auto bg-background/80 text-foreground"
+                                                                        />
+                                                                    ) : (
+                                                                        <>
+                                                                            {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
+                                                                        </>
+                                                                    )}
                                                                     <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
                                                                 </div>
                                                                 {note.authorId === currentUser?.uid && (
@@ -464,7 +515,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                         </TableRow>
                         <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
                          <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-sm">Total</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-sm">Grand Total</TableCell>
                             <TableCell className="p-1 font-bold text-sm text-right" colSpan={2}>{totalWithGst.toFixed(2)}</TableCell>
                             <TableCell />
                         </TableRow>

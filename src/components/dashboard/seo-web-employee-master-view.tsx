@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import type { Task, UserProfile, Client } from '@/lib/data';
+import type { Task, UserProfile, Client, ProgressNote } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -15,9 +15,10 @@ import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
 import { useTasks } from '@/hooks/use-tasks';
 import { useHorizontalScroll } from '@/hooks/use-horizontal-scroll';
 import { Button } from '../ui/button';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Pen } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Badge } from '../ui/badge';
+import { Textarea } from '../ui/textarea';
 
 
 type UserWithId = UserProfile & { id: string };
@@ -158,6 +159,29 @@ const TaskCell = ({
   isSelected: boolean;
 }) => {
     const { user: currentUser } = useAuth();
+    const { updateTask } = useTasks();
+    const [editingRemark, setEditingRemark] = useState<{ taskId: string; remarkIndex: number } | null>(null);
+    const [editingText, setEditingText] = useState('');
+
+    const handleEditRemark = (task: TaskWithId, remarkIndex: number) => {
+        const remark = task.progressNotes?.[remarkIndex];
+        if (!remark) return;
+        setEditingRemark({ taskId: task.id, remarkIndex });
+        setEditingText(remark.note || '');
+    };
+
+    const handleSaveRemark = (task: TaskWithId, remarkIndex: number) => {
+        if (!editingRemark) return;
+
+        const updatedNotes = [...(task.progressNotes || [])];
+        updatedNotes[remarkIndex] = { ...updatedNotes[remarkIndex], note: editingText };
+
+        updateTask(task.id, { progressNotes: updatedNotes });
+
+        setEditingRemark(null);
+        setEditingText('');
+    };
+        
     if (!tasks || tasks.length === 0) return <div className="h-full w-full flex items-center justify-center border-r">-</div>;
     
     const hasMultipleTasks = tasks.length > 1;
@@ -194,15 +218,42 @@ const TaskCell = ({
                                 </AccordionTrigger>
                                 <AccordionContent className="pt-2 pb-2">
                                      <div className="max-h-48 space-y-3 p-1 overflow-y-auto border rounded-md">
-                                        {(task.progressNotes || []).map((note, i) => {
+                                        {(task.progressNotes || []).map((note, remarkIndex) => {
                                             const authorName = note.authorName || 'User';
+                                            const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
+
                                             return (
-                                                <div key={i} className={cn('flex items-start gap-2 text-[10px]', note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                <div key={remarkIndex} className={cn('flex items-start gap-2 text-[10px] group/remark', note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                 {note.authorId !== currentUser?.uid && ( <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(authorName)}</AvatarFallback></Avatar> )}
-                                                <div className={cn('max-w-[75%] rounded-lg p-2', note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                <div className={cn('max-w-[75%] rounded-lg p-2 relative', note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                    {currentUser?.role === 'admin' && !isEditing && (
+                                                      <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                        <Pen className="h-3 w-3"/>
+                                                      </Button>
+                                                    )}
                                                     <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                    {note.note && ( <div className="text-[11px] whitespace-pre-wrap"><LinkifiedText text={note.note} /></div> )}
-                                                    {note.imageUrl && ( <Dialog><DialogTrigger asChild><img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto cursor-pointer"/></DialogTrigger><DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center"><img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain"/></DialogContent></Dialog> )}
+                                                    {isEditing ? (
+                                                        <Textarea
+                                                            value={editingText}
+                                                            onChange={(e) => setEditingText(e.target.value)}
+                                                            onBlur={() => handleSaveRemark(task, remarkIndex)}
+                                                            onKeyDown={(e) => {
+                                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                                e.preventDefault();
+                                                                handleSaveRemark(task, remarkIndex);
+                                                            } else if (e.key === 'Escape') {
+                                                                setEditingRemark(null);
+                                                            }
+                                                            }}
+                                                            autoFocus
+                                                            className="text-xs h-auto bg-background/80 text-foreground"
+                                                        />
+                                                    ) : (
+                                                      <>
+                                                        {note.note && ( <div className="text-[11px] whitespace-pre-wrap"><LinkifiedText text={note.note} /></div> )}
+                                                        {note.imageUrl && ( <Dialog><DialogTrigger asChild><img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto cursor-pointer"/></DialogTrigger><DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center"><img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain"/></DialogContent></Dialog> )}
+                                                      </>
+                                                    )}
                                                     <p className="text-[9px] text-right mt-1 opacity-70">{format(new Date(note.date), 'MMM d, HH:mm')}</p>
                                                 </div>
                                                 {note.authorId === currentUser?.uid && ( <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback></Avatar> )}
@@ -240,13 +291,15 @@ const TaskCell = ({
             <PopoverContent className="w-80 p-2" side="bottom" align="start">
                  <div className="max-h-60 space-y-3 p-1 overflow-y-auto">
                     <h4 className="font-medium text-sm">{singleTask.title}</h4>
-                     {(singleTask.progressNotes || []).map((note, i) => {
+                     {(singleTask.progressNotes || []).map((note, remarkIndex) => {
                         const authorName = note.authorName || 'User';
+                        const isEditing = editingRemark?.taskId === singleTask.id && editingRemark?.remarkIndex === remarkIndex;
+
                         return (
                             <div
-                            key={i}
+                            key={remarkIndex}
                             className={cn(
-                                'flex items-start gap-2 text-[10px]',
+                                'flex items-start gap-2 text-[10px] group/remark',
                                 note.authorId === currentUser?.uid ? 'justify-end' : ''
                             )}
                             >
@@ -258,39 +311,64 @@ const TaskCell = ({
 
                             <div
                                 className={cn(
-                                'max-w-[75%] rounded-lg p-2',
+                                'max-w-[75%] rounded-lg p-2 relative',
                                 note.authorId === currentUser?.uid
                                     ? 'bg-primary text-primary-foreground'
                                     : 'bg-muted'
                                 )}
                             >
+                                {currentUser?.role === 'admin' && !isEditing && (
+                                  <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(singleTask, remarkIndex)}>
+                                    <Pen className="h-3 w-3"/>
+                                  </Button>
+                                )}
                                 <p className="font-bold text-[10px] mb-1">
                                 {note.authorId === currentUser?.uid ? 'You' : authorName}
                                 </p>
 
-                                {note.note && (
-                                <div className="text-[11px] whitespace-pre-wrap">
-                                    <LinkifiedText text={note.note} />
-                                </div>
-                                )}
+                                {isEditing ? (
+                                    <Textarea
+                                        value={editingText}
+                                        onChange={(e) => setEditingText(e.target.value)}
+                                        onBlur={() => handleSaveRemark(singleTask, remarkIndex)}
+                                        onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSaveRemark(singleTask, remarkIndex);
+                                        } else if (e.key === 'Escape') {
+                                            setEditingRemark(null);
+                                        }
+                                        }}
+                                        autoFocus
+                                        className="text-xs h-auto bg-background/80 text-foreground"
+                                    />
+                                ) : (
+                                  <>
+                                    {note.note && (
+                                    <div className="text-[11px] whitespace-pre-wrap">
+                                        <LinkifiedText text={note.note} />
+                                    </div>
+                                    )}
 
-                                {note.imageUrl && (
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                    <img
-                                        src={note.imageUrl}
-                                        alt="remark"
-                                        className="mt-1 rounded-md max-w-full h-auto cursor-pointer"
-                                    />
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center">
-                                    <img
-                                        src={note.imageUrl}
-                                        alt="remark full view"
-                                        className="max-w-full max-h-full object-contain"
-                                    />
-                                    </DialogContent>
-                                </Dialog>
+                                    {note.imageUrl && (
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                        <img
+                                            src={note.imageUrl}
+                                            alt="remark"
+                                            className="mt-1 rounded-md max-w-full h-auto cursor-pointer"
+                                        />
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center">
+                                        <img
+                                            src={note.imageUrl}
+                                            alt="remark full view"
+                                            className="max-w-full max-h-full object-contain"
+                                        />
+                                        </DialogContent>
+                                    </Dialog>
+                                    )}
+                                  </>
                                 )}
 
                                 <p className="text-[9px] text-right mt-1 opacity-70">

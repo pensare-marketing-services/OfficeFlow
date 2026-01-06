@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGr
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, MessageSquare, Trash2, ArrowUpDown, MoreVertical } from 'lucide-react';
+import { CalendarIcon, MessageSquare, Trash2, ArrowUpDown, MoreVertical, Pen } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn, capitalizeSentences } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -216,6 +216,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     const { updateTaskStatus } = useTasks();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+    const [editingRemark, setEditingRemark] = useState<{ taskId: string; remarkIndex: number } | null>(null);
+    const [editingText, setEditingText] = useState('');
 
 
     const sortedTasks = useMemo(() => {
@@ -376,6 +378,25 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         handleFieldChange(taskId, 'progressNotes', []);
     }
 
+    const handleEditRemark = (task: Task & { id: string }, remarkIndex: number) => {
+      const remark = task.progressNotes?.[remarkIndex];
+      if (!remark) return;
+      setEditingRemark({ taskId: task.id, remarkIndex });
+      setEditingText(remark.note || '');
+    };
+  
+    const handleSaveRemark = (task: Task & { id: string }, remarkIndex: number) => {
+        if (!editingRemark) return;
+    
+        const updatedNotes = [...(task.progressNotes || [])];
+        updatedNotes[remarkIndex] = { ...updatedNotes[remarkIndex], note: editingText };
+    
+        handleFieldChange(task.id, 'progressNotes', updatedNotes);
+    
+        setEditingRemark(null);
+        setEditingText('');
+    };
+
     const handlePopoverOpen = (taskId: string) => {
         setOpenedChats(prev => new Set(prev.add(taskId)));
         setNoteInput('');
@@ -435,7 +456,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 <TableHead className="w-[40px] p-1 border-r h-8 text-center">#</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Date</TableHead>
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
-                                {currentUser?.role === 'employee' && <TableHead className="w-[120px] p-1 border-r h-8">Assigned By</TableHead>}
+                                {currentUser?.role === 'employee' && <TableHead className="w-[120px] p-1 border-r h-8">Assigned</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
                                 <TableHead className="p-1 border-r h-8 w-[200px]">Description</TableHead>
                                 <TableHead className="w-[100px] p-1 border-r h-8">Type</TableHead>
@@ -678,33 +699,60 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                         )}
                                                     </div>
                                                     <div className="max-h-60 space-y-3 overflow-y-auto p-1">
-                                                        {(task.progressNotes || []).map((note, i) => {
+                                                        {(task.progressNotes || []).map((note, remarkIndex) => {
                                                             const author = users.find(u => u.id === note.authorId);
                                                             const authorName = author ? author.username : note.authorName;
+                                                            const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
+
                                                             return (
-                                                                <div key={i} className={cn("flex items-start gap-2 text-xs", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                                <div key={remarkIndex} className={cn("flex items-start gap-2 text-xs group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                     {note.authorId !== currentUser?.uid && (
                                                                         <Avatar className="h-6 w-6 border">
-                                                                            
                                                                             <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
                                                                         </Avatar>
                                                                     )}
-                                                                    <div className={cn("max-w-[75%] rounded-lg p-2", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                    <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                        {isAdmin && !isEditing && (
+                                                                            <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                                <Pen className="h-3 w-3"/>
+                                                                            </Button>
+                                                                        )}
                                                                         <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                        {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
-                                                                        {note.imageUrl && (
-                                                                            <Dialog>
-                                                                                <DialogTrigger asChild>
-                                                                                    <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto cursor-pointer" />
-                                                                                </DialogTrigger>
-                                                                                <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
-                                                                                    <DialogHeader className="sr-only">
-                                                                                        <DialogTitle>Image Preview</DialogTitle>
-                                                                                        <DialogDescription>A full-screen view of the image attached to the remark.</DialogDescription>
-                                                                                    </DialogHeader>
-                                                                                    <img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain" />
-                                                                                </DialogContent>
-                                                                            </Dialog>
+                                                                        
+                                                                        {isEditing ? (
+                                                                            <Textarea
+                                                                                value={editingText}
+                                                                                onChange={(e) => setEditingText(e.target.value)}
+                                                                                onBlur={() => handleSaveRemark(task, remarkIndex)}
+                                                                                onKeyDown={(e) => {
+                                                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                                                        e.preventDefault();
+                                                                                        handleSaveRemark(task, remarkIndex);
+                                                                                    } else if (e.key === 'Escape') {
+                                                                                        setEditingRemark(null);
+                                                                                    }
+                                                                                }}
+                                                                                autoFocus
+                                                                                className="text-xs h-auto bg-background/80 text-foreground"
+                                                                            />
+                                                                        ) : (
+                                                                            <>
+                                                                                {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
+                                                                                {note.imageUrl && (
+                                                                                    <Dialog>
+                                                                                        <DialogTrigger asChild>
+                                                                                            <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto cursor-pointer" />
+                                                                                        </DialogTrigger>
+                                                                                        <DialogContent className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+                                                                                            <DialogHeader className="sr-only">
+                                                                                                <DialogTitle>Image Preview</DialogTitle>
+                                                                                                <DialogDescription>A full-screen view of the image attached to the remark.</DialogDescription>
+                                                                                            </DialogHeader>
+                                                                                            <img src={note.imageUrl} alt="remark full view" className="max-w-full max-h-full object-contain" />
+                                                                                        </DialogContent>
+                                                                                    </Dialog>
+                                                                                )}
+                                                                            </>
                                                                         )}
                                                                         <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
                                                                     </div>

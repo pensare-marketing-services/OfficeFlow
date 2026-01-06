@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, CalendarIcon, MessageSquare } from 'lucide-react';
+import { Plus, Trash2, CalendarIcon, MessageSquare, Pen } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -97,6 +97,8 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+    const [editingRemark, setEditingRemark] = useState<{ taskId: string; remarkIndex: number } | null>(null);
+    const [editingText, setEditingText] = useState('');
 
     
     const handleTaskChange = (id: string, field: keyof Task, value: any) => {
@@ -127,6 +129,25 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                 setNoteInput('');
             }
         }
+    };
+
+    const handleEditRemark = (task: Task & { id: string }, remarkIndex: number) => {
+      const remark = task.progressNotes?.[remarkIndex];
+      if (!remark) return;
+      setEditingRemark({ taskId: task.id, remarkIndex });
+      setEditingText(remark.note || '');
+    };
+  
+    const handleSaveRemark = (task: Task & { id: string }, remarkIndex: number) => {
+        if (!editingRemark) return;
+    
+        const updatedNotes = [...(task.progressNotes || [])];
+        updatedNotes[remarkIndex] = { ...updatedNotes[remarkIndex], note: editingText };
+    
+        handleTaskChange(task.id, 'progressNotes', updatedNotes);
+    
+        setEditingRemark(null);
+        setEditingText('');
     };
 
     const addTask = () => {
@@ -250,18 +271,46 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                             <div className="space-y-2">
                                                 <h4 className="font-medium leading-none text-xs">Remarks for "{task.title}"</h4>
                                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
-                                                    {(task.progressNotes || []).map((note, i) => {
+                                                    {(task.progressNotes || []).map((note, remarkIndex) => {
                                                         const author = users.find(u => u.id === note.authorId);
                                                         const authorName = author ? author.username : note.authorName;
+                                                        const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
+
                                                         return (
-                                                            <div key={i} className={cn("flex items-start gap-2 text-xs", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                            <div key={remarkIndex} className={cn("flex items-start gap-2 text-xs group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                 {note.authorId !== currentUser?.uid && (
                                                                     <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(authorName)}</AvatarFallback></Avatar>
                                                                 )}
-                                                                <div className={cn("max-w-[75%] rounded-lg p-2", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                    {currentUser?.role === 'admin' && !isEditing && (
+                                                                      <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                        <Pen className="h-3 w-3"/>
+                                                                      </Button>
+                                                                    )}
                                                                     <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                    {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
-                                                                    {note.imageUrl && <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto" />}
+                                                                    
+                                                                     {isEditing ? (
+                                                                        <Textarea
+                                                                          value={editingText}
+                                                                          onChange={(e) => setEditingText(e.target.value)}
+                                                                          onBlur={() => handleSaveRemark(task, remarkIndex)}
+                                                                          onKeyDown={(e) => {
+                                                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                                              e.preventDefault();
+                                                                              handleSaveRemark(task, remarkIndex);
+                                                                            } else if (e.key === 'Escape') {
+                                                                              setEditingRemark(null);
+                                                                            }
+                                                                          }}
+                                                                          autoFocus
+                                                                          className="text-xs h-auto bg-background/80 text-foreground"
+                                                                        />
+                                                                    ) : (
+                                                                        <>
+                                                                            {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
+                                                                            {note.imageUrl && <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto" />}
+                                                                        </>
+                                                                    )}
                                                                     <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
                                                                 </div>
                                                                 {note.authorId === currentUser?.uid && (
