@@ -62,30 +62,33 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
       });
       
       return tasksToSort.sort((a, b) => {
-        // Correctly get the active assignee's ID for each task.
+        // Primary sort: by deadline, latest first
+        const dateA = new Date(a.deadline).getTime();
+        const dateB = new Date(b.deadline).getTime();
+        if (dateA !== dateB) {
+            return dateB - dateA;
+        }
+
+        // Secondary sort: by active employee priority
         const aActiveAssigneeId = a.assigneeIds?.[a.activeAssigneeIndex || 0];
         const bActiveAssigneeId = b.assigneeIds?.[b.activeAssigneeIndex || 0];
-
-        // Look up the priority for the active employee. Default to 99 if not found.
         const aEmployeePriority = aActiveAssigneeId ? employeePriorityMap.get(aActiveAssigneeId) ?? 99 : 99;
         const bEmployeePriority = bActiveAssigneeId ? employeePriorityMap.get(bActiveAssigneeId) ?? 99 : 99;
-
-        // First, sort by the active employee's priority (lower is higher priority).
         if (aEmployeePriority !== bEmployeePriority) {
           return aEmployeePriority - bEmployeePriority;
         }
 
-        // If employee priorities are the same, sort by the task's own priority.
+        // Tertiary sort: by task's own priority
         const aTaskPriority = a.priority || 99;
         const bTaskPriority = b.priority || 99;
         if (aTaskPriority !== bTaskPriority) {
             return aTaskPriority - bTaskPriority;
         }
 
-        // As a final tie-breaker, sort by creation date (older first).
-        const aDate = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
-        const bDate = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
-        return aDate - bDate;
+        // Final tie-breaker: by creation date (older first)
+        const aCreationDate = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
+        const bCreationDate = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
+        return aCreationDate - bCreationDate;
       });
     }
 
