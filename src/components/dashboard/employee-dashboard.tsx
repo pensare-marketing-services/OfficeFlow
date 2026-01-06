@@ -85,10 +85,10 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
             return aTaskPriority - bTaskPriority;
         }
 
-        // Final tie-breaker: by creation date (older first)
+        // Final tie-breaker: by creation date (newer first)
         const aCreationDate = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
         const bCreationDate = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
-        return aCreationDate - bCreationDate;
+        return bCreationDate - aCreationDate;
       });
     }
 
