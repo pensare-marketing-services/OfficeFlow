@@ -321,8 +321,8 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                 <div className="flex items-center gap-2 text-sm font-medium">
                     Total
                     <Input 
-                        placeholder="Main Budget..." 
-                        className="h-7 w-28 text-xs text-center" 
+                        placeholder="Budget..." 
+                        className="h-7 w-28 text-xs text-center text-right" 
                         type="number"
                         value={mainBudget ?? ''}
                         onChange={(e) => setMainBudget(Number(e.target.value) || undefined)}
@@ -345,7 +345,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                             <TableHead className="w-[20px] text-right text-[10px]">Budget</TableHead>
                             <TableHead className="w-[90px] text-[10px]">Status</TableHead>
                             <TableHead className="w-[90px] text-[10px]">Assign</TableHead>
-                            <TableHead className="w-[70px] text-righttext-[10px]">Spent</TableHead>
+                            <TableHead className="w-[70px] text-right text-[10px]">Spent</TableHead>
                             <TableHead className="w-[40px] text-[10px]">Note</TableHead>
                             <TableHead className="w-[40px] text-[10px]"></TableHead>
                         </TableRow>
@@ -543,7 +543,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                                     value={manualTotal ?? ''}
                                     onChange={(e) => setManualTotal(e.target.value === '' ? null : Number(e.target.value))} 
                                     className="h-7 text-[10px] p-1 bg-blue-100 font-bold border-0 text-right w-full"
-                                    placeholder="Enter Total"
+                                    placeholder="Total"
                                 />
                             </TableCell>
                              <TableCell colSpan={2} className="text-right font-bold text-xs pr-4">Old Balance</TableCell>
