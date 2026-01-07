@@ -350,7 +350,9 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                                 mode="single"
                                                 selected={promo.date ? new Date(promo.date) : undefined}
                                                 onSelect={(date) => {
-                                                    handlePromotionChange(promo.id, 'date', date ? date.toISOString() : '');
+                                                    if(date) {
+                                                        handlePromotionChange(promo.id, 'date', date.toISOString());
+                                                    }
                                                     setOpenPopoverId(null);
                                                 }}
                                                 initialFocus

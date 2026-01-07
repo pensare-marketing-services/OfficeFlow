@@ -30,7 +30,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
 
   if (!user) return null;
 
-  const completedStatuses: Task['status'][] = ['Posted', 'Approved'];
+  const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
   
   const overdueTasks = useMemo(() => {
     const now = new Date();
@@ -54,17 +54,20 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
   
   const filteredTasks = useMemo(() => {
     const getSortedTasks = (tasksToSort: (Task & {id: string})[]) => {
-      return tasksToSort.sort((a, b) => {
-        // Sort by deadline: furthest/latest date first (descending)
-        const dateA = new Date(a.deadline);
-        const dateB = new Date(b.deadline);
-        
-        // Debug logging to check dates
-        console.log(`Sorting: ${a.deadline} (${dateA.toISOString()}) vs ${b.deadline} (${dateB.toISOString()})`);
-        
-        // Latest/furthest date first: Jan 7 before Jan 6
-        return dateB.getTime() - dateA.getTime();
-      });
+        return tasksToSort.sort((a, b) => {
+            // Sort by deadline: latest date first (descending)
+            const dateA = new Date(a.deadline).getTime();
+            const dateB = new Date(b.deadline).getTime();
+            
+            if (dateA !== dateB) {
+                return dateB - dateA;
+            }
+
+            // Fallback to priority if deadlines are the same
+            const priorityA = a.priority || 99;
+            const priorityB = b.priority || 99;
+            return priorityA - priorityB;
+        });
     }
 
     switch (taskFilter) {

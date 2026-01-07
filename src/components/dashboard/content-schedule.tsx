@@ -411,6 +411,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         const isPromotionTask = task.description === 'Paid Promotion';
         
         if (currentUser?.role === 'employee' && isPromotionTask) {
+             // Employees can only mark it as 'Running'
             return ['Running'];
         }
         
@@ -543,7 +544,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     mode="single"
                                                     selected={task.deadline ? new Date(task.deadline) : undefined}
                                                     onSelect={(date) => {
-                                                        handleFieldChange(task.id, 'deadline', date ? date.toISOString() : '');
+                                                        if (date) {
+                                                            handleFieldChange(task.id, 'deadline', date.toISOString());
+                                                        }
                                                         setOpenPopoverId(null);
                                                     }}
                                                     initialFocus
