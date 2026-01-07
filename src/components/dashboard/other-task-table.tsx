@@ -195,12 +195,12 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[40px] px-2 text-[10px]">Sl.No</TableHead>
+                            <TableHead className="w-[40px] px-2 text-[10px]">No</TableHead>
                             <TableHead className="w-[110px] text-[10px]">Date</TableHead>
                             <TableHead className="w-[150px] text-[10px]">Task</TableHead>
                             <TableHead className='text-[10px]'>Assigned</TableHead>
                             <TableHead className='text-[10px]'>Status</TableHead>
-                            <TableHead className="w-[100px] text-[10px]">Remarks</TableHead>
+                            <TableHead className="w-[100px] text-[10px]">Note</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -268,7 +268,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                         </PopoverTrigger>
                                         <PopoverContent className="w-80" side="left" align="end">
                                             <div className="space-y-2">
-                                                <h4 className="font-medium leading-none text-[10px]">Remarks for "{task.title}"</h4>
+                                                <h4 className="font-medium leading-none text-[10px]">Note for "{task.title}"</h4>
                                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                                     {(task.progressNotes || []).map((note, remarkIndex) => {
                                                         const author = users.find(u => u.id === note.authorId);
@@ -281,7 +281,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                                 )}
                                                                 <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                     {currentUser?.role === 'admin' && !isEditing && (
-                                                                      <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                      <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
                                                                         <Pen className="h-3 w-3"/>
                                                                       </Button>
                                                                     )}

@@ -30,23 +30,23 @@ type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
 
 interface PlanPromotionsTableProps {
-  client: ClientWithId;
-  users: UserWithId[];
-  totalCashIn: number;
-  onClientUpdate: (updatedData: Partial<Client>) => void;
+    client: ClientWithId;
+    users: UserWithId[];
+    totalCashIn: number;
+    onClientUpdate: (updatedData: Partial<Client>) => void;
 }
 
 const adTypes: PlanPromotion['adType'][] = [
-    "EG Whatsapp", 
-    "EG Instagram", 
-    "EG FB Post", 
-    "EG Insta Post", 
-    "Traffic Web", 
-    "Lead Gen", 
-    "Lead Call", 
-    "Profile Visit Ad", 
-    "FB Page Like", 
-    "Carousel Ad", 
+    "EG Whatsapp",
+    "EG Instagram",
+    "EG FB Post",
+    "EG Insta Post",
+    "Traffic Web",
+    "Lead Gen",
+    "Lead Call",
+    "Profile Visit Ad",
+    "FB Page Like",
+    "Carousel Ad",
     "IG Engage",
     "Reach Ad"
 ];
@@ -132,14 +132,14 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
 
         return () => unsubscribe();
     }, [client.id]);
-    
-     useEffect(() => {
+
+    useEffect(() => {
         tasks.forEach(task => {
             if (task.description === 'Plan Promotion' && task.clientId === client.id) {
                 const promotion = promotions.find(p => p.campaign === task.title);
                 if (promotion) {
                     let promotionStatus: PlanPromotion['status'] | null = null;
-                    
+
                     if (task.status === 'On Work' && promotion.status !== 'Active') {
                         promotionStatus = 'Active';
                     } else if (task.status === 'Completed' && promotion.status !== 'Stopped') {
@@ -147,7 +147,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                     } else if (task.status === 'Scheduled' && promotion.status !== 'Scheduled') {
                         promotionStatus = 'Scheduled';
                     }
-                    
+
                     if (promotionStatus && promotionStatus !== promotion.status) {
                         handlePromotionChange(promotion.id, 'status', promotionStatus, true); // Pass syncFromTask = true
                     }
@@ -162,19 +162,19 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
 
         if (syncFromTask) return; // Prevent feedback loop
 
-        const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PlanPromotion & {id: string};
+        const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PlanPromotion & { id: string };
         if (!updatedPromotion) return;
-        
+
         const linkedTask = tasks.find(t => t.description === 'Plan Promotion' && t.title === updatedPromotion.campaign && t.clientId === client.id);
 
         if (field === 'assignedTo') {
             const employee = users.find(u => u.username === value);
             // Only create a task if an employee is assigned AND the campaign has a name
             if (employee && updatedPromotion.campaign) {
-                if(linkedTask) {
+                if (linkedTask) {
                     updateTask(linkedTask.id, { assigneeIds: [employee.id] });
                 } else {
-                     const newTask: Omit<Task, 'id' | 'createdAt'> = {
+                    const newTask: Omit<Task, 'id' | 'createdAt'> = {
                         title: updatedPromotion.campaign,
                         description: 'Plan Promotion',
                         status: 'Scheduled',
@@ -188,7 +188,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                     addTask(newTask);
                 }
             } else if (linkedTask && value === 'unassigned') {
-                 updateTask(linkedTask.id, { assigneeIds: [] });
+                updateTask(linkedTask.id, { assigneeIds: [] });
             }
         }
         if (field === 'status' && linkedTask) {
@@ -197,7 +197,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
             if (value === 'Stopped') taskStatus = 'Completed';
             updateTask(linkedTask.id, { status: taskStatus });
         }
-         if (field === 'campaign' && linkedTask) {
+        if (field === 'campaign' && linkedTask) {
             updateTask(linkedTask.id, { title: value });
         }
         if (field === 'adType' && linkedTask) {
@@ -207,7 +207,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
             updateTask(linkedTask.id, { deadline: value });
         }
     };
-    
+
     const addNote = (promoId: string, note: Partial<ProgressNote>) => {
         if (!currentUser) return;
         if (!note.note?.trim() && !note.imageUrl) return;
@@ -244,23 +244,23 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
         }
     };
 
-    const handleEditRemark = (promo: PlanPromotion & {id:string}, remarkIndex: number) => {
-      const remark = promo.remarks?.[remarkIndex];
-      if (!remark) return;
-      setEditingRemark({ promoId: promo.id, remarkIndex });
-      setEditingText(remark.note || '');
+    const handleEditRemark = (promo: PlanPromotion & { id: string }, remarkIndex: number) => {
+        const remark = promo.remarks?.[remarkIndex];
+        if (!remark) return;
+        setEditingRemark({ promoId: promo.id, remarkIndex });
+        setEditingText(remark.note || '');
     };
-  
+
     const handleSaveRemark = (promoId: string, remarkIndex: number) => {
         if (!editingRemark) return;
         const promo = promotions.find(p => p.id === promoId);
         if (!promo || !promo.remarks) return;
-    
+
         const updatedRemarks = [...promo.remarks];
         updatedRemarks[remarkIndex] = { ...updatedRemarks[remarkIndex], note: editingText };
-    
+
         handlePromotionChange(promoId, 'remarks', updatedRemarks);
-    
+
         setEditingRemark(null);
         setEditingText('');
     };
@@ -284,24 +284,24 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
     const deletePromotion = async (id: string) => {
         const promotionToDelete = promotions.find(p => p.id === id);
         if (!promotionToDelete) return;
-    
+
         // First, delete the promotion document
         await deleteDoc(doc(db, `clients/${client.id}/planPromotions`, id));
-    
+
         // Then, find and delete the associated task
         if (promotionToDelete.campaign) {
-            const linkedTask = tasks.find(t => 
-                t.description === 'Plan Promotion' && 
-                t.title === promotionToDelete.campaign && 
+            const linkedTask = tasks.find(t =>
+                t.description === 'Plan Promotion' &&
+                t.title === promotionToDelete.campaign &&
                 t.clientId === client.id
             );
-        
+
             if (linkedTask) {
                 deleteTask(linkedTask.id);
             }
         }
     };
-    
+
     const employeeUsers = useMemo(() => users.filter(u => u.role === 'employee' && u.username), [users]);
 
     const totalSpent = useMemo(() => promotions.reduce((acc, p) => acc + (Number(p.spent) || 0), 0), [promotions]);
@@ -309,7 +309,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
 
     const gst = totalSpent * 0.18;
     const grandTotal = totalSpent + gst;
-    
+
     const clientProvidedTotal = (manualTotal ?? 0) + oldBalance + totalCashIn;
     const balance = clientProvidedTotal - grandTotal;
 
@@ -320,9 +320,9 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                 <CardTitle className="text-base font-headline">Plan Promotions</CardTitle>
                 <div className="flex items-center gap-2 text-sm font-medium ">
                     Total
-                    <Input 
-                        placeholder="Budget..." 
-                        className="h-7 w-28 text-xs text-center text-right" 
+                    <Input
+                        placeholder="Budget..."
+                        className="h-7 w-28 text-xs text-center text-right"
                         type="number"
                         value={mainBudget ?? ''}
                         onChange={(e) => setMainBudget(Number(e.target.value) || undefined)}
@@ -356,7 +356,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                             <TableRow key={promo.id}>
                                 <TableCell className="px-2 py-1 text-[10px] text-center">{index + 1}</TableCell>
                                 <TableCell className="p-0">
-                                     <Popover open={openPopoverId === promo.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? promo.id : null)}>
+                                    <Popover open={openPopoverId === promo.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? promo.id : null)}>
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant={'ghost'}
@@ -372,7 +372,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                                 mode="single"
                                                 selected={promo.date ? new Date(promo.date) : undefined}
                                                 onSelect={(date) => {
-                                                    if(date) {
+                                                    if (date) {
                                                         handlePromotionChange(promo.id, 'date', date.toISOString());
                                                     }
                                                     setOpenPopoverId(null);
@@ -386,10 +386,10 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                 <TableCell className="p-0">
                                     <Select value={promo.adType} onValueChange={(v: PlanPromotion['adType']) => handlePromotionChange(promo.id, 'adType', v)}>
                                         <SelectTrigger className="h-7 text-[10px] p-1 text-[10px]">
-                                             <SelectValue />
-                                             <SelectPrimitive.Icon asChild>
+                                            <SelectValue />
+                                            <SelectPrimitive.Icon asChild>
                                                 <span />
-                                             </SelectPrimitive.Icon>
+                                            </SelectPrimitive.Icon>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {adTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
@@ -401,9 +401,9 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                     <Select value={promo.status} onValueChange={(v: PlanPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
                                         <SelectTrigger className={cn("h-7 text-[10px]", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
                                             <SelectValue />
-                                             <SelectPrimitive.Icon asChild>
+                                            <SelectPrimitive.Icon asChild>
                                                 <span />
-                                             </SelectPrimitive.Icon>
+                                            </SelectPrimitive.Icon>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -411,12 +411,12 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                     </Select>
                                 </TableCell>
                                 <TableCell className="p-1">
-                                     <Select value={promo.assignedTo || 'unassigned'} onValueChange={(v) => handlePromotionChange(promo.id, 'assignedTo', v)}>
+                                    <Select value={promo.assignedTo || 'unassigned'} onValueChange={(v) => handlePromotionChange(promo.id, 'assignedTo', v)}>
                                         <SelectTrigger className="h-7 text-[10px]">
                                             <SelectValue placeholder="Assign" />
-                                             <SelectPrimitive.Icon asChild>
+                                            <SelectPrimitive.Icon asChild>
                                                 <span />
-                                             </SelectPrimitive.Icon>
+                                            </SelectPrimitive.Icon>
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="unassigned">Unassigned</SelectItem>
@@ -434,28 +434,28 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                         </PopoverTrigger>
                                         <PopoverContent className="w-80" side="left" align="end">
                                             <div className="space-y-2">
-                                                 <h4 className="font-medium leading-none text-[10px]">Remarks</h4>
-                                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
-                                                     {(promo.remarks || []).map((note: ProgressNote, remarkIndex: number) => {
+                                                <h4 className="font-medium leading-none text-[10px]">Note</h4>
+                                                <div className="max-h-60 space-y-3 overflow-y-auto p-1">
+                                                    {(promo.remarks || []).map((note: ProgressNote, remarkIndex: number) => {
                                                         const author = users.find(u => u.id === note.authorId);
                                                         const authorName = author ? author.username : note.authorName;
                                                         const isEditing = editingRemark?.promoId === promo.id && editingRemark?.remarkIndex === remarkIndex;
 
                                                         return (
-                                                             <div key={remarkIndex} className={cn("flex items-start gap-2 text-[10px] group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                            <div key={remarkIndex} className={cn("flex items-start gap-2 text-[10px] group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                 {note.authorId !== currentUser?.uid && (
                                                                     <Avatar className="h-6 w-6 border">
                                                                         <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
                                                                     </Avatar>
                                                                 )}
                                                                 <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                                                                     {currentUser?.role === 'admin' && !isEditing && (
-                                                                        <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(promo, remarkIndex)}>
-                                                                            <Pen className="h-3 w-3"/>
+                                                                    {currentUser?.role === 'admin' && !isEditing && (
+                                                                        <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(promo, remarkIndex)}>
+                                                                            <Pen className="h-3 w-3" />
                                                                         </Button>
                                                                     )}
                                                                     <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                    
+
                                                                     {isEditing ? (
                                                                         <Textarea
                                                                             value={editingText}
@@ -486,25 +486,25 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                                                 )}
                                                             </div>
                                                         )
-                                                     })}
-                                                 </div>
-                                                 <div className="relative">
-                                                     <Textarea 
+                                                    })}
+                                                </div>
+                                                <div className="relative">
+                                                    <Textarea
                                                         ref={textareaRef}
                                                         placeholder="Add a remark..."
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
                                                         onKeyDown={(e) => handleNewNote(e, promo.id)}
                                                         className="pr-8 text-[10px]"
-                                                     />
-                                                     <div className="absolute bottom-1 right-1">
-                                                        <InsertLinkPopover 
-                                                            textareaRef={textareaRef} 
+                                                    />
+                                                    <div className="absolute bottom-1 right-1">
+                                                        <InsertLinkPopover
+                                                            textareaRef={textareaRef}
                                                             onValueChange={setNoteInput}
-                                                            onSend={(message) => addNote(promo.id, {note: message})}
+                                                            onSend={(message) => addNote(promo.id, { note: message })}
                                                         />
                                                     </div>
-                                                 </div>
+                                                </div>
                                             </div>
                                         </PopoverContent>
                                     </Popover>
@@ -516,7 +516,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                 </TableCell>
                             </TableRow>
                         ))}
-                         {!loading && promotions.length === 0 && (
+                        {!loading && promotions.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                                     No promotions added yet.
@@ -536,29 +536,19 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                         <TableRow><TableCell colSpan={10} className="p-0 h-2"><Separator /></TableCell></TableRow>
 
                         <TableRow>
-                            <TableCell colSpan={4} className="text-right font-bold text-xs pr-4">Total</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">Old Balance</TableCell>
                             <TableCell className="p-0 text-right">
-                                <Input 
-                                    type="number" 
-                                    value={manualTotal ?? ''}
-                                    onChange={(e) => setManualTotal(e.target.value === '' ? null : Number(e.target.value))} 
-                                    className="h-7 text-[10px] p-1 bg-blue-100 font-bold border-0 text-right w-full"
-                                    placeholder="Total"
-                                />
-                            </TableCell>
-                             <TableCell colSpan={2} className="text-right font-bold text-xs pr-4">Old Balance</TableCell>
-                            <TableCell className="p-0 text-right">
-                                <Input 
-                                    type="number" 
-                                    value={oldBalance} 
-                                    onChange={(e) => setOldBalance(Number(e.target.value))} 
+                                <Input
+                                    type="number"
+                                    value={oldBalance}
+                                    onChange={(e) => setOldBalance(Number(e.target.value))}
                                     className="h-7 text-[10px] p-0 bg-yellow-100 font-bold border-0 text-right w-full"
                                     placeholder="Old Balance"
                                 />
                             </TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
-                        
+
                         <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
 
                         <TableRow>
@@ -566,13 +556,26 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                             <TableCell className="p-1 font-bold text-xs text-right">{gst.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
-                        
+
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">Grand Total</TableCell>
+
+                            <TableCell colSpan={4} className="text-right font-bold text-xs pr-4">Total</TableCell>
+                            <TableCell className="p-0 text-right">
+                                <Input
+                                    type="number"
+                                    value={manualTotal ?? ''}
+                                    onChange={(e) => setManualTotal(e.target.value === '' ? null : Number(e.target.value))}
+                                    className="h-7 text-[10px] p-1 bg-blue-100 font-bold border-0 text-right w-full"
+                                    placeholder="Total"
+                                />
+                            </TableCell>
+                            <TableCell colSpan={2} className="text-right font-bold text-xs pr-4">Grand Total</TableCell>
                             <TableCell className="p-1 font-bold text-xs text-right">{grandTotal.toFixed(2)}</TableCell>
-                            <TableCell colSpan={2} />
+                            <TableCell colSpan={2} className="p-0 bg-transparent" />
+
+
                         </TableRow>
-                        
+
                         <TableRow>
                             <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">Balance</TableCell>
                             <TableCell className="p-1 font-bold text-xs text-right">

@@ -89,7 +89,7 @@ const EditablePriorityInPopover: React.FC<{ task: TaskWithId }> = ({ task }) => 
 
     return (
         <div className="flex items-center gap-1">
-             <span className="text-[8px] text-muted-foreground">Order:</span>
+             <span className="text-[8px] text-muted-foreground">O</span>
             <Input
                 type="number"
                 value={priority}
@@ -227,7 +227,7 @@ const TaskCell = ({
                                                 {note.authorId !== currentUser?.uid && ( <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(authorName)}</AvatarFallback></Avatar> )}
                                                 <div className={cn('max-w-[75%] rounded-lg p-2 relative', note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                     {currentUser?.role === 'admin' && !isEditing && (
-                                                      <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                      <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
                                                         <Pen className="h-3 w-3"/>
                                                       </Button>
                                                     )}
@@ -260,7 +260,7 @@ const TaskCell = ({
                                                 </div>
                                             );
                                         })}
-                                        {(task.progressNotes || []).length === 0 && ( <p className="text-center text-xs text-muted-foreground py-4">No remarks for this task.</p> )}
+                                        {(task.progressNotes || []).length === 0 && ( <p className="text-center text-xs text-muted-foreground py-4">No notes for this task.</p> )}
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -318,7 +318,7 @@ const TaskCell = ({
                                 )}
                             >
                                 {currentUser?.role === 'admin' && !isEditing && (
-                                  <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(singleTask, remarkIndex)}>
+                                  <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(singleTask, remarkIndex)}>
                                     <Pen className="h-3 w-3"/>
                                   </Button>
                                 )}
@@ -389,7 +389,7 @@ const TaskCell = ({
 
                         {(singleTask.progressNotes || []).length === 0 && (
                         <p className="text-center text-xs text-muted-foreground py-4">
-                            No remarks for this task.
+                            No notes for this task.
                         </p>
                         )}
                     </div>
@@ -697,7 +697,7 @@ const DailyTaskTable: React.FC<{
                           className="bg-muted/80 border-r p-0"
                         >
                           <div className="h-full w-full flex items-center justify-center">
-                            Order
+                            O
                           </div>
                         </TableHead>
                       </React.Fragment>

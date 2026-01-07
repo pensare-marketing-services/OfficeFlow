@@ -463,7 +463,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 <TableHead className="w-[100px] p-1 border-r h-8">Type</TableHead>
                                 <TableHead className="w-[240px] p-1 border-r h-8">Assigned To</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Status</TableHead>
-                                <TableHead className="w-[40px] p-1 text-center h-8">Remarks</TableHead>
+                                <TableHead className="w-[40px] p-1 text-center h-8">Note</TableHead>
                                 <TableHead className="w-[40px] p-1 h-8"></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -693,7 +693,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             <PopoverContent className="w-80" side="left" align="end">
                                                 <div className="space-y-2">
                                                     <div className="flex justify-between items-center">
-                                                        <h4 className="font-medium leading-none text-[10px]">Remarks</h4>
+                                                        <h4 className="font-medium leading-none text-[10px]">Notes</h4>
                                                         {(task.progressNotes || []).length > 0 && isAdmin && (
                                                             <Button variant="ghost" size="default" onClick={() => handleClearChat(task.id)} className="text-[10px] h-7 text-muted-foreground">
                                                                 <Trash2 className="mr-1 h-3 w-3" />
@@ -716,7 +716,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                                     )}
                                                                     <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                         {isAdmin && !isEditing && (
-                                                                            <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                            <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
                                                                                 <Pen className="h-3 w-3"/>
                                                                             </Button>
                                                                         )}

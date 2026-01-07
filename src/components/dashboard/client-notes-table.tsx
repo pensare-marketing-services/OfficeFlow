@@ -35,6 +35,7 @@ const statusColors: Record<ClientNoteStatus, string> = {
     "Done": "bg-red-500",
 };
 
+const statusCycle: ClientNoteStatus[] = ["Pending", "Scheduled", "On Work", "Done"];
 
 interface ClientNotesTableProps {
   notes: ClientNote[];
@@ -222,7 +223,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
               <TableHead className="w-[10px] p-1 text-[10px]">No</TableHead>
               <TableHead className="p-1 h-8 text-[10px]">Note</TableHead>
               <TableHead className="p-1 h-8 text-[10px] w-[80px]">Status</TableHead>
-              <TableHead className="p-1 h-8 text-[10px] w-[80px]">Remarks</TableHead>
+              <TableHead className="p-1 h-8 text-[10px] w-[80px]">Note</TableHead>
               <TableHead className="w-[40px] p-1"></TableHead>
             </TableRow>
           </TableHeader>
@@ -296,7 +297,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                         </PopoverTrigger>
                         <PopoverContent className="w-80" side="left" align="end">
                             <div className="space-y-2">
-                                <h4 className="font-medium leading-none text-[10px]">Remarks for "{note.note}"</h4>
+                                <h4 className="font-medium leading-none text-[10px]">Note for "{note.note}"</h4>
                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                     {(note.remarks || []).map((remark, remarkIndex) => {
                                         const author = users.find(u => u.id === remark.authorId);
@@ -312,7 +313,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                                 )}
                                                 <div className={cn("max-w-[75%] rounded-lg p-2 relative", remark.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                     {currentUser?.role === 'admin' && !isEditing && (
-                                                      <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(note, remarkIndex)}>
+                                                      <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(note, remarkIndex)}>
                                                         <Pen className="h-3 w-3"/>
                                                       </Button>
                                                     )}

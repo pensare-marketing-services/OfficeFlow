@@ -253,7 +253,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
               <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[40px]">Task</TableHead>
                {isAdmin && <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[30px]">Assigned</TableHead>}
               <TableHead className="px-1 border-t text-[8px] h-6 w-[30px]">Status</TableHead>
-              {currentUser?.role === 'employee' && <TableHead className="text-xs h-6 w-[30px]">Remarks</TableHead>}
+              {currentUser?.role === 'employee' && <TableHead className="text-xs h-6 w-[30px]">Note</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -277,7 +277,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                     } else if (isEmployeeView) {
                         statusOptions = ['Running', 'Completed'];
                     }
-                } else if (isAdmin && isOverdue) {
+                } else if (isAdmin) {
                      statusOptions = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
                 }
                 
@@ -393,7 +393,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                         <PopoverContent className="w-96" side="bottom" align="end">
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-center">
-                                                    <h4 className="font-medium leading-none">Remarks</h4>
+                                                    <h4 className="font-medium leading-none">Note</h4>
                                                     {(task.progressNotes || []).length > 0 && (
                                                         <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-xs text-muted-foreground">
                                                             <Trash2 className="mr-1 h-3 w-3" />
@@ -416,7 +416,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                                 )}
                                                                 <div className={cn("max-w-[75%] rounded-lg p-3 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                     {isAdmin && !isEditing && (
-                                                                      <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                      <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
                                                                         <Pen className="h-3 w-3"/>
                                                                       </Button>
                                                                     )}
