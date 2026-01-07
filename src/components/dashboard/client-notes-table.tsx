@@ -7,7 +7,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, MessageSquare, Pen } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn, capitalizeSentences } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useUsers } from '@/hooks/use-users';
@@ -19,18 +18,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useToast } from '@/hooks/use-toast';
 import { LinkifiedText } from '@/components/shared/linkified-text';
 import { InsertLinkPopover } from '../shared/insert-link-popover';
+import { Tooltip, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 
 const noteStatuses: ClientNoteStatus[] = ["Pending", "On Work", "For Approval", "Done", "Scheduled"];
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
 const statusColors: Record<ClientNoteStatus, string> = {
-    "Done": "bg-green-500",
-    "On Work": "bg-gray-500",
-    "Pending": "bg-blue-500",
-    "Scheduled": "bg-gray-400",
+    "Pending": "bg-gray-500",
+    "Scheduled": "bg-gray-500",
+    "On Work": "bg-orange-500",
     "For Approval": "bg-orange-500",
+    "Done": "bg-red-500",
 };
+
 
 interface ClientNotesTableProps {
   notes: ClientNote[];
@@ -83,6 +84,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [editingRemark, setEditingRemark] = useState<{ noteId: string; remarkIndex: number } | null>(null);
   const [editingText, setEditingText] = useState('');
+  const isAdmin = currentUser?.role === 'admin';
 
   useEffect(() => {
     setLocalNotes(notes);
@@ -192,6 +194,15 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
         }
     };
 
+    const handleStatusClick = (noteIndex: number) => {
+      if (!isAdmin) return;
+      const currentStatus = localNotes[noteIndex].update;
+      const statusCycle: ClientNoteStatus[] = ["Pending", "On Work", "Done"];
+      const currentIndex = statusCycle.indexOf(currentStatus);
+      const nextIndex = (currentIndex + 1) % statusCycle.length;
+      handleNoteChange(noteIndex, 'update', statusCycle[nextIndex]);
+    };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between p-3">
@@ -202,13 +213,14 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
         </Button>
       </CardHeader>
       <CardContent className="p-0">
+       <TooltipProvider>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[10px] p-1"></TableHead>
               <TableHead className="p-1 h-8 text-xs">Note</TableHead>
               <TableHead className="p-1 h-8 text-xs w-[80px]">Remarks</TableHead>
-              <TableHead className="p-1 h-8 text-xs w-[130px]">Status</TableHead>
+              <TableHead className="p-1 h-8 text-xs w-[80px]">Status</TableHead>
               <TableHead className="w-[40px] p-1"></TableHead>
             </TableRow>
           </TableHeader>
@@ -216,6 +228,9 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
             {localNotes.map((note, index) => {
               const lastRemark = (note.remarks?.length ?? 0) > 0 ? note.remarks![note.remarks!.length - 1] : null;
               const hasUnreadMessage = lastRemark && lastRemark.authorId !== currentUser?.uid && !openedChats.has(note.id);
+              const noteStatus = note.update;
+              const dotColor = statusColors[noteStatus] || "bg-gray-400";
+
 
               return (
               <TableRow key={note.id}>
@@ -335,26 +350,19 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                     </Popover>
                 </TableCell>
                 <TableCell className="p-1">
-                  <Select value={note.update} onValueChange={(value: ClientNoteStatus) => handleNoteChange(index, 'update', value as any)}>
-                      <SelectTrigger className="h-7 text-xs px-2 py-1 w-full focus:ring-1 focus:ring-ring">
-                          <SelectValue>
-                              <div className="flex items-center gap-2">
-                                <div className={cn("h-2 w-2 rounded-full", statusColors[note.update])} />
-                                {note.update}
-                              </div>
-                          </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                          {noteStatuses.map(status => (
-                              <SelectItem key={status} value={status}>
-                                  <div className="flex items-center gap-2">
-                                      <div className={cn("h-2 w-2 rounded-full", statusColors[status])} />
-                                      {status}
-                                  </div>
-                              </SelectItem>
-                          ))}
-                      </SelectContent>
-                  </Select>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div 
+                                className={cn("flex items-center justify-center h-7 w-full", isAdmin && "cursor-pointer")}
+                                onClick={() => handleStatusClick(index)}
+                            >
+                                <div className={cn("h-3 w-3 rounded-full", dotColor)} />
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{noteStatus}</p>
+                        </TooltipContent>
+                    </Tooltip>
                 </TableCell>
                 <TableCell className="p-0 text-center">
                   <Button
@@ -377,6 +385,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
             )}
           </TableBody>
         </Table>
+       </TooltipProvider>
       </CardContent>
     </Card>
   );
