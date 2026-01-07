@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -21,6 +22,7 @@ import CashInLog from '@/components/dashboard/cash-in-log';
 import SeoTable from '@/components/dashboard/seo-table';
 import WebsiteTable from '@/components/dashboard/website-table';
 import OtherTaskTable from '@/components/dashboard/other-task-table';
+import PlanPromotionsTable from '@/components/dashboard/plan-promotions-table';
 
 
 type UserWithId = User & { id: string };
@@ -158,7 +160,8 @@ export default function ClientIdPage() {
         if (!tasks || !client) return [];
         return tasks.filter(task => 
             task.clientId === client.id &&
-            task.description !== 'Paid Promotion' && 
+            task.description !== 'Paid Promotion' &&
+            task.description !== 'Plan Promotion' &&
             task.contentType !== 'Other' &&
             task.contentType !== 'SEO' &&
             task.contentType !== 'Website' &&
@@ -227,7 +230,14 @@ export default function ClientIdPage() {
                             </CardContent>
                         </Card>
                     )}
-                    
+                       {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                        <PaidPromotionsTable 
+                            clientId={client.id}
+                            users={users as UserWithId[]}
+                            totalCashIn={totalCashIn}
+                        />
+                    )}
+
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <SeoTable 
                             clientId={client.id}
@@ -254,7 +264,7 @@ export default function ClientIdPage() {
                 {/* Right Column */}
                 <div className="lg:col-span-2 space-y-4">
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
-                        <PaidPromotionsTable 
+                        <PlanPromotionsTable 
                             clientId={client.id}
                             users={users as UserWithId[]}
                             totalCashIn={totalCashIn}
@@ -291,3 +301,5 @@ export default function ClientIdPage() {
         </div>
     );
 }
+
+    

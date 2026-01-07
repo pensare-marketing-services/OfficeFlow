@@ -62,7 +62,7 @@ export type Client = {
   categories?: string[];
 };
 
-export type PaidPromotion = {
+export type PromotionBase = {
     id: string;
     date: string;
     campaign: string;
@@ -73,7 +73,11 @@ export type PaidPromotion = {
     spent: number;
     remarks: ProgressNote[];
     clientId: string;
-};
+}
+
+export type PaidPromotion = PromotionBase;
+export type PlanPromotion = PromotionBase;
+
 
 export type CashInTransactionStatus = 'Received' | 'Not Received';
 

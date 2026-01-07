@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import type { PaidPromotion, UserProfile as User, Task, ProgressNote, ContentType } from '@/lib/data';
+import type { PlanPromotion, UserProfile as User, Task, ProgressNote, ContentType } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format, isValid } from 'date-fns';
 import { cn, capitalizeSentences } from '@/lib/utils';
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where, getDocs, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Separator } from '../ui/separator';
 import { useTasks } from '@/hooks/use-tasks';
@@ -28,13 +28,13 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 
 type UserWithId = User & { id: string };
 
-interface PaidPromotionsTableProps {
+interface PlanPromotionsTableProps {
   clientId: string;
   users: UserWithId[];
   totalCashIn: number;
 }
 
-const adTypes: PaidPromotion['adType'][] = [
+const adTypes: PlanPromotion['adType'][] = [
     "EG Whatsapp", 
     "EG Instagram", 
     "EG FB Post", 
@@ -48,7 +48,7 @@ const adTypes: PaidPromotion['adType'][] = [
     "IG Engage",
     "Reach Ad"
 ];
-const statuses: PaidPromotion['status'][] = ["Active", "Stopped", "Scheduled"];
+const statuses: PlanPromotion['status'][] = ["Active", "Stopped", "Scheduled"];
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
@@ -92,9 +92,9 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function PaidPromotionsTable({ clientId, users, totalCashIn }: PaidPromotionsTableProps) {
+export default function PlanPromotionsTable({ clientId, users, totalCashIn }: PlanPromotionsTableProps) {
     const { user: currentUser } = useAuth();
-    const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
+    const [promotions, setPromotions] = useState<(PlanPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
     const [oldBalance, setOldBalance] = useState(0);
     const [manualTotal, setManualTotal] = useState<number | null>(null);
@@ -110,13 +110,13 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     useEffect(() => {
         if (!clientId) return;
         setLoading(true);
-        const promotionsQuery = query(collection(db, `clients/${clientId}/promotions`));
+        const promotionsQuery = query(collection(db, `clients/${clientId}/planPromotions`));
         const unsubscribe = onSnapshot(promotionsQuery, (snapshot) => {
-            const promotionsData = snapshot.docs.map(doc => ({ ...doc.data() as PaidPromotion, id: doc.id }));
+            const promotionsData = snapshot.docs.map(doc => ({ ...doc.data() as PlanPromotion, id: doc.id }));
             setPromotions(promotionsData);
             setLoading(false);
         }, (error) => {
-            console.error("Error fetching promotions:", error);
+            console.error("Error fetching plan promotions:", error);
             setLoading(false);
         });
 
@@ -125,10 +125,10 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     
      useEffect(() => {
         tasks.forEach(task => {
-            if (task.description === 'Paid Promotion' && task.clientId === clientId) {
+            if (task.description === 'Plan Promotion' && task.clientId === clientId) {
                 const promotion = promotions.find(p => p.campaign === task.title);
                 if (promotion) {
-                    let promotionStatus: PaidPromotion['status'] | null = null;
+                    let promotionStatus: PlanPromotion['status'] | null = null;
                     
                     if (task.status === 'On Work' && promotion.status !== 'Active') {
                         promotionStatus = 'Active';
@@ -146,16 +146,16 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         });
     }, [tasks, promotions, clientId]);
 
-    const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any, syncFromTask = false) => {
-        const promotionRef = doc(db, `clients/${clientId}/promotions`, id);
+    const handlePromotionChange = async (id: string, field: keyof PlanPromotion, value: any, syncFromTask = false) => {
+        const promotionRef = doc(db, `clients/${clientId}/planPromotions`, id);
         await updateDoc(promotionRef, { [field]: value });
 
         if (syncFromTask) return; // Prevent feedback loop
 
-        const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PaidPromotion & {id: string};
+        const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PlanPromotion & {id: string};
         if (!updatedPromotion) return;
         
-        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === updatedPromotion.campaign && t.clientId === clientId);
+        const linkedTask = tasks.find(t => t.description === 'Plan Promotion' && t.title === updatedPromotion.campaign && t.clientId === clientId);
 
         if (field === 'assignedTo') {
             const employee = users.find(u => u.username === value);
@@ -166,7 +166,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                 } else {
                      const newTask: Omit<Task, 'id' | 'createdAt'> = {
                         title: updatedPromotion.campaign,
-                        description: 'Paid Promotion',
+                        description: 'Plan Promotion',
                         status: 'Scheduled',
                         priority: 2,
                         deadline: updatedPromotion.date,
@@ -215,7 +215,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         handlePromotionChange(promoId, 'remarks', updatedRemarks);
 
         // Sync with task
-        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === promo.campaign && t.clientId === clientId);
+        const linkedTask = tasks.find(t => t.description === 'Plan Promotion' && t.title === promo.campaign && t.clientId === clientId);
         if (linkedTask) {
             const updatedTaskNotes = [...(linkedTask.progressNotes || []), newNote];
             updateTask(linkedTask.id, { progressNotes: updatedTaskNotes });
@@ -234,7 +234,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         }
     };
 
-    const handleEditRemark = (promo: PaidPromotion & {id:string}, remarkIndex: number) => {
+    const handleEditRemark = (promo: PlanPromotion & {id:string}, remarkIndex: number) => {
       const remark = promo.remarks?.[remarkIndex];
       if (!remark) return;
       setEditingRemark({ promoId: promo.id, remarkIndex });
@@ -257,7 +257,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
 
 
     const addPromotion = async () => {
-        const newPromotion: Omit<PaidPromotion, 'id'> = {
+        const newPromotion: Omit<PlanPromotion, 'id'> = {
             date: new Date().toISOString(),
             campaign: '',
             adType: 'Lead Call' as const,
@@ -268,7 +268,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
             remarks: [],
             clientId,
         };
-        await addDoc(collection(db, `clients/${clientId}/promotions`), newPromotion);
+        await addDoc(collection(db, `clients/${clientId}/planPromotions`), newPromotion);
     };
 
     const deletePromotion = async (id: string) => {
@@ -276,12 +276,12 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         if (!promotionToDelete) return;
     
         // First, delete the promotion document
-        await deleteDoc(doc(db, `clients/${clientId}/promotions`, id));
+        await deleteDoc(doc(db, `clients/${clientId}/planPromotions`, id));
     
         // Then, find and delete the associated task
         if (promotionToDelete.campaign) {
             const linkedTask = tasks.find(t => 
-                t.description === 'Paid Promotion' && 
+                t.description === 'Plan Promotion' && 
                 t.title === promotionToDelete.campaign && 
                 t.clientId === clientId
             );
@@ -307,7 +307,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between p-3">
-                <CardTitle className="text-base font-headline">Paid Promotions</CardTitle>
+                <CardTitle className="text-base font-headline">Plan Promotions</CardTitle>
                 <Button size="sm" onClick={addPromotion} className="h-7 gap-1">
                     <Plus className="h-4 w-4" />
                     Add Promotion
@@ -363,7 +363,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                 </TableCell>
                                 <TableCell className="p-0"><EditableCell value={promo.campaign} onSave={(v) => handlePromotionChange(promo.id, 'campaign', v)} /></TableCell>
                                 <TableCell className="p-0">
-                                    <Select value={promo.adType} onValueChange={(v: PaidPromotion['adType']) => handlePromotionChange(promo.id, 'adType', v)}>
+                                    <Select value={promo.adType} onValueChange={(v: PlanPromotion['adType']) => handlePromotionChange(promo.id, 'adType', v)}>
                                         <SelectTrigger className="h-7 text-[10px] p-1 text-[10px]">
                                              <SelectValue />
                                              <SelectPrimitive.Icon asChild>
@@ -377,7 +377,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                 </TableCell>
                                 <TableCell className="p-0"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" className="text-right" /></TableCell>
                                 <TableCell className="p-1">
-                                    <Select value={promo.status} onValueChange={(v: PaidPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
+                                    <Select value={promo.status} onValueChange={(v: PlanPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
                                         <SelectTrigger className={cn("h-7 text-[10px]", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
                                             <SelectValue />
                                              <SelectPrimitive.Icon asChild>

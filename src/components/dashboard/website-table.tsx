@@ -86,7 +86,7 @@ const EditableCell: React.FC<{
             onChange={(e) => setCurrentValue(e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            className={cn("h-7 text-xs p-1 border-transparent hover:border-border focus:border-ring focus:bg-background", className)}
+            className={cn("h-7 text-[10px] p-1 border-transparent hover:border-border focus:border-ring focus:bg-background", className)}
             placeholder={placeholder}
         />
     );
@@ -195,27 +195,27 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[40px] px-2 text-xs">Sl.No</TableHead>
-                            <TableHead className="w-[90px]">Date</TableHead>
-                            <TableHead className="w-[150px]">Task</TableHead>
-                            <TableHead className="w-[200px]">Description</TableHead>
-                            <TableHead className="w-[180px]">Assigned</TableHead>
-                            <TableHead className="w-[120px]">Status</TableHead>
-                            <TableHead className="w-[100px]">Remarks</TableHead>
-                            <TableHead className="w-[40px]"></TableHead>
+                            <TableHead className="w-[40px] px-2 text-[10px]">Sl.No</TableHead>
+                            <TableHead className="w-[90px] text-[10px]">Date</TableHead>
+                            <TableHead className="w-[150px] text-[10px]">Task</TableHead>
+                            <TableHead className="w-[200px] text-[10px]">Description</TableHead>
+                            <TableHead className="w-[180px] text-[10px]">Assigned</TableHead>
+                            <TableHead className="w-[120px] text-[10px]">Status</TableHead>
+                            <TableHead className="w-[100px] text-[10px]">Remarks</TableHead>
+                            <TableHead className="w-[40px] text-[10px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {tasks.map((task, index) => (
                             <TableRow key={task.id}>
-                                <TableCell className="px-2 py-1 text-xs text-center">{index + 1}</TableCell>
+                                <TableCell className="px-2 py-1 text-[10px] text-center">{index + 1}</TableCell>
                                 <TableCell className="p-0">
                                      <Popover open={openPopoverId === task.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? task.id : null)}>
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant={'ghost'}
                                                 size="sm"
-                                                className={cn('w-full justify-start text-left font-normal h-7 text-xs px-2', !task.deadline && 'text-muted-foreground')}
+                                                className={cn('w-full justify-start text-left font-normal h-7 text-[10px] px-2', !task.deadline && 'text-muted-foreground')}
                                             >
                                                 {task.deadline && isValid(new Date(task.deadline)) ? format(new Date(task.deadline), 'MMM dd') : <span>Pick a date</span>}
                                             </Button>
@@ -243,7 +243,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                                 value={task.assigneeIds?.[i] || 'unassigned'} 
                                                 onValueChange={(v) => handleAssigneeChange(task.id, i, v)}
                                             >
-                                                <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Assign" /></SelectTrigger>
+                                                <SelectTrigger className="h-7 text-[10px]"><SelectValue placeholder="Assign" /></SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="unassigned">Unassigned</SelectItem>
                                                     {employeeUsers.filter(u => u.id !== task.assigneeIds?.[1-i]).map(user => <SelectItem key={user.id} value={user.id}>{user.username}</SelectItem>)}
@@ -254,7 +254,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                 </TableCell>
                                  <TableCell className="p-1">
                                     <Select value={task.status} onValueChange={(v: Task['status']) => handleTaskChange(task.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-xs", statusColors[task.status] || 'bg-gray-500 text-white')}><SelectValue /></SelectTrigger>
+                                        <SelectTrigger className={cn("h-7 text-[10px]", statusColors[task.status] || 'bg-gray-500 text-white')}><SelectValue /></SelectTrigger>
                                         <SelectContent>
                                             {allStatuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
@@ -269,7 +269,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                         </PopoverTrigger>
                                         <PopoverContent className="w-80" side="left" align="end">
                                             <div className="space-y-2">
-                                                <h4 className="font-medium leading-none text-xs">Remarks for "{task.title}"</h4>
+                                                <h4 className="font-medium leading-none text-[10px]">Remarks for "{task.title}"</h4>
                                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                                     {(task.progressNotes || []).map((note, remarkIndex) => {
                                                         const author = users.find(u => u.id === note.authorId);
@@ -277,7 +277,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                                         const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
 
                                                         return (
-                                                            <div key={remarkIndex} className={cn("flex items-start gap-2 text-xs group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                            <div key={remarkIndex} className={cn("flex items-start gap-2 text-[10px] group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                 {note.authorId !== currentUser?.uid && (
                                                                     <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(authorName)}</AvatarFallback></Avatar>
                                                                 )}
@@ -287,7 +287,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                                                         <Pen className="h-3 w-3"/>
                                                                       </Button>
                                                                     )}
-                                                                    <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                                    <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
                                                                     
                                                                      {isEditing ? (
                                                                         <Textarea
@@ -303,7 +303,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                                                             }
                                                                           }}
                                                                           autoFocus
-                                                                          className="text-xs h-auto bg-background/80 text-foreground"
+                                                                          className="text-[10px] h-auto bg-background/80 text-foreground"
                                                                         />
                                                                     ) : (
                                                                         <>
@@ -327,7 +327,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
                                                         onKeyDown={(e) => handleNewNote(e, task)}
-                                                        className="pr-8 text-xs"
+                                                        className="pr-8 text-[10px]"
                                                     />
                                                     <div className="absolute bottom-1 right-1">
                                                         <InsertLinkPopover 

@@ -72,7 +72,7 @@ const EditableCell: React.FC<{ value: string; onSave: (value: string) => void }>
       onChange={(e) => setCurrentValue(e.target.value)}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
-      className="h-7 text-xs p-1 border-transparent hover:border-border focus:border-ring focus:bg-background"
+      className="h-7 text-[10px] p-1 border-transparent hover:border-border focus:border-ring focus:bg-background"
     />
   );
 };
@@ -219,10 +219,10 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[10px] p-1">No</TableHead>
-              <TableHead className="p-1 h-8 text-xs">Note</TableHead>
-              <TableHead className="p-1 h-8 text-xs w-[80px]">Status</TableHead>
-              <TableHead className="p-1 h-8 text-xs w-[80px]">Remarks</TableHead>
+              <TableHead className="w-[10px] p-1 text-[10px]">No</TableHead>
+              <TableHead className="p-1 h-8 text-[10px]">Note</TableHead>
+              <TableHead className="p-1 h-8 text-[10px] w-[80px]">Status</TableHead>
+              <TableHead className="p-1 h-8 text-[10px] w-[80px]">Remarks</TableHead>
               <TableHead className="w-[40px] p-1"></TableHead>
             </TableRow>
           </TableHeader>
@@ -236,7 +236,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
 
               return (
               <TableRow key={note.id}>
-                <TableCell className="p-1 text-xs text-muted-foreground font-medium text-center">{index + 1}</TableCell>
+                <TableCell className="p-1 text-[10px] text-muted-foreground font-medium text-center">{index + 1}</TableCell>
                 <TableCell className="p-0">
                   <EditableCell
                     value={note.note}
@@ -296,7 +296,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                         </PopoverTrigger>
                         <PopoverContent className="w-80" side="left" align="end">
                             <div className="space-y-2">
-                                <h4 className="font-medium leading-none text-xs">Remarks for "{note.note}"</h4>
+                                <h4 className="font-medium leading-none text-[10px]">Remarks for "{note.note}"</h4>
                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                     {(note.remarks || []).map((remark, remarkIndex) => {
                                         const author = users.find(u => u.id === remark.authorId);
@@ -304,7 +304,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                         const isEditing = editingRemark?.noteId === note.id && editingRemark?.remarkIndex === remarkIndex;
 
                                         return (
-                                            <div key={remarkIndex} className={cn("flex items-start gap-2 text-xs group/remark", remark.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                            <div key={remarkIndex} className={cn("flex items-start gap-2 text-[10px] group/remark", remark.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                 {remark.authorId !== currentUser?.uid && (
                                                     <Avatar className="h-6 w-6 border">
                                                         <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
@@ -316,7 +316,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                                         <Pen className="h-3 w-3"/>
                                                       </Button>
                                                     )}
-                                                    <p className="font-bold text-xs mb-1">{remark.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                    <p className="font-bold text-[10px] mb-1">{remark.authorId === currentUser?.uid ? 'You' : authorName}</p>
                                                     
                                                     {isEditing ? (
                                                         <Textarea
@@ -332,7 +332,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                                             }
                                                           }}
                                                           autoFocus
-                                                          className="text-xs h-auto bg-background/80 text-foreground"
+                                                          className="text-[10px] h-auto bg-background/80 text-foreground"
                                                         />
                                                     ) : (
                                                       <>
@@ -364,7 +364,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                         )
                                     })}
                                      {(note.remarks || []).length === 0 && (
-                                        <p className="text-center text-xs text-muted-foreground py-4">No remarks yet.</p>
+                                        <p className="text-center text-[10px] text-muted-foreground py-4">No remarks yet.</p>
                                      )}
                                 </div>
                                 <div className="relative">
@@ -375,7 +375,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                         onChange={(e) => setNoteInput(e.target.value)}
                                         onKeyDown={(e) => handleNewRemark(e, index)}
                                         onPaste={(e) => handlePaste(e, index)}
-                                        className="pr-2 text-xs"
+                                        className="pr-2 text-[10px]"
                                     />
                                     <div className="absolute bottom-1 right-1">
                                         <InsertLinkPopover 

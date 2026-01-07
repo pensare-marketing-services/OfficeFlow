@@ -328,6 +328,71 @@
         "clientId"
       ]
     },
+    "PlanPromotion": {
+      "title": "Plan Promotion",
+      "description": "Represents a single plan promotion campaign for a client.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "campaign": {
+          "type": "string"
+        },
+        "adType": {
+          "type": "string",
+          "enum": [
+            "EG Whatsapp",
+            "EG Instagram",
+            "EG FB Post",
+            "EG Insta Post",
+            "Traffic Web",
+            "Lead Gen",
+            "Lead Call",
+            "Profile Visit Ad",
+            "FB Page Like",
+            "Carousel Ad",
+            "IG Engage",
+            "Reach Ad"
+          ]
+        },
+        "budget": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Active", "Stopped", "Scheduled"]
+        },
+        "assignedTo": {
+          "type": "string",
+          "description": "The username of the person assigned."
+        },
+        "spent": {
+          "type": "number"
+        },
+        "remarks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/ProgressNote"
+          }
+        },
+         "clientId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "campaign",
+        "adType",
+        "budget",
+        "status",
+        "assignedTo",
+        "spent",
+        "remarks",
+        "clientId"
+      ]
+    },
     "CashInTransaction": {
       "title": "Cash In Transaction",
       "description": "Represents a single cash-in transaction from a client.",
@@ -412,6 +477,12 @@
       },
       "description": "Stores all paid promotions for a specific client."
     },
+     "/clients/{clientId}/planPromotions/{planPromotionId}": {
+      "schema": {
+        "$ref": "#/entities/PlanPromotion"
+      },
+      "description": "Stores all plan promotions for a specific client."
+    },
     "/clients/{clientId}/cashInTransactions/{transactionId}": {
       "schema": {
         "$ref": "#/entities/CashInTransaction"
@@ -433,5 +504,4 @@
   }
 }
 
-    
     

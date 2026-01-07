@@ -140,7 +140,7 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
         }
     };
     
-    const commonClasses = "bg-transparent border-0 focus-visible:ring-1 text-xs p-1 h-auto placeholder:text-muted-foreground/70 w-full";
+    const commonClasses = "bg-transparent border-0 focus-visible:ring-1 text-[10px] p-1 h-auto placeholder:text-muted-foreground/70 w-full";
 
     if (type === 'textarea') {
          return <Textarea value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={cn(commonClasses, "h-auto")} placeholder={placeholder} />;
@@ -165,17 +165,17 @@ const AssigneeSelect = ({
     const selectedUser = employeeUsers.find(u => u.id === assigneeId);
 
     const TriggerContent = () => selectedUser ? (
-        <span className="truncate text-xs">{selectedUser.username}</span>
+        <span className="truncate text-[10px]">{selectedUser.username}</span>
     ) : <SelectValue placeholder="Assign" />;
 
 
     if (!isEditable) {
         return selectedUser ? (
-            <div className="flex items-center justify-start p-1 h-7 text-xs truncate">
+            <div className="flex items-center justify-start p-1 h-7 text-[10px] truncate">
                 {selectedUser.username}
             </div>
         ) : (
-             <div className="w-full p-2 h-7 text-xs text-muted-foreground">-</div>
+             <div className="w-full p-2 h-7 text-[10px] text-muted-foreground">-</div>
         )
     }
 
@@ -184,7 +184,7 @@ const AssigneeSelect = ({
             value={assigneeId || 'unassigned'}
             onValueChange={(value) => onAssigneeChange(value === 'unassigned' ? '' : value)}
         >
-            <SelectTrigger className={cn("w-full h-7 text-xs p-1", isActive && "ring-2 ring-accent", !selectedUser && "justify-center")}>
+            <SelectTrigger className={cn("w-full h-7 text-[10px] p-1", isActive && "ring-2 ring-accent", !selectedUser && "justify-center")}>
                 <TriggerContent />
             </SelectTrigger>
             <SelectContent>
@@ -196,7 +196,7 @@ const AssigneeSelect = ({
                                 
                                 <AvatarFallback>{getInitials(user.username)}</AvatarFallback>
                             </Avatar>
-                            <span className="text-xs">{user.username}</span>
+                            <span className="text-[10px]">{user.username}</span>
                         </div>
                     </SelectItem>
                 ))}
@@ -451,7 +451,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     return (
         <Card>
             <CardContent className="p-0">
-                    <Table className="text-xs">
+                    <Table className="text-[10px]">
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[40px] p-1 border-r h-8 text-center">#</TableHead>
@@ -533,7 +533,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     variant={'ghost'}
                                                     size="sm"
                                                     disabled={!isAdmin}
-                                                    className={cn('w-full justify-start text-left font-normal h-7 text-xs px-1', !task.deadline && 'text-muted-foreground')}
+                                                    className={cn('w-full justify-start text-left font-normal h-7 text-[10px] px-1', !task.deadline && 'text-muted-foreground')}
                                                 >
                                                 
                                                     {task.deadline ? format(new Date(task.deadline), 'MMM dd') : <span>Pick a date</span>}
@@ -554,9 +554,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
-                                    {showClient && <TableCell className="p-1 border-r font-medium text-xs">{client?.name || '-'}</TableCell>}
+                                    {showClient && <TableCell className="p-1 border-r font-medium text-[10px]">{client?.name || '-'}</TableCell>}
                                     {currentUser?.role === 'employee' && (
-                                        <TableCell className="p-1 border-r text-xs text-muted-foreground">
+                                        <TableCell className="p-1 border-r text-[10px] text-muted-foreground">
                                             {clientAssignedEmployees || '-'}
                                         </TableCell>
                                     )}
@@ -564,7 +564,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         {isAdmin ? (
                                             <EditableTableCell value={task.title} onSave={(value) => handleFieldChange(task.id, 'title', value)} placeholder="New Title"/>
                                         ) : (
-                                            <div className="text-xs p-1 h-7 flex items-center truncate" title={task.title}>{task.title || '-'}</div>
+                                            <div className="text-[10px] p-1 h-7 flex items-center truncate" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r" style={{maxWidth: '200px'}}>
@@ -578,7 +578,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         ) : (
                                             <Dialog>
                                                 <DialogTrigger asChild>
-                                                    <p className="text-xs text-muted-foreground p-1 truncate cursor-pointer hover:text-foreground">
+                                                    <p className="text-[10px] text-muted-foreground p-1 truncate cursor-pointer hover:text-foreground">
                                                         {(task.description || '-').substring(0, 30)}{task.description && task.description.length > 30 ? '...' : ''}
                                                     </p>
                                                 </DialogTrigger>
@@ -598,13 +598,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     <TableCell className="p-0 border-r">
                                         {(isAdmin && isStandardTask) ? (
                                             <Select value={task.contentType} onValueChange={(value: ContentType) => handleFieldChange(task.id, 'contentType', value)}>
-                                                <SelectTrigger className="h-7 text-xs p-1"><SelectValue /></SelectTrigger>
+                                                <SelectTrigger className="h-7 text-[10px] p-1"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
                                                      {mainContentTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         ) : (
-                                            <div className="text-xs p-1 h-7 flex items-center">{task.contentType || '-'}</div>
+                                            <div className="text-[10px] p-1 h-7 flex items-center">{task.contentType || '-'}</div>
                                         )}
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
@@ -628,7 +628,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)}
                                             disabled={isEmployee && !isMyTurn && !isCompleted && !isOverdue}
                                         >
-                                            <SelectTrigger className={cn("h-7 text-xs p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
+                                            <SelectTrigger className={cn("h-7 text-[10px] p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>{finalDisplayedStatus}</SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
@@ -693,9 +693,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             <PopoverContent className="w-80" side="left" align="end">
                                                 <div className="space-y-2">
                                                     <div className="flex justify-between items-center">
-                                                        <h4 className="font-medium leading-none text-xs">Remarks</h4>
+                                                        <h4 className="font-medium leading-none text-[10px]">Remarks</h4>
                                                         {(task.progressNotes || []).length > 0 && isAdmin && (
-                                                            <Button variant="ghost" size="default" onClick={() => handleClearChat(task.id)} className="text-xs h-7 text-muted-foreground">
+                                                            <Button variant="ghost" size="default" onClick={() => handleClearChat(task.id)} className="text-[10px] h-7 text-muted-foreground">
                                                                 <Trash2 className="mr-1 h-3 w-3" />
                                                                 Clear
                                                             </Button>
@@ -708,7 +708,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                             const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
 
                                                             return (
-                                                                <div key={remarkIndex} className={cn("flex items-start gap-2 text-xs group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                                <div key={remarkIndex} className={cn("flex items-start gap-2 text-[10px] group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                     {note.authorId !== currentUser?.uid && (
                                                                         <Avatar className="h-6 w-6 border">
                                                                             <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
@@ -720,7 +720,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                                                 <Pen className="h-3 w-3"/>
                                                                             </Button>
                                                                         )}
-                                                                        <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                                        <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
                                                                         
                                                                         {isEditing ? (
                                                                             <Textarea
@@ -736,7 +736,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                                                     }
                                                                                 }}
                                                                                 autoFocus
-                                                                                className="text-xs h-auto bg-background/80 text-foreground"
+                                                                                className="text-[10px] h-auto bg-background/80 text-foreground"
                                                                             />
                                                                         ) : (
                                                                             <>
@@ -777,7 +777,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                             onChange={(e) => setNoteInput(e.target.value)}
                                                             onKeyDown={(e) => handleNewNote(e, task)}
                                                             onPaste={(e) => handlePaste(e, task)}
-                                                            className="pr-8 text-xs"
+                                                            className="pr-8 text-[10px]"
                                                         />
                                                          <div className="absolute bottom-1 right-1">
                                                             <InsertLinkPopover 

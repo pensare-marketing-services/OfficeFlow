@@ -61,27 +61,27 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                  <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[100px]">Date</TableHead>
-                            <TableHead className="w-[120px]">Status</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
-                            <TableHead className="w-[40px]"></TableHead>
+                            <TableHead className="w-[100px] text-[10px]">Date</TableHead>
+                            <TableHead className="w-[120px] text-[10px]">Status</TableHead>
+                            <TableHead className="text-right text-[10px]">Amount</TableHead>
+                            <TableHead className="w-[40px] text-[10px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {transactions.map((t) => (
                              <TableRow key={t.id}>
-                                <TableCell className="py-1 px-2 text-xs">{format(new Date(t.date), 'MMM dd, yyyy')}</TableCell>
+                                <TableCell className="py-1 px-2 text-[10px]">{format(new Date(t.date), 'MMM dd, yyyy')}</TableCell>
                                 <TableCell className='p-1'>
                                      <Select value={t.status} onValueChange={(v: CashInTransactionStatus) => handleTransactionChange(t.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-xs w-full", t.status === 'Received' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
+                                        <SelectTrigger className={cn("h-7 text-[10px] w-full", t.status === 'Received' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {statuses.map(s => <SelectItem key={s} value={s} className="text-xs">{s === 'Received' ? 'Cash Rcvd' : 'Not Rcvd'}</SelectItem>)}
+                                            {statuses.map(s => <SelectItem key={s} value={s} className="text-[10px]">{s === 'Received' ? 'Cash Rcvd' : 'Not Rcvd'}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
-                                <TableCell className="py-1 px-2 text-xs text-right font-medium">{t.amount.toFixed(2)}</TableCell>
+                                <TableCell className="py-1 px-2 text-[10px] text-right font-medium">{t.amount.toFixed(2)}</TableCell>
                                 <TableCell className="p-0 text-center">
                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteTransaction(t.id)}>
                                         <Trash2 className="h-4 w-4" />
@@ -107,7 +107,7 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                             <Button
                                 variant={'outline'}
                                 size="sm"
-                                className={cn('w-[150px] justify-start text-left font-normal h-8 text-xs', !newDate && 'text-muted-foreground')}
+                                className={cn('w-[150px] justify-start text-left font-normal h-8 text-[10px]', !newDate && 'text-muted-foreground')}
                             >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
                                 {newDate ? format(newDate, 'MMM dd, yyyy') : <span>Pick a date</span>}
@@ -130,7 +130,7 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                         placeholder="Amount"
                         value={newAmount}
                         onChange={(e) => setNewAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                        className="h-8 text-xs"
+                        className="h-8 text-[10px] placeholder:text-[10px]"
                     />
                     <Button size="sm" className="h-8" onClick={addTransaction} disabled={!newDate || newAmount === '' || Number(newAmount) <= 0}>
                         <Plus className="h-4 w-4" />
@@ -138,8 +138,8 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                 </div>
                 <Separator className="my-1" />
                  <div className="flex justify-between items-center p-2 bg-muted rounded-md">
-                    <span className="font-bold text-sm">Total Cash In</span>
-                    <span className="font-bold text-sm">{totalCashIn.toFixed(2)}</span>
+                    <span className="font-bold text-xs">Total Cash In</span>
+                    <span className="font-bold text-xs">{totalCashIn.toFixed(2)}</span>
                 </div>
             </CardFooter>
         </Card>
