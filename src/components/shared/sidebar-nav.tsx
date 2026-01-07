@@ -110,10 +110,10 @@ export function SidebarNav() {
                     </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden px-2 pt-1">
-                        <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-xs border-sidebar-border w-full", categoryFilter === 'digital marketing' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('digital marketing'); }}>DM</Button>
-                        <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-xs border-sidebar-border w-full", categoryFilter === 'seo' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('seo'); }}>SEO</Button>
-                        <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-xs border-sidebar-border w-full", categoryFilter === 'website' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('website'); }}>Web</Button>
-                        <Button size="sm" variant={categoryFilter === 'gd' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-xs border-sidebar-border w-full", categoryFilter === 'gd' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('gd'); }}>GD</Button>
+                        <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-[10px] border-sidebar-border w-full", categoryFilter === 'digital marketing' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('digital marketing'); }}>DM</Button>
+                        <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-[10px] border-sidebar-border w-full", categoryFilter === 'seo' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('seo'); }}>SEO</Button>
+                        <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-[10px] border-sidebar-border w-full", categoryFilter === 'website' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('website'); }}>Web</Button>
+                        <Button size="sm" variant={categoryFilter === 'gd' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-[10px] border-sidebar-border w-full", categoryFilter === 'gd' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('gd'); }}>GD</Button>
                     </div>
                 </SidebarMenuItem>
                 <CollapsibleContent>
@@ -130,7 +130,7 @@ export function SidebarNav() {
                                 <Link href={`/clients/${client.id}`}>
                                     <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
                                         <span>
-                                            <span className="flex h-4 w-4 items-center justify-center text-xs">{index + 1}</span>
+                                            <span className="flex h-4 w-4 items-center justify-center text-[10px]">{index + 1}</span>
                                             <span>{client.name}</span>
                                         </span>
                                     </SidebarMenuSubButton>
@@ -141,7 +141,7 @@ export function SidebarNav() {
                              <SidebarMenuItem>
                                <span
                                   aria-disabled="true"
-                                  className="flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sm text-sidebar-foreground opacity-50 outline-none [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground"
+                                  className="flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-xs text-sidebar-foreground opacity-50 outline-none [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground"
                                 >
                                   No clients found
                                 </span>

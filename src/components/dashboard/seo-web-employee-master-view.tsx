@@ -193,7 +193,7 @@ const TaskCell = ({
                     <div
                         onClick={onSelect}
                         className={cn(
-                            'h-full w-full flex items-center justify-center cursor-pointer text-xs font-medium border-r px-1 gap-1 bg-pink-200',
+                            'h-full w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-r px-1 gap-1 bg-pink-200',
                             isSelected && 'ring-1 ring-accent ring-inset'
                         )}
                     >
@@ -208,7 +208,7 @@ const TaskCell = ({
                             const taskStatusColor = statusPopupColors[task.status] || 'bg-gray-200 text-foreground';
                             return (
                             <AccordionItem value={task.id} key={task.id} className="border-b-0">
-                                <AccordionTrigger className={cn("py-0 text-xs hover:no-underline rounded-md px-0 flex justify-between hover:bg-muted/50", )}>
+                                <AccordionTrigger className={cn("py-0 text-[10px] hover:no-underline rounded-md px-0 flex justify-between hover:bg-muted/50", )}>
                                     <span className={cn("truncate flex-1 text-left h-7 flex items-center px-2 rounded-l-md", taskStatusColor)}>
                                         {task.title}
                                     </span>
@@ -246,7 +246,7 @@ const TaskCell = ({
                                                             }
                                                             }}
                                                             autoFocus
-                                                            className="text-xs h-auto bg-background/80 text-foreground"
+                                                            className="text-[10px] h-auto bg-background/80 text-foreground"
                                                         />
                                                     ) : (
                                                       <>
@@ -260,7 +260,7 @@ const TaskCell = ({
                                                 </div>
                                             );
                                         })}
-                                        {(task.progressNotes || []).length === 0 && ( <p className="text-center text-xs text-muted-foreground py-4">No notes for this task.</p> )}
+                                        {(task.progressNotes || []).length === 0 && ( <p className="text-center text-[10px] text-muted-foreground py-4">No notes for this task.</p> )}
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -290,7 +290,7 @@ const TaskCell = ({
             </PopoverTrigger>
             <PopoverContent className="w-80 p-2" side="bottom" align="start">
                  <div className="max-h-60 space-y-3 p-1 overflow-y-auto">
-                    <h4 className="font-medium text-sm">{singleTask.title}</h4>
+                    <h4 className="font-medium text-xs">{singleTask.title}</h4>
                      {(singleTask.progressNotes || []).map((note, remarkIndex) => {
                         const authorName = note.authorName || 'User';
                         const isEditing = editingRemark?.taskId === singleTask.id && editingRemark?.remarkIndex === remarkIndex;
@@ -340,7 +340,7 @@ const TaskCell = ({
                                         }
                                         }}
                                         autoFocus
-                                        className="text-xs h-auto bg-background/80 text-foreground"
+                                        className="text-[10px] h-auto bg-background/80 text-foreground"
                                     />
                                 ) : (
                                   <>
@@ -388,7 +388,7 @@ const TaskCell = ({
                         })}
 
                         {(singleTask.progressNotes || []).length === 0 && (
-                        <p className="text-center text-xs text-muted-foreground py-4">
+                        <p className="text-center text-[10px] text-muted-foreground py-4">
                             No notes for this task.
                         </p>
                         )}
@@ -515,7 +515,7 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients }: SeoW
                 <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <h3 className="text-sm font-semibold w-24 text-center">{format(currentMonthDate, 'MMMM yyyy')}</h3>
+                <h3 className="text-xs font-semibold w-24 text-center">{format(currentMonthDate, 'MMMM yyyy')}</h3>
                  <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                 </Button>

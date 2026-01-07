@@ -240,7 +240,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     <TooltipProvider>
     <Card className="shadow-md">
       <CardHeader className="py-2 px-3 flex flex-row items-center justify-between">
-        <CardTitle className="font-headline text-sm">{title}</CardTitle>
+        <CardTitle className="font-headline text-xs">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
@@ -253,7 +253,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
               <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[40px]">Task</TableHead>
                {isAdmin && <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[30px]">Assigned</TableHead>}
               <TableHead className="px-1 border-t text-[8px] h-6 w-[30px]">Status</TableHead>
-              {currentUser?.role === 'employee' && <TableHead className="text-xs h-6 w-[30px]">Note</TableHead>}
+              {currentUser?.role === 'employee' && <TableHead className="text-[10px] h-6 w-[30px]">Note</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -362,7 +362,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                         key={status} 
                                                         value={status}
                                                         disabled={(isEmployeeView && !employeeAllowedStatuses.includes(status as TaskStatus))}
-                                                        className="text-xs"
+                                                        className="text-[10px]"
                                                     >
                                                         {status}
                                                     </SelectItem>
@@ -373,7 +373,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                     </div>
                                 ) : (
                                 <Badge variant={statusVariant[task.status] || 'default'} className={cn(
-                                    "capitalize text-xs",
+                                    "capitalize text-[10px]",
                                     statusColors[task.status]
                                 )}>{task.status}</Badge>
                                 )}
@@ -395,7 +395,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                 <div className="flex justify-between items-center">
                                                     <h4 className="font-medium leading-none">Note</h4>
                                                     {(task.progressNotes || []).length > 0 && (
-                                                        <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-xs text-muted-foreground">
+                                                        <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-[10px] text-muted-foreground">
                                                             <Trash2 className="mr-1 h-3 w-3" />
                                                             Clear Chat
                                                         </Button>
@@ -408,7 +408,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                         const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
 
                                                         return (
-                                                            <div key={remarkIndex} className={cn("flex items-start gap-3 text-sm group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                            <div key={remarkIndex} className={cn("flex items-start gap-3 text-xs group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                 {note.authorId !== currentUser?.uid && (
                                                                         <Avatar className="h-8 w-8 border">
                                                                         <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
@@ -420,7 +420,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                                         <Pen className="h-2 w-2"/>
                                                                       </Button>
                                                                     )}
-                                                                    <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                                    <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
                                                                     
                                                                     {isEditing ? (
                                                                         <Textarea
@@ -436,7 +436,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                                                 }
                                                                             }}
                                                                             autoFocus
-                                                                            className="text-xs h-auto bg-background/80 text-foreground"
+                                                                            className="text-[10px] h-auto bg-background/80 text-foreground"
                                                                         />
                                                                     ) : (
                                                                         <>
@@ -477,7 +477,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                         onChange={(e) => setNoteInput(e.target.value)}
                                                         onKeyDown={(e) => handleNewNote(e, task)}
                                                         onPaste={(e) => handlePaste(e, task)}
-                                                        className="pr-8 text-xs"
+                                                        className="pr-8 text-[10px]"
                                                     />
                                                     <div className="absolute bottom-1 right-1">
                                                         <InsertLinkPopover 

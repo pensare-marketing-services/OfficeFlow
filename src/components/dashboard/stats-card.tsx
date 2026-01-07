@@ -52,7 +52,7 @@ export function StatsCard({
       <CardContent className='p-3'>
         <div className="flex items-center justify-between">
           {/* Left side: Title */}
-          <div className="text-xs font-medium text-muted-foreground">
+          <div className="text-[10px] font-medium text-muted-foreground">
             {title}
           </div>
           

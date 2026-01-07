@@ -138,8 +138,8 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                 </div>
                 <Separator className="my-1" />
                  <div className="flex justify-between items-center p-2 bg-muted rounded-md">
-                    <span className="font-bold text-xs">Total Cash In</span>
-                    <span className="font-bold text-xs">{totalCashIn.toFixed(2)}</span>
+                    <span className="font-bold text-[10px]">Total Cash In</span>
+                    <span className="font-bold text-[10px]">{totalCashIn.toFixed(2)}</span>
                 </div>
             </CardFooter>
         </Card>

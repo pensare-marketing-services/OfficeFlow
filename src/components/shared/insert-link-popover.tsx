@@ -60,14 +60,14 @@ export const InsertLinkPopover: React.FC<InsertLinkPopoverProps> = ({ textareaRe
             placeholder="Text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="h-8 text-xs"
+            className="h-8 text-[10px]"
           />
           <div className="flex items-center gap-2">
             <Input
               placeholder="Search or paste a link"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="h-8 text-xs"
+              className="h-8 text-[10px]"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();

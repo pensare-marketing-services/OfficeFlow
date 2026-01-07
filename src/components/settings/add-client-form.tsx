@@ -98,16 +98,16 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
                 <CardContent className="space-y-3 p-3">
                     <FormField control={form.control} name="name" render={({ field }) => (
                          <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
-                            <FormLabel className="col-span-1 text-xs">Client Name</FormLabel>
+                            <FormLabel className="col-span-1 text-[10px]">Client Name</FormLabel>
                             <FormControl className="col-span-2">
-                                <Input placeholder="e.g., Acme Inc." {...field} className="h-8 text-xs" />
+                                <Input placeholder="e.g., Acme Inc." {...field} className="h-8 text-[10px]" />
                             </FormControl>
                             <div className="col-span-3 col-start-2"><FormMessage /></div>
                         </FormItem>
                     )} />
 
                     <div className="space-y-1">
-                        <FormLabel className="text-xs">Assign Employees</FormLabel>
+                        <FormLabel className="text-[10px]">Assign Employees</FormLabel>
                         <div className="flex gap-2">
                             {[1, 2, 3].map((num) => {
                                 const fieldName = `employeeId${num}` as const;
@@ -125,7 +125,7 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
                                         <FormItem className="flex-1">
                                             <Select onValueChange={field.onChange} value={field.value || 'unassigned'} disabled={usersLoading}>
                                                 <FormControl>
-                                                <SelectTrigger className="h-8 text-xs">
+                                                <SelectTrigger className="h-8 text-[10px]">
                                                     <SelectValue placeholder="Unassigned" />
                                                 </SelectTrigger>
                                                 </FormControl>
@@ -134,10 +134,10 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
                                                     {filteredOptions.map((employee) => (
                                                         <SelectItem key={employee.id} value={employee.id}>
                                                             <div className="flex items-center gap-2">
-                                                                <Avatar className="h-6 w-6 text-xs">
+                                                                <Avatar className="h-6 w-6 text-[10px]">
                                                                     <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
                                                                 </Avatar>
-                                                                <span className="text-xs">{employee.username}</span>
+                                                                <span className="text-[10px]">{employee.username}</span>
                                                             </div>
                                                         </SelectItem>
                                                     ))}
@@ -158,7 +158,7 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
                         render={() => (
                             <FormItem>
                                 <div className="mb-2">
-                                    <FormLabel className="text-xs">Categories</FormLabel>
+                                    <FormLabel className="text-[10px]">Categories</FormLabel>
                                 </div>
                                 <div className="flex flex-wrap gap-4">
                                 {categories.map((item) => (
@@ -186,7 +186,7 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
                                                 }}
                                             />
                                             </FormControl>
-                                            <FormLabel className="font-normal text-xs capitalize">
+                                            <FormLabel className="font-normal text-[10px] capitalize">
                                             {item}
                                             </FormLabel>
                                         </FormItem>

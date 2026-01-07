@@ -195,12 +195,12 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[40px] px-2 text-[10px]">No</TableHead>
-                            <TableHead className="w-[110px] text-[10px]">Date</TableHead>
+                            <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
+                            <TableHead className="w-[30px] text-[10px]">Date</TableHead>
                             <TableHead className="w-[150px] text-[10px]">Task</TableHead>
                             <TableHead className='text-[10px]'>Assigned</TableHead>
                             <TableHead className='text-[10px]'>Status</TableHead>
-                            <TableHead className="w-[100px] text-[10px]">Note</TableHead>
+                            <TableHead className="w-[20px] text-[10px]">Note</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -216,7 +216,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                 size="sm"
                                                 className={cn('w-full justify-start text-left font-normal h-7 text-[10px] px-2', !task.deadline && 'text-muted-foreground')}
                                             >
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {/* <CalendarIcon className="mr-2 h-4 w-4" /> */}
                                                 {task.deadline && isValid(new Date(task.deadline)) ? format(new Date(task.deadline), 'MMM dd') : <span>Pick a date</span>}
                                             </Button>
                                         </PopoverTrigger>

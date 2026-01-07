@@ -316,11 +316,11 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
         <Card>
             <CardHeader className="flex flex-row items-center justify-between p-3">
                 <CardTitle className="text-base font-headline">Plan Promotions</CardTitle>
-                <div className="flex items-center gap-2 text-sm font-medium ">
+                <div className="flex items-center gap-2 text-xs font-medium ">
                     Total
                     <Input
                         placeholder="Budget..."
-                        className="h-7 w-28 text-xs text-center text-right"
+                        className="h-7 w-28 text-[10px] text-center text-right"
                         type="number"
                         value={mainBudget ?? ''}
                         onChange={(e) => setMainBudget(Number(e.target.value) || undefined)}
@@ -337,15 +337,15 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
-                            <TableHead className="w-[40px] text-[10px]">Date</TableHead>
+                            <TableHead className="w-[20px] text-[10px]">Date</TableHead>
                             <TableHead className="w-[120px] text-[10px]">Campaign</TableHead>
-                            <TableHead className="w-[110px] text-[10px]">Type</TableHead>
+                            <TableHead className="w-[100px] text-[10px]">Type</TableHead>
                             <TableHead className="w-[20px] text-right text-[10px]">Budget</TableHead>
                             <TableHead className="w-[90px] text-[10px]">Status</TableHead>
                             <TableHead className="w-[90px] text-[10px]">Assign</TableHead>
                             <TableHead className="w-[70px] text-right text-[10px]">Spent</TableHead>
-                            <TableHead className="w-[40px] text-[10px]">Note</TableHead>
-                            <TableHead className="w-[40px] text-[10px]"></TableHead>
+                            <TableHead className="w-[20px] text-[10px]">Note</TableHead>
+                            <TableHead className="w-[20px] text-[10px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -380,10 +380,10 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                         </PopoverContent>
                                     </Popover>
                                 </TableCell>
-                                <TableCell className="p-0"><EditableCell value={promo.campaign} onSave={(v) => handlePromotionChange(promo.id, 'campaign', v)} /></TableCell>
+                                <TableCell className="p-0 text-[10px]"><EditableCell value={promo.campaign} onSave={(v) => handlePromotionChange(promo.id, 'campaign', v)} /></TableCell>
                                 <TableCell className="p-0">
                                     <Select value={promo.adType} onValueChange={(v: PlanPromotion['adType']) => handlePromotionChange(promo.id, 'adType', v)}>
-                                        <SelectTrigger className="h-7 text-[10px] p-1 text-[10px]">
+                                        <SelectTrigger className="h-7 text-[10px] p-0 text-[10px]">
                                             <SelectValue />
                                             <SelectPrimitive.Icon asChild>
                                                 <span />
@@ -394,10 +394,10 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
-                                <TableCell className="p-0"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" className="text-right" /></TableCell>
+                                <TableCell className="p-0 text-[10px]"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" className="text-right" /></TableCell>
                                 <TableCell className="p-1">
                                     <Select value={promo.status} onValueChange={(v: PlanPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-[10px]", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
+                                        <SelectTrigger className={cn("h-7  text-[10px]", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
                                             <SelectValue />
                                             <SelectPrimitive.Icon asChild>
                                                 <span />
@@ -422,7 +422,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
-                                <TableCell className="p-0"><EditableCell value={promo.spent} onSave={(v) => handlePromotionChange(promo.id, 'spent', v)} type="number" className="text-right" /></TableCell>
+                                <TableCell className="p-0 text-[10px]"><EditableCell value={promo.spent} onSave={(v) => handlePromotionChange(promo.id, 'spent', v)} type="number" className="text-right" /></TableCell>
                                 <TableCell className="p-0 text-center">
                                     <Popover onOpenChange={(open) => { if (open) setNoteInput(''); }}>
                                         <PopoverTrigger asChild>
@@ -524,17 +524,15 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                     </TableBody>
                     <TableFooter>
                         <TableRow>
-                            <TableCell colSpan={4} className="text-right font-bold text-xs pr-4">Total Budget</TableCell>
-                            <TableCell className="p-1 font-bold text-xs text-right">{totalBudget.toFixed(2)}</TableCell>
-                            <TableCell colSpan={2} className="text-right font-bold text-xs pr-4">Total Spent</TableCell>
-                            <TableCell className="p-1 font-bold text-xs text-right">{totalSpent.toFixed(2)}</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-[10px] pr-4">Total Spent</TableCell>
+                            <TableCell className="p-1 font-bold text-[10px] text-right">{totalSpent.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
 
                         <TableRow><TableCell colSpan={10} className="p-0 h-2"><Separator /></TableCell></TableRow>
 
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">Old Balance</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-[10px] pr-4">Old Balance</TableCell>
                             <TableCell className="p-0 text-right">
                                 <Input
                                     type="number"
@@ -550,20 +548,22 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                         <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
 
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">GST 18%</TableCell>
-                            <TableCell className="p-1 font-bold text-xs text-right">{gst.toFixed(2)}</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-[10px] pr-4">GST 18%</TableCell>
+                            <TableCell className="p-1 font-bold text-[10px] text-right">{gst.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
 
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">Grand Total</TableCell>
-                            <TableCell className="p-1 font-bold text-xs text-right">{grandTotal.toFixed(2)}</TableCell>
+                        <TableCell colSpan={4} className="text-right font-bold text-[10px] pr-4">Total Budget</TableCell>
+                        <TableCell className="p-1 font-bold text-[10px] text-right">{totalBudget.toFixed(2)}</TableCell>
+                            <TableCell colSpan={2} className="text-right font-bold text-[10px] pr-4">Grand Total</TableCell>
+                            <TableCell className="p-1 font-bold text-[10px] text-right">{grandTotal.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
 
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">Balance</TableCell>
-                            <TableCell className="p-1 font-bold text-xs text-right">
+                            <TableCell colSpan={7} className="text-right font-bold text-[10px] pr-4">Balance</TableCell>
+                            <TableCell className="p-1 font-bold text-[10px] text-right">
                                 <span className={cn(balance < 0 ? "text-red-600" : "text-green-600")}>
                                     {balance.toFixed(2)}
                                 </span>

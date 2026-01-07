@@ -66,7 +66,7 @@ export default function AddEmployeeForm() {
                         <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
                             <FormLabel className="col-span-1">Username</FormLabel>
                             <FormControl className="col-span-2">
-                                <Input className="h-8 text-xs" placeholder="e.g., janedoe" {...field} />
+                                <Input className="h-8 text-[10px]" placeholder="e.g., janedoe" {...field} />
                             </FormControl>
                             <div className="col-span-3"><FormMessage /></div>
                         </FormItem>
@@ -76,7 +76,7 @@ export default function AddEmployeeForm() {
                             <FormLabel className="col-span-1">Password</FormLabel>
                             <FormControl className="col-span-2">
                                 <div className="relative">
-                                    <Input className="h-8 text-xs" type={isPasswordVisible ? 'text' : 'password'} placeholder="Set a password" {...field} />
+                                    <Input className="h-8 text-[10px]" type={isPasswordVisible ? 'text' : 'password'} placeholder="Set a password" {...field} />
                                     <Button 
                                         type="button"
                                         variant="ghost" 
@@ -97,7 +97,7 @@ export default function AddEmployeeForm() {
                             <div className="col-span-2">
                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                    <SelectTrigger className="h-8 text-xs">
+                                    <SelectTrigger className="h-8 text-[10px]">
                                         <SelectValue placeholder="Select a role" />
                                     </SelectTrigger>
                                     </FormControl>
@@ -116,7 +116,7 @@ export default function AddEmployeeForm() {
                             <div className="col-span-2">
                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                    <SelectTrigger className="h-8 text-xs">
+                                    <SelectTrigger className="h-8 text-[10px]">
                                         <SelectValue placeholder="Select a department" />
                                     </SelectTrigger>
                                     </FormControl>

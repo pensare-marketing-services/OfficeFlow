@@ -148,7 +148,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                                 {filteredOptions.map((employee) => (
                                                     <SelectItem key={employee.id} value={employee.id}>
                                                         <div className="flex items-center gap-2">
-                                                            <Avatar className="h-6 w-6 text-xs">
+                                                            <Avatar className="h-6 w-6 text-[10px]">
                                                                 <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
                                                             </Avatar>
                                                             <span>{employee.username}</span>
@@ -240,10 +240,10 @@ const EditablePasswordCell = ({ userId, initialPassword }: { userId: string, ini
                     onBlur={handleSave}
                     onKeyDown={handleKeyDown}
                     autoFocus
-                    className="h-7 text-xs"
+                    className="h-7 text-[10px]"
                 />
             ) : (
-                 <span className="text-xs font-mono flex-grow">
+                 <span className="text-[10px] font-mono flex-grow">
                     {isPasswordVisible ? password : '••••••••'}
                 </span>
             )}
@@ -290,7 +290,7 @@ const EditablePriorityCell = ({ userId, initialPriority }: { userId: string, ini
             onChange={(e) => setPriority(Number(e.target.value) || 99)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="h-7 text-xs w-16 text-center"
+            className="h-7 text-[10px] w-16 text-center"
         />
     );
 };
@@ -302,11 +302,11 @@ const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string
     }, [employeeIds, allUsers]);
 
     if (assignedEmployees.length === 0) {
-        return <TableCell className="text-muted-foreground text-xs p-1">-</TableCell>;
+        return <TableCell className="text-muted-foreground text-[10px] p-1">-</TableCell>;
     }
 
     return (
-        <TableCell className="text-xs p-1">
+        <TableCell className="text-[10px] p-1">
             {assignedEmployees.map(e => e.username).join(', ')}
         </TableCell>
     );
@@ -317,9 +317,9 @@ const ClientTable = ({ clients, users, loading, onUpdate }: { clients: ClientWit
          <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead className="px-2 text-xs h-8">Client Name</TableHead>
-                    <TableHead className="px-2 text-xs h-8">Assigned Employees</TableHead>
-                    <TableHead className="text-right px-2 text-xs h-8">Actions</TableHead>
+                    <TableHead className="px-2 text-[10px] h-8">Client Name</TableHead>
+                    <TableHead className="px-2 text-[10px] h-8">Assigned Employees</TableHead>
+                    <TableHead className="text-right px-2 text-[10px] h-8">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -330,7 +330,7 @@ const ClientTable = ({ clients, users, loading, onUpdate }: { clients: ClientWit
                 ))}
                 {!loading && clients.map((client) => (
                     <TableRow key={client.id}>
-                        <TableCell className="font-medium text-xs py-1 px-2">{client.name}</TableCell>
+                        <TableCell className="font-medium text-[10px] py-1 px-2">{client.name}</TableCell>
                         <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
                          <TableCell className="text-right px-2 py-1">
                              <EditClientDialog 
@@ -409,11 +409,11 @@ export default function SettingsPage() {
                              <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-[40px] px-2 text-xs h-8">#</TableHead>
-                                        <TableHead className="px-2 text-xs h-8">Username</TableHead>
-                                        <TableHead className="px-2 text-xs h-8">Password</TableHead>
-                                        <TableHead className="px-2 text-xs h-8">Priority</TableHead>
-                                        <TableHead className="text-right px-2 text-xs h-8">Actions</TableHead>
+                                        <TableHead className="w-[40px] px-2 text-[10px] h-8">#</TableHead>
+                                        <TableHead className="px-2 text-[10px] h-8">Username</TableHead>
+                                        <TableHead className="px-2 text-[10px] h-8">Password</TableHead>
+                                        <TableHead className="px-2 text-[10px] h-8">Priority</TableHead>
+                                        <TableHead className="text-right px-2 text-[10px] h-8">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -425,13 +425,13 @@ export default function SettingsPage() {
                                     {error && <TableRow><TableCell colSpan={5} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
                                     {!usersLoading && users.filter(u => u.role === 'employee').map((employee, index) => (
                                         <TableRow key={employee.id}>
-                                            <TableCell className="px-2 py-1 text-xs">{index + 1}</TableCell>
+                                            <TableCell className="px-2 py-1 text-[10px]">{index + 1}</TableCell>
                                             <TableCell className="py-1 px-2">
                                                 <div className="flex items-center gap-2">
                                                     <Avatar className="h-6 w-6">
-                                                        <AvatarFallback className="text-xs">{getInitials(employee.username)}</AvatarFallback>
+                                                        <AvatarFallback className="text-[10px]">{getInitials(employee.username)}</AvatarFallback>
                                                     </Avatar>
-                                                    <span className="font-medium text-xs">{employee.username}</span>
+                                                    <span className="font-medium text-[10px]">{employee.username}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="py-1 px-2">
