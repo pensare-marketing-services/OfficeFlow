@@ -20,7 +20,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useToast } from '@/hooks/use-toast';
 import { LinkifiedText } from '@/components/shared/linkified-text';
 import { InsertLinkPopover } from '../shared/insert-link-popover';
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 const noteStatuses: ClientNoteStatus[] = ["Pending", "On Work", "For Approval", "Done", "Scheduled"];
@@ -195,15 +196,14 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
             }
         }
     };
+    
+    const dropdownStatuses: { value: ClientNoteStatus; label: string; color: string }[] = [
+        { value: "Pending", label: "No Color", color: "bg-transparent border" },
+        { value: "Scheduled", label: "Grey", color: "bg-gray-500" },
+        { value: "On Work", label: "Orange", color: "bg-orange-500" },
+        { value: "Done", label: "Red", color: "bg-red-500" },
+    ];
 
-    const handleStatusClick = (noteIndex: number) => {
-      if (!isAdmin) return;
-      const currentStatus = localNotes[noteIndex].update;
-      const statusCycle: ClientNoteStatus[] = ["Pending", "Scheduled", "On Work", "Done"];
-      const currentIndex = statusCycle.indexOf(currentStatus);
-      const nextIndex = (currentIndex + 1) % statusCycle.length;
-      handleNoteChange(noteIndex, 'update', statusCycle[nextIndex]);
-    };
 
   return (
     <Card>
@@ -245,19 +245,41 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                 </TableCell>
                 
                 <TableCell className="p-1">
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <div 
-                                className={cn("flex items-center justify-center h-7 w-full", isAdmin && "cursor-pointer")}
-                                onClick={() => handleStatusClick(index)}
-                            >
-                                <div className={cn("h-3 w-5 ", dotColor)} />
-                            </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{noteStatus}</p>
-                        </TooltipContent>
-                    </Tooltip>
+                    {isAdmin ? (
+                        <Select
+                            value={noteStatus}
+                            onValueChange={(newStatus: ClientNoteStatus) => handleNoteChange(index, 'update', newStatus)}
+                        >
+                            <SelectTrigger className="h-7 w-full focus:ring-0 border-0">
+                                <SelectValue asChild>
+                                    <div className="flex items-center justify-center">
+                                        <div className={cn("h-3 w-5", dotColor)} />
+                                    </div>
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {dropdownStatuses.map(({ value, label, color }) => (
+                                    <SelectItem key={value} value={value}>
+                                        <div className="flex items-center gap-2">
+                                            <div className={cn("h-3 w-5 rounded-sm", color)} />
+                                            <span>{label}</span>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    ) : (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="flex items-center justify-center h-7 w-full">
+                                    <div className={cn("h-3 w-5 ", dotColor)} />
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{noteStatus}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
                 </TableCell>
                 <TableCell className="p-0 text-center">
                     <Popover onOpenChange={(open) => { if (open) handlePopoverOpen(note.id); }}>
