@@ -308,9 +308,8 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         <Card>
             <CardHeader className="flex flex-row items-center justify-between p-3">
                 <CardTitle className="text-base font-headline">Paid Promotions</CardTitle>
-                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-muted-foreground">Total:</span>
-                    <span className="text-sm font-bold">{grandTotal.toFixed(2)}</span>
+                <div className="w-48">
+                    <Input placeholder="Main Budget..." className="h-8 text-xs text-center" />
                 </div>
                 <Button size="sm" onClick={addPromotion} className="h-7 gap-1">
                     <Plus className="h-4 w-4" />
@@ -526,6 +525,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                     value={manualTotal ?? ''}
                                     onChange={(e) => setManualTotal(e.target.value === '' ? null : Number(e.target.value))} 
                                     className="h-7 text-[10px] p-1 bg-blue-100 font-bold border-0 text-right w-full"
+                                    placeholder="Enter Total"
                                 />
                             </TableCell>
                              <TableCell colSpan={2} className="text-right font-bold text-xs pr-4">Old Balance</TableCell>
@@ -535,6 +535,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                     value={oldBalance} 
                                     onChange={(e) => setOldBalance(Number(e.target.value))} 
                                     className="h-7 text-[10px] p-0 bg-yellow-100 font-bold border-0 text-right w-full"
+                                    placeholder="Old Balance"
                                 />
                             </TableCell>
                             <TableCell colSpan={2} />
