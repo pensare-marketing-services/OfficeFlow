@@ -416,8 +416,8 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                                 )}
                                                                 <div className={cn("max-w-[75%] rounded-lg p-3 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                     {isAdmin && !isEditing && (
-                                                                      <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
-                                                                        <Pen className="h-3 w-3"/>
+                                                                      <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2 " onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                        <Pen className="h-2 w-2"/>
                                                                       </Button>
                                                                     )}
                                                                     <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>

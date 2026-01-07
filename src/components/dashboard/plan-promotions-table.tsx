@@ -99,7 +99,6 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
     const [promotions, setPromotions] = useState<(PlanPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
     const [oldBalance, setOldBalance] = useState(0);
-    const [manualTotal, setManualTotal] = useState<number | null>(null);
     const { addTask, updateTask, deleteTask, tasks } = useTasks();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -310,8 +309,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
     const gst = totalSpent * 0.18;
     const grandTotal = totalSpent + gst;
 
-    const clientProvidedTotal = (manualTotal ?? 0) + oldBalance + totalCashIn;
-    const balance = clientProvidedTotal - grandTotal;
+    const balance = (totalCashIn + oldBalance) - grandTotal;
 
 
     return (
@@ -450,8 +448,8 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                                                 )}
                                                                 <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                     {currentUser?.role === 'admin' && !isEditing && (
-                                                                        <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(promo, remarkIndex)}>
-                                                                            <Pen className="h-3 w-3" />
+                                                                        <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2" onClick={() => handleEditRemark(promo, remarkIndex)}>
+                                                                            <Pen className="h-2 w-2" />
                                                                         </Button>
                                                                     )}
                                                                     <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
@@ -491,7 +489,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                                 <div className="relative">
                                                     <Textarea
                                                         ref={textareaRef}
-                                                        placeholder="Add a remark..."
+                                                        placeholder="Add a Note..."
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
                                                         onKeyDown={(e) => handleNewNote(e, promo.id)}
@@ -558,22 +556,9 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                         </TableRow>
 
                         <TableRow>
-
-                            <TableCell colSpan={4} className="text-right font-bold text-xs pr-4">Total</TableCell>
-                            <TableCell className="p-0 text-right">
-                                <Input
-                                    type="number"
-                                    value={manualTotal ?? ''}
-                                    onChange={(e) => setManualTotal(e.target.value === '' ? null : Number(e.target.value))}
-                                    className="h-7 text-[10px] p-1 bg-blue-100 font-bold border-0 text-right w-full"
-                                    placeholder="Total"
-                                />
-                            </TableCell>
-                            <TableCell colSpan={2} className="text-right font-bold text-xs pr-4">Grand Total</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">Grand Total</TableCell>
                             <TableCell className="p-1 font-bold text-xs text-right">{grandTotal.toFixed(2)}</TableCell>
-                            <TableCell colSpan={2} className="p-0 bg-transparent" />
-
-
+                            <TableCell colSpan={2} />
                         </TableRow>
 
                         <TableRow>

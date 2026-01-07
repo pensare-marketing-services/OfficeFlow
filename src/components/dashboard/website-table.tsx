@@ -283,8 +283,8 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                                                 )}
                                                                 <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                     {currentUser?.role === 'admin' && !isEditing && (
-                                                                      <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-5 w-5 opacity-0 group-hover/remark:opacity-100" onClick={() => handleEditRemark(task, remarkIndex)}>
-                                                                        <Pen className="h-3 w-3"/>
+                                                                      <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2" onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                        <Pen className="h-2 w-2"/>
                                                                       </Button>
                                                                     )}
                                                                     <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
