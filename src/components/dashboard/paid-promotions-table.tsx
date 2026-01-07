@@ -308,6 +308,10 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         <Card>
             <CardHeader className="flex flex-row items-center justify-between p-3">
                 <CardTitle className="text-base font-headline">Paid Promotions</CardTitle>
+                 <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground">Total:</span>
+                    <span className="text-sm font-bold">{grandTotal.toFixed(2)}</span>
+                </div>
                 <Button size="sm" onClick={addPromotion} className="h-7 gap-1">
                     <Plus className="h-4 w-4" />
                     Add Promotion
@@ -565,5 +569,3 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         </Card>
     );
 }
-
-    
