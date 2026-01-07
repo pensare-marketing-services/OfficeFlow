@@ -233,6 +233,14 @@
                 "enum": ["seo", "website", "digital marketing", "gd"]
             },
             "description": "The service categories this client belongs to."
+        },
+        "paidPromotionsMainBudget": {
+            "type": "number",
+            "description": "The main budget manually entered for Paid Promotions."
+        },
+        "planPromotionsMainBudget": {
+            "type": "number",
+            "description": "The main budget manually entered for Plan Promotions."
         }
       },
       "required": [
@@ -503,5 +511,3 @@
     }
   }
 }
-
-    

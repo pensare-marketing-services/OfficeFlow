@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import type { PaidPromotion, UserProfile as User, Task, ProgressNote, ContentType } from '@/lib/data';
+import type { PaidPromotion, UserProfile as User, Task, ProgressNote, ContentType, Client } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -27,11 +27,13 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 
 
 type UserWithId = User & { id: string };
+type ClientWithId = Client & { id: string };
 
 interface PaidPromotionsTableProps {
-  clientId: string;
+  client: ClientWithId;
   users: UserWithId[];
   totalCashIn: number;
+  onClientUpdate: (updatedData: Partial<Client>) => void;
 }
 
 const adTypes: PaidPromotion['adType'][] = [
@@ -92,7 +94,7 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function PaidPromotionsTable({ clientId, users, totalCashIn }: PaidPromotionsTableProps) {
+export default function PaidPromotionsTable({ client, users, totalCashIn, onClientUpdate }: PaidPromotionsTableProps) {
     const { user: currentUser } = useAuth();
     const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
@@ -105,12 +107,20 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
     const [editingRemark, setEditingRemark] = useState<{ promoId: string; remarkIndex: number } | null>(null);
     const [editingText, setEditingText] = useState('');
     const isAdmin = currentUser?.role === 'admin';
-
+    const [mainBudget, setMainBudget] = useState<number | undefined>(client.paidPromotionsMainBudget);
 
     useEffect(() => {
-        if (!clientId) return;
+        setMainBudget(client.paidPromotionsMainBudget);
+    }, [client.paidPromotionsMainBudget]);
+
+    const handleMainBudgetChange = () => {
+        onClientUpdate({ paidPromotionsMainBudget: mainBudget });
+    };
+
+    useEffect(() => {
+        if (!client.id) return;
         setLoading(true);
-        const promotionsQuery = query(collection(db, `clients/${clientId}/promotions`));
+        const promotionsQuery = query(collection(db, `clients/${client.id}/promotions`));
         const unsubscribe = onSnapshot(promotionsQuery, (snapshot) => {
             const promotionsData = snapshot.docs.map(doc => ({ ...doc.data() as PaidPromotion, id: doc.id }));
             setPromotions(promotionsData);
@@ -121,11 +131,11 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         });
 
         return () => unsubscribe();
-    }, [clientId]);
+    }, [client.id]);
     
      useEffect(() => {
         tasks.forEach(task => {
-            if (task.description === 'Paid Promotion' && task.clientId === clientId) {
+            if (task.description === 'Paid Promotion' && task.clientId === client.id) {
                 const promotion = promotions.find(p => p.campaign === task.title);
                 if (promotion) {
                     let promotionStatus: PaidPromotion['status'] | null = null;
@@ -144,10 +154,10 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                 }
             }
         });
-    }, [tasks, promotions, clientId]);
+    }, [tasks, promotions, client.id]);
 
     const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any, syncFromTask = false) => {
-        const promotionRef = doc(db, `clients/${clientId}/promotions`, id);
+        const promotionRef = doc(db, `clients/${client.id}/promotions`, id);
         await updateDoc(promotionRef, { [field]: value });
 
         if (syncFromTask) return; // Prevent feedback loop
@@ -155,7 +165,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PaidPromotion & {id: string};
         if (!updatedPromotion) return;
         
-        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === updatedPromotion.campaign && t.clientId === clientId);
+        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === updatedPromotion.campaign && t.clientId === client.id);
 
         if (field === 'assignedTo') {
             const employee = users.find(u => u.username === value);
@@ -172,7 +182,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                         deadline: updatedPromotion.date,
                         assigneeIds: [employee.id],
                         progressNotes: [],
-                        clientId: clientId,
+                        clientId: client.id,
                         contentType: updatedPromotion.adType as ContentType,
                     };
                     addTask(newTask);
@@ -215,7 +225,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         handlePromotionChange(promoId, 'remarks', updatedRemarks);
 
         // Sync with task
-        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === promo.campaign && t.clientId === clientId);
+        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === promo.campaign && t.clientId === client.id);
         if (linkedTask) {
             const updatedTaskNotes = [...(linkedTask.progressNotes || []), newNote];
             updateTask(linkedTask.id, { progressNotes: updatedTaskNotes });
@@ -266,9 +276,9 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
             assignedTo: '',
             spent: 0,
             remarks: [],
-            clientId,
+            clientId: client.id,
         };
-        await addDoc(collection(db, `clients/${clientId}/promotions`), newPromotion);
+        await addDoc(collection(db, `clients/${client.id}/promotions`), newPromotion);
     };
 
     const deletePromotion = async (id: string) => {
@@ -276,14 +286,14 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         if (!promotionToDelete) return;
     
         // First, delete the promotion document
-        await deleteDoc(doc(db, `clients/${clientId}/promotions`, id));
+        await deleteDoc(doc(db, `clients/${client.id}/promotions`, id));
     
         // Then, find and delete the associated task
         if (promotionToDelete.campaign) {
             const linkedTask = tasks.find(t => 
                 t.description === 'Paid Promotion' && 
                 t.title === promotionToDelete.campaign && 
-                t.clientId === clientId
+                t.clientId === client.id
             );
         
             if (linkedTask) {
@@ -308,8 +318,16 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
         <Card>
             <CardHeader className="flex flex-row items-center justify-between p-3">
                 <CardTitle className="text-base font-headline">Paid Promotions</CardTitle>
-                <div className="w-48">
-                    <Input placeholder="Main Budget..." className="h-8 text-xs text-center" />
+                <div className="flex items-center gap-2 text-sm font-medium">
+                    Total
+                    <Input 
+                        placeholder="Main Budget..." 
+                        className="h-7 w-28 text-xs text-center" 
+                        type="number"
+                        value={mainBudget ?? ''}
+                        onChange={(e) => setMainBudget(Number(e.target.value) || undefined)}
+                        onBlur={handleMainBudgetChange}
+                    />
                 </div>
                 <Button size="sm" onClick={addPromotion} className="h-7 gap-1">
                     <Plus className="h-4 w-4" />

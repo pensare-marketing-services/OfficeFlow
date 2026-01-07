@@ -232,9 +232,10 @@ export default function ClientIdPage() {
                     )}
                        {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <PaidPromotionsTable 
-                            clientId={client.id}
+                            client={client}
                             users={users as UserWithId[]}
                             totalCashIn={totalCashIn}
+                            onClientUpdate={handleClientUpdate}
                         />
                     )}
 
@@ -265,9 +266,10 @@ export default function ClientIdPage() {
                 <div className="lg:col-span-2 space-y-4">
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <PlanPromotionsTable 
-                            clientId={client.id}
+                            client={client}
                             users={users as UserWithId[]}
                             totalCashIn={totalCashIn}
+                            onClientUpdate={handleClientUpdate}
                         />
                     )}
                     
@@ -301,5 +303,3 @@ export default function ClientIdPage() {
         </div>
     );
 }
-
-    
