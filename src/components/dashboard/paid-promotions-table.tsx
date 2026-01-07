@@ -86,7 +86,7 @@ const EditableCell: React.FC<{
             onChange={(e) => setCurrentValue(e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            className={cn("h-7 text-xs p-1 border-transparent hover:border-border focus:border-ring focus:bg-background", className)}
+            className={cn("h-7 text-[10px] p-1 border-transparent hover:border-border focus:border-ring focus:bg-background", className)}
         />
     );
 };
@@ -316,23 +316,23 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[10px] px-2 text-xs">No</TableHead>
-                            <TableHead className="w-[40px]">Date</TableHead>
-                            <TableHead className="w-[120px]">Campaign</TableHead>
-                            <TableHead className="w-[110px]">Type</TableHead>
-                            <TableHead className="w-[20px] text-right">Budget</TableHead>
-                            <TableHead className="w-[90px]">Status</TableHead>
-                            <TableHead className="w-[90px]">Assign</TableHead>
-                            <TableHead className="w-[70px] text-right">Spent</TableHead>
-                            <TableHead className="w-[40px]">Note</TableHead>
-                            <TableHead className="w-[40px]"></TableHead>
+                            <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
+                            <TableHead className="w-[40px] text-[10px]">Date</TableHead>
+                            <TableHead className="w-[120px] text-[10px]">Campaign</TableHead>
+                            <TableHead className="w-[110px] text-[10px]">Type</TableHead>
+                            <TableHead className="w-[20px] text-right text-[10px]">Budget</TableHead>
+                            <TableHead className="w-[90px] text-[10px]">Status</TableHead>
+                            <TableHead className="w-[90px] text-[10px]">Assign</TableHead>
+                            <TableHead className="w-[70px] text-righttext-[10px]">Spent</TableHead>
+                            <TableHead className="w-[40px] text-[10px]">Note</TableHead>
+                            <TableHead className="w-[40px] text-[10px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading && <TableRow><TableCell colSpan={10} className="h-24 text-center">Loading...</TableCell></TableRow>}
                         {!loading && promotions.map((promo, index) => (
                             <TableRow key={promo.id}>
-                                <TableCell className="px-2 py-1 text-xs text-center">{index + 1}</TableCell>
+                                <TableCell className="px-2 py-1 text-[10px] text-center">{index + 1}</TableCell>
                                 <TableCell className="p-0">
                                      <Popover open={openPopoverId === promo.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? promo.id : null)}>
                                         <PopoverTrigger asChild>
@@ -340,7 +340,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                                 variant={'ghost'}
                                                 size="sm"
                                                 disabled={!isAdmin}
-                                                className={cn('w-full justify-start text-left font-normal h-7 text-xs px-2', !promo.date && 'text-muted-foreground')}
+                                                className={cn('w-full justify-start text-left font-normal h-7 text-[10px] px-2', !promo.date && 'text-muted-foreground')}
                                             >
                                                 {promo.date && isValid(new Date(promo.date)) ? format(new Date(promo.date), 'MMM dd') : <span>Pick a date</span>}
                                             </Button>
@@ -361,9 +361,9 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                     </Popover>
                                 </TableCell>
                                 <TableCell className="p-0"><EditableCell value={promo.campaign} onSave={(v) => handlePromotionChange(promo.id, 'campaign', v)} /></TableCell>
-                                <TableCell className="p-1">
+                                <TableCell className="p-0">
                                     <Select value={promo.adType} onValueChange={(v: PaidPromotion['adType']) => handlePromotionChange(promo.id, 'adType', v)}>
-                                        <SelectTrigger className="h-7 text-xs">
+                                        <SelectTrigger className="h-7 text-[10px] p-1 text-[10px]">
                                              <SelectValue />
                                              <SelectPrimitive.Icon asChild>
                                                 <span />
@@ -377,7 +377,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                 <TableCell className="p-0"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" className="text-right" /></TableCell>
                                 <TableCell className="p-1">
                                     <Select value={promo.status} onValueChange={(v: PaidPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-xs", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
+                                        <SelectTrigger className={cn("h-7 text-[10px]", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
                                             <SelectValue />
                                              <SelectPrimitive.Icon asChild>
                                                 <span />
@@ -390,7 +390,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                 </TableCell>
                                 <TableCell className="p-1">
                                      <Select value={promo.assignedTo || 'unassigned'} onValueChange={(v) => handlePromotionChange(promo.id, 'assignedTo', v)}>
-                                        <SelectTrigger className="h-7 text-xs">
+                                        <SelectTrigger className="h-7 text-[10px]">
                                             <SelectValue placeholder="Assign" />
                                              <SelectPrimitive.Icon asChild>
                                                 <span />
@@ -412,7 +412,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                         </PopoverTrigger>
                                         <PopoverContent className="w-80" side="left" align="end">
                                             <div className="space-y-2">
-                                                 <h4 className="font-medium leading-none text-xs">Remarks</h4>
+                                                 <h4 className="font-medium leading-none text-[10px]">Remarks</h4>
                                                  <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                                      {(promo.remarks || []).map((note: ProgressNote, remarkIndex: number) => {
                                                         const author = users.find(u => u.id === note.authorId);
@@ -420,7 +420,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                                         const isEditing = editingRemark?.promoId === promo.id && editingRemark?.remarkIndex === remarkIndex;
 
                                                         return (
-                                                             <div key={remarkIndex} className={cn("flex items-start gap-2 text-xs group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
+                                                             <div key={remarkIndex} className={cn("flex items-start gap-2 text-[10px] group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                 {note.authorId !== currentUser?.uid && (
                                                                     <Avatar className="h-6 w-6 border">
                                                                         <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
@@ -432,7 +432,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                                                             <Pen className="h-3 w-3"/>
                                                                         </Button>
                                                                     )}
-                                                                    <p className="font-bold text-xs mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                                    <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
                                                                     
                                                                     {isEditing ? (
                                                                         <Textarea
@@ -448,7 +448,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                                                                 }
                                                                             }}
                                                                             autoFocus
-                                                                            className="text-xs h-auto bg-background/80 text-foreground"
+                                                                            className="text-[10px] h-auto bg-background/80 text-foreground"
                                                                         />
                                                                     ) : (
                                                                         <>
@@ -473,7 +473,7 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
                                                         onKeyDown={(e) => handleNewNote(e, promo.id)}
-                                                        className="pr-8 text-xs"
+                                                        className="pr-8 text-[10px]"
                                                      />
                                                      <div className="absolute bottom-1 right-1">
                                                         <InsertLinkPopover 
@@ -504,33 +504,32 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                     </TableBody>
                     <TableFooter>
                         <TableRow>
-                            <TableCell colSpan={4} className="text-right font-bold text-sm pr-4">Total Budget</TableCell>
-                            <TableCell className="p-1 font-bold text-sm text-right">{totalBudget.toFixed(2)}</TableCell>
-                            <TableCell colSpan={2} className="text-right font-bold text-sm pr-4">Total Spent</TableCell>
-                            <TableCell className="p-1 font-bold text-sm text-right">{totalSpent.toFixed(2)}</TableCell>
+                            <TableCell colSpan={4} className="text-right font-bold text-xs pr-4">Total Budget</TableCell>
+                            <TableCell className="p-1 font-bold text-xs text-right">{totalBudget.toFixed(2)}</TableCell>
+                            <TableCell colSpan={2} className="text-right font-bold text-xs pr-4">Total Spent</TableCell>
+                            <TableCell className="p-1 font-bold text-xs text-right">{totalSpent.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
 
                         <TableRow><TableCell colSpan={10} className="p-0 h-2"><Separator /></TableCell></TableRow>
 
                         <TableRow>
-                            <TableCell colSpan={4} className="text-right font-bold text-sm pr-4">Manual Total</TableCell>
+                            <TableCell colSpan={4} className="text-right font-bold text-xs pr-4">Total</TableCell>
                             <TableCell className="p-0 text-right">
                                 <Input 
                                     type="number" 
                                     value={manualTotal ?? ''}
                                     onChange={(e) => setManualTotal(e.target.value === '' ? null : Number(e.target.value))} 
-                                    className="h-7 text-xs p-1 bg-blue-100 font-bold border-0 text-right w-full"
-                                    placeholder="Enter Total"
+                                    className="h-7 text-[10px] p-1 bg-blue-100 font-bold border-0 text-right w-full"
                                 />
                             </TableCell>
-                             <TableCell colSpan={2} className="text-right font-bold text-sm pr-4">Old Balance</TableCell>
+                             <TableCell colSpan={2} className="text-right font-bold text-xs pr-4">Old Balance</TableCell>
                             <TableCell className="p-0 text-right">
                                 <Input 
                                     type="number" 
                                     value={oldBalance} 
                                     onChange={(e) => setOldBalance(Number(e.target.value))} 
-                                    className="h-7 text-xs p-1 bg-yellow-100 font-bold border-0 text-right w-full"
+                                    className="h-7 text-[10px] p-0 bg-yellow-100 font-bold border-0 text-right w-full"
                                 />
                             </TableCell>
                             <TableCell colSpan={2} />
@@ -539,20 +538,20 @@ export default function PaidPromotionsTable({ clientId, users, totalCashIn }: Pa
                         <TableRow><TableCell colSpan={10} className="p-0 h-1"><Separator /></TableCell></TableRow>
 
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-sm pr-4">GST 18%</TableCell>
-                            <TableCell className="p-1 font-bold text-sm text-right">{gst.toFixed(2)}</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">GST 18%</TableCell>
+                            <TableCell className="p-1 font-bold text-xs text-right">{gst.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
                         
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-sm pr-4">Grand Total</TableCell>
-                            <TableCell className="p-1 font-bold text-sm text-right">{grandTotal.toFixed(2)}</TableCell>
+                            <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">Grand Total</TableCell>
+                            <TableCell className="p-1 font-bold text-xs text-right">{grandTotal.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} />
                         </TableRow>
                         
                         <TableRow>
-                            <TableCell colSpan={7} className="text-right font-bold text-sm pr-4">Balance</TableCell>
-                            <TableCell className="p-1 font-bold text-sm text-right">
+                            <TableCell colSpan={7} className="text-right font-bold text-xs pr-4">Balance</TableCell>
+                            <TableCell className="p-1 font-bold text-xs text-right">
                                 <span className={cn(balance < 0 ? "text-red-600" : "text-green-600")}>
                                     {balance.toFixed(2)}
                                 </span>

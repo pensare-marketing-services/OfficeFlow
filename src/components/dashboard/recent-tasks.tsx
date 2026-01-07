@@ -278,7 +278,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                         statusOptions = ['Running', 'Completed'];
                     }
                 } else if (isAdmin && isOverdue) {
-                    statusOptions = ['On Work', 'Scheduled', 'Hold', 'Overdue'];
+                     statusOptions = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
                 }
                 
                 let currentStatus: string = isOverdue ? 'Overdue' : task.status;
