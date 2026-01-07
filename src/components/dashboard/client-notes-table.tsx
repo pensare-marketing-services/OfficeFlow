@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -26,7 +27,7 @@ const noteStatuses: ClientNoteStatus[] = ["Pending", "On Work", "For Approval", 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
 const statusColors: Record<ClientNoteStatus, string> = {
-    "Pending": "bg-gray-500",
+    "Pending": "bg-transparent",
     "Scheduled": "bg-gray-500",
     "On Work": "bg-orange-500",
     "For Approval": "bg-orange-500",
@@ -198,7 +199,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
     const handleStatusClick = (noteIndex: number) => {
       if (!isAdmin) return;
       const currentStatus = localNotes[noteIndex].update;
-      const statusCycle: ClientNoteStatus[] = ["Pending", "On Work", "Done"];
+      const statusCycle: ClientNoteStatus[] = ["Pending", "Scheduled", "On Work", "Done"];
       const currentIndex = statusCycle.indexOf(currentStatus);
       const nextIndex = (currentIndex + 1) % statusCycle.length;
       handleNoteChange(noteIndex, 'update', statusCycle[nextIndex]);
@@ -218,10 +219,10 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[10px] p-1"></TableHead>
+              <TableHead className="w-[10px] p-1">No</TableHead>
               <TableHead className="p-1 h-8 text-xs">Note</TableHead>
-              <TableHead className="p-1 h-8 text-xs w-[80px]">Remarks</TableHead>
               <TableHead className="p-1 h-8 text-xs w-[80px]">Status</TableHead>
+              <TableHead className="p-1 h-8 text-xs w-[80px]">Remarks</TableHead>
               <TableHead className="w-[40px] p-1"></TableHead>
             </TableRow>
           </TableHeader>
@@ -241,6 +242,22 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                     value={note.note}
                     onSave={(value) => handleNoteChange(index, 'note', value)}
                   />
+                </TableCell>
+                
+                <TableCell className="p-1">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div 
+                                className={cn("flex items-center justify-center h-7 w-full", isAdmin && "cursor-pointer")}
+                                onClick={() => handleStatusClick(index)}
+                            >
+                                <div className={cn("h-3 w-5 ", dotColor)} />
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{noteStatus}</p>
+                        </TooltipContent>
+                    </Tooltip>
                 </TableCell>
                 <TableCell className="p-0 text-center">
                     <Popover onOpenChange={(open) => { if (open) handlePopoverOpen(note.id); }}>
@@ -350,21 +367,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                         </PopoverContent>
                     </Popover>
                 </TableCell>
-                <TableCell className="p-1">
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <div 
-                                className={cn("flex items-center justify-center h-7 w-full", isAdmin && "cursor-pointer")}
-                                onClick={() => handleStatusClick(index)}
-                            >
-                                <div className={cn("h-3 w-3 rounded-full", dotColor)} />
-                            </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{noteStatus}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TableCell>
+                
                 <TableCell className="p-0 text-center">
                   <Button
                     variant="ghost"
