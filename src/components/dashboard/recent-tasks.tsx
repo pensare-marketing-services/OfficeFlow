@@ -84,7 +84,7 @@ const statusColors: Record<string, string> = {
     'For Approval': 'bg-orange-500 text-white',
     'Approved': 'bg-green-600 text-white',
     'Posted': 'bg-blue-500 text-white',
-    'Completed': 'bg-blue-500 text-white',
+    'Completed': 'bg-cyan-500 text-white',
     'Hold': 'bg-gray-500 text-white',
     'To Do': 'bg-gray-400 text-white',
     'Ready for Next': 'bg-teal-500 text-white',
