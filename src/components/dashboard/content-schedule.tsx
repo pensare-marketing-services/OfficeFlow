@@ -435,7 +435,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[40px] p-1 border-r h-8 text-center">No</TableHead>
-                                <TableHead className="w-[80px] p-1 border-r h-8">Date</TableHead>
+                                <TableHead className="w-[40px] p-1 border-r h-8">Date</TableHead>
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
                                 {currentUser?.role === 'employee' && <TableHead className="w-[120px] p-1 border-r h-8">Assigned By</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
@@ -477,12 +477,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const getDisplayedStatus = (): string => {
                                     if (isOverdue) return 'Overdue';
                                     if (isPromotionTask) {
-                                        if (isEmployee) {
-                                            return task.status === 'Completed' ? 'Completed' : 'Running';
+                                         if (isEmployee) {
+                                            return task.status;
                                         }
                                         if (isAdmin) {
-                                            if (task.status === 'On Work') return 'Active';
-                                            if (task.status === 'Completed') return 'Stopped';
+                                            if (task.status === 'Completed') return 'Active';
                                         }
                                     }
                                     if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval') {
@@ -798,3 +797,4 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
+

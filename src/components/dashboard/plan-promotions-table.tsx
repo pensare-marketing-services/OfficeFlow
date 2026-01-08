@@ -147,24 +147,13 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
 
         const linkedTask = tasks.find(t => t.id === updatedPromotion.linkedTaskId);
         
-        if (field === 'status') {
-             if (value === 'Active') {
-                if (linkedTask && linkedTask.status !== 'On Work') {
-                    updateTask(linkedTask.id, { status: 'On Work' });
-                }
-             } else if (value === 'Scheduled') {
-                 if (linkedTask && linkedTask.status !== 'Scheduled') {
-                    updateTask(linkedTask.id, { status: 'Scheduled' });
-                }
-             }
-        }
         if (field === 'assignedTo') {
             const employee = users.find(u => u.username === value);
             if (employee && updatedPromotion.campaign) {
                 if (linkedTask) {
                     updateTask(linkedTask.id, { 
                         assigneeIds: [employee.id],
-                        ...(!['On Work', 'Completed'].includes(linkedTask.status)) && { status: 'Scheduled' }
+                        status: 'Scheduled'
                     });
                 } else {
                     const newTask: Omit<Task, 'id' | 'createdAt'> = {
