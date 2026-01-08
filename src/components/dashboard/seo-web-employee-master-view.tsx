@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -106,6 +107,28 @@ const EditablePriorityInPopover: React.FC<{ task: TaskWithId }> = ({ task }) => 
 
 const EditablePriorityInGrid: React.FC<{ tasks: TaskWithId[] | null }> = ({ tasks }) => {
   const { updateTask } = useTasks();
+  const singleTask = tasks && tasks.length === 1 ? tasks[0] : null;
+  const [priority, setPriority] = useState(singleTask?.priority ?? 99);
+
+  useEffect(() => {
+    if (singleTask) {
+      setPriority(singleTask.priority ?? 99);
+    }
+  }, [singleTask]);
+
+  const handleBlur = () => {
+    if (!singleTask) return;
+    const newPriority = Number(priority);
+    if (newPriority !== (singleTask.priority ?? 99)) {
+      updateTask(singleTask.id, { priority: newPriority });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
+  };
 
   if (!tasks || tasks.length === 0) {
     return (
@@ -128,26 +151,6 @@ const EditablePriorityInGrid: React.FC<{ tasks: TaskWithId[] | null }> = ({ task
       </div>
     );
   }
-
-  const singleTask = tasks[0];
-  const [priority, setPriority] = useState(singleTask.priority ?? 99);
-
-  useEffect(() => {
-    setPriority(singleTask.priority ?? 99);
-  }, [singleTask.priority]);
-
-  const handleBlur = () => {
-    const newPriority = Number(priority);
-    if (newPriority !== (singleTask.priority ?? 99)) {
-      updateTask(singleTask.id, { priority: newPriority });
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.currentTarget.blur();
-    }
-  };
 
   return (
     <div className="h-full w-full flex items-center justify-center">
