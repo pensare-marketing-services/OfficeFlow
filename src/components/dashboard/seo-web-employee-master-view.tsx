@@ -215,11 +215,11 @@ const TaskCell = ({
                     <div
                         onClick={onSelect}
                         className={cn(
-                            'h-full w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-r px-1 gap-1 bg-pink-200',
+                            'h-full w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-r px-1 gap-1 bg-[#e5e5e5]',
                             isSelected && 'ring-1 ring-accent ring-inset'
                         )}
                     >
-                         <span className="text-pink-800 font-bold text-[10px]">
+                         <span className="font-bold text-[10px]">
                             +{tasks.length} Tasks
                         </span>
                     </div>
