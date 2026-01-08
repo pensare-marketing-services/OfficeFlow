@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { Task, UserProfile as User, ProgressNote, Client, TaskStatus, ContentType } from '@/lib/data';
@@ -61,6 +62,8 @@ const adTypes: (Task['contentType'])[] = [
 
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
+const PAGINATION_COUNT = 50;
+
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     'Approved': 'default',
@@ -96,6 +99,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const { user: currentUser } = useAuth();
   const [clients, setClients] = useState<ClientWithId[]>([]);
   const [noteInput, setNoteInput] = useState('');
+  const [visibleCount, setVisibleCount] = useState(PAGINATION_COUNT);
   const { toast } = useToast();
   const { updateTask, deleteMultipleTasks } = useTasks();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -115,6 +119,10 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         return bDate - aDate;
     });
   }, [tasks]);
+
+  const paginatedTasks = useMemo(() => {
+    return sortedTasks.slice(0, visibleCount);
+  }, [sortedTasks, visibleCount]);
 
   useEffect(() => {
     const clientsQuery = collection(db, "clients");
@@ -262,7 +270,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedTasks.map((task, index) => {
+            {paginatedTasks.map((task, index) => {
                 const assignees = (task.assigneeIds || []).map(id => getAssignee(id)).filter(Boolean) as UserWithId[];
                 const client = getClient(task.clientId);
                 const isEmployeeView = currentUser?.role === 'employee';
@@ -521,6 +529,18 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         </div>
          {tasks.length === 0 && (
             <div className="text-center text-muted-foreground p-8">No tasks to display.</div>
+        )}
+        {sortedTasks.length > visibleCount && (
+            <div className="p-2 border-t">
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full text-xs"
+                    onClick={() => setVisibleCount(prev => prev + PAGINATION_COUNT)}
+                >
+                    Load More ({sortedTasks.length - visibleCount} remaining)
+                </Button>
+            </div>
         )}
       </CardContent>
     </Card>
