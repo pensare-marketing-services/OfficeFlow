@@ -145,14 +145,10 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
         const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PlanPromotion & { id: string };
         if (!updatedPromotion) return;
 
-        const linkedTask = tasks.find(t => t.description === 'Plan Promotion' && t.clientId === client.id && t.id === updatedPromotion.linkedTaskId);
+        const linkedTask = tasks.find(t => t.id === updatedPromotion.linkedTaskId);
         
         if (field === 'status') {
-             if (value === 'Stopped') {
-                 if (linkedTask && linkedTask.status !== 'Completed') {
-                     updateTask(linkedTask.id, { status: 'Completed' });
-                 }
-             } else if (value === 'Active') {
+             if (value === 'Active') {
                 if (linkedTask && linkedTask.status !== 'On Work') {
                     updateTask(linkedTask.id, { status: 'On Work' });
                 }
@@ -166,7 +162,10 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
             const employee = users.find(u => u.username === value);
             if (employee && updatedPromotion.campaign) {
                 if (linkedTask) {
-                    updateTask(linkedTask.id, { assigneeIds: [employee.id] });
+                    updateTask(linkedTask.id, { 
+                        assigneeIds: [employee.id],
+                        ...(!['On Work', 'Completed'].includes(linkedTask.status)) && { status: 'Scheduled' }
+                    });
                 } else {
                     const newTask: Omit<Task, 'id' | 'createdAt'> = {
                         title: updatedPromotion.campaign,
@@ -275,13 +274,10 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
 
     const deletePromotion = async (id: string) => {
         const promotionToDelete = promotions.find(p => p.id === id);
-        if (!promotionToDelete) return;
-
-        await deleteDoc(doc(db, `clients/${client.id}/planPromotions`, id));
-
-        if (promotionToDelete.linkedTaskId) {
+        if (promotionToDelete?.linkedTaskId) {
             deleteTask(promotionToDelete.linkedTaskId);
         }
+        await deleteDoc(doc(db, `clients/${client.id}/planPromotions`, id));
     };
 
     const employeeUsers = useMemo(() => users.filter(u => u.role === 'employee' && u.username), [users]);
