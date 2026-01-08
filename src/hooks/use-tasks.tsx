@@ -16,7 +16,7 @@ interface TaskContextType {
     tasks: TaskWithId[];
     loading: boolean;
     error: Error | null;
-    addTask: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
+    addTask: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => Promise<string | undefined>;
     updateTask: (taskId: string, task: Partial<Task>) => void;
     deleteTask: (taskId: string) => void;
     deleteMultipleTasks: (taskIds: string[]) => Promise<void>;
@@ -75,6 +75,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 createdAt: serverTimestamp(),
                 activeAssigneeIndex: 0,
             });
+            return docRef.id;
 
         } catch (e) {
             console.error("Error adding document: ", e);

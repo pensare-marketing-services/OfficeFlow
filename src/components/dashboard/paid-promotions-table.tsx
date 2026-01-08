@@ -99,7 +99,6 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
     const { user: currentUser } = useAuth();
     const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
-    const [oldBalance, setOldBalance] = useState(0);
     const { addTask, updateTask, deleteTask, tasks } = useTasks();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -108,13 +107,19 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
     const [editingText, setEditingText] = useState('');
     const isAdmin = currentUser?.role === 'admin';
     const [mainBudget, setMainBudget] = useState<number | ''>(client.paidPromotionsMainBudget || 0);
+    const [oldBalance, setOldBalance] = useState<number>(client.paidPromotionsOldBalance || 0);
 
     useEffect(() => {
         setMainBudget(client.paidPromotionsMainBudget || 0);
-    }, [client.paidPromotionsMainBudget]);
+        setOldBalance(client.paidPromotionsOldBalance || 0);
+    }, [client.paidPromotionsMainBudget, client.paidPromotionsOldBalance]);
 
     const handleMainBudgetChange = () => {
         onClientUpdate({ paidPromotionsMainBudget: Number(mainBudget) || 0 });
+    };
+
+    const handleOldBalanceChange = () => {
+        onClientUpdate({ paidPromotionsOldBalance: Number(oldBalance) || 0 });
     };
 
     useEffect(() => {
@@ -133,14 +138,14 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
         return () => unsubscribe();
     }, [client.id]);
 
-    const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any, syncFromTask = false) => {
+    const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any) => {
         const promotionRef = doc(db, `clients/${client.id}/promotions`, id);
         await updateDoc(promotionRef, { [field]: value });
 
         const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PaidPromotion & { id: string };
         if (!updatedPromotion) return;
-
-        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === updatedPromotion.campaign && t.clientId === client.id);
+        
+        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.clientId === client.id && t.id === updatedPromotion.linkedTaskId);
 
         if (field === 'status') {
              if (value === 'Stopped') {
@@ -174,7 +179,12 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                         clientId: client.id,
                         contentType: updatedPromotion.adType as ContentType,
                     };
-                    addTask(newTask);
+                    // addTask returns the id of the new task
+                    const newTaskId = await addTask(newTask);
+                    if (newTaskId) {
+                        // Link the new task to the promotion
+                        await updateDoc(promotionRef, { linkedTaskId: newTaskId });
+                    }
                 }
             } else if (linkedTask && value === 'unassigned') {
                 updateTask(linkedTask.id, { assigneeIds: [] });
@@ -191,7 +201,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
         }
     };
 
-    const addNote = (promoId: string, note: Partial<ProgressNote>) => {
+    const addNote = async (promoId: string, note: Partial<ProgressNote>) => {
         if (!currentUser) return;
         if (!note.note?.trim() && !note.imageUrl) return;
 
@@ -205,12 +215,14 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
             authorName: currentUser.username,
         };
         const updatedRemarks = [...(promo.remarks || []), newNote];
-        handlePromotionChange(promoId, 'remarks', updatedRemarks);
+        await handlePromotionChange(promoId, 'remarks', updatedRemarks);
 
-        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === promo.campaign && t.clientId === client.id);
-        if (linkedTask) {
-            const updatedTaskNotes = [...(linkedTask.progressNotes || []), newNote];
-            updateTask(linkedTask.id, { progressNotes: updatedTaskNotes });
+        if (promo.linkedTaskId) {
+            const linkedTask = tasks.find(t => t.id === promo.linkedTaskId);
+            if (linkedTask) {
+                const updatedTaskNotes = [...(linkedTask.progressNotes || []), newNote];
+                updateTask(linkedTask.id, { progressNotes: updatedTaskNotes });
+            }
         }
     };
 
@@ -233,7 +245,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
         setEditingText(remark.note || '');
     };
 
-    const handleSaveRemark = (promoId: string, remarkIndex: number) => {
+    const handleSaveRemark = async (promoId: string, remarkIndex: number) => {
         if (!editingRemark) return;
         const promo = promotions.find(p => p.id === promoId);
         if (!promo || !promo.remarks) return;
@@ -241,7 +253,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
         const updatedRemarks = [...promo.remarks];
         updatedRemarks[remarkIndex] = { ...updatedRemarks[remarkIndex], note: editingText };
 
-        handlePromotionChange(promoId, 'remarks', updatedRemarks);
+        await handlePromotionChange(promoId, 'remarks', updatedRemarks);
 
         setEditingRemark(null);
         setEditingText('');
@@ -269,16 +281,8 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
 
         await deleteDoc(doc(db, `clients/${client.id}/promotions`, id));
 
-        if (promotionToDelete.campaign) {
-            const linkedTask = tasks.find(t =>
-                t.description === 'Paid Promotion' &&
-                t.title === promotionToDelete.campaign &&
-                t.clientId === client.id
-            );
-
-            if (linkedTask) {
-                deleteTask(linkedTask.id);
-            }
+        if (promotionToDelete.linkedTaskId) {
+            deleteTask(promotionToDelete.linkedTaskId);
         }
     };
 
@@ -293,11 +297,16 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
     const balance = (totalCashIn + oldBalance) - grandTotal;
 
 
-    const getPromotionDisplayStatus = (promo: PaidPromotion): PaidPromotion['status'] => {
-        const linkedTask = tasks.find(t => t.description === 'Paid Promotion' && t.title === promo.campaign && t.clientId === client.id);
-        if (linkedTask?.status === 'Completed' && promo.status !== 'Stopped') {
+    const getPromotionDisplayStatus = (promo: PaidPromotion & { id: string }): PaidPromotion['status'] => {
+        if (promo.status === 'Stopped') {
+            return 'Stopped';
+        }
+        
+        const linkedTask = tasks.find(t => t.id === promo.linkedTaskId);
+        if (linkedTask?.status === 'Completed') {
             return 'Active';
         }
+
         return promo.status;
     };
 
@@ -531,6 +540,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                                     type="number"
                                     value={oldBalance}
                                     onChange={(e) => setOldBalance(Number(e.target.value))}
+                                    onBlur={handleOldBalanceChange}
                                     className="h-7 text-[11px] p-0 bg-yellow-100 font-bold border-0 text-right w-full"
                                     placeholder="Old Balance"
                                 />

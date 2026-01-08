@@ -241,6 +241,14 @@
         "planPromotionsMainBudget": {
             "type": "number",
             "description": "The main budget manually entered for Plan Promotions."
+        },
+        "paidPromotionsOldBalance": {
+            "type": "number",
+            "description": "The old balance for Paid Promotions."
+        },
+        "planPromotionsOldBalance": {
+            "type": "number",
+            "description": "The old balance for Plan Promotions."
         }
       },
       "required": [
@@ -322,6 +330,10 @@
         },
          "clientId": {
           "type": "string"
+        },
+        "linkedTaskId": {
+          "type": "string",
+          "description": "The ID of the task linked to this promotion."
         }
       },
       "required": [
@@ -387,6 +399,10 @@
         },
          "clientId": {
           "type": "string"
+        },
+        "linkedTaskId": {
+          "type": "string",
+          "description": "The ID of the task linked to this promotion."
         }
       },
       "required": [
@@ -502,12 +518,6 @@
         "$ref": "#/entities/SeoTask"
       },
       "description": "Stores all SEO tasks for a specific client."
-    },
-    "/notifications/{notificationId}": {
-      "schema": {
-        "$ref": "#/entities/Notification"
-      },
-      "description": "Stores notifications for users."
     }
   }
 }
