@@ -62,17 +62,8 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         tasksToFilter = tasks;
         break;
     }
-
-    return tasksToFilter.sort((a,b) => {
-        const priorityA = a.priority || 99;
-        const priorityB = b.priority || 99;
-        if (priorityA !== priorityB) {
-            return priorityA - priorityB;
-        }
-        // Sort by creation date descending (newest first)
-        return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
-    });
-
+    // Sorting will be handled by the RecentTasks component
+    return tasksToFilter;
   }, [tasks, taskFilter, viewMode, overdueTasks]);
   
   const dmTasks = filteredTasks.filter(task => !['SEO', 'Website', 'Web Blogs', 'Other'].includes(task.contentType || ''));
