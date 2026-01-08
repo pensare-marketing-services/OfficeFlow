@@ -108,7 +108,8 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         if (priorityA !== priorityB) {
             return priorityA - priorityB;
         }
-        return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0);
+        // Sort by creation date descending (newest first)
+        return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
     });
   }, [tasks]);
 
@@ -416,7 +417,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                                 )}
                                                                 <div className={cn("max-w-[75%] rounded-lg p-3 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                     {isAdmin && !isEditing && (
-                                                                      <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2 " onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                      <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2" onClick={() => handleEditRemark(task, remarkIndex)}>
                                                                         <Pen className="h-2 w-2"/>
                                                                       </Button>
                                                                     )}
