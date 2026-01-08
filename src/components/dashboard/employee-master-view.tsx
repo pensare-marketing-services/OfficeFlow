@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -103,36 +104,50 @@ const EditablePriorityInPopover: React.FC<{ task: TaskWithId }> = ({ task }) => 
     );
 };
 
-const EditablePriorityInGrid: React.FC<{ task: TaskWithId | null }> = ({ task }) => {
+const EditablePriorityInGrid: React.FC<{ tasks: TaskWithId[] | null }> = ({ tasks }) => {
   const { updateTask } = useTasks();
-  const [priority, setPriority] = useState(task?.priority ?? 99);
-
-  useEffect(() => {
-    setPriority(task?.priority ?? 99);
-  }, [task?.priority]);
-
-  const handleBlur = () => {
-    if (!task) return;
-    
-    const newPriority = Number(priority);
-    if (newPriority !== (task.priority ?? 99)) {
-      updateTask(task.id, { priority: newPriority });
-    }
-  };
   
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-          e.currentTarget.blur();
-      }
-  }
-
-  if (!task) {
+  if (!tasks || tasks.length === 0) {
     return (
       <div className="h-full w-full flex items-center justify-center">
         <span className="text-muted-foreground/40">-</span>
       </div>
     );
   }
+
+  if (tasks.length > 1) {
+    const sortedPriorities = tasks
+      .map(t => t.priority ?? 99)
+      .sort((a, b) => a - b)
+      .join(', ');
+    return (
+      <div className="h-full w-full flex items-center justify-center px-1">
+        <span className="text-[10px] text-muted-foreground truncate" title={sortedPriorities}>
+            {sortedPriorities}
+        </span>
+      </div>
+    );
+  }
+
+  const singleTask = tasks[0];
+  const [priority, setPriority] = useState(singleTask.priority ?? 99);
+
+  useEffect(() => {
+    setPriority(singleTask.priority ?? 99);
+  }, [singleTask.priority]);
+
+  const handleBlur = () => {
+    const newPriority = Number(priority);
+    if (newPriority !== (singleTask.priority ?? 99)) {
+      updateTask(singleTask.id, { priority: newPriority });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
+  };
 
   return (
     <div className="h-full w-full flex items-center justify-center">
@@ -318,7 +333,7 @@ const TaskCell = ({
                                 )}
                             >
                                 {currentUser?.role === 'admin' && !isEditing && (
-                                  <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2 " onClick={() => handleEditRemark(singleTask, remarkIndex)}>
+                                  <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2" onClick={() => handleEditRemark(singleTask, remarkIndex)}>
                                     <Pen className="h-2 w-2"/>
                                   </Button>
                                 )}
@@ -724,7 +739,6 @@ const DailyTaskTable: React.FC<{
                     >
                       {employees.map((employee) => {
                         const tasksForCell = clientTasks.get(`${client.id}-${employee.id}`);
-                        const singleTask = tasksForCell && tasksForCell.length === 1 ? tasksForCell[0] : null;
                         
                         return (
                           <React.Fragment key={employee.id}>
@@ -740,7 +754,7 @@ const DailyTaskTable: React.FC<{
                               )}
                             </TableCell>
                             <TableCell className="p-0 border-r" style={{ width: `${orderColWidth}px` }}>
-                                <EditablePriorityInGrid task={singleTask} />
+                                <EditablePriorityInGrid tasks={tasksForCell || null} />
                             </TableCell>
                           </React.Fragment>
                         );
