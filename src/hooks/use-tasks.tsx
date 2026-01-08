@@ -108,10 +108,13 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [currentUser]);
     
     const deleteTask = useCallback(async (taskId: string) => {
+        // Optimistically update the UI
+        setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
         try {
             await deleteDoc(doc(db, 'tasks', taskId));
         } catch (e) {
             console.error("Error deleting document: ", e);
+             // If the delete fails, we could potentially add the task back to the list
             setError(new Error('Failed to delete task. Please check your network connection.'));
         }
     }, []);
