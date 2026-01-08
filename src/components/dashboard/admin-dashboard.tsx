@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -68,7 +69,8 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         if (priorityA !== priorityB) {
             return priorityA - priorityB;
         }
-        return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0);
+        // Sort by creation date descending (newest first)
+        return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
     });
 
   }, [tasks, taskFilter, viewMode, overdueTasks]);
