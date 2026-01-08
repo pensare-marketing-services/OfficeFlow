@@ -107,7 +107,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
     const [editingRemark, setEditingRemark] = useState<{ promoId: string; remarkIndex: number } | null>(null);
     const [editingText, setEditingText] = useState('');
     const isAdmin = currentUser?.role === 'admin';
-    const [mainBudget, setMainBudget] = useState<number | ''>(client.planPromotionsMainBudget || '');
+    const [mainBudget, setMainBudget] = useState<number | ''>(client.planPromotionsMainBudget || 0);
 
     useEffect(() => {
         setMainBudget(client.planPromotionsMainBudget || 0);
@@ -133,42 +133,32 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
         return () => unsubscribe();
     }, [client.id]);
 
-    useEffect(() => {
-        tasks.forEach(task => {
-            if (task.description === 'Plan Promotion' && task.clientId === client.id) {
-                const promotion = promotions.find(p => p.campaign === task.title);
-                if (promotion) {
-                    let promotionStatus: PlanPromotion['status'] | null = null;
-                    if (task.status === 'Completed' && promotion.status !== 'Stopped') {
-                        promotionStatus = 'Stopped';
-                    } else if (task.status === 'On Work' && promotion.status !== 'Active') {
-                        promotionStatus = 'Active';
-                    } else if (task.status === 'Scheduled' && promotion.status !== 'Scheduled') {
-                        promotionStatus = 'Scheduled';
-                    }
-
-                    if (promotionStatus && promotionStatus !== promotion.status) {
-                        handlePromotionChange(promotion.id, 'status', promotionStatus, true); // Pass syncFromTask = true
-                    }
-                }
-            }
-        });
-    }, [tasks, promotions, client.id]);
-
     const handlePromotionChange = async (id: string, field: keyof PlanPromotion, value: any, syncFromTask = false) => {
         const promotionRef = doc(db, `clients/${client.id}/planPromotions`, id);
         await updateDoc(promotionRef, { [field]: value });
-
-        if (syncFromTask) return; // Prevent feedback loop
 
         const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PlanPromotion & { id: string };
         if (!updatedPromotion) return;
 
         const linkedTask = tasks.find(t => t.description === 'Plan Promotion' && t.title === updatedPromotion.campaign && t.clientId === client.id);
 
+        if (field === 'status') {
+             if (value === 'Stopped') {
+                 if (linkedTask && linkedTask.status !== 'Completed') {
+                     updateTask(linkedTask.id, { status: 'Completed' });
+                 }
+             } else if (value === 'Active') {
+                if (linkedTask && linkedTask.status !== 'On Work') {
+                    updateTask(linkedTask.id, { status: 'On Work' });
+                }
+             } else if (value === 'Scheduled') {
+                 if (linkedTask && linkedTask.status !== 'Scheduled') {
+                    updateTask(linkedTask.id, { status: 'Scheduled' });
+                }
+             }
+        }
         if (field === 'assignedTo') {
             const employee = users.find(u => u.username === value);
-            // Only create a task if an employee is assigned AND the campaign has a name
             if (employee && updatedPromotion.campaign) {
                 if (linkedTask) {
                     updateTask(linkedTask.id, { assigneeIds: [employee.id] });
@@ -189,12 +179,6 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
             } else if (linkedTask && value === 'unassigned') {
                 updateTask(linkedTask.id, { assigneeIds: [] });
             }
-        }
-        if (field === 'status' && linkedTask) {
-            let taskStatus: Task['status'] = 'Scheduled';
-            if (value === 'Active') taskStatus = 'On Work';
-            if (value === 'Stopped') taskStatus = 'Completed';
-            updateTask(linkedTask.id, { status: taskStatus });
         }
         if (field === 'campaign' && linkedTask) {
             updateTask(linkedTask.id, { title: value });
@@ -223,7 +207,6 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
         const updatedRemarks = [...(promo.remarks || []), newNote];
         handlePromotionChange(promoId, 'remarks', updatedRemarks);
 
-        // Sync with task
         const linkedTask = tasks.find(t => t.description === 'Plan Promotion' && t.title === promo.campaign && t.clientId === client.id);
         if (linkedTask) {
             const updatedTaskNotes = [...(linkedTask.progressNotes || []), newNote];
@@ -284,10 +267,8 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
         const promotionToDelete = promotions.find(p => p.id === id);
         if (!promotionToDelete) return;
 
-        // First, delete the promotion document
         await deleteDoc(doc(db, `clients/${client.id}/planPromotions`, id));
 
-        // Then, find and delete the associated task
         if (promotionToDelete.campaign) {
             const linkedTask = tasks.find(t =>
                 t.description === 'Plan Promotion' &&
@@ -310,6 +291,14 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
     const grandTotal = totalSpent + gst;
 
     const balance = (totalCashIn + oldBalance) - grandTotal;
+
+    const getPromotionDisplayStatus = (promo: PlanPromotion): PlanPromotion['status'] => {
+        const linkedTask = tasks.find(t => t.description === 'Plan Promotion' && t.title === promo.campaign && t.clientId === client.id);
+        if (linkedTask?.status === 'Completed' && promo.status !== 'Stopped') {
+            return 'Active';
+        }
+        return promo.status;
+    };
 
 
     return (
@@ -350,7 +339,9 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                     </TableHeader>
                     <TableBody>
                         {loading && <TableRow><TableCell colSpan={10} className="h-24 text-center">Loading...</TableCell></TableRow>}
-                        {!loading && promotions.map((promo, index) => (
+                        {!loading && promotions.map((promo, index) => {
+                            const displayStatus = getPromotionDisplayStatus(promo);
+                            return (
                             <TableRow key={promo.id}>
                                 <TableCell className="px-2 py-1 text-[10px] text-center">{index + 1}</TableCell>
                                 <TableCell className="p-0">
@@ -396,8 +387,8 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                 </TableCell>
                                 <TableCell className="p-0 text-[10px]"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" className="text-right" /></TableCell>
                                 <TableCell className="p-1">
-                                    <Select value={promo.status} onValueChange={(v: PlanPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7  text-[10px]", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
+                                    <Select value={displayStatus} onValueChange={(v: PlanPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
+                                        <SelectTrigger className={cn("h-7  text-[10px]", displayStatus === 'Stopped' ? 'bg-red-500 text-white' : displayStatus === 'Active' ? 'bg-green-500 text-white' : displayStatus === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
                                             <SelectValue />
                                             <SelectPrimitive.Icon asChild>
                                                 <span />
@@ -513,7 +504,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                     </Button>
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        )})}
                         {!loading && promotions.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">

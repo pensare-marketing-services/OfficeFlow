@@ -267,16 +267,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             });
             return;
         }
-
-        const isPromotionTask = task.description === 'Paid Promotion' || task.description === 'Plan Promotion';
+        
         let finalStatus = newStatus;
-        
-        if (isPromotionTask) {
-            if (newStatus === 'Active') finalStatus = 'On Work';
-            if (newStatus === 'Stopped') finalStatus = 'Completed';
-            if (newStatus === 'Completed') finalStatus = 'Completed';
-        }
-        
         let updatePayload: Partial<Task> = { status: finalStatus as TaskStatus };
 
         if (['Posted', 'Completed'].includes(finalStatus)) {
@@ -482,28 +474,24 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     .join(', ');
 
 
-                                const getDisplayedStatusForEmployee = (): string => {
+                                const getDisplayedStatus = (): string => {
                                     if (isOverdue) return 'Overdue';
                                     if (isPromotionTask) {
-                                        if (task.status === 'Completed') return 'Completed';
+                                        if (isEmployee) {
+                                            return task.status === 'Completed' ? 'Completed' : 'Running';
+                                        }
+                                        if (isAdmin) {
+                                            if (task.status === 'On Work') return 'Active';
+                                            if (task.status === 'Completed') return 'Stopped';
+                                        }
                                     }
-                                    if (task.status === 'Scheduled') return 'Scheduled';
-                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval' ) {
+                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval') {
                                        return 'On Work';
                                     }
                                     return task.status;
                                 }
 
-                                const getDisplayedStatusForAdmin = (): string => {
-                                     if (isOverdue) return 'Overdue';
-                                     if(isPromotionTask) {
-                                        if(task.status === 'On Work') return 'Active';
-                                        if(task.status === 'Completed') return 'Stopped';
-                                     }
-                                     return task.status;
-                                }
-
-                                let finalDisplayedStatus = isEmployee ? getDisplayedStatusForEmployee() : getDisplayedStatusForAdmin();
+                                let finalDisplayedStatus = getDisplayedStatus();
                                 
                                 const availableStatuses = getAvailableStatuses(task);
                                 
@@ -810,6 +798,3 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
-
-
-    
