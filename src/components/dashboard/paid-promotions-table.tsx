@@ -140,10 +140,11 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                 if (promotion) {
                     let promotionStatus: PaidPromotion['status'] | null = null;
 
-                    if (task.status === 'On Work' && promotion.status !== 'Active') {
+                    if (task.status === 'Completed' && promotion.status !== 'Active') {
                         promotionStatus = 'Active';
-                    } else if (task.status === 'Completed' && promotion.status !== 'Stopped') {
-                        promotionStatus = 'Stopped';
+                    } else if (task.status === 'On Work' && promotion.status !== 'Active') {
+                        // This case might be obsolete if emp only sees "Complete"
+                         promotionStatus = 'Active';
                     } else if (task.status === 'Scheduled' && promotion.status !== 'Scheduled') {
                         promotionStatus = 'Scheduled';
                     }
@@ -321,7 +322,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                     Total Budget
                     <Input
                         placeholder="Budget..."
-                        className="h-7 w-28 text-[10px] text-center text-right"
+                        className="h-7 w-28 text-[10px] text-center text-right placeholder:text-[10px]"
                         type="number"
                         value={mainBudget}
                         onChange={(e) => setMainBudget(e.target.value === '' ? '' : Number(e.target.value))}
@@ -540,7 +541,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                                     type="number"
                                     value={oldBalance}
                                     onChange={(e) => setOldBalance(Number(e.target.value))}
-                                    className="h-7 text-[10px] p-0 bg-yellow-100 font-bold border-0 text-right w-full"
+                                    className="h-7 text-[11px] p-0 bg-yellow-100 font-bold border-0 text-right w-full"
                                     placeholder="Old Balance"
                                 />
                             </TableCell>
@@ -555,7 +556,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                             <TableCell colSpan={2} />
                         </TableRow>
                         <TableRow>
-                        <TableCell colSpan={4} className="text-right font-bold text-[10px] pr-4">Total Budget</TableCell>
+                        <TableCell colSpan={4} className="text-right font-bold text-[10px] pr-4">Budget</TableCell>
                         <TableCell className="p-1 font-bold text-[10px] text-right">{totalBudget.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} className="text-right font-bold text-[10px] pr-4">Grand Total</TableCell>
                             <TableCell className="p-1 font-bold text-[10px] text-right">{grandTotal.toFixed(2)}</TableCell>

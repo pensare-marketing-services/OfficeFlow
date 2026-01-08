@@ -268,12 +268,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             return;
         }
 
-        const isPromotionTask = task.description === 'Paid Promotion';
+        const isPromotionTask = task.description === 'Paid Promotion' || task.description === 'Plan Promotion';
         let finalStatus = newStatus;
+        
         if (isPromotionTask) {
-            if (newStatus === 'Running') finalStatus = 'On Work';
             if (newStatus === 'Active') finalStatus = 'On Work';
             if (newStatus === 'Stopped') finalStatus = 'Completed';
+            if (newStatus === 'Completed') finalStatus = 'Completed';
         }
         
         let updatePayload: Partial<Task> = { status: finalStatus as TaskStatus };
@@ -396,11 +397,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     }, [users]);
     
     const getAvailableStatuses = (task: Task) => {
-        const isPromotionTask = task.description === 'Paid Promotion';
+        const isPromotionTask = task.description === 'Paid Promotion' || task.description === 'Plan Promotion';
         
         if (currentUser?.role === 'employee' && isPromotionTask) {
-             // Employees can only mark it as 'Running'
-            return ['Running'];
+             return ['Completed'];
         }
         
         if (currentUser?.role === 'admin') {
@@ -467,12 +467,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const isEmployee = currentUser?.role === 'employee';
                                 const isAdmin = currentUser?.role === 'admin';
                                 
+                                const isPromotionTask = task.description === 'Paid Promotion' || task.description === 'Plan Promotion';
+
                                 const now = new Date();
                                 const deadline = new Date(task.deadline);
                                 deadline.setHours(23, 59, 59, 999);
-                                const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && deadline < now;
+                                const isOverdue = !isPromotionTask && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && deadline < now;
                                 
-                                const isPromotionTask = task.description === 'Paid Promotion';
                                 const isStandardTask = !isPromotionTask;
                                 
                                 const clientAssignedEmployees = client?.employeeIds
@@ -484,7 +485,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const getDisplayedStatusForEmployee = (): string => {
                                     if (isOverdue) return 'Overdue';
                                     if (isPromotionTask) {
-                                        if (task.status === 'On Work') return 'Running';
                                         if (task.status === 'Completed') return 'Completed';
                                     }
                                     if (task.status === 'Scheduled') return 'Scheduled';

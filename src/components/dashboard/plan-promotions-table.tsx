@@ -139,11 +139,10 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                 const promotion = promotions.find(p => p.campaign === task.title);
                 if (promotion) {
                     let promotionStatus: PlanPromotion['status'] | null = null;
-
-                    if (task.status === 'On Work' && promotion.status !== 'Active') {
+                    if (task.status === 'Completed' && promotion.status !== 'Active') {
                         promotionStatus = 'Active';
-                    } else if (task.status === 'Completed' && promotion.status !== 'Stopped') {
-                        promotionStatus = 'Stopped';
+                    } else if (task.status === 'On Work' && promotion.status !== 'Active') {
+                        promotionStatus = 'Active';
                     } else if (task.status === 'Scheduled' && promotion.status !== 'Scheduled') {
                         promotionStatus = 'Scheduled';
                     }
@@ -321,7 +320,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                     Total Budget
                     <Input
                         placeholder="Budget..."
-                        className="h-7 w-28 text-[10px] text-center text-right"
+                        className="h-7 w-28 text-[11px] text-center text-right placeholder:text-[10px]"
                         type="number"
                         value={mainBudget}
                         onChange={(e) => setMainBudget(e.target.value === '' ? '' : Number(e.target.value))}
@@ -555,7 +554,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                         </TableRow>
 
                         <TableRow>
-                        <TableCell colSpan={4} className="text-right font-bold text-[10px] pr-4">Total Budget</TableCell>
+                        <TableCell colSpan={4} className="text-right font-bold text-[10px] pr-4">Budget</TableCell>
                         <TableCell className="p-1 font-bold text-[10px] text-right">{totalBudget.toFixed(2)}</TableCell>
                             <TableCell colSpan={2} className="text-right font-bold text-[10px] pr-4">Grand Total</TableCell>
                             <TableCell className="p-1 font-bold text-[10px] text-right">{grandTotal.toFixed(2)}</TableCell>
