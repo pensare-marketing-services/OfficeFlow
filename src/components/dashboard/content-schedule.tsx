@@ -295,7 +295,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         if (!task) return;
         const newAssigneeIds = [...(task.assigneeIds || [])];
         newAssigneeIds[index] = newId;
-        const finalAssignees = [...new Set(newAssigneeIds.filter(id => id))];
+        const finalAssignees = [...new Set(newAssigneeIds.filter(id => id && id !== 'unassigned'))];
         onTaskUpdate({ id: taskId, assigneeIds: finalAssignees, activeAssigneeIndex: 0 }); // Reset index on change
     };
 
@@ -597,17 +597,19 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
                                         <div className="flex items-center justify-start gap-1 p-1">
-                                            {[0, 1].map(i => (
+                                            {[0, 1, 2].map(i => {
+                                                const otherAssigneeIds = assigneeIds.filter((_, idx) => idx !== i);
+                                                return (
                                                 <div key={i} className="flex-1 min-w-0">
                                                     <AssigneeSelect 
                                                         assigneeId={assigneeIds[i]}
                                                         onAssigneeChange={(newId) => handleAssigneeChange(task.id, i, newId)}
-                                                        employeeUsers={employeeUsers.filter(u => u.id !== assigneeIds[1-i])} // filter out the other assignee
+                                                        employeeUsers={employeeUsers.filter(u => !otherAssigneeIds.includes(u.id))}
                                                         isActive={isMultiAssignee && activeAssigneeIndex === i}
                                                         isEditable={isAdmin}
                                                     />
                                                 </div>
-                                            ))}
+                                            )})}
                                         </div>
                                     </TableCell>
                                     <TableCell className="p-0 border-r">
@@ -704,7 +706,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                                     )}
                                                                     <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                         {isAdmin && !isEditing && (
-                                                                            <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2 " onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                            <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-4 w-4" onClick={() => handleEditRemark(task, remarkIndex)}>
                                                                                 <Pen className="h-2 w-2"/>
                                                                             </Button>
                                                                         )}

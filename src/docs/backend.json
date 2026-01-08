@@ -89,7 +89,7 @@
           "items": {
             "type": "string"
           },
-          "description": "The UIDs of the users this task is assigned to. Can have up to 2 assignees."
+          "description": "The UIDs of the users this task is assigned to. Can have up to 3 assignees."
         },
         "clientId": {
           "type": "string",
