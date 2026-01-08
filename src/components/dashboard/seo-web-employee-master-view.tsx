@@ -36,10 +36,10 @@ interface SeoWebEmployeeMasterViewProps {
 const statusBackgroundColors: Record<string, string> = {
   'Scheduled': 'bg-transparent',
   'On Work': 'bg-gray-500/40',
-  'For Approval': 'bg-orange-500/40',
-  'Approved': 'bg-green-600/40',
-  'Posted': 'bg-blue-500/40',
-  'Completed': 'bg-cyan-500/40',
+  'For Approval': 'bg-[#ffb131]',
+  'Approved': 'bg-[#42f925]',
+  'Posted': 'bg-[#32fafe]',
+  'Completed': 'bg-[#32fafe]',
   'Hold': 'bg-gray-500/40',
   'To Do': 'bg-gray-400/40',
   'Ready for Next': 'bg-teal-500/40',
@@ -53,10 +53,10 @@ const statusBackgroundColors: Record<string, string> = {
 const statusPopupColors: Record<string, string> = {
     'Scheduled': 'bg-gray-200 text-foreground',
     'On Work': 'bg-gray-500 text-white',
-    'For Approval': 'bg-orange-500 text-white',
-    'Approved': 'bg-green-600 text-white',
-    'Posted': 'bg-blue-500 text-white',
-    'Completed': 'bg-cyan-500 text-white',
+    'For Approval': 'bg-[#ffb131] text-white',
+    'Approved': 'bg-[#42f925] text-white',
+    'Posted': 'bg-[#32fafe] text-white',
+    'Completed': 'bg-[#32fafe] text-white',
     'Hold': 'bg-gray-500 text-white',
     'To Do': 'bg-gray-400 text-white',
     'Ready for Next': 'bg-teal-500 text-white',
@@ -108,8 +108,10 @@ const EditablePriorityInPopover: React.FC<{ task: TaskWithId }> = ({ task }) => 
 const EditablePriorityInGrid: React.FC<{ tasks: TaskWithId[] | null }> = ({ tasks }) => {
   const { updateTask } = useTasks();
   const singleTask = tasks && tasks.length === 1 ? tasks[0] : null;
-  const [priority, setPriority] = useState(singleTask?.priority ?? 99);
 
+  // Hooks are called unconditionally
+  const [priority, setPriority] = useState(singleTask?.priority ?? 99);
+  
   useEffect(() => {
     if (singleTask) {
       setPriority(singleTask.priority ?? 99);
@@ -130,6 +132,7 @@ const EditablePriorityInGrid: React.FC<{ tasks: TaskWithId[] | null }> = ({ task
     }
   };
 
+  // Conditional rendering happens after hooks
   if (!tasks || tasks.length === 0) {
     return (
       <div className="h-full w-full flex items-center justify-center">
@@ -152,6 +155,7 @@ const EditablePriorityInGrid: React.FC<{ tasks: TaskWithId[] | null }> = ({ task
     );
   }
 
+  // This part is for a single task
   return (
     <div className="h-full w-full flex items-center justify-center">
       <Input
