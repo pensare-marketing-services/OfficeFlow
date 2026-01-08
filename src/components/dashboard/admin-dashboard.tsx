@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -36,6 +37,9 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const overdueTasks = useMemo(() => {
     const now = new Date();
     return tasks.filter(task => {
+        if (task.description === 'Paid Promotion' || task.description === 'Plan Promotion') {
+            return false;
+        }
         const deadline = new Date(task.deadline);
         deadline.setHours(23, 59, 59, 999); // Consider deadline as end of day
         return deadline < now && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status);
