@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -8,6 +9,7 @@ import { ClipboardList, CheckCircle2, Hourglass, AlertTriangle, PauseCircle } fr
 import ContentSchedule from './content-schedule';
 import { useTasks } from '@/hooks/use-tasks';
 import { useUsers } from '@/hooks/use-users';
+import { startOfDay } from 'date-fns';
 
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
@@ -58,14 +60,18 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
   const filteredTasks = useMemo(() => {
     const getSortedTasks = (tasksToSort: (Task & {id: string})[]) => {
         return tasksToSort.sort((a, b) => {
-            const dateA = new Date(a.deadline).getTime();
-            const dateB = new Date(b.deadline).getTime();
+            const dateA = startOfDay(new Date(a.deadline)).getTime();
+            const dateB = startOfDay(new Date(b.deadline)).getTime();
+
+            // Sort by deadline descending (newest first)
             if (dateA !== dateB) {
-                return dateB - dateA; // Newest deadline first
+                return dateB - dateA;
             }
+
+            // If deadlines are the same, sort by priority ascending (lower is higher priority)
             const priorityA = a.priority || 99;
             const priorityB = b.priority || 99;
-            return priorityA - priorityB; // Lower priority number first
+            return priorityA - priorityB;
         });
     }
 
