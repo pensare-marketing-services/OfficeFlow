@@ -55,18 +55,14 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
   const filteredTasks = useMemo(() => {
     const getSortedTasks = (tasksToSort: (Task & {id: string})[]) => {
         return tasksToSort.sort((a, b) => {
-            // Sort by deadline: latest date first (descending)
             const dateA = new Date(a.deadline).getTime();
             const dateB = new Date(b.deadline).getTime();
-            
             if (dateA !== dateB) {
-                return dateB - dateA;
+                return dateB - dateA; // Newest deadline first
             }
-
-            // Fallback to priority if deadlines are the same
             const priorityA = a.priority || 99;
             const priorityB = b.priority || 99;
-            return priorityA - priorityB;
+            return priorityA - priorityB; // Lower priority number first
         });
     }
 

@@ -211,7 +211,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     const [noteInput, setNoteInput] = useState('');
     const { toast } = useToast();
     const [clients, setClients] = useState<ClientWithId[]>(propClients || []);
-    const [sortConfig, setSortConfig] = useState<{ key: 'priority'; direction: 'ascending' | 'descending' } | null>(null);
     const [openedChats, setOpenedChats] = useState<Set<string>>(new Set());
     const { updateTaskStatus } = useTasks();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -223,29 +222,18 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     const sortedTasks = useMemo(() => {
         let sortableTasks = [...tasks];
         sortableTasks.sort((a, b) => {
-            const aValue = a.priority || 99;
-            const bValue = b.priority || 99;
-            if (aValue < bValue) return -1;
-            if (aValue > bValue) return 1;
-
-            // If priorities are equal, sort by creation time (older first)
-            const aDate = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
-            const bDate = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
-            return aDate - bDate;
+            const dateA = new Date(a.deadline).getTime();
+            const dateB = new Date(b.deadline).getTime();
+            if (dateA !== dateB) {
+                return dateB - dateA; // Newest deadline first
+            }
+            const priorityA = a.priority || 99;
+            const priorityB = b.priority || 99;
+            return priorityA - priorityB; // Lower priority number first
         });
         return sortableTasks;
     }, [tasks]);
 
-    const requestSort = (key: 'priority') => {
-        let direction: 'ascending' | 'descending' = 'ascending';
-        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        } else if (sortConfig && sortConfig.key === key && sortConfig.direction === 'descending') {
-            setSortConfig(null);
-            return;
-        }
-        setSortConfig({ key, direction });
-    };
 
     useEffect(() => {
         if (propClients) {
