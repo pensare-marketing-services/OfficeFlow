@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -106,14 +107,14 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
     const [editingRemark, setEditingRemark] = useState<{ promoId: string; remarkIndex: number } | null>(null);
     const [editingText, setEditingText] = useState('');
     const isAdmin = currentUser?.role === 'admin';
-    const [mainBudget, setMainBudget] = useState<number | undefined>(client.planPromotionsMainBudget);
+    const [mainBudget, setMainBudget] = useState<number | ''>(client.planPromotionsMainBudget || '');
 
     useEffect(() => {
-        setMainBudget(client.planPromotionsMainBudget);
+        setMainBudget(client.planPromotionsMainBudget || '');
     }, [client.planPromotionsMainBudget]);
 
     const handleMainBudgetChange = () => {
-        onClientUpdate({ planPromotionsMainBudget: mainBudget });
+        onClientUpdate({ planPromotionsMainBudget: Number(mainBudget) || 0 });
     };
 
     useEffect(() => {
@@ -317,13 +318,13 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
             <CardHeader className="flex flex-row items-center justify-between p-3">
                 <CardTitle className="text-base font-headline">Plan Promotions</CardTitle>
                 <div className="flex items-center gap-2 text-xs font-medium ">
-                    Total
+                    Total Budget
                     <Input
                         placeholder="Budget..."
                         className="h-7 w-28 text-[10px] text-center text-right"
                         type="number"
-                        value={mainBudget ?? ''}
-                        onChange={(e) => setMainBudget(Number(e.target.value) || undefined)}
+                        value={mainBudget}
+                        onChange={(e) => setMainBudget(e.target.value === '' ? '' : Number(e.target.value))}
                         onBlur={handleMainBudgetChange}
                     />
                 </div>

@@ -108,11 +108,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   
   const sortedTasks = useMemo(() => {
     return [...tasks].sort((a,b) => {
-        const priorityA = a.priority || 99;
-        const priorityB = b.priority || 99;
-        if (priorityA !== priorityB) {
-            return priorityA - priorityB;
-        }
         // Sort by creation date descending (newest first)
         const aDate = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
         const bDate = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
