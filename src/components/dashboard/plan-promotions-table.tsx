@@ -110,7 +110,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
     const [mainBudget, setMainBudget] = useState<number | ''>(client.planPromotionsMainBudget || '');
 
     useEffect(() => {
-        setMainBudget(client.planPromotionsMainBudget || '');
+        setMainBudget(client.planPromotionsMainBudget || 0);
     }, [client.planPromotionsMainBudget]);
 
     const handleMainBudgetChange = () => {
@@ -139,8 +139,8 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                 const promotion = promotions.find(p => p.campaign === task.title);
                 if (promotion) {
                     let promotionStatus: PlanPromotion['status'] | null = null;
-                    if (task.status === 'Completed' && promotion.status !== 'Active') {
-                        promotionStatus = 'Active';
+                    if (task.status === 'Completed' && promotion.status !== 'Stopped') {
+                        promotionStatus = 'Stopped';
                     } else if (task.status === 'On Work' && promotion.status !== 'Active') {
                         promotionStatus = 'Active';
                     } else if (task.status === 'Scheduled' && promotion.status !== 'Scheduled') {

@@ -110,7 +110,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
     const [mainBudget, setMainBudget] = useState<number | ''>(client.paidPromotionsMainBudget || '');
 
     useEffect(() => {
-        setMainBudget(client.paidPromotionsMainBudget || '');
+        setMainBudget(client.paidPromotionsMainBudget || 0);
     }, [client.paidPromotionsMainBudget]);
 
     const handleMainBudgetChange = () => {
@@ -140,10 +140,9 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                 if (promotion) {
                     let promotionStatus: PaidPromotion['status'] | null = null;
 
-                    if (task.status === 'Completed' && promotion.status !== 'Active') {
-                        promotionStatus = 'Active';
+                    if (task.status === 'Completed' && promotion.status !== 'Stopped') {
+                        promotionStatus = 'Stopped';
                     } else if (task.status === 'On Work' && promotion.status !== 'Active') {
-                        // This case might be obsolete if emp only sees "Complete"
                          promotionStatus = 'Active';
                     } else if (task.status === 'Scheduled' && promotion.status !== 'Scheduled') {
                         promotionStatus = 'Scheduled';
