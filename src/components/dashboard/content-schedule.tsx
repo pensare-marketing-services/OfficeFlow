@@ -434,13 +434,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                     <Table className="text-[10px]">
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[40px] p-1 border-r h-8 text-center">No</TableHead>
+                                <TableHead className="w-[20px] p-1 border-r h-8 text-center">No</TableHead>
                                 <TableHead className="w-[40px] p-1 border-r h-8">Date</TableHead>
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
                                 {currentUser?.role === 'employee' && <TableHead className="w-[120px] p-1 border-r h-8">Assigned By</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
                                 <TableHead className="p-1 border-r h-8 w-[200px]">Description</TableHead>
-                                <TableHead className="w-[100px] p-1 border-r h-8">Type</TableHead>
+                                <TableHead className="w-[50px] p-1 border-r h-8">Type</TableHead>
                                 <TableHead className="w-[240px] p-1 border-r h-8">Assigned To</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Status</TableHead>
                                 <TableHead className="w-[40px] p-1 text-center h-8">Note</TableHead>
