@@ -24,6 +24,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { useClients } from '@/hooks/use-clients';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
 
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
@@ -31,11 +33,14 @@ const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() :
 type ClientWithId = Client & { id: string };
 type UserWithId = UserProfile & { id: string };
 
+const categories = ["seo", "website", "digital marketing", "gd"] as const;
+
 const editClientSchema = z.object({
   name: z.string().min(2, 'Client name must be at least 2 characters.'),
   employeeId1: z.string().optional(),
   employeeId2: z.string().optional(),
   employeeId3: z.string().optional(),
+  categories: z.array(z.string()).optional(),
 });
 
 type EditClientFormValues = z.infer<typeof editClientSchema>;
@@ -57,6 +62,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
             employeeId1: client.employeeIds?.[0] || 'unassigned',
             employeeId2: client.employeeIds?.[1] || 'unassigned',
             employeeId3: client.employeeIds?.[2] || 'unassigned',
+            categories: client.categories || [],
         },
     });
     
@@ -67,6 +73,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                 employeeId1: client.employeeIds?.[0] || 'unassigned',
                 employeeId2: client.employeeIds?.[1] || 'unassigned',
                 employeeId3: client.employeeIds?.[2] || 'unassigned',
+                categories: client.categories || [],
             });
         }
     }, [client, open, form]);
@@ -82,7 +89,11 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
         const uniqueEmployeeIds = [...new Set(employeeIds)];
 
         try {
-            await onUpdate(client.id, { name: data.name, employeeIds: uniqueEmployeeIds });
+            await onUpdate(client.id, { 
+                name: data.name, 
+                employeeIds: uniqueEmployeeIds,
+                categories: data.categories || []
+            });
             toast({ title: "Client Updated", description: "The client's details have been saved." });
             setOpen(false);
         } catch (error: any) {
@@ -163,6 +174,57 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                 />
                             )
                         })}
+
+                        <Separator />
+
+                         <FormField
+                            control={form.control}
+                            name="categories"
+                            render={() => (
+                                <FormItem>
+                                    <div className="mb-2">
+                                        <FormLabel>Categories</FormLabel>
+                                    </div>
+                                    <div className="flex flex-wrap gap-4">
+                                    {categories.map((item) => (
+                                        <FormField
+                                        key={item}
+                                        control={form.control}
+                                        name="categories"
+                                        render={({ field }) => {
+                                            return (
+                                            <FormItem
+                                                key={item}
+                                                className="flex flex-row items-start space-x-2 space-y-0"
+                                            >
+                                                <FormControl>
+                                                <Checkbox
+                                                    checked={field.value?.includes(item)}
+                                                    onCheckedChange={(checked) => {
+                                                    return checked
+                                                        ? field.onChange([...(field.value || []), item])
+                                                        : field.onChange(
+                                                            field.value?.filter(
+                                                            (value) => value !== item
+                                                            )
+                                                        )
+                                                    }}
+                                                />
+                                                </FormControl>
+                                                <FormLabel className="font-normal text-sm capitalize">
+                                                {item}
+                                                </FormLabel>
+                                            </FormItem>
+                                            )
+                                        }}
+                                        />
+                                    ))}
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        
                         <DialogFooter className="justify-between sm:justify-between">
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
