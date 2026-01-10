@@ -38,6 +38,7 @@ export type Task = {
   contentType?: ContentType;
   createdAt?: any; // Allow serverTimestamp
   activeAssigneeIndex?: number;
+  month?: string;
 };
 
 export type ClientNoteStatus = "Done" | "On Work" | "Pending" | "Scheduled" | "For Approval";
@@ -92,4 +93,3 @@ export type CashInTransaction = {
     amount: number;
     status: CashInTransactionStatus;
 }
-

@@ -31,7 +31,6 @@ type TaskWithId = Task & { id: string };
 
 type MonthData = {
     name: string;
-    tasks: TaskWithId[];
 };
 
 
@@ -140,7 +139,7 @@ export default function ClientIdPage() {
     const params = useParams();
     const clientId = params.clientId as string;
 
-    const [monthlyTasks, setMonthlyTasks] = useState<MonthData[]>([{ name: "Month 1", tasks: [] }]);
+    const [monthlyTabs, setMonthlyTabs] = useState<MonthData[]>([{ name: "Month 1" }]);
     const [activeMonth, setActiveMonth] = useState("Month 1");
 
     const allClientTasks = useMemo(() => {
@@ -148,18 +147,15 @@ export default function ClientIdPage() {
         return tasks.filter(task => task.clientId === clientId);
     }, [tasks, clientId]);
 
-     useEffect(() => {
-        setMonthlyTasks(prev => [{ ...prev[0], tasks: allClientTasks }]);
-    }, [allClientTasks]);
 
     const handleAddNewMonth = () => {
-        const newMonthName = `Month ${monthlyTasks.length + 1}`;
-        setMonthlyTasks(prev => [...prev, { name: newMonthName, tasks: [] }]);
+        const newMonthName = `Month ${monthlyTabs.length + 1}`;
+        setMonthlyTabs(prev => [...prev, { name: newMonthName }]);
         setActiveMonth(newMonthName);
     };
 
     const handleMonthNameChange = (oldName: string, newName: string) => {
-        setMonthlyTasks(prev => prev.map(month => month.name === oldName ? { ...month, name: newName } : month));
+        setMonthlyTabs(prev => prev.map(month => month.name === oldName ? { ...month, name: newName } : month));
         if(activeMonth === oldName) {
             setActiveMonth(newName);
         }
@@ -228,6 +224,9 @@ export default function ClientIdPage() {
         const deadline = new Date();
         deadline.setHours(23, 59, 59, 999);
 
+        // Associate task with the current month name
+        const currentMonthName = activeMonth;
+
         const newTaskData: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
             description: '',
@@ -238,19 +237,10 @@ export default function ClientIdPage() {
             assigneeIds: [],
             progressNotes: [],
             clientId: client.id,
+            month: currentMonthName, // Add month property
         };
 
-        const newTaskId = await addTask(newTaskData);
-
-        if (newTaskId) {
-            const newTaskWithId: TaskWithId = { ...newTaskData, id: newTaskId, createdAt: new Date() };
-             setMonthlyTasks(prev => prev.map(month => {
-                if (month.name === activeMonth) {
-                    return { ...month, tasks: [...month.tasks, newTaskWithId] };
-                }
-                return month;
-            }));
-        }
+        await addTask(newTaskData);
     };
 
     const handleNotesUpdate = (notes: ClientNote[]) => {
@@ -258,9 +248,13 @@ export default function ClientIdPage() {
     }
 
     const tasksForCurrentMonth = useMemo(() => {
-        const currentMonth = monthlyTasks.find(m => m.name === activeMonth);
-        return currentMonth ? currentMonth.tasks : [];
-    }, [monthlyTasks, activeMonth]);
+        // Filter tasks based on the active month tab
+        // For "Month 1", show tasks that have no month property or are explicitly "Month 1"
+        if (activeMonth === "Month 1") {
+            return allClientTasks.filter(task => !task.month || task.month === "Month 1");
+        }
+        return allClientTasks.filter(task => task.month === activeMonth);
+    }, [allClientTasks, activeMonth]);
 
     const filteredTasks = useMemo(() => {
         if (!tasksForCurrentMonth || !client) return [];
@@ -318,7 +312,7 @@ export default function ClientIdPage() {
                                     </div>
                                     <Tabs value={activeMonth} onValueChange={setActiveMonth} className="w-full">
                                         <TabsList>
-                                            {monthlyTasks.map(month => (
+                                            {monthlyTabs.map(month => (
                                                 <EditableTabTrigger 
                                                     key={month.name}
                                                     value={month.name}

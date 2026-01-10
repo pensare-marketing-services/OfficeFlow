@@ -140,6 +140,10 @@
         "activeAssigneeIndex": {
           "type": "number",
           "description": "The index of the assignee in the assigneeIds array who is currently responsible for the task."
+        },
+        "month": {
+          "type": "string",
+          "description": "The billing or work cycle this task belongs to, e.g., 'Month 1', 'July 2024'."
         }
       },
       "required": [

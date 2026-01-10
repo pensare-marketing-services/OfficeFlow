@@ -84,7 +84,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [currentUser]);
 
     const updateTask = useCallback(async (taskId: string, taskUpdate: Partial<Task>) => {
-        if (!currentUser) return;
+        if (!currentUser || !taskId) return;
         try {
             const taskRef = doc(db, 'tasks', taskId);
             const docSnap = await getDoc(taskRef);
