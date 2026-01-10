@@ -1,5 +1,4 @@
 
-
 export type UserProfile = {
   uid?: string;
   name?: string;
@@ -84,6 +83,7 @@ export type PromotionBase = {
     remarks: ProgressNote[];
     clientId: string;
     linkedTaskId?: string;
+    month?: string;
 }
 
 export type PaidPromotion = PromotionBase;

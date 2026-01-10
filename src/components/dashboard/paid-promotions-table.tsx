@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -35,6 +34,7 @@ interface PaidPromotionsTableProps {
     users: UserWithId[];
     totalCashIn: number;
     onClientUpdate: (updatedData: Partial<Client>) => void;
+    activeMonth: string;
 }
 
 const adTypes: PaidPromotion['adType'][] = [
@@ -95,7 +95,7 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function PaidPromotionsTable({ client, users, totalCashIn, onClientUpdate }: PaidPromotionsTableProps) {
+export default function PaidPromotionsTable({ client, users, totalCashIn, onClientUpdate, activeMonth }: PaidPromotionsTableProps) {
     const { user: currentUser } = useAuth();
     const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
@@ -125,7 +125,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
     useEffect(() => {
         if (!client.id) return;
         setLoading(true);
-        const promotionsQuery = query(collection(db, `clients/${client.id}/promotions`));
+        const promotionsQuery = query(collection(db, `clients/${client.id}/promotions`), where("month", "==", activeMonth));
         const unsubscribe = onSnapshot(promotionsQuery, (snapshot) => {
             const promotionsData = snapshot.docs.map(doc => ({ ...doc.data() as PaidPromotion, id: doc.id }));
             setPromotions(promotionsData);
@@ -136,7 +136,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
         });
 
         return () => unsubscribe();
-    }, [client.id]);
+    }, [client.id, activeMonth]);
 
     const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any) => {
         const promotionRef = doc(db, `clients/${client.id}/promotions`, id);
@@ -166,6 +166,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                         progressNotes: [],
                         clientId: client.id,
                         contentType: updatedPromotion.adType as ContentType,
+                        month: activeMonth,
                     };
                     const newTaskId = await addTask(newTask);
                     if (newTaskId) {
@@ -257,6 +258,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
             spent: 0,
             remarks: [],
             clientId: client.id,
+            month: activeMonth,
         };
         await addDoc(collection(db, `clients/${client.id}/promotions`), newPromotion);
     };
@@ -561,4 +563,3 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
         </Card>
     );
 }
-

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -14,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format, isValid } from 'date-fns';
 import { cn, capitalizeSentences } from '@/lib/utils';
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Separator } from '../ui/separator';
 import { useTasks } from '@/hooks/use-tasks';
@@ -35,6 +34,7 @@ interface PlanPromotionsTableProps {
     users: UserWithId[];
     totalCashIn: number;
     onClientUpdate: (updatedData: Partial<Client>) => void;
+    activeMonth: string;
 }
 
 const adTypes: PlanPromotion['adType'][] = [
@@ -95,7 +95,7 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function PlanPromotionsTable({ client, users, totalCashIn, onClientUpdate }: PlanPromotionsTableProps) {
+export default function PlanPromotionsTable({ client, users, totalCashIn, onClientUpdate, activeMonth }: PlanPromotionsTableProps) {
     const { user: currentUser } = useAuth();
     const [promotions, setPromotions] = useState<(PlanPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
@@ -125,7 +125,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
     useEffect(() => {
         if (!client.id) return;
         setLoading(true);
-        const promotionsQuery = query(collection(db, `clients/${client.id}/planPromotions`));
+        const promotionsQuery = query(collection(db, `clients/${client.id}/planPromotions`), where("month", "==", activeMonth));
         const unsubscribe = onSnapshot(promotionsQuery, (snapshot) => {
             const promotionsData = snapshot.docs.map(doc => ({ ...doc.data() as PlanPromotion, id: doc.id }));
             setPromotions(promotionsData);
@@ -136,7 +136,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
         });
 
         return () => unsubscribe();
-    }, [client.id]);
+    }, [client.id, activeMonth]);
 
     const handlePromotionChange = async (id: string, field: keyof PlanPromotion, value: any) => {
         const promotionRef = doc(db, `clients/${client.id}/planPromotions`, id);
@@ -166,6 +166,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                         progressNotes: [],
                         clientId: client.id,
                         contentType: updatedPromotion.adType as ContentType,
+                        month: activeMonth,
                     };
                     const newTaskId = await addTask(newTask);
                     if (newTaskId) {
@@ -257,6 +258,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
             spent: 0,
             remarks: [],
             clientId: client.id,
+            month: activeMonth,
         };
         await addDoc(collection(db, `clients/${client.id}/planPromotions`), newPromotion);
     };

@@ -253,18 +253,16 @@ export default function ClientIdPage() {
     }
 
     const tasksForCurrentMonth = useMemo(() => {
-        if (activeMonth === "Month 1") {
+        if (activeMonth === "Month 1" && (!client?.months || client.months.length <= 1)) {
             return allClientTasks.filter(task => !task.month || task.month === "Month 1");
         }
         return allClientTasks.filter(task => task.month === activeMonth);
-    }, [allClientTasks, activeMonth]);
+    }, [allClientTasks, activeMonth, client?.months]);
 
     const filteredTasks = useMemo(() => {
         if (!tasksForCurrentMonth || !client) return [];
         return tasksForCurrentMonth.filter(task => 
             task.clientId === client.id &&
-            task.description !== 'Paid Promotion' &&
-            task.description !== 'Plan Promotion' &&
             task.contentType !== 'Other' &&
             task.contentType !== 'SEO' &&
             task.contentType !== 'Website' &&
@@ -367,6 +365,7 @@ export default function ClientIdPage() {
                             users={users as UserWithId[]}
                             totalCashIn={totalCashIn}
                             onClientUpdate={handleClientUpdate}
+                            activeMonth={activeMonth}
                         />
                     )}
 
@@ -401,6 +400,7 @@ export default function ClientIdPage() {
                             users={users as UserWithId[]}
                             totalCashIn={totalCashIn}
                             onClientUpdate={handleClientUpdate}
+                            activeMonth={activeMonth}
                         />
                     )}
                     
