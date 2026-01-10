@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -14,7 +15,7 @@ import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
 import { Input } from '@/components/ui/input';
-import { Pen } from 'lucide-react';
+import { Pen, Plus } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
 import ClientNotesTable from '@/components/dashboard/client-notes-table';
 import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
@@ -208,7 +209,10 @@ export default function ClientIdPage() {
                                             client={client} 
                                             onUpdate={(id, data) => handleClientUpdate(data)} 
                                         />
-                                        <Button onClick={handleAddTask} disabled={tasksLoading}>Add Task</Button>
+                                        <Button onClick={handleAddTask} disabled={tasksLoading}>
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Add Task
+                                        </Button>
                                     </div>
                                 </div>
                             )}
