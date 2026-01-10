@@ -198,9 +198,15 @@ export default function ClientIdPage() {
                         <CardContent className="p-2">
                          {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
                                 <div className="flex flex-col gap-2">
-                                     <div className='flex-shrink-0'>
-                                        <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
-                                        <CardDescription>Manage client plans and progress.</CardDescription>
+                                     <div className="flex justify-between items-start">
+                                        <div className='flex-shrink-0'>
+                                            <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
+                                            <CardDescription>Manage client plans and progress.</CardDescription>
+                                        </div>
+                                        <Button size="sm" className="h-7 gap-1">
+                                            <Plus className="h-4 w-4" />
+                                            Add Month
+                                        </Button>
                                      </div>
                                     <div className="flex flex-row items-center gap-4">
                                         <ClientPlanSummary 
