@@ -1,4 +1,5 @@
 
+
 {
   "entities": {
     "UserProfile": {
@@ -237,6 +238,16 @@
                 "enum": ["seo", "website", "digital marketing", "gd"]
             },
             "description": "The service categories this client belongs to."
+        },
+        "months": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" }
+            }
+          },
+          "description": "A list of monthly tabs for the client page."
         },
         "paidPromotionsMainBudget": {
             "type": "number",

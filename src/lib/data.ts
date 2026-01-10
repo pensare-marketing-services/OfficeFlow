@@ -50,6 +50,10 @@ export type ClientNote = {
   remarks?: ProgressNote[];
 }
 
+export type MonthData = {
+    name: string;
+};
+
 export type Client = {
   id: string;
   name: string;
@@ -61,6 +65,7 @@ export type Client = {
   priority?: number;
   notes?: ClientNote[];
   categories?: string[];
+  months?: MonthData[];
   paidPromotionsMainBudget?: number;
   planPromotionsMainBudget?: number;
   paidPromotionsOldBalance?: number;

@@ -2,13 +2,13 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction } from '@/lib/data';
+import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction, MonthData } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
-import { doc, updateDoc, getDoc, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { doc, updateDoc, onSnapshot, collection, query, orderBy } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
@@ -28,10 +28,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
 type TaskWithId = Task & { id: string };
-
-type MonthData = {
-    name: string;
-};
 
 
 const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }> = ({ value, onSave }) => {
@@ -150,38 +146,49 @@ export default function ClientIdPage() {
 
     const handleAddNewMonth = () => {
         const newMonthName = `Month ${monthlyTabs.length + 1}`;
-        setMonthlyTabs(prev => [...prev, { name: newMonthName }]);
+        const newTabs = [...monthlyTabs, { name: newMonthName }];
+        setMonthlyTabs(newTabs);
         setActiveMonth(newMonthName);
+        handleClientUpdate({ months: newTabs });
     };
 
     const handleMonthNameChange = (oldName: string, newName: string) => {
-        setMonthlyTabs(prev => prev.map(month => month.name === oldName ? { ...month, name: newName } : month));
+        const newTabs = monthlyTabs.map(month => month.name === oldName ? { ...month, name: newName } : month);
+        setMonthlyTabs(newTabs);
         if(activeMonth === oldName) {
             setActiveMonth(newName);
         }
+        handleClientUpdate({ months: newTabs });
     };
 
 
     useEffect(() => {
         if (!clientId) return;
-
         setLoading(true);
         const clientDocRef = doc(db, 'clients', clientId);
         
-        const fetchClient = async () => {
-            const docSnap = await getDoc(clientDocRef);
+        const unsubscribe = onSnapshot(clientDocRef, (docSnap) => {
             if (docSnap.exists()) {
-                setClient({ ...docSnap.data() as Client, id: docSnap.id });
+                const clientData = { ...docSnap.data() as Client, id: docSnap.id };
+                setClient(clientData);
+                if (clientData.months && clientData.months.length > 0) {
+                    setMonthlyTabs(clientData.months);
+                    if (!clientData.months.some(m => m.name === activeMonth)) {
+                        setActiveMonth(clientData.months[0].name);
+                    }
+                } else {
+                    setMonthlyTabs([{ name: "Month 1" }]);
+                    setActiveMonth("Month 1");
+                }
             } else {
                 console.error("No such client!");
                 setClient(null);
             }
             setLoading(false);
-        };
+        });
 
-        fetchClient();
-
-    }, [clientId]);
+        return () => unsubscribe();
+    }, [clientId, activeMonth]);
     
     useEffect(() => {
         if (!clientId) return;
@@ -213,7 +220,6 @@ export default function ClientIdPage() {
         const clientRef = doc(db, 'clients', clientId);
         try {
             await updateDoc(clientRef, updatedData);
-             setClient(prev => prev ? { ...prev, ...updatedData } : null);
         } catch (error) {
             console.error("Error updating client:", error);
         }
@@ -224,7 +230,6 @@ export default function ClientIdPage() {
         const deadline = new Date();
         deadline.setHours(23, 59, 59, 999);
 
-        // Associate task with the current month name
         const currentMonthName = activeMonth;
 
         const newTaskData: Omit<Task, 'id' | 'createdAt'> = {
@@ -237,7 +242,7 @@ export default function ClientIdPage() {
             assigneeIds: [],
             progressNotes: [],
             clientId: client.id,
-            month: currentMonthName, // Add month property
+            month: currentMonthName,
         };
 
         await addTask(newTaskData);
@@ -248,8 +253,6 @@ export default function ClientIdPage() {
     }
 
     const tasksForCurrentMonth = useMemo(() => {
-        // Filter tasks based on the active month tab
-        // For "Month 1", show tasks that have no month property or are explicitly "Month 1"
         if (activeMonth === "Month 1") {
             return allClientTasks.filter(task => !task.month || task.month === "Month 1");
         }
