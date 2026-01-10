@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
@@ -22,10 +22,17 @@ import SeoTable from '@/components/dashboard/seo-table';
 import WebsiteTable from '@/components/dashboard/website-table';
 import OtherTaskTable from '@/components/dashboard/other-task-table';
 import PlanPromotionsTable from '@/components/dashboard/plan-promotions-table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
+type TaskWithId = Task & { id: string };
+
+type MonthData = {
+    name: string;
+    tasks: TaskWithId[];
+};
 
 
 const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }> = ({ value, onSave }) => {
@@ -63,6 +70,64 @@ const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }
     );
 };
 
+const EditableTabTrigger: React.FC<{ value: string; onSave: (value: string) => void }> = ({ value, onSave }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentValue, setCurrentValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setCurrentValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleSave = () => {
+    if (currentValue !== value) {
+      onSave(currentValue);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      setCurrentValue(value);
+      setIsEditing(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <Input
+        ref={inputRef}
+        value={currentValue}
+        onChange={(e) => setCurrentValue(e.target.value)}
+        onBlur={handleSave}
+        onKeyDown={handleKeyDown}
+        className="h-7 w-auto text-[10px] px-2"
+      />
+    );
+  }
+
+  return (
+    <div className="relative group flex items-center">
+      <TabsTrigger value={value} className="text-xs">
+        {value}
+      </TabsTrigger>
+      <button onClick={() => setIsEditing(true)} className="absolute right-1 p-0.5 rounded-full bg-background/50 hover:bg-accent opacity-0 group-hover:opacity-100 transition-opacity">
+        <Pen className="h-3 w-3 text-muted-foreground" />
+      </button>
+    </div>
+  );
+};
+
+
 export default function ClientIdPage() {
     const { user: currentUser } = useAuth();
     const { tasks, addTask, updateTask, deleteTask, loading: tasksLoading } = useTasks();
@@ -74,6 +139,32 @@ export default function ClientIdPage() {
     
     const params = useParams();
     const clientId = params.clientId as string;
+
+    const [monthlyTasks, setMonthlyTasks] = useState<MonthData[]>([{ name: "Month 1", tasks: [] }]);
+    const [activeMonth, setActiveMonth] = useState("Month 1");
+
+    const allClientTasks = useMemo(() => {
+        if (!tasks || !clientId) return [];
+        return tasks.filter(task => task.clientId === clientId);
+    }, [tasks, clientId]);
+
+     useEffect(() => {
+        setMonthlyTasks(prev => [{ ...prev[0], tasks: allClientTasks }]);
+    }, [allClientTasks]);
+
+    const handleAddNewMonth = () => {
+        const newMonthName = `Month ${monthlyTasks.length + 1}`;
+        setMonthlyTasks(prev => [...prev, { name: newMonthName, tasks: [] }]);
+        setActiveMonth(newMonthName);
+    };
+
+    const handleMonthNameChange = (oldName: string, newName: string) => {
+        setMonthlyTasks(prev => prev.map(month => month.name === oldName ? { ...month, name: newName } : month));
+        if(activeMonth === oldName) {
+            setActiveMonth(newName);
+        }
+    };
+
 
     useEffect(() => {
         if (!clientId) return;
@@ -132,12 +223,12 @@ export default function ClientIdPage() {
         }
     };
     
-    const handleAddTask = () => {
+    const handleAddTask = async () => {
         if (!currentUser || !client) return;
         const deadline = new Date();
-        deadline.setHours(23, 59, 59, 999); // Set to end of today
+        deadline.setHours(23, 59, 59, 999);
 
-        const newTask: Omit<Task, 'id' | 'createdAt'> = {
+        const newTaskData: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
             description: '',
             status: 'Scheduled',
@@ -148,16 +239,32 @@ export default function ClientIdPage() {
             progressNotes: [],
             clientId: client.id,
         };
-        addTask(newTask);
+
+        const newTaskId = await addTask(newTaskData);
+
+        if (newTaskId) {
+            const newTaskWithId: TaskWithId = { ...newTaskData, id: newTaskId, createdAt: new Date() };
+             setMonthlyTasks(prev => prev.map(month => {
+                if (month.name === activeMonth) {
+                    return { ...month, tasks: [...month.tasks, newTaskWithId] };
+                }
+                return month;
+            }));
+        }
     };
 
     const handleNotesUpdate = (notes: ClientNote[]) => {
         handleClientUpdate({ notes });
     }
 
+    const tasksForCurrentMonth = useMemo(() => {
+        const currentMonth = monthlyTasks.find(m => m.name === activeMonth);
+        return currentMonth ? currentMonth.tasks : [];
+    }, [monthlyTasks, activeMonth]);
+
     const filteredTasks = useMemo(() => {
-        if (!tasks || !client) return [];
-        return tasks.filter(task => 
+        if (!tasksForCurrentMonth || !client) return [];
+        return tasksForCurrentMonth.filter(task => 
             task.clientId === client.id &&
             task.description !== 'Paid Promotion' &&
             task.description !== 'Plan Promotion' &&
@@ -166,22 +273,23 @@ export default function ClientIdPage() {
             task.contentType !== 'Website' &&
             task.contentType !== 'Web Blogs'
         );
-    }, [tasks, client]);
+    }, [tasksForCurrentMonth, client]);
     
     const seoTasks = useMemo(() => {
-        if (!tasks || !client) return [];
-        return tasks.filter(task => task.clientId === client.id && task.contentType === 'SEO');
-    }, [tasks, client]);
+        if (!tasksForCurrentMonth || !client) return [];
+        return tasksForCurrentMonth.filter(task => task.clientId === client.id && task.contentType === 'SEO');
+    }, [tasksForCurrentMonth, client]);
     
     const websiteTasks = useMemo(() => {
-        if (!tasks || !client) return [];
-        return tasks.filter(task => task.clientId === client.id && (task.contentType === 'Website' || task.contentType === 'Web Blogs'));
-    }, [tasks, client]);
+        if (!tasksForCurrentMonth || !client) return [];
+        return tasksForCurrentMonth.filter(task => task.clientId === client.id && (task.contentType === 'Website' || task.contentType === 'Web Blogs'));
+    }, [tasksForCurrentMonth, client]);
 
     const otherTasks = useMemo(() => {
-        if (!tasks || !client) return [];
-        return tasks.filter(task => task.clientId === client.id && task.contentType === 'Other');
-    }, [tasks, client]);
+        if (!tasksForCurrentMonth || !client) return [];
+        return tasksForCurrentMonth.filter(task => task.clientId === client.id && task.contentType === 'Other');
+    }, [tasksForCurrentMonth, client]);
+
 
     const totalCashIn = useMemo(() => {
         return cashInTransactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
@@ -196,18 +304,29 @@ export default function ClientIdPage() {
                 <div className="lg:col-span-3 space-y-4">
                     <Card>
                         <CardContent className="p-2">
-                         {pageLoading ? <Skeleton className="h-24 w-full" /> : client && (
+                         {pageLoading ? <Skeleton className="h-36 w-full" /> : client && (
                                 <div className="flex flex-col gap-2">
-                                     <div className="flex justify-between items-start">
+                                    <div className="flex justify-between items-start">
                                         <div className='flex-shrink-0'>
                                             <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
                                             <CardDescription>Manage client plans and progress.</CardDescription>
                                         </div>
-                                        <Button size="sm" className="h-7 gap-1">
+                                        <Button size="sm" onClick={handleAddNewMonth} className="h-7 gap-1">
                                             <Plus className="h-4 w-4" />
                                             Add Month
                                         </Button>
-                                     </div>
+                                    </div>
+                                    <Tabs value={activeMonth} onValueChange={setActiveMonth} className="w-full">
+                                        <TabsList>
+                                            {monthlyTasks.map(month => (
+                                                <EditableTabTrigger 
+                                                    key={month.name}
+                                                    value={month.name}
+                                                    onSave={(newName) => handleMonthNameChange(month.name, newName)}
+                                                />
+                                            ))}
+                                        </TabsList>
+                                    </Tabs>
                                     <div className="flex flex-row items-center gap-4">
                                         <ClientPlanSummary 
                                             client={client} 
@@ -220,7 +339,7 @@ export default function ClientIdPage() {
                     </Card>
 
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
-                        <Card>
+                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between p-3">
                                 <CardTitle className="text-base font-headline">Digital Marketing</CardTitle>
                                 <Button size="sm" onClick={handleAddTask} disabled={tasksLoading} className="h-7 gap-1">
