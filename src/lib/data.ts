@@ -1,4 +1,5 @@
 
+
 export type UserProfile = {
   uid?: string;
   name?: string;
@@ -51,6 +52,10 @@ export type ClientNote = {
 
 export type MonthData = {
     name: string;
+    plan?: string;
+    billDuration?: string;
+    socialPlatforms?: string;
+    monthlyReach?: string;
 };
 
 export type Client = {

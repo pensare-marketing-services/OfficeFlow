@@ -161,6 +161,17 @@ export default function ClientIdPage() {
         handleClientUpdate({ months: newTabs });
     };
 
+    const handleMonthDataUpdate = (updatedData: Partial<MonthData>) => {
+        const newTabs = monthlyTabs.map(month => {
+            if (month.name === activeMonth) {
+                return { ...month, ...updatedData };
+            }
+            return month;
+        });
+        setMonthlyTabs(newTabs);
+        handleClientUpdate({ months: newTabs });
+    };
+
 
     useEffect(() => {
         if (!clientId) return;
@@ -177,7 +188,14 @@ export default function ClientIdPage() {
                         setActiveMonth(clientData.months[0].name);
                     }
                 } else {
-                    setMonthlyTabs([{ name: "Month 1" }]);
+                     const initialMonth: MonthData = {
+                        name: "Month 1",
+                        plan: clientData.plan || '',
+                        billDuration: clientData.billDuration || '',
+                        socialPlatforms: clientData.socialPlatforms || '',
+                        monthlyReach: clientData.monthlyReach || '',
+                    };
+                    setMonthlyTabs([initialMonth]);
                     setActiveMonth("Month 1");
                 }
             } else {
@@ -291,6 +309,7 @@ export default function ClientIdPage() {
     }, [cashInTransactions]);
 
     const pageLoading = loading || tasksLoading || usersLoading || cashInLoading;
+    const activeMonthData = useMemo(() => monthlyTabs.find(m => m.name === activeMonth), [monthlyTabs, activeMonth]);
 
     return (
         <div className="space-y-4">
@@ -324,8 +343,8 @@ export default function ClientIdPage() {
                                     </Tabs>
                                     <div className="flex flex-row items-center gap-4">
                                         <ClientPlanSummary 
-                                            client={client} 
-                                            onUpdate={(id, data) => handleClientUpdate(data)} 
+                                            monthData={activeMonthData} 
+                                            onUpdate={handleMonthDataUpdate} 
                                         />
                                     </div>
                                 </div>

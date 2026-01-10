@@ -244,10 +244,14 @@
           "items": {
             "type": "object",
             "properties": {
-              "name": { "type": "string" }
+              "name": { "type": "string" },
+              "plan": { "type": "string" },
+              "billDuration": { "type": "string" },
+              "socialPlatforms": { "type": "string" },
+              "monthlyReach": { "type": "string" }
             }
           },
-          "description": "A list of monthly tabs for the client page."
+          "description": "A list of monthly tabs for the client page, each with its own plan details."
         },
         "paidPromotionsMainBudget": {
             "type": "number",
@@ -349,6 +353,10 @@
         "linkedTaskId": {
           "type": "string",
           "description": "The ID of the task linked to this promotion."
+        },
+         "month": {
+          "type": "string",
+          "description": "The billing or work cycle this promotion belongs to."
         }
       },
       "required": [
@@ -418,6 +426,10 @@
         "linkedTaskId": {
           "type": "string",
           "description": "The ID of the task linked to this promotion."
+        },
+         "month": {
+          "type": "string",
+          "description": "The billing or work cycle this promotion belongs to."
         }
       },
       "required": [

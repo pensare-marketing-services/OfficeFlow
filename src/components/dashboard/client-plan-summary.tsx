@@ -1,13 +1,13 @@
 'use client';
-import type { Client } from '@/lib/data';
+import type { Client, MonthData } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { Input } from '../ui/input';
 import { useState, useEffect } from 'react';
 
 interface ClientPlanSummaryProps {
-    client: Client & { id: string };
-    onUpdate: (clientId: string, updatedData: Partial<Client>) => void;
+    monthData: MonthData | undefined;
+    onUpdate: (updatedData: Partial<MonthData>) => void;
 }
 
 
@@ -36,10 +36,10 @@ const EditableField: React.FC<{ value: string; onSave: (value: string) => void }
 };
 
 
-export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) {
+export function ClientPlanSummary({ monthData, onUpdate }: ClientPlanSummaryProps) {
     
-    const handleSave = (field: keyof Client, value: string) => {
-        onUpdate(client.id, { [field]: value });
+    const handleSave = (field: keyof MonthData, value: string) => {
+        onUpdate({ [field]: value });
     };
 
     return (
@@ -50,21 +50,21 @@ export function ClientPlanSummary({ client, onUpdate }: ClientPlanSummaryProps) 
                         <TableRow>
                             <TableCell className="font-bold text-[10px] p-2 bg-muted/50 w-[120px]">PLAN</TableCell>
                             <TableCell className="p-1">
-                                <EditableField value={client.plan || ''} onSave={(value) => handleSave('plan', value)} />
+                                <EditableField value={monthData?.plan || ''} onSave={(value) => handleSave('plan', value)} />
                             </TableCell>
                             <TableCell className="font-bold text-[10px] p-2 bg-muted/50 w-[120px]">Bill Duration</TableCell>
                             <TableCell className="p-1">
-                                <EditableField value={client.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
+                                <EditableField value={monthData?.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
                             </TableCell>
                         </TableRow>
                         <TableRow>
                             <TableCell className="font-bold text-[10px] p-2 bg-muted/50 w-[120px]">Social Platforms</TableCell>
                             <TableCell className="p-1">
-                                <EditableField value={client.socialPlatforms || ''} onSave={(value) => handleSave('socialPlatforms', value)} />
+                                <EditableField value={monthData?.socialPlatforms || ''} onSave={(value) => handleSave('socialPlatforms', value)} />
                             </TableCell>
                             <TableCell className="font-bold text-[10px] p-2 bg-muted/50 w-[120px]">Monthly Reach</TableCell>
                             <TableCell className="p-1">
-                                 <EditableField value={client.monthlyReach || ''} onSave={(value) => handleSave('monthlyReach', value)} />
+                                 <EditableField value={monthData?.monthlyReach || ''} onSave={(value) => handleSave('monthlyReach', value)} />
                             </TableCell>
                         </TableRow>
                     </TableBody>
