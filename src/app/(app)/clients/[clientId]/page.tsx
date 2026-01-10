@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -209,10 +207,6 @@ export default function ClientIdPage() {
                                             client={client} 
                                             onUpdate={(id, data) => handleClientUpdate(data)} 
                                         />
-                                        <Button onClick={handleAddTask} disabled={tasksLoading}>
-                                            <Plus className="mr-2 h-4 w-4" />
-                                            Add Task
-                                        </Button>
                                     </div>
                                 </div>
                             )}
@@ -220,13 +214,24 @@ export default function ClientIdPage() {
                     </Card>
 
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
-                        <ContentSchedule 
-                            tasks={filteredTasks} 
-                            users={users as UserWithId[]} 
-                            onTaskUpdate={handleTaskUpdate}
-                            onTaskDelete={handleTaskDelete}
-                            showClient={false}
-                        />
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between p-3">
+                                <CardTitle className="text-base font-headline">Digital Marketing</CardTitle>
+                                <Button size="sm" onClick={handleAddTask} disabled={tasksLoading} className="h-7 gap-1">
+                                    <Plus className="h-4 w-4" />
+                                    Add Task
+                                </Button>
+                            </CardHeader>
+                            <CardContent className='p-0'>
+                                <ContentSchedule 
+                                    tasks={filteredTasks} 
+                                    users={users as UserWithId[]} 
+                                    onTaskUpdate={handleTaskUpdate}
+                                    onTaskDelete={handleTaskDelete}
+                                    showClient={false}
+                                />
+                            </CardContent>
+                        </Card>
                     ) : (
                         <Card>
                             <CardContent className="text-center text-muted-foreground py-16">
