@@ -74,11 +74,12 @@ const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }
 const EditableTabTrigger: React.FC<{
   value: string;
   onSave: (value: string) => void;
-  onDelete: () => void;
+  onDelete: (monthName: string) => Promise<void>;
   isOnlyMonth: boolean;
 }> = ({ value, onSave, onDelete, isOnlyMonth }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentValue, setCurrentValue] = useState(value);
+  const [isDeleting, setIsDeleting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -109,6 +110,13 @@ const EditableTabTrigger: React.FC<{
       setIsEditing(false);
     }
   };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    await onDelete(value);
+    setIsDeleting(false);
+    // The AlertDialog will close itself on action click if we don't prevent it
+  }
 
   if (isEditing) {
     return (
@@ -157,8 +165,9 @@ const EditableTabTrigger: React.FC<{
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={onDelete} className="bg-destructive hover:bg-destructive/90">
-                                    Yes, delete month
+                                <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isDeleting ? "Deleting..." : "Yes, delete month"}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
@@ -239,7 +248,6 @@ export default function ClientIdPage() {
     };
 
     const handleDeleteMonth = async (monthName: string) => {
-        setIsDeleting(true);
         try {
             const batch = writeBatch(db);
 
@@ -272,8 +280,6 @@ export default function ClientIdPage() {
         } catch (error) {
             console.error("Failed to delete month:", error);
             toast({ variant: 'destructive', title: "Deletion Failed", description: "There was an error deleting the month." });
-        } finally {
-            setIsDeleting(false);
         }
     };
 
@@ -433,16 +439,12 @@ export default function ClientIdPage() {
         return cashInTransactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
     }, [cashInTransactions]);
 
-    const pageLoading = loading || tasksLoading || usersLoading || cashInLoading || isDeleting;
+    const pageLoading = loading || tasksLoading || usersLoading || cashInLoading;
     const activeMonthData = useMemo(() => monthlyTabs.find(m => m.name === activeMonth), [monthlyTabs, activeMonth]);
 
     return (
         <div className="space-y-4">
-            {isDeleting && (
-                <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                </div>
-            )}
+            
              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-4">
@@ -462,7 +464,7 @@ export default function ClientIdPage() {
                                                             key={month.name}
                                                             value={month.name}
                                                             onSave={(newName) => handleMonthNameChange(month.name, newName)}
-                                                            onDelete={() => handleDeleteMonth(month.name)}
+                                                            onDelete={handleDeleteMonth}
                                                             isOnlyMonth={monthlyTabs.length === 1}
                                                         />
                                                     ))}
