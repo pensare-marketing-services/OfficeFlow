@@ -1,6 +1,4 @@
 
-
-
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -188,7 +186,21 @@ export default function ClientIdPage() {
     const clientId = params.clientId as string;
 
     const [monthlyTabs, setMonthlyTabs] = useState<MonthData[]>([{ name: "Month 1" }]);
-    const [activeMonth, setActiveMonth] = useState("Month 1");
+    
+    // State to hold the active month, initialized from sessionStorage or default
+    const [activeMonth, setActiveMonth] = useState(() => {
+        if (typeof window !== 'undefined' && clientId) {
+            return sessionStorage.getItem(`activeMonth_${clientId}`) || "Month 1";
+        }
+        return "Month 1";
+    });
+
+    // Effect to update sessionStorage when activeMonth changes
+    useEffect(() => {
+        if (clientId) {
+            sessionStorage.setItem(`activeMonth_${clientId}`, activeMonth);
+        }
+    }, [activeMonth, clientId]);
 
     const allClientTasks = useMemo(() => {
         if (!tasks || !clientId) return [];
@@ -288,7 +300,10 @@ export default function ClientIdPage() {
                 setClient(clientData);
                 if (clientData.months && clientData.months.length > 0) {
                     setMonthlyTabs(clientData.months);
-                    if (!clientData.months.some(m => m.name === activeMonth)) {
+                     const savedMonth = sessionStorage.getItem(`activeMonth_${clientId}`);
+                    if (savedMonth && clientData.months.some(m => m.name === savedMonth)) {
+                        setActiveMonth(savedMonth);
+                    } else if (!clientData.months.some(m => m.name === activeMonth)) {
                         setActiveMonth(clientData.months[0].name);
                     }
                 } else {
@@ -312,7 +327,7 @@ export default function ClientIdPage() {
         });
 
         return () => unsubscribe();
-    }, [clientId, activeMonth]);
+    }, [clientId]);
     
     useEffect(() => {
         if (!clientId) return;
@@ -436,7 +451,7 @@ export default function ClientIdPage() {
                          {pageLoading ? <Skeleton className="h-36 w-full" /> : client && (
                                 <div className="flex flex-col gap-2">
                                     <div className="flex justify-between items-center gap-4">
-                                        <div className='flex-shrink-0'>
+                                        <div className='flex-shrink-0 w-[150px]'>
                                             <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
                                         </div>
                                          <Tabs value={activeMonth} onValueChange={setActiveMonth} className="flex-grow min-w-0">
@@ -578,5 +593,3 @@ export default function ClientIdPage() {
         </div>
     );
 }
-
-
