@@ -56,6 +56,8 @@ export type MonthData = {
     billDuration?: string;
     socialPlatforms?: string;
     monthlyReach?: string;
+    paidPromotionsMainBudget?: number;
+    planPromotionsMainBudget?: number;
 };
 
 export type Client = {

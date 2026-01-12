@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import type { PaidPromotion, UserProfile as User, Task, ProgressNote, ContentType, Client } from '@/lib/data';
+import type { PaidPromotion, UserProfile as User, Task, ProgressNote, ContentType, Client, MonthData } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -35,6 +35,7 @@ interface PaidPromotionsTableProps {
     totalCashIn: number;
     onClientUpdate: (updatedData: Partial<Client>) => void;
     activeMonth: string;
+    monthData: MonthData | undefined;
 }
 
 const adTypes: PaidPromotion['adType'][] = [
@@ -95,7 +96,7 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function PaidPromotionsTable({ client, users, totalCashIn, onClientUpdate, activeMonth }: PaidPromotionsTableProps) {
+export default function PaidPromotionsTable({ client, users, totalCashIn, onClientUpdate, activeMonth, monthData }: PaidPromotionsTableProps) {
     const { user: currentUser } = useAuth();
     const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
     const [loading, setLoading] = useState(true);
@@ -106,16 +107,23 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
     const [editingRemark, setEditingRemark] = useState<{ promoId: string; remarkIndex: number } | null>(null);
     const [editingText, setEditingText] = useState('');
     const isAdmin = currentUser?.role === 'admin';
-    const [mainBudget, setMainBudget] = useState<number | ''>(client.paidPromotionsMainBudget || 0);
+    const [mainBudget, setMainBudget] = useState<number | ''>(monthData?.paidPromotionsMainBudget || 0);
     const [oldBalance, setOldBalance] = useState<number>(client.paidPromotionsOldBalance || 0);
 
     useEffect(() => {
-        setMainBudget(client.paidPromotionsMainBudget || 0);
+        setMainBudget(monthData?.paidPromotionsMainBudget || 0);
         setOldBalance(client.paidPromotionsOldBalance || 0);
-    }, [client.paidPromotionsMainBudget, client.paidPromotionsOldBalance]);
+    }, [monthData, client.paidPromotionsOldBalance]);
 
-    const handleMainBudgetChange = () => {
-        onClientUpdate({ paidPromotionsMainBudget: Number(mainBudget) || 0 });
+    const handleMainBudgetChange = (newBudgetValue: number | '') => {
+        const budget = Number(newBudgetValue) || 0;
+        setMainBudget(budget);
+        
+        const updatedMonths = client.months?.map(m => 
+            m.name === activeMonth ? { ...m, paidPromotionsMainBudget: budget } : m
+        ) || [];
+
+        onClientUpdate({ months: updatedMonths });
     };
 
     const handleOldBalanceChange = () => {
@@ -308,7 +316,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                         type="number"
                         value={mainBudget}
                         onChange={(e) => setMainBudget(e.target.value === '' ? '' : Number(e.target.value))}
-                        onBlur={handleMainBudgetChange}
+                        onBlur={(e) => handleMainBudgetChange(Number(e.target.value))}
                     />
                 </div>
                 <Button size="sm" onClick={addPromotion} className="h-7 gap-1">
