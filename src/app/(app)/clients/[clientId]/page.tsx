@@ -188,7 +188,6 @@ export default function ClientIdPage() {
     const [loading, setLoading] = useState(true);
     const [cashInTransactions, setCashInTransactions] = useState<(CashInTransaction & { id: string })[]>([]);
     const [cashInLoading, setCashInLoading] = useState(true);
-    const [isDeleting, setIsDeleting] = useState(false);
     const { toast } = useToast();
     
     const params = useParams();
@@ -228,7 +227,6 @@ export default function ClientIdPage() {
             paidPromotionsMainBudget: 0,
             planPromotionsMainBudget: 0,
         }];
-        setMonthlyTabs(newTabs);
         setActiveMonth(newMonthName);
         handleClientUpdate({ months: newTabs });
     };
@@ -240,7 +238,6 @@ export default function ClientIdPage() {
         }
 
         const newTabs = monthlyTabs.map(month => month.name === oldName ? { ...month, name: newName } : month);
-        setMonthlyTabs(newTabs);
         if(activeMonth === oldName) {
             setActiveMonth(newName);
         }
@@ -333,7 +330,7 @@ export default function ClientIdPage() {
         });
 
         return () => unsubscribe();
-    }, [clientId]);
+    }, [clientId, activeMonth]); // Added activeMonth to dependencies to handle edge cases
     
     useEffect(() => {
         if (!clientId) return;
