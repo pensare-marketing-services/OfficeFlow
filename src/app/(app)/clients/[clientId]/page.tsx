@@ -281,6 +281,8 @@ export default function ClientIdPage() {
         if (!tasksForCurrentMonth || !client) return [];
         return tasksForCurrentMonth.filter(task => 
             task.clientId === client.id &&
+            task.description !== 'Paid Promotion' &&
+            task.description !== 'Plan Promotion' &&
             task.contentType !== 'Other' &&
             task.contentType !== 'SEO' &&
             task.contentType !== 'Website' &&
