@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -26,6 +27,8 @@ import PlanPromotionsTable from '@/components/dashboard/plan-promotions-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Loader2 } from 'lucide-react';
 
 
 type UserWithId = User & { id: string };
@@ -74,6 +77,7 @@ const EditableTabTrigger: React.FC<{
 }> = ({ value, onSave, onDelete, isOnlyMonth }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentValue, setCurrentValue] = useState(value);
+  const [isDeleting, setIsDeleting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -104,6 +108,12 @@ const EditableTabTrigger: React.FC<{
       setIsEditing(false);
     }
   };
+  
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
+    await onDelete(value);
+    // No need to set isDeleting to false as the component will unmount
+  };
 
   if (isEditing) {
     return (
@@ -129,17 +139,33 @@ const EditableTabTrigger: React.FC<{
         {value}
       </TabsTrigger>
       {!isOnlyMonth && (
-        <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute right-0 h-5 w-5 opacity-50 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-            onClick={(e) => {
-                e.stopPropagation();
-                onDelete(value);
-            }}
-        >
-            <Trash2 className="h-3 w-3" />
-        </Button>
+         <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute right-0 h-5 w-5 opacity-50 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <Trash2 className="h-3 w-3" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the month "{value}" and all of its associated tasks and promotions.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                 {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Yes, delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   );
@@ -253,7 +279,6 @@ export default function ClientIdPage() {
             }
             return month;
         });
-        setMonthlyTabs(newTabs); // Optimistic update for responsiveness
         handleClientUpdate({ months: newTabs });
     };
 
