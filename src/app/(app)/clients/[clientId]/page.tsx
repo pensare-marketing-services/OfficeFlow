@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -91,8 +92,10 @@ const EditableTabTrigger: React.FC<{
   }, [isEditing]);
 
   const handleSave = () => {
-    if (currentValue !== value) {
-      onSave(currentValue);
+    if (currentValue !== value && currentValue.trim() !== '') {
+      onSave(currentValue.trim());
+    } else {
+        setCurrentValue(value);
     }
     setIsEditing(false);
   };
@@ -198,6 +201,11 @@ export default function ClientIdPage() {
     };
 
     const handleMonthNameChange = (oldName: string, newName: string) => {
+        if(monthlyTabs.some(tab => tab.name === newName)) {
+            toast({ variant: 'destructive', title: 'Duplicate Name', description: 'Month names must be unique.' });
+            return;
+        }
+
         const newTabs = monthlyTabs.map(month => month.name === oldName ? { ...month, name: newName } : month);
         setMonthlyTabs(newTabs);
         if(activeMonth === oldName) {
@@ -357,11 +365,13 @@ export default function ClientIdPage() {
     }
 
     const tasksForCurrentMonth = useMemo(() => {
-        if (activeMonth === "Month 1" && (!client?.months || client.months.length <= 1)) {
+        // If there's only one month tab and it's named "Month 1", show legacy tasks (without a 'month' field) as well.
+        if (monthlyTabs.length <= 1 && activeMonth === "Month 1") {
             return allClientTasks.filter(task => !task.month || task.month === "Month 1");
         }
+        // Otherwise, only show tasks that strictly match the active month name.
         return allClientTasks.filter(task => task.month === activeMonth);
-    }, [allClientTasks, activeMonth, client?.months]);
+    }, [allClientTasks, activeMonth, monthlyTabs]);
 
     const filteredTasks = useMemo(() => {
         if (!tasksForCurrentMonth || !client) return [];
@@ -553,3 +563,4 @@ export default function ClientIdPage() {
         </div>
     );
 }
+
