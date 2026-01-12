@@ -229,7 +229,7 @@
           "items": {
             "$ref": "#/entities/ClientNote"
           },
-          "description": "A list of notes specific to this client."
+          "description": "[DEPRECATED] A list of notes specific to this client. Now stored in the 'months' array."
         },
         "categories": {
             "type": "array",
@@ -250,18 +250,24 @@
               "socialPlatforms": { "type": "string" },
               "monthlyReach": { "type": "string" },
               "paidPromotionsMainBudget": { "type": "number" },
-              "planPromotionsMainBudget": { "type": "number" }
+              "planPromotionsMainBudget": { "type": "number" },
+              "notes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/entities/ClientNote"
+                }
+              }
             }
           },
-          "description": "A list of monthly tabs for the client page, each with its own plan details."
+          "description": "A list of monthly tabs for the client page, each with its own plan details and notes."
         },
         "paidPromotionsMainBudget": {
             "type": "number",
-            "description": "The main budget manually entered for Paid Promotions."
+            "description": "[DEPRECATED] The main budget manually entered for Paid Promotions."
         },
         "planPromotionsMainBudget": {
             "type": "number",
-            "description": "The main budget manually entered for Plan Promotions."
+            "description": "[DEPRECATED] The main budget manually entered for Plan Promotions."
         },
         "paidPromotionsOldBalance": {
             "type": "number",

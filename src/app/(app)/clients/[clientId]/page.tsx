@@ -14,7 +14,7 @@ import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
 import { Input } from '@/components/ui/input';
-import { Pen, Plus, Trash2, MoreVertical } from 'lucide-react';
+import { Pen, Plus, Trash2 } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
 import ClientNotesTable from '@/components/dashboard/client-notes-table';
 import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
@@ -24,17 +24,12 @@ import WebsiteTable from '@/components/dashboard/website-table';
 import OtherTaskTable from '@/components/dashboard/other-task-table';
 import PlanPromotionsTable from '@/components/dashboard/plan-promotions-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
-type TaskWithId = Task & { id: string };
-
 
 const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }> = ({ value, onSave }) => {
     const [currentValue, setCurrentValue] = useState(value);
@@ -79,7 +74,6 @@ const EditableTabTrigger: React.FC<{
 }> = ({ value, onSave, onDelete, isOnlyMonth }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentValue, setCurrentValue] = useState(value);
-  const [isDeleting, setIsDeleting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -101,7 +95,7 @@ const EditableTabTrigger: React.FC<{
     }
     setIsEditing(false);
   };
-
+  
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSave();
@@ -110,13 +104,6 @@ const EditableTabTrigger: React.FC<{
       setIsEditing(false);
     }
   };
-
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    await onDelete(value);
-    setIsDeleting(false);
-    // The AlertDialog will close itself on action click if we don't prevent it
-  }
 
   if (isEditing) {
     return (
@@ -128,53 +115,32 @@ const EditableTabTrigger: React.FC<{
         onKeyDown={handleKeyDown}
         className="h-7 w-auto text-xs px-2"
         onClick={(e) => e.stopPropagation()}
+        onDoubleClick={(e) => e.stopPropagation()}
       />
     );
   }
 
   return (
-    <div className="relative group flex items-center pr-1">
+    <div 
+        className="relative group flex items-center pr-1"
+        onDoubleClick={() => setIsEditing(true)}
+    >
       <TabsTrigger value={value} className="text-xs pr-6">
         {value}
       </TabsTrigger>
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                 <Button variant="ghost" size="icon" className="absolute right-0 h-5 w-5 opacity-50 group-hover:opacity-100 transition-opacity">
-                    <MoreVertical className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={() => setIsEditing(true)}>
-                    <Pen className="mr-2 h-4 w-4" />
-                    <span>Edit name</span>
-                </DropdownMenuItem>
-                {!isOnlyMonth && (
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
-                                 <Trash2 className="mr-2 h-4 w-4" />
-                                <span>Delete month</span>
-                            </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This will permanently delete the month "<strong>{value}</strong>" and all of its associated tasks and promotions. This action cannot be undone.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
-                                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    {isDeleting ? "Deleting..." : "Yes, delete month"}
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                )}
-            </DropdownMenuContent>
-        </DropdownMenu>
+      {!isOnlyMonth && (
+        <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute right-0 h-5 w-5 opacity-50 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+            onClick={(e) => {
+                e.stopPropagation();
+                onDelete(value);
+            }}
+        >
+            <Trash2 className="h-3 w-3" />
+        </Button>
+      )}
     </div>
   );
 };
@@ -193,9 +159,8 @@ export default function ClientIdPage() {
     const params = useParams();
     const clientId = params.clientId as string;
 
-    const [monthlyTabs, setMonthlyTabs] = useState<MonthData[]>([{ name: "Month 1" }]);
+    const [monthlyTabs, setMonthlyTabs] = useState<MonthData[]>([{ name: "Month 1", notes: [] }]);
     
-    // State to hold the active month, initialized from sessionStorage or default
     const [activeMonth, setActiveMonth] = useState(() => {
         if (typeof window !== 'undefined' && clientId) {
             return sessionStorage.getItem(`activeMonth_${clientId}`) || "Month 1";
@@ -203,7 +168,6 @@ export default function ClientIdPage() {
         return "Month 1";
     });
 
-    // Effect to update sessionStorage when activeMonth changes
     useEffect(() => {
         if (clientId) {
             sessionStorage.setItem(`activeMonth_${clientId}`, activeMonth);
@@ -226,9 +190,11 @@ export default function ClientIdPage() {
             monthlyReach: '',
             paidPromotionsMainBudget: 0,
             planPromotionsMainBudget: 0,
+            notes: []
         }];
-        setActiveMonth(newMonthName);
-        handleClientUpdate({ months: newTabs });
+        handleClientUpdate({ months: newTabs }).then(() => {
+            setActiveMonth(newMonthName);
+        });
     };
 
     const handleMonthNameChange = (oldName: string, newName: string) => {
@@ -238,40 +204,40 @@ export default function ClientIdPage() {
         }
 
         const newTabs = monthlyTabs.map(month => month.name === oldName ? { ...month, name: newName } : month);
-        if(activeMonth === oldName) {
-            setActiveMonth(newName);
-        }
-        handleClientUpdate({ months: newTabs });
+        
+        handleClientUpdate({ months: newTabs }).then(() => {
+             if(activeMonth === oldName) {
+                setActiveMonth(newName);
+            }
+        });
     };
 
     const handleDeleteMonth = async (monthName: string) => {
         try {
             const batch = writeBatch(db);
 
-            // 1. Delete tasks for this month
             const tasksQuery = query(collection(db, 'tasks'), where('clientId', '==', clientId), where('month', '==', monthName));
             const tasksSnapshot = await getDocs(tasksQuery);
             tasksSnapshot.forEach(doc => batch.delete(doc.ref));
 
-            // 2. Delete paid promotions for this month
             const paidPromosQuery = query(collection(db, `clients/${clientId}/promotions`), where('month', '==', monthName));
             const paidPromosSnapshot = await getDocs(paidPromosQuery);
             paidPromosSnapshot.forEach(doc => batch.delete(doc.ref));
             
-            // 3. Delete plan promotions for this month
             const planPromosQuery = query(collection(db, `clients/${clientId}/planPromotions`), where('month', '==', monthName));
             const planPromosSnapshot = await getDocs(planPromosQuery);
             planPromosSnapshot.forEach(doc => batch.delete(doc.ref));
 
-            // 4. Update client document to remove the month from the array
             const newTabs = monthlyTabs.filter(month => month.name !== monthName);
-            const newActiveMonth = newTabs.length > 0 ? newTabs[0].name : "Month 1";
             
             batch.update(doc(db, 'clients', clientId), { months: newTabs });
 
             await batch.commit();
 
-            setActiveMonth(newActiveMonth);
+            if (activeMonth === monthName) {
+                const newActiveMonth = newTabs.length > 0 ? newTabs[0].name : "Month 1";
+                setActiveMonth(newActiveMonth);
+            }
             toast({ title: "Month Deleted", description: `"${monthName}" has been successfully deleted.` });
 
         } catch (error) {
@@ -287,7 +253,7 @@ export default function ClientIdPage() {
             }
             return month;
         });
-        setMonthlyTabs(newTabs);
+        setMonthlyTabs(newTabs); // Optimistic update for responsiveness
         handleClientUpdate({ months: newTabs });
     };
 
@@ -318,6 +284,7 @@ export default function ClientIdPage() {
                         monthlyReach: clientData.monthlyReach || '',
                         paidPromotionsMainBudget: clientData.paidPromotionsMainBudget || 0,
                         planPromotionsMainBudget: clientData.planPromotionsMainBudget || 0,
+                        notes: clientData.notes || [] // Migrate old global notes
                     };
                     setMonthlyTabs([initialMonth]);
                     setActiveMonth("Month 1");
@@ -330,7 +297,7 @@ export default function ClientIdPage() {
         });
 
         return () => unsubscribe();
-    }, [clientId, activeMonth]); // Added activeMonth to dependencies to handle edge cases
+    }, [clientId]); 
     
     useEffect(() => {
         if (!clientId) return;
@@ -391,15 +358,13 @@ export default function ClientIdPage() {
     };
 
     const handleNotesUpdate = (notes: ClientNote[]) => {
-        handleClientUpdate({ notes });
+        handleMonthDataUpdate({ notes });
     }
 
     const tasksForCurrentMonth = useMemo(() => {
-        // If there's only one month tab and it's named "Month 1", show legacy tasks (without a 'month' field) as well.
         if (monthlyTabs.length <= 1 && activeMonth === "Month 1") {
             return allClientTasks.filter(task => !task.month || task.month === "Month 1");
         }
-        // Otherwise, only show tasks that strictly match the active month name.
         return allClientTasks.filter(task => task.month === activeMonth);
     }, [allClientTasks, activeMonth, monthlyTabs]);
 
@@ -573,9 +538,9 @@ export default function ClientIdPage() {
                         />
                     )}
 
-                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && activeMonthData && (
                        <ClientNotesTable 
-                            notes={client.notes || []}
+                            notes={activeMonthData.notes || []}
                             onUpdate={handleNotesUpdate}
                        />
                     )}

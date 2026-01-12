@@ -58,6 +58,7 @@ export type MonthData = {
     monthlyReach?: string;
     paidPromotionsMainBudget?: number;
     planPromotionsMainBudget?: number;
+    notes?: ClientNote[];
 };
 
 export type Client = {
@@ -69,11 +70,11 @@ export type Client = {
   monthlyReach?: string;
   employeeIds?: string[];
   priority?: number;
-  notes?: ClientNote[];
+  notes?: ClientNote[]; // Deprecated, kept for migration
   categories?: string[];
   months?: MonthData[];
-  paidPromotionsMainBudget?: number;
-  planPromotionsMainBudget?: number;
+  paidPromotionsMainBudget?: number; // Deprecated
+  planPromotionsMainBudget?: number; // Deprecated
   paidPromotionsOldBalance?: number;
   planPromotionsOldBalance?: number;
 };
