@@ -29,6 +29,7 @@ interface SeoTableProps {
   onTaskAdd: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
   onTaskUpdate: (taskId: string, task: Partial<Task>) => void;
   onTaskDelete: (taskId: string) => void;
+  activeMonth: string;
 }
 
 const allStatuses: Task['status'][] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
@@ -92,7 +93,7 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpdate, onTaskDelete }: SeoTableProps) {
+export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpdate, onTaskDelete, activeMonth }: SeoTableProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -163,6 +164,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
             progressNotes: [],
             clientId,
             contentType: 'SEO',
+            month: activeMonth,
         };
         onTaskAdd(newTask);
     };
@@ -282,7 +284,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                                                                 )}
                                                                 <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                     {currentUser?.role === 'admin' && !isEditing && (
-                                                                      <Button variant="ghost" size="icon" className="aabsolute top-2 right-2 h-2 w-2" onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                      <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2" onClick={() => handleEditRemark(task, remarkIndex)}>
                                                                         <Pen className="h-2 w-2"/>
                                                                       </Button>
                                                                     )}

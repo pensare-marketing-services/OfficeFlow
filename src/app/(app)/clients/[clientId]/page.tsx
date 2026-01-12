@@ -492,6 +492,7 @@ export default function ClientIdPage() {
                             onTaskAdd={addTask}
                             onTaskUpdate={updateTask}
                             onTaskDelete={deleteTask}
+                            activeMonth={activeMonth}
                         />
                     )}
                     
@@ -503,6 +504,7 @@ export default function ClientIdPage() {
                             onTaskAdd={addTask}
                             onTaskUpdate={updateTask}
                             onTaskDelete={deleteTask}
+                            activeMonth={activeMonth}
                         />
                     )}
                 </div>
@@ -528,6 +530,7 @@ export default function ClientIdPage() {
                             onTaskAdd={addTask}
                             onTaskUpdate={updateTask}
                             onTaskDelete={deleteTask}
+                            activeMonth={activeMonth}
                         />
                     )}
 

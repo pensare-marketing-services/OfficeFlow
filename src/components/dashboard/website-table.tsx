@@ -29,6 +29,7 @@ interface WebsiteTableProps {
   onTaskAdd: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
   onTaskUpdate: (taskId: string, task: Partial<Task>) => void;
   onTaskDelete: (taskId: string) => void;
+  activeMonth: string;
 }
 
 const allStatuses: Task['status'][] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
@@ -92,7 +93,7 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTaskUpdate, onTaskDelete }: WebsiteTableProps) {
+export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTaskUpdate, onTaskDelete, activeMonth }: WebsiteTableProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -164,6 +165,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
             progressNotes: [],
             clientId,
             contentType: 'Website',
+            month: activeMonth,
         };
         onTaskAdd(newTask);
     };

@@ -29,6 +29,7 @@ interface OtherTaskTableProps {
   onTaskAdd: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
   onTaskUpdate: (taskId: string, task: Partial<Task>) => void;
   onTaskDelete: (taskId: string) => void;
+  activeMonth: string;
 }
 
 const allStatuses: Task['status'][] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
@@ -92,7 +93,7 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTaskUpdate, onTaskDelete }: OtherTaskTableProps) {
+export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTaskUpdate, onTaskDelete, activeMonth }: OtherTaskTableProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -164,6 +165,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
             progressNotes: [],
             clientId,
             contentType: 'Other',
+            month: activeMonth,
         };
         onTaskAdd(newTask);
     };
