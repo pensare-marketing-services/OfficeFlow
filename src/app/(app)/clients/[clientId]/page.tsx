@@ -1,5 +1,6 @@
 
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -15,7 +16,7 @@ import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
 import { Input } from '@/components/ui/input';
-import { Pen, Plus, Trash2 } from 'lucide-react';
+import { Pen, Plus, Trash2, MoreVertical } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
 import ClientNotesTable from '@/components/dashboard/client-notes-table';
 import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
@@ -28,6 +29,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 
 type UserWithId = User & { id: string };
@@ -117,45 +120,54 @@ const EditableTabTrigger: React.FC<{
         onChange={(e) => setCurrentValue(e.target.value)}
         onBlur={handleSave}
         onKeyDown={handleKeyDown}
-        className="h-7 w-auto text-[10px] px-2"
+        className="h-7 w-auto text-xs px-2"
         onClick={(e) => e.stopPropagation()}
       />
     );
   }
 
   return (
-    <div className="relative group flex items-center">
-      <TabsTrigger value={value} className="text-xs pr-7">
+    <div className="relative group flex items-center pr-1">
+      <TabsTrigger value={value} className="text-xs pr-6">
         {value}
       </TabsTrigger>
-      <div className="absolute right-0.5 flex items-center">
-         <button onClick={() => setIsEditing(true)} className="p-0.5 rounded-full bg-background/50 hover:bg-accent opacity-0 group-hover:opacity-100 transition-opacity">
-            <Pen className="h-3 w-3 text-muted-foreground" />
-        </button>
-        {!isOnlyMonth && (
-             <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <button className="p-0.5 rounded-full bg-background/50 text-destructive/80 hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Trash2 className="h-3 w-3" />
-                    </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This will permanently delete the month "<strong>{value}</strong>" and all of its associated tasks and promotions. This action cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={onDelete} className="bg-destructive hover:bg-destructive/90">
-                            Yes, delete month
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        )}
-      </div>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                 <Button variant="ghost" size="icon" className="absolute right-0 h-5 w-5 opacity-50 group-hover:opacity-100 transition-opacity">
+                    <MoreVertical className="h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => setIsEditing(true)}>
+                    <Pen className="mr-2 h-4 w-4" />
+                    <span>Edit name</span>
+                </DropdownMenuItem>
+                {!isOnlyMonth && (
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                 <Trash2 className="mr-2 h-4 w-4" />
+                                <span>Delete month</span>
+                            </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This will permanently delete the month "<strong>{value}</strong>" and all of its associated tasks and promotions. This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={onDelete} className="bg-destructive hover:bg-destructive/90">
+                                    Yes, delete month
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
     </div>
   );
 };
@@ -423,22 +435,25 @@ export default function ClientIdPage() {
                         <CardContent className="p-2">
                          {pageLoading ? <Skeleton className="h-36 w-full" /> : client && (
                                 <div className="flex flex-col gap-2">
-                                    <div className="flex justify-between items-start">
+                                    <div className="flex justify-between items-center gap-4">
                                         <div className='flex-shrink-0'>
                                             <EditableTitle value={client.name} onSave={(newName) => handleClientUpdate({ name: newName })} />
                                         </div>
-                                         <Tabs value={activeMonth} onValueChange={setActiveMonth} className="w-full max-w-md mx-auto">
-                                            <TabsList>
-                                                {monthlyTabs.map(month => (
-                                                    <EditableTabTrigger 
-                                                        key={month.name}
-                                                        value={month.name}
-                                                        onSave={(newName) => handleMonthNameChange(month.name, newName)}
-                                                        onDelete={() => handleDeleteMonth(month.name)}
-                                                        isOnlyMonth={monthlyTabs.length === 1}
-                                                    />
-                                                ))}
-                                            </TabsList>
+                                         <Tabs value={activeMonth} onValueChange={setActiveMonth} className="flex-grow min-w-0">
+                                            <ScrollArea className="w-full whitespace-nowrap">
+                                                <TabsList>
+                                                    {monthlyTabs.map(month => (
+                                                        <EditableTabTrigger 
+                                                            key={month.name}
+                                                            value={month.name}
+                                                            onSave={(newName) => handleMonthNameChange(month.name, newName)}
+                                                            onDelete={() => handleDeleteMonth(month.name)}
+                                                            isOnlyMonth={monthlyTabs.length === 1}
+                                                        />
+                                                    ))}
+                                                </TabsList>
+                                                <ScrollBar orientation="horizontal" />
+                                            </ScrollArea>
                                         </Tabs>
                                         <Button size="sm" onClick={handleAddNewMonth} className="h-7 gap-1">
                                             <Plus className="h-4 w-4" />
@@ -563,4 +578,5 @@ export default function ClientIdPage() {
         </div>
     );
 }
+
 
