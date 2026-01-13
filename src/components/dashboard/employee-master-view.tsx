@@ -574,6 +574,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                 users={users}
                 clients={clients}
                 employees={employees}
+                selectedDate={selectedDate}
             />
         </div>
       </CardContent>
@@ -588,23 +589,47 @@ const DailyTaskTable: React.FC<{
   users: UserWithId[];
   clients: ClientWithId[];
   employees: UserWithId[];
-}> = ({ tasks, users, clients, employees }) => {
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-  const [highlightedClientIds, setHighlightedClientIds] = useState<Set<string>>(new Set());
-  const { scrollRef } = useHorizontalScroll();
-  const tableRef = useRef<HTMLDivElement>(null);
+  selectedDate: Date;
+}> = ({ tasks, users, clients, employees, selectedDate }) => {
+    const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+    const { scrollRef } = useHorizontalScroll();
+    const tableRef = useRef<HTMLDivElement>(null);
+    const [highlightedClientIds, setHighlightedClientIds] = useState<Set<string>>(new Set());
 
-  const toggleHighlight = (clientId: string) => {
-    setHighlightedClientIds(prev => {
-        const newSet = new Set(prev);
+    const getStorageKey = (date: Date) => `highlightedClients_${format(date, 'yyyy-MM-dd')}`;
+
+    useEffect(() => {
+        const storageKey = getStorageKey(selectedDate);
+        try {
+            const item = window.localStorage.getItem(storageKey);
+            if (item) {
+                setHighlightedClientIds(new Set(JSON.parse(item)));
+            } else {
+                setHighlightedClientIds(new Set());
+            }
+        } catch (error) {
+            console.error("Failed to read from localStorage", error);
+            setHighlightedClientIds(new Set());
+        }
+    }, [selectedDate]);
+
+    const toggleHighlight = (clientId: string) => {
+        const newSet = new Set(highlightedClientIds);
         if (newSet.has(clientId)) {
             newSet.delete(clientId);
         } else {
             newSet.add(clientId);
         }
-        return newSet;
-    });
-  };
+        setHighlightedClientIds(newSet);
+
+        try {
+            const storageKey = getStorageKey(selectedDate);
+            window.localStorage.setItem(storageKey, JSON.stringify(Array.from(newSet)));
+        } catch (error) {
+            console.error("Failed to write to localStorage", error);
+        }
+    };
+
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -687,18 +712,19 @@ const DailyTaskTable: React.FC<{
                     key={client.id}
                     className={cn(
                       `${rowHeight} border-b hover:bg-muted/30`,
-                      selectedClientId === client.id && 'bg-accent/20',
-                      isHighlighted && 'bg-yellow-200 hover:bg-yellow-200/80'
+                      selectedClientId === client.id && 'bg-accent/20'
                     )}
                     onClick={() => setSelectedClientId(client.id)}
-                    onDoubleClick={() => toggleHighlight(client.id)}
                   >
                     <TableCell className="p-0 border-r">
                       <div className="h-full w-full flex items-center justify-center">
                         {index + 1}
                       </div>
                     </TableCell>
-                    <TableCell className="p-0 border-r">
+                    <TableCell 
+                      className={cn("p-0 border-r", isHighlighted && "bg-yellow-200")}
+                      onDoubleClick={() => toggleHighlight(client.id)}
+                    >
                       <div className="h-full w-full flex items-center px-1">
                         <span className="truncate">{client.name}</span>
                       </div>
@@ -759,7 +785,7 @@ const DailyTaskTable: React.FC<{
                       className={cn(
                         `${rowHeight} border-b`,
                         selectedClientId === client.id && 'bg-accent/20',
-                         highlightedClientIds.has(client.id) && 'bg-yellow-200'
+                        highlightedClientIds.has(client.id) && 'bg-yellow-200'
                       )}
                     >
                       {employees.map((employee) => {
