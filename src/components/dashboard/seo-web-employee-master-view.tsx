@@ -581,8 +581,21 @@ const DailyTaskTable: React.FC<{
   employees: UserWithId[];
 }> = ({ tasks, users, clients, employees }) => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [highlightedClientIds, setHighlightedClientIds] = useState<Set<string>>(new Set());
   const { scrollRef } = useHorizontalScroll();
   const tableRef = useRef<HTMLDivElement>(null);
+  
+  const toggleHighlight = (clientId: string) => {
+    setHighlightedClientIds(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(clientId)) {
+            newSet.delete(clientId);
+        } else {
+            newSet.add(clientId);
+        }
+        return newSet;
+    });
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -657,15 +670,19 @@ const DailyTaskTable: React.FC<{
                   .map((id) => users.find((u) => u.id === id)?.username)
                   .filter(Boolean)
                   .join(', ');
+                
+                const isHighlighted = highlightedClientIds.has(client.id);
 
                 return (
                   <TableRow
                     key={client.id}
                     className={cn(
                       `${rowHeight} border-b hover:bg-muted/30`,
-                      selectedClientId === client.id && 'bg-accent/20'
+                      selectedClientId === client.id && 'bg-accent/20',
+                      isHighlighted && 'bg-yellow-200 hover:bg-yellow-200/80'
                     )}
                     onClick={() => setSelectedClientId(client.id)}
+                    onDoubleClick={() => toggleHighlight(client.id)}
                   >
                     <TableCell className="p-0 border-r">
                       <div className="h-full w-full flex items-center justify-center">
@@ -732,7 +749,8 @@ const DailyTaskTable: React.FC<{
                       key={client.id}
                       className={cn(
                         `${rowHeight} border-b`,
-                        selectedClientId === client.id && 'bg-accent/20'
+                        selectedClientId === client.id && 'bg-accent/20',
+                         highlightedClientIds.has(client.id) && 'bg-yellow-200'
                       )}
                     >
                       {employees.map((employee) => {
