@@ -589,7 +589,7 @@ const DailyTaskTable: React.FC<{
     const tableRef = useRef<HTMLDivElement>(null);
     const [highlightedClientIds, setHighlightedClientIds] = useState<Set<string>>(new Set());
 
-    const getStorageKey = (date: Date) => `highlightedClients_${format(date, 'yyyy-MM-dd')}`;
+    const getStorageKey = (date: Date) => `seo_highlightedClients_${format(date, 'yyyy-MM-dd')}`;
 
     useEffect(() => {
         const storageKey = getStorageKey(selectedDate);
@@ -777,8 +777,7 @@ const DailyTaskTable: React.FC<{
                       key={client.id}
                       className={cn(
                         `${rowHeight} border-b`,
-                        selectedClientId === client.id && 'bg-accent/20',
-                         highlightedClientIds.has(client.id) && 'bg-yellow-200'
+                        selectedClientId === client.id && 'bg-accent/20'
                       )}
                     >
                       {employees.map((employee) => {
