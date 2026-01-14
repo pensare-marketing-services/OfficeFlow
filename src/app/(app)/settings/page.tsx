@@ -289,7 +289,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete the client <strong>{client.name}</strong> and all of their associated data, including tasks, promotions, and notes.
+                                            This action cannot be undone. This will permanently delete the client &lt;strong&gt;{client.name}&lt;/strong&gt; and all of their associated data, including tasks, promotions, and notes.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
@@ -574,7 +574,7 @@ export default function SettingsPage() {
                                                         <AlertDialogHeader>
                                                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                This action cannot be undone. This will permanently delete the account for strong>{employee.username}</strong>.
+                                                                This action cannot be undone. This will permanently delete the account for &lt;strong&gt;{employee.username}&lt;/strong&gt;.
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
@@ -612,3 +612,4 @@ export default function SettingsPage() {
     
 
     
+
