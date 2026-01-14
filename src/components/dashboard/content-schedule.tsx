@@ -33,7 +33,6 @@ type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
 
 const allStatuses: TaskStatus[] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
-const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
 
 interface ContentScheduleProps {
     tasks: (Task & { id: string })[];
@@ -449,7 +448,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                         </TableHeader>
                         <TableBody>
                             {sortedTasks.map((task, index) => {
-                                const isCompleted = completedStatuses.includes(task.status);
+                                const isCompleted = ['Posted', 'Approved', 'Completed'].includes(task.status);
                                 const client = getClient(task.clientId);
                                 const { assigneeIds = [], activeAssigneeIndex = 0 } = task;
                                 const isMultiAssignee = assigneeIds.length > 1;
@@ -797,5 +796,4 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
-
 
