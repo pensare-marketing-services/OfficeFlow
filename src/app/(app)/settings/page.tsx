@@ -242,18 +242,18 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                                     <div className="space-y-0.5">
                                         <FormLabel>Client Status</FormLabel>
-                                        <FormDescription className="text-[10px]">
+                                        <FormDescription className="text-xs">
                                             Inactive clients will be hidden from the sidebar and master views.
                                         </FormDescription>
                                     </div>
                                     <FormControl>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Switch
-                                                    checked={field.value}
-                                                    onCheckedChange={field.onChange}
-                                                    onClick={(e) => e.preventDefault()} // Prevent immediate toggle
-                                                />
+                                                <div onClick={(e) => e.preventDefault()} >
+                                                  <Switch
+                                                      checked={field.value}
+                                                  />
+                                                </div>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
@@ -266,7 +266,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
-                                                    <AlertDialogCancel onClick={() => field.onChange(field.value)}>Cancel</AlertDialogCancel>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
                                                     <AlertDialogAction onClick={() => field.onChange(!field.value)}>
                                                         Yes, {field.value ? 'Deactivate' : 'Activate'}
                                                     </AlertDialogAction>
@@ -289,7 +289,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete the client &lt;strong&gt;{client.name}&lt;/strong&gt; and all of their associated data, including tasks, promotions, and notes.
+                                            This action cannot be undone. This will permanently delete the client <strong>{client.name}</strong> and all of their associated data, including tasks, promotions, and notes.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
@@ -574,7 +574,7 @@ export default function SettingsPage() {
                                                         <AlertDialogHeader>
                                                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                This action cannot be undone. This will permanently delete the account for &lt;strong&gt;{employee.username}&lt;/strong&gt;.
+                                                                This action cannot be undone. This will permanently delete the account for <strong>{employee.username}</strong>.
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
