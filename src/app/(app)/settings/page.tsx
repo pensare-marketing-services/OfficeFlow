@@ -243,21 +243,22 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                     <div className="space-y-0.5">
                                         <FormLabel>Client Status</FormLabel>
                                         <FormDescription className="text-xs">
-                                            Inactive clients will be hidden from the sidebar and master views.
+                                            {field.value ? 'Client is currently Active.' : 'Client is currently Inactive.'}
                                         </FormDescription>
                                     </div>
                                     <FormControl>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <div onClick={(e) => e.preventDefault()} >
-                                                  <Switch
-                                                      checked={field.value}
-                                                  />
-                                                </div>
+                                                <Switch
+                                                    checked={field.value}
+                                                    onCheckedChange={() => {}} // Dummy change handler
+                                                />
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                    <AlertDialogTitle>
+                                                        {field.value ? 'Deactivate Client?' : 'Activate Client?'}
+                                                    </AlertDialogTitle>
                                                     <AlertDialogDescription>
                                                         {field.value 
                                                             ? `Deactivating this client will hide them from the sidebar and master views. No data will be deleted.` 
@@ -612,4 +613,3 @@ export default function SettingsPage() {
     
 
     
-
