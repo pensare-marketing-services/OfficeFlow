@@ -1,3 +1,4 @@
+
 'use client';
 import { useMemo, useState, useEffect } from 'react';
 import { Users, Building, Trash2, Eye, EyeOff, Pen } from "lucide-react";
@@ -134,7 +135,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                         )} />
 
                         {[1, 2, 3].map((num) => {
-                            const fieldName = `employeeId${num}` as const;
+                            const fieldName = `employeeId${num}` as 'employeeId1' | 'employeeId2' | 'employeeId3';
                             const watchedIds = [watchEmployee1, watchEmployee2, watchEmployee3];
                             const filteredOptions = employeeOptions.filter(
                                 (emp) => !watchedIds.includes(emp.id) || watchedIds[num - 1] === emp.id
@@ -547,5 +548,7 @@ export default function SettingsPage() {
         </div>
     );
 }
+
+    
 
     
