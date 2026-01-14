@@ -1,3 +1,4 @@
+
 'use client';
 import type { Client, MonthData } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
@@ -37,7 +38,12 @@ const EditableField: React.FC<{ value: string; onSave: (value: string) => void }
 
 
 export function ClientPlanSummary({ monthData, onUpdate }: ClientPlanSummaryProps) {
-    
+    const [localMonthData, setLocalMonthData] = useState(monthData);
+
+    useEffect(() => {
+        setLocalMonthData(monthData);
+    }, [monthData]);
+
     const handleSave = (field: keyof MonthData, value: string) => {
         onUpdate({ [field]: value });
     };
@@ -50,21 +56,21 @@ export function ClientPlanSummary({ monthData, onUpdate }: ClientPlanSummaryProp
                         <TableRow>
                             <TableCell className="font-bold text-[10px] p-2 bg-muted/50 w-[120px]">PLAN</TableCell>
                             <TableCell className="p-1">
-                                <EditableField value={monthData?.plan || ''} onSave={(value) => handleSave('plan', value)} />
+                                <EditableField value={localMonthData?.plan || ''} onSave={(value) => handleSave('plan', value)} />
                             </TableCell>
                             <TableCell className="font-bold text-[10px] p-2 bg-muted/50 w-[120px]">Bill Duration</TableCell>
                             <TableCell className="p-1">
-                                <EditableField value={monthData?.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
+                                <EditableField value={localMonthData?.billDuration || ''} onSave={(value) => handleSave('billDuration', value)} />
                             </TableCell>
                         </TableRow>
                         <TableRow>
                             <TableCell className="font-bold text-[10px] p-2 bg-muted/50 w-[120px]">Social Platforms</TableCell>
                             <TableCell className="p-1">
-                                <EditableField value={monthData?.socialPlatforms || ''} onSave={(value) => handleSave('socialPlatforms', value)} />
+                                <EditableField value={localMonthData?.socialPlatforms || ''} onSave={(value) => handleSave('socialPlatforms', value)} />
                             </TableCell>
                             <TableCell className="font-bold text-[10px] p-2 bg-muted/50 w-[120px]">Monthly Reach</TableCell>
                             <TableCell className="p-1">
-                                 <EditableField value={monthData?.monthlyReach || ''} onSave={(value) => handleSave('monthlyReach', value)} />
+                                 <EditableField value={localMonthData?.monthlyReach || ''} onSave={(value) => handleSave('monthlyReach', value)} />
                             </TableCell>
                         </TableRow>
                     </TableBody>
