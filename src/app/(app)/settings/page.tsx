@@ -2,7 +2,7 @@
 
 'use client';
 import { useMemo, useState, useEffect } from 'react';
-import { Users, Building, Trash2, Eye, EyeOff, Pen, AlertTriangle } from "lucide-react";
+import { Users, Building, Trash2, Eye, EyeOff, Pen, Settings  } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import AddEmployeeForm from '@/components/settings/add-employee-form';
 import AddClientForm from '@/components/settings/add-client-form';
@@ -128,7 +128,8 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7">
-                    <Pen className="h-4 w-4" />
+                    {/* <Pen className="h-4 w-4" /> */}
+                    <Settings className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
             <DialogContent>
@@ -534,10 +535,10 @@ export default function SettingsPage() {
                              <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-[40px] px-2 text-[10px] h-8">#</TableHead>
+                                        <TableHead className="w-[10px] px-2 text-[10px] h-8">#</TableHead>
                                         <TableHead className="px-2 text-[10px] h-8">Username</TableHead>
                                         <TableHead className="px-2 text-[10px] h-8">Password</TableHead>
-                                        <TableHead className="px-2 text-[10px] h-8">Priority</TableHead>
+                                        <TableHead className="px-2 text-[10px] h-8 w-[10]">Priority</TableHead>
                                         <TableHead className="text-right px-2 text-[10px] h-8">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
