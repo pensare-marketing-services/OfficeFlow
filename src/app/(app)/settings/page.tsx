@@ -239,17 +239,16 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                             control={form.control}
                             name="active"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border border-red-700 p-3 shadow-sm">
                                     <div className="space-y-0.5">
-                                        <FormLabel>Client Status</FormLabel>
-                                        <FormDescription className="text-xs">
-                                            {field.value ? 'Client is currently Active.' : 'Client is currently Inactive.'}
-                                        </FormDescription>
+                                        <FormLabel className="text-sm font-normal">{field.value ? 'Client is currently Active.' : 'Client is currently Inactive.'}</FormLabel>
+                                     
                                     </div>
                                     <FormControl>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <div onClick={(e) => e.preventDefault()} className="inline-block">
+                                                {/* This div prevents the FormItem's label click from triggering the switch */}
+                                                <div onClick={(e) => e.preventDefault()}>
                                                     <Switch
                                                         checked={field.value}
                                                         onCheckedChange={field.onChange}
@@ -611,6 +610,8 @@ export default function SettingsPage() {
         </div>
     );
 }
+
+    
 
     
 
