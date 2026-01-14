@@ -70,133 +70,298 @@ const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }
     );
 };
 
+// const EditableTabTrigger: React.FC<{
+//   value: string;
+//   onSave: (value: string) => void;
+//   onDelete: (monthName: string) => Promise<void>;
+//   isOnlyMonth: boolean;
+// }> = ({ value, onSave, onDelete, isOnlyMonth }) => {
+//   const [isEditing, setIsEditing] = useState(false);
+//   const [currentValue, setCurrentValue] = useState(value);
+//   const [isDeleting, setIsDeleting] = useState(false);
+//   const inputRef = useRef<HTMLInputElement>(null);
+
+//   useEffect(() => {
+//     setCurrentValue(value);
+//   }, [value]);
+
+//   useEffect(() => {
+//     if (isEditing && inputRef.current) {
+//       inputRef.current.focus();
+//       inputRef.current.select();
+//     }
+//   }, [isEditing]);
+
+//   const handleSave = () => {
+//     if (currentValue !== value && currentValue.trim() !== '') {
+//       onSave(currentValue.trim());
+//     } else {
+//         setCurrentValue(value);
+//     }
+//     setIsEditing(false);
+//   };
+  
+//   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+//     if (e.key === 'Enter') {
+//       handleSave();
+//     } else if (e.key === 'Escape') {
+//       setCurrentValue(value);
+//       setIsEditing(false);
+//     }
+//   };
+  
+//   const handleDeleteConfirm = async () => {
+//     setIsDeleting(true);
+//     await onDelete(value);
+//   };
+
+//   if (isEditing) {
+//     return (
+//       <Input
+//         ref={inputRef}
+//         value={currentValue}
+//         onChange={(e) => setCurrentValue(e.target.value)}
+//         onBlur={handleSave}
+//         onKeyDown={handleKeyDown}
+//         className="h-7 w-auto text-xs px-2"
+//         onClick={(e) => e.stopPropagation()}
+//       />
+//     );
+//   }
+
+//   return (
+//     <div className="relative group flex items-center pr-1">
+//       <TabsTrigger value={value} className="text-xs pr-7">
+//         {value}
+//       </TabsTrigger>
+//       <DropdownMenu>
+//         <DropdownMenuTrigger asChild>
+//           <Button
+//             variant="ghost"
+//             size="icon"
+//             className="absolute right-0 h-5 w-5 opacity-60 group-hover:opacity-100 transition-opacity"
+//             onClick={(e) => e.stopPropagation()}
+//           >
+//             <MoreVertical className="h-3 w-3" />
+//           </Button>
+//         </DropdownMenuTrigger>
+//         <DropdownMenuContent
+//           side="bottom"
+//           align="end"
+//           onClick={(e) => e.stopPropagation()}
+//         >
+//           <DropdownMenuItem onSelect={() => setIsEditing(true)}>
+//             <Pen className="mr-2 h-3 w-3" />
+//             Edit
+//           </DropdownMenuItem>
+//           {!isOnlyMonth && (
+//             <AlertDialog>
+//               <AlertDialogTrigger asChild>
+//                 <DropdownMenuItem
+//                   onSelect={(e) => e.preventDefault()}
+//                   className="text-destructive focus:text-destructive"
+//                 >
+//                   <Trash2 className="mr-2 h-3 w-3" />
+//                   Delete
+//                 </DropdownMenuItem>
+//               </AlertDialogTrigger>
+//               <AlertDialogContent>
+//                 <AlertDialogHeader>
+//                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+//                   <AlertDialogDescription>
+//                     This action cannot be undone. This will permanently delete
+//                     the month "{value}" and all of its associated tasks and
+//                     promotions.
+//                   </AlertDialogDescription>
+//                 </AlertDialogHeader>
+//                 <AlertDialogFooter>
+//                   <AlertDialogCancel>Cancel</AlertDialogCancel>
+//                   <AlertDialogAction
+//                     onClick={handleDeleteConfirm}
+//                     disabled={isDeleting}
+//                     className="bg-destructive hover:bg-destructive/90"
+//                   >
+//                     {isDeleting && (
+//                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                     )}
+//                     Yes, delete
+//                   </AlertDialogAction>
+//                 </AlertDialogFooter>
+//               </AlertDialogContent>
+//             </AlertDialog>
+//           )}
+//         </DropdownMenuContent>
+//       </DropdownMenu>
+//     </div>
+//   );
+// };
+
+
+
 const EditableTabTrigger: React.FC<{
-  value: string;
-  onSave: (value: string) => void;
-  onDelete: (monthName: string) => Promise<void>;
-  isOnlyMonth: boolean;
-}> = ({ value, onSave, onDelete, isOnlyMonth }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentValue, setCurrentValue] = useState(value);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setCurrentValue(value);
-  }, [value]);
-
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [isEditing]);
-
-  const handleSave = () => {
-    if (currentValue !== value && currentValue.trim() !== '') {
-      onSave(currentValue.trim());
-    } else {
-        setCurrentValue(value);
-    }
-    setIsEditing(false);
-  };
+    value: string;
+    onSave: (value: string) => void;
+    onDelete: (monthName: string) => Promise<void>;
+    isOnlyMonth: boolean;
+  }> = ({ value, onSave, onDelete, isOnlyMonth }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentValue, setCurrentValue] = useState(value);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
   
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSave();
-    } else if (e.key === 'Escape') {
+    useEffect(() => {
       setCurrentValue(value);
-      setIsEditing(false);
-    }
-  };
+    }, [value]);
   
-  const handleDeleteConfirm = async () => {
-    setIsDeleting(true);
-    await onDelete(value);
-  };
-
-  if (isEditing) {
-    return (
-      <Input
-        ref={inputRef}
-        value={currentValue}
-        onChange={(e) => setCurrentValue(e.target.value)}
-        onBlur={handleSave}
-        onKeyDown={handleKeyDown}
-        className="h-7 w-auto text-xs px-2"
-        onClick={(e) => e.stopPropagation()}
-      />
-    );
-  }
-
-  return (
-    <div className="relative group flex items-center pr-1">
-      <TabsTrigger value={value} className="text-xs pr-7">
-        {value}
-      </TabsTrigger>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-0 h-5 w-5 opacity-60 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreVertical className="h-3 w-3" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          side="bottom"
-          align="end"
+    useEffect(() => {
+      if (isEditing && inputRef.current) {
+        inputRef.current.focus();
+        inputRef.current.select();
+      }
+    }, [isEditing]);
+  
+    const handleSave = () => {
+      if (currentValue !== value && currentValue.trim() !== '') {
+        onSave(currentValue.trim());
+      } else {
+        setCurrentValue(value);
+      }
+      setIsEditing(false);
+    };
+    
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        handleSave();
+      } else if (e.key === 'Escape') {
+        setCurrentValue(value);
+        setIsEditing(false);
+      }
+    };
+    
+    const handleDeleteConfirm = async () => {
+      setIsDeleting(true);
+      try {
+        await onDelete(value);
+        setShowDeleteDialog(false);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsDeleting(false);
+      }
+    };
+  
+    if (isEditing) {
+      return (
+        <Input
+          ref={inputRef}
+          value={currentValue}
+          onChange={(e) => setCurrentValue(e.target.value)}
+          onBlur={handleSave}
+          onKeyDown={handleKeyDown}
+          className="h-7 w-auto text-xs px-2"
           onClick={(e) => e.stopPropagation()}
-        >
-          <DropdownMenuItem onSelect={() => setIsEditing(true)}>
-            <Pen className="mr-2 h-3 w-3" />
-            Edit
-          </DropdownMenuItem>
-          {!isOnlyMonth && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
+        />
+      );
+    }
+  
+    return (
+      <>
+        <div className="relative group flex items-center pr-1">
+          <TabsTrigger value={value} className="text-xs pr-7">
+            {value}
+          </TabsTrigger>
+          <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 h-5 w-5 opacity-60 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setDropdownOpen(true);
+                }}
+              >
+                <MoreVertical className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              side="bottom"
+              align="end"
+              onCloseAutoFocus={(e) => e.preventDefault()}
+            >
+              <DropdownMenuItem 
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setDropdownOpen(false);
+                  setIsEditing(true);
+                }}
+              >
+                <Pen className="mr-2 h-3 w-3" />
+                Edit
+              </DropdownMenuItem>
+              {!isOnlyMonth && (
                 <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setDropdownOpen(false);
+                    // Small delay to allow dropdown to close before opening dialog
+                    setTimeout(() => {
+                      setShowDeleteDialog(true);
+                    }, 50);
+                  }}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-3 w-3" />
                   Delete
                 </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    the month "{value}" and all of its associated tasks and
-                    promotions.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteConfirm}
-                    disabled={isDeleting}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    {isDeleting && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Yes, delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-};
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+  
+        {/* AlertDialog moved outside to avoid nesting issues */}
+        <AlertDialog 
+          open={showDeleteDialog} 
+          onOpenChange={setShowDeleteDialog}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete
+                the month "{value}" and all of its associated tasks and
+                promotions.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel 
+                onClick={() => setShowDeleteDialog(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="bg-destructive hover:bg-destructive/90"
+              >
+                {isDeleting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Yes, delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
+    );
+  };
 
 
+  
 export default function ClientIdPage() {
     const { user: currentUser } = useAuth();
     const { tasks, addTask, updateTask, deleteTask, loading: tasksLoading } = useTasks();
