@@ -15,7 +15,7 @@ import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
 import { Input } from '@/components/ui/input';
-import { Pen, Plus, Trash2 } from 'lucide-react';
+import { Pen, Plus, Trash2, MoreVertical } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
 import ClientNotesTable from '@/components/dashboard/client-notes-table';
 import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
@@ -28,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Loader2 } from 'lucide-react';
 
 
@@ -112,7 +113,6 @@ const EditableTabTrigger: React.FC<{
   const handleDeleteConfirm = async () => {
     setIsDeleting(true);
     await onDelete(value);
-    // No need to set isDeleting to false as the component will unmount
   };
 
   if (isEditing) {
@@ -125,47 +125,60 @@ const EditableTabTrigger: React.FC<{
         onKeyDown={handleKeyDown}
         className="h-7 w-auto text-xs px-2"
         onClick={(e) => e.stopPropagation()}
-        onDoubleClick={(e) => e.stopPropagation()}
       />
     );
   }
 
   return (
-    <div 
-        className="relative group flex items-center pr-1"
-        onDoubleClick={() => setIsEditing(true)}
-    >
-      <TabsTrigger value={value} className="text-xs pr-6">
+    <div className="relative group flex items-center pr-1">
+      <TabsTrigger value={value} className="text-xs pr-7">
         {value}
       </TabsTrigger>
       {!isOnlyMonth && (
-         <AlertDialog>
-          <AlertDialogTrigger asChild>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button 
                 variant="ghost" 
                 size="icon" 
-                className="absolute right-0 h-5 w-5 opacity-50 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                className="absolute right-0 h-5 w-5 opacity-60 group-hover:opacity-100 transition-opacity"
                 onClick={(e) => e.stopPropagation()}
             >
-                <Trash2 className="h-3 w-3" />
+                <MoreVertical className="h-3 w-3" />
             </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the month "{value}" and all of its associated tasks and promotions.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
-                 {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Yes, delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="bottom" align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onSelect={() => setIsEditing(true)}>
+              <Pen className="mr-2 h-3 w-3" />
+              Edit
+            </DropdownMenuItem>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <DropdownMenuItem 
+                        onSelect={(e) => e.preventDefault()} 
+                        className="text-destructive focus:text-destructive"
+                    >
+                         <Trash2 className="mr-2 h-3 w-3" />
+                         Delete
+                    </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the month "{value}" and all of its associated tasks and promotions.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                        {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Yes, delete
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );
@@ -223,21 +236,77 @@ export default function ClientIdPage() {
         });
     };
 
-    const handleMonthNameChange = (oldName: string, newName: string) => {
-        if(monthlyTabs.some(tab => tab.name === newName)) {
-            toast({ variant: 'destructive', title: 'Duplicate Name', description: 'Month names must be unique.' });
-            return;
+    const handleMonthNameChange = async (oldName: string, newName: string) => {
+        if (monthlyTabs.some(tab => tab.name === newName)) {
+          toast({
+            variant: 'destructive',
+            title: 'Duplicate Name',
+            description: 'Month names must be unique.',
+          });
+          return;
         }
-
-        const newTabs = monthlyTabs.map(month => month.name === oldName ? { ...month, name: newName } : month);
-        
-        handleClientUpdate({ months: newTabs }).then(() => {
-             if(activeMonth === oldName) {
-                setActiveMonth(newName);
-            }
-        });
-    };
-
+      
+        try {
+          const batch = writeBatch(db);
+      
+          // 1️⃣ Update client months array
+          const newTabs = monthlyTabs.map(month =>
+            month.name === oldName ? { ...month, name: newName } : month
+          );
+      
+          batch.update(doc(db, 'clients', clientId), { months: newTabs });
+      
+          // 2️⃣ Update TASKS
+          const tasksQuery = query(
+            collection(db, 'tasks'),
+            where('clientId', '==', clientId),
+            where('month', '==', oldName)
+          );
+          const tasksSnap = await getDocs(tasksQuery);
+          tasksSnap.forEach(docSnap => {
+            batch.update(docSnap.ref, { month: newName });
+          });
+      
+          // 3️⃣ Update PAID PROMOTIONS
+          const paidPromoQuery = query(
+            collection(db, `clients/${clientId}/promotions`),
+            where('month', '==', oldName)
+          );
+          const paidPromoSnap = await getDocs(paidPromoQuery);
+          paidPromoSnap.forEach(docSnap => {
+            batch.update(docSnap.ref, { month: newName });
+          });
+      
+          // 4️⃣ Update PLAN PROMOTIONS
+          const planPromoQuery = query(
+            collection(db, `clients/${clientId}/planPromotions`),
+            where('month', '==', oldName)
+          );
+          const planPromoSnap = await getDocs(planPromoQuery);
+          planPromoSnap.forEach(docSnap => {
+            batch.update(docSnap.ref, { month: newName });
+          });
+      
+          await batch.commit();
+      
+          if (activeMonth === oldName) {
+            setActiveMonth(newName);
+          }
+      
+          toast({
+            title: 'Month renamed',
+            description: `"${oldName}" renamed to "${newName}"`,
+          });
+        } catch (error) {
+          console.error(error);
+          toast({
+            variant: 'destructive',
+            title: 'Rename failed',
+            description: 'Could not rename month',
+          });
+        }
+      };
+      
     const handleDeleteMonth = async (monthName: string) => {
         try {
             const batch = writeBatch(db);
