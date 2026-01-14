@@ -249,10 +249,12 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                     <FormControl>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Switch
-                                                    checked={field.value}
-                                                    onCheckedChange={() => {}} // Dummy change handler
-                                                />
+                                                <div onClick={(e) => e.preventDefault()} className="inline-block">
+                                                    <Switch
+                                                        checked={field.value}
+                                                        onCheckedChange={field.onChange}
+                                                    />
+                                                </div>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
@@ -267,7 +269,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogCancel onClick={() => field.onChange(field.value)}>Cancel</AlertDialogCancel>
                                                     <AlertDialogAction onClick={() => field.onChange(!field.value)}>
                                                         Yes, {field.value ? 'Deactivate' : 'Activate'}
                                                     </AlertDialogAction>
