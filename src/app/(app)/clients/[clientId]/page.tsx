@@ -70,132 +70,6 @@ const EditableTitle: React.FC<{ value: string; onSave: (value: string) => void }
     );
 };
 
-// const EditableTabTrigger: React.FC<{
-//   value: string;
-//   onSave: (value: string) => void;
-//   onDelete: (monthName: string) => Promise<void>;
-//   isOnlyMonth: boolean;
-// }> = ({ value, onSave, onDelete, isOnlyMonth }) => {
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [currentValue, setCurrentValue] = useState(value);
-//   const [isDeleting, setIsDeleting] = useState(false);
-//   const inputRef = useRef<HTMLInputElement>(null);
-
-//   useEffect(() => {
-//     setCurrentValue(value);
-//   }, [value]);
-
-//   useEffect(() => {
-//     if (isEditing && inputRef.current) {
-//       inputRef.current.focus();
-//       inputRef.current.select();
-//     }
-//   }, [isEditing]);
-
-//   const handleSave = () => {
-//     if (currentValue !== value && currentValue.trim() !== '') {
-//       onSave(currentValue.trim());
-//     } else {
-//         setCurrentValue(value);
-//     }
-//     setIsEditing(false);
-//   };
-  
-//   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-//     if (e.key === 'Enter') {
-//       handleSave();
-//     } else if (e.key === 'Escape') {
-//       setCurrentValue(value);
-//       setIsEditing(false);
-//     }
-//   };
-  
-//   const handleDeleteConfirm = async () => {
-//     setIsDeleting(true);
-//     await onDelete(value);
-//   };
-
-//   if (isEditing) {
-//     return (
-//       <Input
-//         ref={inputRef}
-//         value={currentValue}
-//         onChange={(e) => setCurrentValue(e.target.value)}
-//         onBlur={handleSave}
-//         onKeyDown={handleKeyDown}
-//         className="h-7 w-auto text-xs px-2"
-//         onClick={(e) => e.stopPropagation()}
-//       />
-//     );
-//   }
-
-//   return (
-//     <div className="relative group flex items-center pr-1">
-//       <TabsTrigger value={value} className="text-xs pr-7">
-//         {value}
-//       </TabsTrigger>
-//       <DropdownMenu>
-//         <DropdownMenuTrigger asChild>
-//           <Button
-//             variant="ghost"
-//             size="icon"
-//             className="absolute right-0 h-5 w-5 opacity-60 group-hover:opacity-100 transition-opacity"
-//             onClick={(e) => e.stopPropagation()}
-//           >
-//             <MoreVertical className="h-3 w-3" />
-//           </Button>
-//         </DropdownMenuTrigger>
-//         <DropdownMenuContent
-//           side="bottom"
-//           align="end"
-//           onClick={(e) => e.stopPropagation()}
-//         >
-//           <DropdownMenuItem onSelect={() => setIsEditing(true)}>
-//             <Pen className="mr-2 h-3 w-3" />
-//             Edit
-//           </DropdownMenuItem>
-//           {!isOnlyMonth && (
-//             <AlertDialog>
-//               <AlertDialogTrigger asChild>
-//                 <DropdownMenuItem
-//                   onSelect={(e) => e.preventDefault()}
-//                   className="text-destructive focus:text-destructive"
-//                 >
-//                   <Trash2 className="mr-2 h-3 w-3" />
-//                   Delete
-//                 </DropdownMenuItem>
-//               </AlertDialogTrigger>
-//               <AlertDialogContent>
-//                 <AlertDialogHeader>
-//                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-//                   <AlertDialogDescription>
-//                     This action cannot be undone. This will permanently delete
-//                     the month "{value}" and all of its associated tasks and
-//                     promotions.
-//                   </AlertDialogDescription>
-//                 </AlertDialogHeader>
-//                 <AlertDialogFooter>
-//                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-//                   <AlertDialogAction
-//                     onClick={handleDeleteConfirm}
-//                     disabled={isDeleting}
-//                     className="bg-destructive hover:bg-destructive/90"
-//                   >
-//                     {isDeleting && (
-//                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-//                     )}
-//                     Yes, delete
-//                   </AlertDialogAction>
-//                 </AlertDialogFooter>
-//               </AlertDialogContent>
-//             </AlertDialog>
-//           )}
-//         </DropdownMenuContent>
-//       </DropdownMenu>
-//     </div>
-//   );
-// };
-
 
 
 const EditableTabTrigger: React.FC<{
@@ -426,14 +300,14 @@ export default function ClientIdPage() {
         try {
           const batch = writeBatch(db);
       
-          // 1️⃣ Update client months array
+          // 1. Update client months array
           const newTabs = monthlyTabs.map(month =>
             month.name === oldName ? { ...month, name: newName } : month
           );
       
           batch.update(doc(db, 'clients', clientId), { months: newTabs });
       
-          // 2️⃣ Update TASKS
+          // 2. Update TASKS
           const tasksQuery = query(
             collection(db, 'tasks'),
             where('clientId', '==', clientId),
@@ -444,7 +318,7 @@ export default function ClientIdPage() {
             batch.update(docSnap.ref, { month: newName });
           });
       
-          // 3️⃣ Update PAID PROMOTIONS
+          // 3. Update PAID PROMOTIONS
           const paidPromoQuery = query(
             collection(db, `clients/${clientId}/promotions`),
             where('month', '==', oldName)
@@ -454,7 +328,7 @@ export default function ClientIdPage() {
             batch.update(docSnap.ref, { month: newName });
           });
       
-          // 4️⃣ Update PLAN PROMOTIONS
+          // 4. Update PLAN PROMOTIONS
           const planPromoQuery = query(
             collection(db, `clients/${clientId}/planPromotions`),
             where('month', '==', oldName)
@@ -475,11 +349,11 @@ export default function ClientIdPage() {
             description: `"${oldName}" renamed to "${newName}"`,
           });
         } catch (error) {
-          console.error(error);
+          console.error("Error renaming month and associated data:", error);
           toast({
             variant: 'destructive',
             title: 'Rename failed',
-            description: 'Could not rename month',
+            description: 'Could not update all associated tasks and promotions.',
           });
         }
       };
