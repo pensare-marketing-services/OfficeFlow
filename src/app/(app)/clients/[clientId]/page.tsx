@@ -288,6 +288,7 @@ export default function ClientIdPage() {
     };
 
     const handleMonthNameChange = async (oldName: string, newName: string) => {
+        if (oldName === newName) return;
         if (monthlyTabs.some(tab => tab.name === newName)) {
           toast({
             variant: 'destructive',
@@ -307,7 +308,7 @@ export default function ClientIdPage() {
       
           batch.update(doc(db, 'clients', clientId), { months: newTabs });
       
-          // 2. Update TASKS
+          // 2. Find and update all associated TASKS
           const tasksQuery = query(
             collection(db, 'tasks'),
             where('clientId', '==', clientId),
@@ -318,7 +319,7 @@ export default function ClientIdPage() {
             batch.update(docSnap.ref, { month: newName });
           });
       
-          // 3. Update PAID PROMOTIONS
+          // 3. Find and update all associated PAID PROMOTIONS
           const paidPromoQuery = query(
             collection(db, `clients/${clientId}/promotions`),
             where('month', '==', oldName)
@@ -328,7 +329,7 @@ export default function ClientIdPage() {
             batch.update(docSnap.ref, { month: newName });
           });
       
-          // 4. Update PLAN PROMOTIONS
+          // 4. Find and update all associated PLAN PROMOTIONS
           const planPromoQuery = query(
             collection(db, `clients/${clientId}/planPromotions`),
             where('month', '==', oldName)
@@ -346,14 +347,14 @@ export default function ClientIdPage() {
       
           toast({
             title: 'Month renamed',
-            description: `"${oldName}" renamed to "${newName}"`,
+            description: `"${oldName}" was successfully renamed to "${newName}" and all associated data was updated.`,
           });
         } catch (error) {
           console.error("Error renaming month and associated data:", error);
           toast({
             variant: 'destructive',
             title: 'Rename failed',
-            description: 'Could not update all associated tasks and promotions.',
+            description: 'Could not update all associated tasks and promotions. Please try again.',
           });
         }
       };
@@ -508,6 +509,7 @@ export default function ClientIdPage() {
 
     const tasksForCurrentMonth = useMemo(() => {
         if (monthlyTabs.length <= 1 && activeMonth === "Month 1") {
+            // For brand new or non-migrated clients, show tasks with "Month 1" or no month at all
             return allClientTasks.filter(task => !task.month || task.month === "Month 1");
         }
         return allClientTasks.filter(task => task.month === activeMonth);
