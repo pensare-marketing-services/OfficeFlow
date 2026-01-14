@@ -77,6 +77,7 @@ export type Client = {
   planPromotionsMainBudget?: number; // Deprecated
   paidPromotionsOldBalance?: number;
   planPromotionsOldBalance?: number;
+  active?: boolean;
 };
 
 export type PromotionBase = {

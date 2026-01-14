@@ -276,6 +276,10 @@
         "planPromotionsOldBalance": {
             "type": "number",
             "description": "The old balance for Plan Promotions."
+        },
+        "active": {
+            "type": "boolean",
+            "description": "Whether the client is currently active. Defaults to true. Inactive clients are hidden from most views."
         }
       },
       "required": [

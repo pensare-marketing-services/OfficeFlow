@@ -646,6 +646,7 @@ const DailyTaskTable: React.FC<{
   const dmClients = useMemo(
     () =>
       clients
+        .filter(c => c.active !== false)
         .filter(
           (c) =>
             c.categories?.includes('digital marketing') ||
@@ -823,4 +824,3 @@ const DailyTaskTable: React.FC<{
     </div>
   );
 };
-

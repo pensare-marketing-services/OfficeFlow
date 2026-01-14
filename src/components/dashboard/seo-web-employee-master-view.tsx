@@ -639,6 +639,7 @@ const DailyTaskTable: React.FC<{
   const seoWebClients = useMemo(
     () =>
       clients
+        .filter(c => c.active !== false)
         .filter(
           (c) =>
             c.categories?.includes('seo') ||

@@ -1,7 +1,8 @@
 
+
 'use client';
 import { useMemo, useState, useEffect } from 'react';
-import { Users, Building, Trash2, Eye, EyeOff, Pen } from "lucide-react";
+import { Users, Building, Trash2, Eye, EyeOff, Pen, AlertTriangle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import AddEmployeeForm from '@/components/settings/add-employee-form';
 import AddClientForm from '@/components/settings/add-client-form';
@@ -27,6 +28,8 @@ import { Loader2 } from 'lucide-react';
 import { useClients } from '@/hooks/use-clients';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
 
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
@@ -42,6 +45,7 @@ const editClientSchema = z.object({
   employeeId2: z.string().optional(),
   employeeId3: z.string().optional(),
   categories: z.array(z.string()).optional(),
+  active: z.boolean(),
 });
 
 type EditClientFormValues = z.infer<typeof editClientSchema>;
@@ -64,6 +68,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
             employeeId2: client.employeeIds?.[1] || 'unassigned',
             employeeId3: client.employeeIds?.[2] || 'unassigned',
             categories: client.categories || [],
+            active: client.active !== false,
         },
     });
     
@@ -75,6 +80,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                 employeeId2: client.employeeIds?.[1] || 'unassigned',
                 employeeId3: client.employeeIds?.[2] || 'unassigned',
                 categories: client.categories || [],
+                active: client.active !== false,
             });
         }
     }, [client, open, form]);
@@ -93,7 +99,8 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
             await onUpdate(client.id, { 
                 name: data.name, 
                 employeeIds: uniqueEmployeeIds,
-                categories: data.categories || []
+                categories: data.categories || [],
+                active: data.active
             });
             toast({ title: "Client Updated", description: "The client's details have been saved." });
             setOpen(false);
@@ -225,13 +232,57 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                 </FormItem>
                             )}
                         />
-                        
-                        <DialogFooter className="justify-between sm:justify-between">
-                            <AlertDialog>
+
+                         <Separator />
+
+                         <FormField
+                            control={form.control}
+                            name="active"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                    <div className="space-y-0.5">
+                                        <FormLabel>Client Status</FormLabel>
+                                        <FormDescription className="text-[10px]">
+                                            Inactive clients will be hidden from the sidebar and master views.
+                                        </FormDescription>
+                                    </div>
+                                    <FormControl>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Switch
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                    onClick={(e) => e.preventDefault()} // Prevent immediate toggle
+                                                />
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        {field.value 
+                                                            ? `Deactivating this client will hide them from the sidebar and master views. No data will be deleted.` 
+                                                            : `Activating this client will make them visible in the sidebar and master views again.`
+                                                        }
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel onClick={() => field.onChange(field.value)}>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => field.onChange(!field.value)}>
+                                                        Yes, {field.value ? 'Deactivate' : 'Activate'}
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                            />
+
+                        <DialogFooter className="justify-between sm:justify-between pt-4">
+                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <Button type="button" variant="destructive" disabled={loading}>
-                                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-            
+                                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
@@ -392,7 +443,7 @@ const ClientTable = ({ clients, users, loading, onUpdate }: { clients: ClientWit
                     </TableRow>
                 ))}
                 {!loading && clients.map((client) => (
-                    <TableRow key={client.id}>
+                    <TableRow key={client.id} className={cn(client.active === false && "bg-muted/30 opacity-50")}>
                         <TableCell className="font-medium text-[10px] py-1 px-2">{client.name}</TableCell>
                         <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
                          <TableCell className="text-right px-2 py-1">
@@ -421,10 +472,19 @@ export default function SettingsPage() {
         const clientRef = doc(db, 'clients', clientId);
         await updateDoc(clientRef, data);
     };
+    
+    const sortedClients = useMemo(() => {
+        return [...clients].sort((a,b) => {
+            if (a.active !== b.active) {
+                return (a.active === false ? 1 : -1) - (b.active === false ? 1 : -1);
+            }
+            return (a.priority || 0) - (b.priority || 0);
+        });
+    }, [clients]);
 
-    const midPoint = Math.ceil(clients.length / 2);
-    const firstColumnClients = clients.slice(0, midPoint);
-    const secondColumnClients = clients.slice(midPoint);
+    const midPoint = Math.ceil(sortedClients.length / 2);
+    const firstColumnClients = sortedClients.slice(0, midPoint);
+    const secondColumnClients = sortedClients.slice(midPoint);
     const pageLoading = clientsLoading || usersLoading;
 
     return (

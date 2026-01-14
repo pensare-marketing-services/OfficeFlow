@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -47,14 +48,16 @@ export function SidebarNav() {
     return user?.role === 'admin';
   });
 
+  const activeClients = useMemo(() => clients.filter(c => c.active !== false), [clients]);
+
   const filteredClients = useMemo(() => {
     if (categoryFilter === 'all') {
-      return clients;
+      return activeClients;
     }
-    return clients.filter(client => 
+    return activeClients.filter(client => 
         client.categories?.some(cat => cat.toLowerCase() === categoryFilter.toLowerCase())
     );
-  }, [clients, categoryFilter]);
+  }, [activeClients, categoryFilter]);
   
   const handleFilterClick = (filter: CategoryFilter) => {
     setCategoryFilter(prev => prev === filter ? 'all' : filter);
