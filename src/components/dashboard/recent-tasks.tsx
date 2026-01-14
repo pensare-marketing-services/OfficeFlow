@@ -256,7 +256,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
           <TableHeader>
             <TableRow>
               <TableHead className="p-1 border-r border-t text-[8px] h-6 w-[8px]">#</TableHead>
-              <TableHead className="p-1 border-r border-t text-[8px] h-6 w-[25px]">Date</TableHead>
+              <TableHead className="p-1 border-r border-t text-[8px] h-6 w-[20px]">Date</TableHead>
               <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[30px]">Client</TableHead>
               <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[40px]">Task</TableHead>
                {isAdmin && <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[30px]">Assigned</TableHead>}
