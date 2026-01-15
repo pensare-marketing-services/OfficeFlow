@@ -158,8 +158,8 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
         const newTask: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
             description: '',
-            status: 'Scheduled',
-            priority: 99,
+            status: 'To Do',
+            priority: 9,
             deadline: deadline.toISOString(),
             assigneeIds: [],
             progressNotes: [],

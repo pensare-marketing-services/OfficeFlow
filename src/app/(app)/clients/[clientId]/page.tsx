@@ -490,8 +490,8 @@ export default function ClientIdPage() {
         const newTaskData: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
             description: '',
-            status: 'Scheduled',
-            priority: 99,
+            status: 'To Do',
+            priority: 9,
             contentType: 'Image Ad',
             deadline: deadline.toISOString(),
             assigneeIds: [],

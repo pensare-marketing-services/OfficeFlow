@@ -158,8 +158,8 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
         const newTask: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
             description: '',
-            status: 'Scheduled',
-            priority: 99,
+            status: 'To Do',
+            priority: 9,
             deadline: deadline.toISOString(),
             assigneeIds: [],
             progressNotes: [],

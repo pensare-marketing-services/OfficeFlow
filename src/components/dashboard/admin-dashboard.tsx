@@ -28,16 +28,18 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const [viewMode, setViewMode] = useState<ViewMode>('employees');
   const { deleteTask, updateTask } = useTasks();
 
-  const totalTasks = tasks.length;
+  const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'To Do'), [tasks]);
+
+  const totalTasks = activeTasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
   const seoWebEmployeesCount = users.filter(u => u.role === 'employee' && (u.department === 'seo' || u.department === 'web')).length;
-  const approvedTasksCount = tasks.filter(t => t.status === 'Approved').length;
-  const postedTasksCount = tasks.filter(t => t.status === 'Posted').length;
-  const onHoldTasksCount = tasks.filter(t => t.status === 'Hold').length;
+  const approvedTasksCount = activeTasks.filter(t => t.status === 'Approved').length;
+  const postedTasksCount = activeTasks.filter(t => t.status === 'Posted').length;
+  const onHoldTasksCount = activeTasks.filter(t => t.status === 'Hold').length;
   
   const overdueTasks = useMemo(() => {
     const now = new Date();
-    return tasks.filter(task => {
+    return activeTasks.filter(task => {
         if (task.description === 'Paid Promotion' || task.description === 'Plan Promotion') {
             return false;
         }
@@ -45,34 +47,34 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         deadline.setHours(23, 59, 59, 999); // Consider deadline as end of day
         return deadline < now && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status);
     });
-}, [tasks]);
+}, [activeTasks]);
 
   const overdueCount = overdueTasks.length;
   
   const filteredTasks = useMemo(() => {
     if (viewMode !== 'tasks') return [];
-    let tasksToFilter = tasks;
+    let tasksToFilter = activeTasks;
      switch (taskFilter) {
       case 'approved':
-        tasksToFilter = tasks.filter(t => t.status === 'Approved');
+        tasksToFilter = activeTasks.filter(t => t.status === 'Approved');
         break;
       case 'posted':
-        tasksToFilter = tasks.filter(t => t.status === 'Posted');
+        tasksToFilter = activeTasks.filter(t => t.status === 'Posted');
         break;
       case 'overdue':
         tasksToFilter = overdueTasks;
         break;
       case 'onHold':
-        tasksToFilter = tasks.filter(t => t.status === 'Hold');
+        tasksToFilter = activeTasks.filter(t => t.status === 'Hold');
         break;
       case 'total':
       default:
-        tasksToFilter = tasks;
+        tasksToFilter = activeTasks;
         break;
     }
     // Sorting will be handled by the RecentTasks component
     return tasksToFilter;
-  }, [tasks, taskFilter, viewMode, overdueTasks]);
+  }, [activeTasks, taskFilter, viewMode, overdueTasks]);
   
   const dmTasks = filteredTasks.filter(task => !['SEO', 'Website', 'Web Blogs', 'Other'].includes(task.contentType || ''));
   const seoTasks = filteredTasks.filter(task => task.contentType === 'SEO');
@@ -131,7 +133,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
             title="Approved Tasks" 
             value={approvedTasksCount} 
             icon={CheckCircle2} 
-            variant="success"
+            variant="default"
             onClick={() => handleTaskFilterClick('approved')}
             isActive={viewMode === 'tasks' && taskFilter === 'approved'}
         />

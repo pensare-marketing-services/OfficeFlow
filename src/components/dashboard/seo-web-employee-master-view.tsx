@@ -69,16 +69,16 @@ const getInitials = (name: string = '') =>
 
 const EditablePriorityInPopover: React.FC<{ task: TaskWithId }> = ({ task }) => {
     const { updateTask } = useTasks();
-    const [priority, setPriority] = useState(task.priority ?? 99);
+    const [priority, setPriority] = useState(task.priority ?? 9);
 
 
     useEffect(() => {
-        setPriority(task.priority ?? 99);
+        setPriority(task.priority ?? 9);
     }, [task.priority]);
 
     const handleBlur = () => {
         const newPriority = Number(priority);
-        if (newPriority !== (task.priority ?? 99)) {
+        if (newPriority !== (task.priority ?? 9)) {
             updateTask(task.id, { priority: newPriority });
         }
     };
@@ -95,6 +95,8 @@ const EditablePriorityInPopover: React.FC<{ task: TaskWithId }> = ({ task }) => 
             <Input
                 type="number"
                 value={priority}
+                min={1}
+                max={9}
                 onChange={(e) => setPriority(Number(e.target.value))}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
@@ -110,18 +112,18 @@ const EditablePriorityInGrid: React.FC<{ tasks: TaskWithId[] | null }> = ({ task
   const singleTask = tasks && tasks.length === 1 ? tasks[0] : null;
 
   // Hooks are called unconditionally
-  const [priority, setPriority] = useState(singleTask?.priority ?? 99);
+  const [priority, setPriority] = useState(singleTask?.priority ?? 9);
   
   useEffect(() => {
     if (singleTask) {
-      setPriority(singleTask.priority ?? 99);
+      setPriority(singleTask.priority ?? 9);
     }
   }, [singleTask]);
 
   const handleBlur = () => {
     if (!singleTask) return;
     const newPriority = Number(priority);
-    if (newPriority !== (singleTask.priority ?? 99)) {
+    if (newPriority !== (singleTask.priority ?? 9)) {
       updateTask(singleTask.id, { priority: newPriority });
     }
   };
@@ -143,7 +145,7 @@ const EditablePriorityInGrid: React.FC<{ tasks: TaskWithId[] | null }> = ({ task
 
   if (tasks.length > 1) {
     const sortedPriorities = tasks
-      .map(t => t.priority ?? 99)
+      .map(t => t.priority ?? 9)
       .sort((a, b) => a - b)
       .join(', ');
     return (
@@ -161,6 +163,8 @@ const EditablePriorityInGrid: React.FC<{ tasks: TaskWithId[] | null }> = ({ task
       <Input
         type="number"
         value={priority}
+        min={1}
+        max={9}
         onChange={(e) => setPriority(Number(e.target.value))}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
@@ -449,12 +453,14 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients }: SeoW
       });
   }, [users]);
   
+  const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'To Do'), [tasks]);
+
   const tasksByDate = useMemo(() => {
     const grouped = new Map<string, TaskWithId[]>();
     const today = startOfDay(new Date());
     const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next'];
 
-    tasks.forEach(task => {
+    activeTasks.forEach(task => {
         if (!task.deadline) return;
         const deadline = startOfDay(new Date(task.deadline));
 
@@ -469,7 +475,7 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients }: SeoW
         }
     });
     return grouped;
-  }, [tasks]);
+  }, [activeTasks]);
   
   const daysInMonth = getDaysInMonth(currentMonthDate);
   const dateButtons = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -485,7 +491,7 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients }: SeoW
   
   const daysWithTasksInCurrentMonth = useMemo(() => {
     const days = new Set<number>();
-    tasks.forEach(task => {
+    activeTasks.forEach(task => {
         if(task.deadline) {
             const taskDate = new Date(task.deadline);
             if(taskDate.getMonth() === currentMonthDate.getMonth() && taskDate.getFullYear() === currentMonthDate.getFullYear()) {
@@ -499,20 +505,20 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients }: SeoW
     }
 
     return days;
-  }, [tasks, currentMonthDate]);
+  }, [activeTasks, currentMonthDate]);
   
   const getTasksForSelectedDay = () => {
     const today = startOfDay(new Date());
     const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next', 'Approved'];
   
-    let dailyTasks = tasks.filter(task => {
+    let dailyTasks = activeTasks.filter(task => {
       if (!task.deadline) return false;
       const deadline = startOfDay(new Date(task.deadline));
       return isSameDay(deadline, selectedDate);
     });
   
     if (isSameDay(selectedDate, today)) {
-      const rolloverTasks = tasks.filter(task => {
+      const rolloverTasks = activeTasks.filter(task => {
         if (!task.deadline) return false;
         const deadline = startOfDay(new Date(task.deadline));
         return deadline < today && incompleteStatuses.includes(task.status);

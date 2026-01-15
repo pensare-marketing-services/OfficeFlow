@@ -31,6 +31,8 @@ export function StatsCard({
       'ring-emerald-500': isActive && variant === 'success',
       'bg-amber-500/10 border-amber-500/30 text-amber-600': variant === 'warning',
       'ring-amber-500': isActive && variant === 'warning',
+      'bg-blue-500/10 border-blue-500/30 text-blue-600': variant === 'default' && title.includes('Approved'),
+      'ring-blue-500': isActive && variant === 'default' && title.includes('Approved'),
     }
   );
   
@@ -38,13 +40,15 @@ export function StatsCard({
     'text-destructive': variant === 'destructive',
     'text-emerald-500': variant === 'success',
     'text-amber-500': variant === 'warning',
-    'text-muted-foreground': variant === 'default',
+    'text-blue-500': variant === 'default' && title.includes('Approved'),
+    'text-muted-foreground': variant === 'default' && !title.includes('Approved'),
   });
 
   const valueClasses = cn("font-headline font-bold", {
     'text-destructive': variant === 'destructive',
     'text-emerald-600': variant === 'success',
     'text-amber-600': variant === 'warning',
+    'text-blue-600': variant === 'default' && title.includes('Approved'),
   });
 
   return (

@@ -157,8 +157,8 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
         const newTask: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
             description: '',
-            status: 'Scheduled',
-            priority: 99,
+            status: 'To Do',
+            priority: 9,
             deadline: deadline.toISOString(),
             assigneeIds: [],
             progressNotes: [],
