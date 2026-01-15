@@ -47,7 +47,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
 }, [employeeTasks]);
 
   const allNonCompletedTasks = useMemo(() => {
-    return employeeTasks.filter(t => !completedStatuses.includes(t.status));
+    return employeeTasks.filter(t => !completedStatuses.includes(t.status) && t.status !== 'To Do');
   }, [employeeTasks]);
   
   const overdueCount = overdueTasks.length;

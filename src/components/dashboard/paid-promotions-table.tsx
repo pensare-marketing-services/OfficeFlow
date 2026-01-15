@@ -161,13 +161,13 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                 if (linkedTask) {
                     updateTask(linkedTask.id, { 
                         assigneeIds: [employee.id],
-                        status: 'Scheduled'
+                        status: 'To Do'
                     });
                 } else {
                     const newTask: Omit<Task, 'id' | 'createdAt'> = {
                         title: updatedPromotion.campaign,
                         description: 'Paid Promotion',
-                        status: 'Scheduled', // Always start as scheduled
+                        status: 'To Do', // Always start as To Do
                         priority: 2,
                         deadline: updatedPromotion.date,
                         assigneeIds: [employee.id],
@@ -261,7 +261,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
             campaign: '',
             adType: 'Lead Call' as const,
             budget: 0,
-            status: 'Scheduled' as const,
+            status: 'To Do' as const,
             assignedTo: '',
             spent: 0,
             remarks: [],
@@ -290,7 +290,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
     const balance = (totalCashIn + oldBalance) - grandTotal;
 
 
-    const getPromotionDisplayStatus = (promo: PaidPromotion & { id: string }): PaidPromotion['status'] => {
+    const getPromotionDisplayStatus = (promo: PaidPromotion & { id: string }): PaidPromotion['status'] | 'To Do' => {
         if (promo.status === 'Stopped') {
             return 'Stopped';
         }
@@ -299,6 +299,8 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
         if (linkedTask?.status === 'Completed') {
             return 'Active';
         }
+
+        if(linkedTask?.status === 'To Do') return 'To Do';
 
         return promo.status;
     };
@@ -391,13 +393,14 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                                 <TableCell className="p-0 text-[10px]"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" className="text-right" /></TableCell>
                                 <TableCell className="p-1">
                                     <Select value={displayStatus} onValueChange={(v: PaidPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-[10px]", displayStatus === 'Stopped' ? 'bg-red-500 text-white' : displayStatus === 'Active' ? 'bg-green-500 text-white' : displayStatus === 'Scheduled' ? 'bg-gray-500 text-white' : '')}>
+                                        <SelectTrigger className={cn("h-7 text-[10px]", displayStatus === 'Stopped' ? 'bg-red-500 text-white' : displayStatus === 'Active' ? 'bg-green-500 text-white' : displayStatus === 'Scheduled' ? 'bg-gray-500 text-white' : 'bg-gray-400 text-white')}>
                                             <SelectValue />
                                             <SelectPrimitive.Icon asChild>
                                                 <span />
                                             </SelectPrimitive.Icon>
                                         </SelectTrigger>
                                         <SelectContent>
+                                             <SelectItem value="To Do">To Do</SelectItem>
                                             {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
                                     </Select>

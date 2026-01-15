@@ -4,7 +4,7 @@
 
 import { useState, useMemo } from 'react';
 import { StatsCard } from './stats-card';
-import { ClipboardList, Users, CheckCircle2, AlertTriangle, PauseCircle, ClipboardCheck } from 'lucide-react';
+import { ClipboardList, Users, CheckCircle2, AlertTriangle, PauseCircle, ClipboardCheck, ListTodo } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
 import EmployeeMasterView from './employee-master-view';
@@ -20,7 +20,7 @@ interface AdminDashboardProps {
   clients: ClientWithId[];
 }
 
-type TaskFilter = 'total' | 'approved' | 'posted' | 'overdue' | 'onHold';
+type TaskFilter = 'total' | 'approved' | 'posted' | 'overdue' | 'onHold' | 'toDo';
 type ViewMode = 'tasks' | 'employees' | 'employees-seo-web';
 
 export default function AdminDashboard({ tasks, users, clients }: AdminDashboardProps) {
@@ -29,8 +29,10 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const { deleteTask, updateTask } = useTasks();
 
   const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'To Do'), [tasks]);
+  const toDoTasks = useMemo(() => tasks.filter(t => t.status === 'To Do'), [tasks]);
 
   const totalTasks = activeTasks.length;
+  const toDoTasksCount = toDoTasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
   const seoWebEmployeesCount = users.filter(u => u.role === 'employee' && (u.department === 'seo' || u.department === 'web')).length;
   const approvedTasksCount = activeTasks.filter(t => t.status === 'Approved').length;
@@ -53,7 +55,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   
   const filteredTasks = useMemo(() => {
     if (viewMode !== 'tasks') return [];
-    let tasksToFilter = activeTasks;
+    let tasksToFilter: (Task & {id: string})[] = [];
      switch (taskFilter) {
       case 'approved':
         tasksToFilter = activeTasks.filter(t => t.status === 'Approved');
@@ -67,6 +69,9 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
       case 'onHold':
         tasksToFilter = activeTasks.filter(t => t.status === 'Hold');
         break;
+      case 'toDo':
+        tasksToFilter = toDoTasks;
+        break;
       case 'total':
       default:
         tasksToFilter = activeTasks;
@@ -74,7 +79,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
     }
     // Sorting will be handled by the RecentTasks component
     return tasksToFilter;
-  }, [activeTasks, taskFilter, viewMode, overdueTasks]);
+  }, [activeTasks, toDoTasks, taskFilter, viewMode, overdueTasks]);
   
   const dmTasks = filteredTasks.filter(task => !['SEO', 'Website', 'Web Blogs', 'Other'].includes(task.contentType || ''));
   const seoTasks = filteredTasks.filter(task => task.contentType === 'SEO');
@@ -87,7 +92,8 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
     approved: "Approved Tasks",
     posted: "Posted Tasks",
     overdue: "Overdue Tasks",
-    onHold: "On Hold Tasks"
+    onHold: "On Hold Tasks",
+    toDo: "To Do Tasks"
   };
 
   const handleTaskFilterClick = (filter: TaskFilter) => {
@@ -107,7 +113,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   return (
     
     <div className="space-y-4">
-     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
         <StatsCard 
             title="Digital Marketing" 
             value={totalEmployees - seoWebEmployeesCount} 
@@ -121,6 +127,13 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
             icon={Users}
             onClick={handleSeoWebViewClick}
             isActive={viewMode === 'employees-seo-web'} 
+        />
+        <StatsCard 
+            title="To Do" 
+            value={toDoTasksCount} 
+            icon={ListTodo} 
+            onClick={() => handleTaskFilterClick('toDo')}
+            isActive={viewMode === 'tasks' && taskFilter === 'toDo'}
         />
         <StatsCard 
             title="Total Tasks" 
