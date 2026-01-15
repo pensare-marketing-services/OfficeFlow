@@ -4,7 +4,7 @@
 
 import { useState, useMemo } from 'react';
 import { StatsCard } from './stats-card';
-import { ClipboardList, Users, CheckCircle2, AlertTriangle, PauseCircle } from 'lucide-react';
+import { ClipboardList, Users, CheckCircle2, AlertTriangle, PauseCircle, ClipboardCheck } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
 import EmployeeMasterView from './employee-master-view';
@@ -20,7 +20,7 @@ interface AdminDashboardProps {
   clients: ClientWithId[];
 }
 
-type TaskFilter = 'total' | 'completed' | 'overdue' | 'onHold';
+type TaskFilter = 'total' | 'approved' | 'posted' | 'overdue' | 'onHold';
 type ViewMode = 'tasks' | 'employees' | 'employees-seo-web';
 
 export default function AdminDashboard({ tasks, users, clients }: AdminDashboardProps) {
@@ -31,7 +31,8 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const totalTasks = tasks.length;
   const totalEmployees = users.filter(u => u.role === 'employee').length;
   const seoWebEmployeesCount = users.filter(u => u.role === 'employee' && (u.department === 'seo' || u.department === 'web')).length;
-  const completedTasks = tasks.filter(t => t.status === 'Approved' || t.status === 'Posted').length;
+  const approvedTasksCount = tasks.filter(t => t.status === 'Approved').length;
+  const postedTasksCount = tasks.filter(t => t.status === 'Posted').length;
   const onHoldTasksCount = tasks.filter(t => t.status === 'Hold').length;
   
   const overdueTasks = useMemo(() => {
@@ -52,8 +53,11 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
     if (viewMode !== 'tasks') return [];
     let tasksToFilter = tasks;
      switch (taskFilter) {
-      case 'completed':
-        tasksToFilter = tasks.filter(t => t.status === 'Approved' || t.status === 'Posted');
+      case 'approved':
+        tasksToFilter = tasks.filter(t => t.status === 'Approved');
+        break;
+      case 'posted':
+        tasksToFilter = tasks.filter(t => t.status === 'Posted');
         break;
       case 'overdue':
         tasksToFilter = overdueTasks;
@@ -78,7 +82,8 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
 
   const filterTitles: Record<TaskFilter, string> = {
     total: "All Recent Tasks",
-    completed: "Completed Tasks",
+    approved: "Approved Tasks",
+    posted: "Posted Tasks",
     overdue: "Overdue Tasks",
     onHold: "On Hold Tasks"
   };
@@ -100,7 +105,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   return (
     
     <div className="space-y-4">
-     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <StatsCard 
             title="Digital Marketing" 
             value={totalEmployees - seoWebEmployeesCount} 
@@ -124,11 +129,19 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         />
         <StatsCard 
             title="Approved Tasks" 
-            value={completedTasks} 
+            value={approvedTasksCount} 
             icon={CheckCircle2} 
             variant="success"
-            onClick={() => handleTaskFilterClick('completed')}
-            isActive={viewMode === 'tasks' && taskFilter === 'completed'}
+            onClick={() => handleTaskFilterClick('approved')}
+            isActive={viewMode === 'tasks' && taskFilter === 'approved'}
+        />
+        <StatsCard 
+            title="Posted Tasks" 
+            value={postedTasksCount} 
+            icon={ClipboardCheck} 
+            variant="success"
+            onClick={() => handleTaskFilterClick('posted')}
+            isActive={viewMode === 'tasks' && taskFilter === 'posted'}
         />
         <StatsCard
             title="Overdue"
