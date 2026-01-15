@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -52,9 +53,11 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="font-headline text-xs font-medium leading-none">{user.username}</p>
-            <p className="text-[10px] leading-none text-muted-foreground">
-              {user.email}
-            </p>
+            {user.role && (
+              <p className="text-[10px] leading-none text-muted-foreground capitalize">
+                {user.role}
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
