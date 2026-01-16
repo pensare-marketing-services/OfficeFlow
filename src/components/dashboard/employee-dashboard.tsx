@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
 import { StatsCard } from './stats-card';
-import { ClipboardList, CheckCircle2, Hourglass, AlertTriangle, PauseCircle } from 'lucide-react';
+import { ClipboardList, CheckCircle2, Hourglass, AlertTriangle, PauseCircle, ListTodo } from 'lucide-react';
 import ContentSchedule from './content-schedule';
 import { useTasks } from '@/hooks/use-tasks';
 import { useUsers } from '@/hooks/use-users';
@@ -22,7 +22,7 @@ interface EmployeeDashboardProps {
 }
 
 
-type TaskFilter = 'all' | 'inProgress' | 'completed' | 'overdue' | 'onHold';
+type TaskFilter = 'all' | 'inProgress' | 'completed' | 'overdue' | 'onHold' | 'toDo';
 
 export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients }: EmployeeDashboardProps) {
   const { user } = useAuth();
@@ -47,11 +47,15 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
 }, [employeeTasks]);
 
   const allNonCompletedTasks = useMemo(() => {
-    return employeeTasks.filter(t => !completedStatuses.includes(t.status) && t.status !== 'To Do');
+    return employeeTasks.filter(t => !completedStatuses.includes(t.status));
   }, [employeeTasks]);
   
+  const toDoTasks = useMemo(() => {
+    return employeeTasks.filter(t => t.status === 'To Do');
+  }, [employeeTasks]);
+
   const overdueCount = overdueTasks.length;
-  
+  const toDoTasksCount = toDoTasks.length;
   const allTasksCount = allNonCompletedTasks.length;
   const completedTasksCount = employeeTasks.filter(t => completedStatuses.includes(t.status)).length;
   const onHoldTasksCount = employeeTasks.filter(t => t.status === 'Hold').length;
@@ -84,11 +88,13 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
         return getSortedTasks(overdueTasks);
       case 'onHold':
         return getSortedTasks(employeeTasks.filter(t => t.status === 'Hold'));
+      case 'toDo':
+        return getSortedTasks(toDoTasks);
       case 'all':
       default:
         return getSortedTasks(allNonCompletedTasks);
     }
-  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks]);
+  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks, toDoTasks]);
 
   const filterTitles: Record<TaskFilter, string> = {
     all: "All My Tasks",
@@ -96,6 +102,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
     completed: "My Approved Tasks",
     overdue: "My Overdue Tasks",
     onHold: "My On Hold Tasks",
+    toDo: "My To Do Tasks",
   };
 
   const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
@@ -105,13 +112,20 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
 
   return (
     <div className="space-y-4">
-      <div className="w-3/4 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         <StatsCard 
             title="All Tasks" 
             value={allTasksCount} 
             icon={ClipboardList} 
             onClick={() => setTaskFilter('all')}
             isActive={taskFilter === 'all'}
+        />
+        <StatsCard 
+            title="To Do"
+            value={toDoTasksCount}
+            icon={ListTodo}
+            onClick={() => setTaskFilter('toDo')}
+            isActive={taskFilter === 'toDo'}
         />
         <StatsCard 
             title="On Work" 

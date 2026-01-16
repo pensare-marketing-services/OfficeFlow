@@ -468,7 +468,7 @@ const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { cl
          <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead className="px-2 text-[10px] h-8 w-[40px]">Sl No</TableHead>
+                    <TableHead className="px-2 text-[10px] h-8 w-[40px]">No</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Client Name</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Assigned Employees</TableHead>
                     <TableHead className="text-right px-2 text-[10px] h-8">Actions</TableHead>
