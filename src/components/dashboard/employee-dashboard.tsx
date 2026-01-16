@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -47,7 +46,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
 }, [employeeTasks]);
 
   const allNonCompletedTasks = useMemo(() => {
-    return employeeTasks.filter(t => !completedStatuses.includes(t.status));
+    return employeeTasks.filter(t => !completedStatuses.includes(t.status) && t.status !== 'To Do');
   }, [employeeTasks]);
   
   const toDoTasks = useMemo(() => {
