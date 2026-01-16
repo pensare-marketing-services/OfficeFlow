@@ -42,7 +42,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
 
         const deadline = new Date(task.deadline);
         deadline.setHours(23, 59, 59, 999); // Consider deadline as end of day
-        return deadline < now && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status);
+        return deadline < now && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && task.status !== 'To Do';
     });
 }, [employeeTasks]);
 
