@@ -142,9 +142,9 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const handleStatusChange = (task: Task & {id: string}, newStatus: string) => {
     let statusToSave: TaskStatus = newStatus as TaskStatus;
     let updatePayload: Partial<Task> = {};
-    const now = new Date();
     
     if (task.status === 'To Do' && newStatus !== 'To Do') {
+      const now = new Date();
       const taskDeadline = new Date(task.deadline);
       if (taskDeadline < startOfDay(now)) {
         updatePayload.deadline = now.toISOString();
@@ -274,7 +274,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 const now = new Date();
                 const deadline = new Date(task.deadline);
                 deadline.setHours(23, 59, 59, 999);
-                const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && task.status !== 'To Do' && deadline < now;
+                const isOverdue = !isPromotionTask && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && task.status !== 'To Do' && deadline < now;
                 
                 let statusOptions: string[] = [...allStatuses];
                 

@@ -521,10 +521,92 @@ export default function SettingsPage() {
         });
     }, [clients]);
 
-    const midPoint = Math.ceil(sortedClients.length / 2);
-    const firstColumnClients = sortedClients.slice(0, midPoint);
-    const secondColumnClients = sortedClients.slice(midPoint);
+    const third = Math.ceil(sortedClients.length / 3);
+    const firstColumnClients = sortedClients.slice(0, third);
+    const secondColumnClients = sortedClients.slice(third, 2 * third);
+    const thirdColumnClients = sortedClients.slice(2 * third);
+
+    const employees = users.filter(u => u.role === 'employee');
+    const employeeMidpoint = Math.ceil(employees.length / 2);
+    const firstHalfEmployees = employees.slice(0, employeeMidpoint);
+    const secondHalfEmployees = employees.slice(employeeMidpoint);
+
     const pageLoading = clientsLoading || usersLoading;
+
+    const EmployeeTable = ({ employeeList }: { employeeList: UserWithId[] }) => (
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="w-[10px] px-2 text-[10px] h-8">#</TableHead>
+                    <TableHead className="px-2 text-[10px] h-8">Username</TableHead>
+                    <TableHead className="px-2 text-[10px] h-8">Password</TableHead>
+                    <TableHead className="px-2 text-[10px] h-8 w-[10]">Priority</TableHead>
+                    <TableHead className="text-right px-2 text-[10px] h-8">Actions</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {usersLoading && Array.from({length: 3}).map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell colSpan={5} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
+                    </TableRow>
+                ))}
+                {error && <TableRow><TableCell colSpan={5} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
+                {!usersLoading && employeeList.map((employee, index) => (
+                    <TableRow key={employee.id}>
+                        <TableCell className="px-2 py-1 text-[10px]">{index + 1}</TableCell>
+                        <TableCell className="py-1 px-2">
+                            <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6">
+                                    <AvatarFallback className="text-[10px]">{getInitials(employee.username)}</AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium text-[10px]">{employee.username}</span>
+                            </div>
+                        </TableCell>
+                        <TableCell className="py-1 px-2">
+                            <EditablePasswordCell userId={employee.id} initialPassword={employee.password} />
+                        </TableCell>
+                        <TableCell className="py-1 px-2">
+                            <EditablePriorityCell userId={employee.id} initialPriority={employee.priority} />
+                        </TableCell>
+                        <TableCell className="text-right px-2 py-1">
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive h-7 w-7">
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete the account for <strong>{employee.username}</strong>.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={async () => {
+                                                try {
+                                                    await deleteUser(employee.id);
+                                                    toast({title: "User deleted"});
+                                                } catch (e: any) {
+                                                    console.error(e);
+                                                    toast({ variant: 'destructive', title: "Deletion Failed", description: e.message });
+                                                }
+                                            }}
+                                            className="bg-destructive hover:bg-destructive/90"
+                                        >
+                                            Delete
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    );
 
     return (
         <div className="space-y-4">
@@ -533,7 +615,7 @@ export default function SettingsPage() {
                     <CardTitle className="flex items-center gap-2 text-base"><Building /> Manage Clients</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4">
                         <div>
                              <ClientTable 
                                 clients={firstColumnClients}
@@ -550,96 +632,36 @@ export default function SettingsPage() {
                                 onUpdate={handleUpdateClient}
                             />
                         </div>
+                         <div>
+                             <ClientTable 
+                                clients={thirdColumnClients}
+                                users={users}
+                                loading={pageLoading}
+                                onUpdate={handleUpdateClient}
+                            />
+                        </div>
                     </div>
                 </CardContent>
             </Card>
 
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                 <div className="lg:col-span-1">
                     <AddEmployeeForm />
                 </div>
                 <div className="lg:col-span-1">
                     <AddClientForm clientCount={clients.length}/>
                 </div>
-                <div className="lg:col-span-1">
+                <div className="lg:col-span-2">
                      <Card>
                         <CardHeader className="p-3">
                             <CardTitle className="flex items-center gap-2 text-base"><Users /> Manage Employees</CardTitle>
                         </CardHeader>
                         <CardContent className="p-0">
-                             <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-[10px] px-2 text-[10px] h-8">#</TableHead>
-                                        <TableHead className="px-2 text-[10px] h-8">Username</TableHead>
-                                        <TableHead className="px-2 text-[10px] h-8">Password</TableHead>
-                                        <TableHead className="px-2 text-[10px] h-8 w-[10]">Priority</TableHead>
-                                        <TableHead className="text-right px-2 text-[10px] h-8">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {usersLoading && Array.from({length: 3}).map((_, i) => (
-                                        <TableRow key={i}>
-                                             <TableCell colSpan={5} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
-                                        </TableRow>
-                                    ))}
-                                    {error && <TableRow><TableCell colSpan={5} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
-                                    {!usersLoading && users.filter(u => u.role === 'employee').map((employee, index) => (
-                                        <TableRow key={employee.id}>
-                                            <TableCell className="px-2 py-1 text-[10px]">{index + 1}</TableCell>
-                                            <TableCell className="py-1 px-2">
-                                                <div className="flex items-center gap-2">
-                                                    <Avatar className="h-6 w-6">
-                                                        <AvatarFallback className="text-[10px]">{getInitials(employee.username)}</AvatarFallback>
-                                                    </Avatar>
-                                                    <span className="font-medium text-[10px]">{employee.username}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="py-1 px-2">
-                                                <EditablePasswordCell userId={employee.id} initialPassword={employee.password} />
-                                            </TableCell>
-                                            <TableCell className="py-1 px-2">
-                                                <EditablePriorityCell userId={employee.id} initialPriority={employee.priority} />
-                                            </TableCell>
-                                            <TableCell className="text-right px-2 py-1">
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                         <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive h-7 w-7">
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                This action cannot be undone. This will permanently delete the account for <strong>{employee.username}</strong>.
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                            <AlertDialogAction
-                                                                onClick={async () => {
-                                                                    try {
-                                                                        await deleteUser(employee.id);
-                                                                        toast({title: "User deleted"});
-                                                                    } catch (e: any) {
-                                                                        console.error(e);
-                                                                        toast({ variant: 'destructive', title: "Deletion Failed", description: e.message });
-                                                                    }
-                                                                }}
-                                                                className="bg-destructive hover:bg-destructive/90"
-                                                            >
-                                                                Delete
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
+                                <div><EmployeeTable employeeList={firstHalfEmployees} /></div>
+                                <div><EmployeeTable employeeList={secondHalfEmployees} /></div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -653,4 +675,5 @@ export default function SettingsPage() {
     
 
     
+
 
