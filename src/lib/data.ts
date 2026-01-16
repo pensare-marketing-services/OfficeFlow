@@ -78,6 +78,7 @@ export type Client = {
   paidPromotionsOldBalance?: number;
   planPromotionsOldBalance?: number;
   active?: boolean;
+  deactivationReason?: string;
 };
 
 export type PromotionBase = {

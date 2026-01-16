@@ -30,6 +30,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { Textarea } from '@/components/ui/textarea';
 
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
@@ -46,6 +47,7 @@ const editClientSchema = z.object({
   employeeId3: z.string().optional(),
   categories: z.array(z.string()).optional(),
   active: z.boolean(),
+  deactivationReason: z.string().optional(),
 });
 
 type EditClientFormValues = z.infer<typeof editClientSchema>;
@@ -69,6 +71,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
             employeeId3: client.employeeIds?.[2] || 'unassigned',
             categories: client.categories || [],
             active: client.active !== false,
+            deactivationReason: client.deactivationReason || '',
         },
     });
     
@@ -81,6 +84,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                 employeeId3: client.employeeIds?.[2] || 'unassigned',
                 categories: client.categories || [],
                 active: client.active !== false,
+                deactivationReason: client.deactivationReason || '',
             });
         }
     }, [client, open, form]);
@@ -88,6 +92,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
     const watchEmployee1 = form.watch('employeeId1');
     const watchEmployee2 = form.watch('employeeId2');
     const watchEmployee3 = form.watch('employeeId3');
+    const watchActive = form.watch('active');
 
     const onSubmit = async (data: EditClientFormValues) => {
         setLoading(true);
@@ -95,13 +100,20 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
             .filter(id => id && id !== 'unassigned') as string[];
         const uniqueEmployeeIds = [...new Set(employeeIds)];
 
+        const updateData: Partial<Client> = {
+            name: data.name, 
+            employeeIds: uniqueEmployeeIds,
+            categories: data.categories || [],
+            active: data.active,
+            deactivationReason: data.deactivationReason,
+        };
+
+        if (data.active) {
+            updateData.deactivationReason = '';
+        }
+
         try {
-            await onUpdate(client.id, { 
-                name: data.name, 
-                employeeIds: uniqueEmployeeIds,
-                categories: data.categories || [],
-                active: data.active
-            });
+            await onUpdate(client.id, updateData);
             toast({ title: "Client Updated", description: "The client's details have been saved." });
             setOpen(false);
         } catch (error: any) {
@@ -240,7 +252,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                             control={form.control}
                             name="active"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border border-red-700 p-3 shadow-sm">
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-3 shadow-sm">
                                     <div className="space-y-0.5">
                                         <FormLabel className="text-sm font-normal">{field.value ? 'Client is currently Active.' : 'Client is currently Inactive.'}</FormLabel>
                                      
@@ -280,6 +292,26 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                 </FormItem>
                             )}
                             />
+
+                        {!watchActive && (
+                            <FormField
+                                control={form.control}
+                                name="deactivationReason"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Reason for Deactivation</FormLabel>
+                                    <FormControl>
+                                    <Textarea
+                                        placeholder="Explain why this client is being deactivated..."
+                                        {...field}
+                                    />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                        )}
+
 
                         <DialogFooter className="justify-between sm:justify-between pt-4">
                              <AlertDialog>

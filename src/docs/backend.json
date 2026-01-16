@@ -280,6 +280,10 @@
         "active": {
             "type": "boolean",
             "description": "Whether the client is currently active. Defaults to true. Inactive clients are hidden from most views."
+        },
+        "deactivationReason": {
+            "type": "string",
+            "description": "The reason why a client was made inactive."
         }
       },
       "required": [
