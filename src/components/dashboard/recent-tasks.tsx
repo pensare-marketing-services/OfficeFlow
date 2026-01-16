@@ -15,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { cn, capitalizeSentences } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, startOfDay } from 'date-fns';
 import { useTasks } from '@/hooks/use-tasks';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -27,6 +27,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/comp
 import { Input } from '../ui/input';
 import { InsertLinkPopover } from '../shared/insert-link-popover';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Calendar } from '../ui/calendar';
 
 
 type UserWithId = User & { id: string };
@@ -142,18 +143,16 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     let statusToSave: TaskStatus = newStatus as TaskStatus;
     let updatePayload: Partial<Task> = {};
     const now = new Date();
-    const deadline = new Date(task.deadline);
-    deadline.setHours(23, 59, 59, 999);
-    const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && task.status !== 'To Do' && deadline < now;
+    
+    if (task.status === 'To Do' && newStatus !== 'To Do') {
+      const taskDeadline = new Date(task.deadline);
+      if (taskDeadline < startOfDay(now)) {
+        updatePayload.deadline = now.toISOString();
+      }
+    }
 
     if (newStatus === 'Active') statusToSave = 'On Work';
     if (newStatus === 'Stopped') statusToSave = 'Completed';
-    
-    if (isAdmin && isOverdue && newStatus === 'On Work') {
-        const newDeadline = new Date();
-        newDeadline.setDate(newDeadline.getDate() + 1);
-        updatePayload.deadline = newDeadline.toISOString();
-    }
     
     updatePayload.status = statusToSave;
     updateTask(task.id, updatePayload);
@@ -276,7 +275,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 const deadline = new Date(task.deadline);
                 deadline.setHours(23, 59, 59, 999);
                 const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && task.status !== 'To Do' && deadline < now;
-                const createdDate = task.createdAt?.seconds ? new Date(task.createdAt.seconds * 1000) : null;
                 
                 let statusOptions: string[] = [...allStatuses];
                 
@@ -316,7 +314,29 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                         <TableRow onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}>
                             <TableCell className="px-2 border-r border-t text-[8px] font-medium text-center">{index + 1}</TableCell>
                             <TableCell className="px-2 border-r border-t text-[8px] font-medium text-center">
-                                {createdDate ? format(createdDate, 'MMM dd') : '-'}
+                               {isAdmin && title === "To Do Tasks" ? (
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="ghost" size="sm" className="h-6 text-[8px] p-1">
+                                                {task.deadline ? format(new Date(task.deadline), 'MMM dd') : '-'}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={task.deadline ? new Date(task.deadline) : undefined}
+                                                onSelect={(date) => {
+                                                    if (date) {
+                                                        updateTask(task.id, { deadline: date.toISOString() });
+                                                    }
+                                                }}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                ) : (
+                                    <span>{task.deadline ? format(new Date(task.deadline), 'MMM dd') : '-'}</span>
+                                )}
                             </TableCell>
                             <TableCell className="px-2 border-r border-t text-[8px]">
                                 <Tooltip>
