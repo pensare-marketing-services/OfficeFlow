@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -10,6 +8,7 @@ import type { Task, UserProfile as User, Client } from '@/lib/data';
 import EmployeeMasterView from './employee-master-view';
 import { useTasks } from '@/hooks/use-tasks';
 import SeoWebEmployeeMasterView from './seo-web-employee-master-view';
+import { startOfDay, isSameDay } from 'date-fns';
 
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
@@ -31,10 +30,32 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'To Do'), [tasks]);
   const toDoTasks = useMemo(() => tasks.filter(t => t.status === 'To Do'), [tasks]);
 
+  const tasksForToday = useMemo(() => {
+    const today = startOfDay(new Date());
+    // Incomplete statuses that should be rolled over to today if their deadline has passed
+    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next', 'Approved'];
+    
+    return activeTasks.filter(task => {
+        if (!task.deadline) return false;
+        const deadline = startOfDay(new Date(task.deadline));
+        
+        // A task belongs to today if its deadline is today, OR if its deadline was in the past but it's still incomplete.
+        return isSameDay(deadline, today) || (deadline < today && incompleteStatuses.includes(task.status));
+    });
+  }, [activeTasks]);
+  
+  const dmTasksTodayCount = useMemo(() => {
+    const nonDmContentTypes: (Task['contentType'])[] = ['SEO', 'Website', 'Web Blogs', 'Other'];
+    return tasksForToday.filter(task => !nonDmContentTypes.includes(task.contentType!)).length;
+  }, [tasksForToday]);
+
+  const seoWebTasksTodayCount = useMemo(() => {
+    const seoWebContentTypes: (Task['contentType'])[] = ['SEO', 'Website', 'Web Blogs'];
+     return tasksForToday.filter(task => seoWebContentTypes.includes(task.contentType!)).length;
+  }, [tasksForToday]);
+
   const totalTasks = activeTasks.length;
   const toDoTasksCount = toDoTasks.length;
-  const totalEmployees = users.filter(u => u.role === 'employee').length;
-  const seoWebEmployeesCount = users.filter(u => u.role === 'employee' && (u.department === 'seo' || u.department === 'web')).length;
   const approvedTasksCount = activeTasks.filter(t => t.status === 'Approved').length;
   const postedTasksCount = activeTasks.filter(t => t.status === 'Posted').length;
   const onHoldTasksCount = activeTasks.filter(t => t.status === 'Hold').length;
@@ -116,14 +137,14 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
         <StatsCard 
             title="Digital Marketing" 
-            value={totalEmployees - seoWebEmployeesCount} 
+            value={dmTasksTodayCount} 
             icon={Users}
             onClick={handleEmployeeViewClick}
             isActive={viewMode === 'employees'} 
         />
         <StatsCard 
             title="Web - Seo" 
-            value={seoWebEmployeesCount} 
+            value={seoWebTasksTodayCount} 
             icon={Users}
             onClick={handleSeoWebViewClick}
             isActive={viewMode === 'employees-seo-web'} 
