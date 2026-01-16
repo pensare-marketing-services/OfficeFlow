@@ -227,7 +227,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                 return dateB - dateA; // Newest deadline first
             }
             const priorityA = a.priority || 99;
-            const priorityB = b.priority || 99;
+            const priorityB = b.priority || 9;
             return priorityA - priorityB; 
         });
         return sortableTasks;
@@ -463,7 +463,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const now = new Date();
                                 const deadline = new Date(task.deadline);
                                 deadline.setHours(23, 59, 59, 999);
-                                const isOverdue = !isPromotionTask && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && deadline < now;
+                                const isOverdue = !isPromotionTask && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && task.status !== 'To Do' && deadline < now;
                                 
                                 const isStandardTask = !isPromotionTask;
                                 
@@ -796,4 +796,5 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
+
 
