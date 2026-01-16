@@ -140,7 +140,6 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7">
-                    {/* <Pen className="h-4 w-4" /> */}
                     <Settings className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
@@ -264,7 +263,6 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                     <FormControl>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                {/* This div prevents the FormItem's label click from triggering the switch */}
                                                 <div onClick={(e) => e.preventDefault()}>
                                                     <Switch
                                                         checked={field.value}
@@ -465,11 +463,12 @@ const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string
     );
 };
 
-const ClientTable = ({ clients, users, loading, onUpdate }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void> }) => {
+const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { clients: ClientWithId[], users: UserWithId[], loading: boolean, onUpdate: (clientId: string, data: Partial<Client>) => Promise<void>, startIndex?: number }) => {
     return (
          <Table>
             <TableHeader>
                 <TableRow>
+                    <TableHead className="px-2 text-[10px] h-8 w-[40px]">Sl No</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Client Name</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Assigned Employees</TableHead>
                     <TableHead className="text-right px-2 text-[10px] h-8">Actions</TableHead>
@@ -478,11 +477,12 @@ const ClientTable = ({ clients, users, loading, onUpdate }: { clients: ClientWit
             <TableBody>
                 {loading && Array.from({length: 8}).map((_, i) => (
                     <TableRow key={i}>
-                        <TableCell colSpan={3} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
+                        <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                     </TableRow>
                 ))}
-                {!loading && clients.map((client) => (
+                {!loading && clients.map((client, index) => (
                     <TableRow key={client.id} className={cn(client.active === false && "bg-muted/30 opacity-50")}>
+                        <TableCell className="font-medium text-[10px] py-1 px-2 text-center">{startIndex + index + 1}</TableCell>
                         <TableCell className="font-medium text-[10px] py-1 px-2">{client.name}</TableCell>
                         <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
                          <TableCell className="text-right px-2 py-1">
@@ -495,7 +495,7 @@ const ClientTable = ({ clients, users, loading, onUpdate }: { clients: ClientWit
                     </TableRow>
                 ))}
                 {!loading && clients.length === 0 && (
-                    <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground p-4">No clients in this column.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground p-4">No clients in this column.</TableCell></TableRow>
                 )}
             </TableBody>
         </Table>
@@ -533,7 +533,7 @@ export default function SettingsPage() {
 
     const pageLoading = clientsLoading || usersLoading;
 
-    const EmployeeTable = ({ employeeList }: { employeeList: UserWithId[] }) => (
+    const EmployeeTable = ({ employeeList, startIndex = 0 }: { employeeList: UserWithId[], startIndex?: number }) => (
         <Table>
             <TableHeader>
                 <TableRow>
@@ -553,7 +553,7 @@ export default function SettingsPage() {
                 {error && <TableRow><TableCell colSpan={5} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
                 {!usersLoading && employeeList.map((employee, index) => (
                     <TableRow key={employee.id}>
-                        <TableCell className="px-2 py-1 text-[10px]">{index + 1}</TableCell>
+                        <TableCell className="px-2 py-1 text-[10px]">{startIndex + index + 1}</TableCell>
                         <TableCell className="py-1 px-2">
                             <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6">
@@ -622,6 +622,7 @@ export default function SettingsPage() {
                                 users={users}
                                 loading={pageLoading}
                                 onUpdate={handleUpdateClient}
+                                startIndex={0}
                             />
                         </div>
                          <div>
@@ -630,6 +631,7 @@ export default function SettingsPage() {
                                 users={users}
                                 loading={pageLoading}
                                 onUpdate={handleUpdateClient}
+                                startIndex={firstColumnClients.length}
                             />
                         </div>
                          <div>
@@ -638,6 +640,7 @@ export default function SettingsPage() {
                                 users={users}
                                 loading={pageLoading}
                                 onUpdate={handleUpdateClient}
+                                startIndex={firstColumnClients.length + secondColumnClients.length}
                             />
                         </div>
                     </div>
@@ -659,8 +662,8 @@ export default function SettingsPage() {
                         </CardHeader>
                         <CardContent className="p-0">
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-                                <div><EmployeeTable employeeList={firstHalfEmployees} /></div>
-                                <div><EmployeeTable employeeList={secondHalfEmployees} /></div>
+                                <div><EmployeeTable employeeList={firstHalfEmployees} startIndex={0} /></div>
+                                <div><EmployeeTable employeeList={secondHalfEmployees} startIndex={firstHalfEmployees.length} /></div>
                             </div>
                         </CardContent>
                     </Card>
@@ -677,3 +680,6 @@ export default function SettingsPage() {
     
 
 
+
+
+    
