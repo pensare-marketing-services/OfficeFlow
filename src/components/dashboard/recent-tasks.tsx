@@ -144,7 +144,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
     const now = new Date();
     const deadline = new Date(task.deadline);
     deadline.setHours(23, 59, 59, 999);
-    const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && deadline < now;
+    const isOverdue = !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && task.status !== 'To Do' && deadline < now;
 
     if (newStatus === 'Active') statusToSave = 'On Work';
     if (newStatus === 'Stopped') statusToSave = 'Completed';
