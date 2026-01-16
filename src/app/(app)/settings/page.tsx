@@ -154,47 +154,51 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                             <FormItem><FormLabel>Client Name</FormLabel><FormControl><Input placeholder="e.g., Acme Inc." {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
 
-                        {[1, 2, 3].map((num) => {
-                            const fieldName = `employeeId${num}` as 'employeeId1' | 'employeeId2' | 'employeeId3';
-                            const watchedIds = [watchEmployee1, watchEmployee2, watchEmployee3];
-                            const filteredOptions = employeeOptions.filter(
-                                (emp) => !watchedIds.includes(emp.id) || watchedIds[num - 1] === emp.id
-                            );
+                        <div className="space-y-2">
+                            <FormLabel>Assign Employees</FormLabel>
+                            <div className="flex items-start gap-2">
+                                {[1, 2, 3].map((num) => {
+                                    const fieldName = `employeeId${num}` as 'employeeId1' | 'employeeId2' | 'employeeId3';
+                                    const watchedIds = [watchEmployee1, watchEmployee2, watchEmployee3];
+                                    const filteredOptions = employeeOptions.filter(
+                                        (emp) => !watchedIds.includes(emp.id) || watchedIds[num - 1] === emp.id
+                                    );
 
-                            return (
-                                <FormField
-                                    key={num}
-                                    control={form.control}
-                                    name={fieldName}
-                                    render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Assign Employee {num}</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value || 'unassigned'}>
-                                            <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Unassigned" />
-                                            </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="unassigned">Unassigned</SelectItem>
-                                                {filteredOptions.map((employee) => (
-                                                    <SelectItem key={employee.id} value={employee.id}>
-                                                        <div className="flex items-center gap-2">
-                                                            <Avatar className="h-6 w-6 text-[10px]">
-                                                                <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
-                                                            </Avatar>
-                                                            <span>{employee.username}</span>
-                                                        </div>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                    )}
-                                />
-                            )
-                        })}
+                                    return (
+                                        <FormField
+                                            key={num}
+                                            control={form.control}
+                                            name={fieldName}
+                                            render={({ field }) => (
+                                            <FormItem className="flex-1">
+                                                <Select onValueChange={field.onChange} value={field.value || 'unassigned'}>
+                                                    <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Unassigned" />
+                                                    </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                                                        {filteredOptions.map((employee) => (
+                                                            <SelectItem key={employee.id} value={employee.id}>
+                                                                <div className="flex items-center gap-2">
+                                                                    <Avatar className="h-6 w-6 text-[10px]">
+                                                                        <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
+                                                                    </Avatar>
+                                                                    <span>{employee.username}</span>
+                                                                </div>
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                            )}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </div>
 
                         <Separator />
 
@@ -649,3 +653,4 @@ export default function SettingsPage() {
     
 
     
+
