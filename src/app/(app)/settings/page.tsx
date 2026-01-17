@@ -385,7 +385,7 @@ const EditableNicknameCell = ({ userId, initialNickname }: { userId: string, ini
             onChange={(e) => setNickname(e.target.value)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="h-7 text-[10px]"
+            className="!h-7 !text-[10px]"
             placeholder="No nickname"
         />
     );
@@ -437,11 +437,11 @@ const EditablePasswordCell = ({ userId, initialPassword }: { userId: string, ini
                     {isPasswordVisible ? password : '••••••••'}
                 </span>
             )}
-             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsPasswordVisible(!isPasswordVisible)}>
-                {isPasswordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+             <Button variant="ghost" size="icon" className="h-2 w-4" onClick={() => setIsPasswordVisible(!isPasswordVisible)}>
+                {isPasswordVisible ? <EyeOff className="h-2 w-2" /> : <Eye className="h-4 w-4" />}
             </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsEditing(!isEditing)}>
-                <Pen className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-2 w-4" onClick={() => setIsEditing(!isEditing)}>
+                <Pen className="h-2 w-2" />
             </Button>
         </div>
     )
@@ -480,7 +480,7 @@ const EditablePriorityCell = ({ userId, initialPriority }: { userId: string, ini
             onChange={(e) => setPriority(Number(e.target.value) || 99)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="h-7 text-[10px] w-10 text-center mx-auto"
+            className="h-7 text-[10px] w-10 text-center mx-auto p-0"
         />
     );
 };
@@ -609,7 +609,7 @@ export default function SettingsPage() {
                         <TableCell className="py-1 px-2">
                             <EditablePasswordCell userId={employee.id} initialPassword={employee.password} />
                         </TableCell>
-                        <TableCell className="py-1 px-2">
+                        <TableCell className="py-0 px-0">
                             <EditablePriorityCell  userId={employee.id} initialPriority={employee.priority} />
                         </TableCell>
                         <TableCell className="text-right px-2 py-1">
