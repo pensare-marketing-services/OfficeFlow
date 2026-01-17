@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
@@ -31,8 +32,8 @@ export function StatsCard({
       'ring-emerald-500': isActive && variant === 'success',
       'bg-amber-500/10 border-amber-500/30 text-amber-600': variant === 'warning',
       'ring-amber-500': isActive && variant === 'warning',
-      'bg-blue-500/10 border-blue-500/30 text-blue-600': variant === 'default' && title.includes('Approved'),
-      'ring-blue-500': isActive && variant === 'default' && title.includes('Approved'),
+      'bg-blue-500/10 border-blue-500/30 text-blue-600': variant === 'default' && title.includes('Posted'),
+      'ring-blue-500': isActive && variant === 'default' && title.includes('Posted'),
     }
   );
   
@@ -40,15 +41,15 @@ export function StatsCard({
     'text-destructive': variant === 'destructive',
     'text-emerald-500': variant === 'success',
     'text-amber-500': variant === 'warning',
-    'text-blue-500': variant === 'default' && title.includes('Approved'),
-    'text-muted-foreground': variant === 'default' && !title.includes('Approved'),
+    'text-blue-500': variant === 'default' && title.includes('Posted'),
+    'text-muted-foreground': variant === 'default' && !title.includes('Posted'),
   });
 
   const valueClasses = cn("font-headline font-bold", {
     'text-destructive': variant === 'destructive',
     'text-emerald-600': variant === 'success',
     'text-amber-600': variant === 'warning',
-    'text-blue-600': variant === 'default' && title.includes('Approved'),
+    'text-blue-600': variant === 'default' && title.includes('Posted'),
   });
 
   return (

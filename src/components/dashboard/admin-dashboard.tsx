@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -33,7 +34,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   const tasksForToday = useMemo(() => {
     const today = startOfDay(new Date());
     // Incomplete statuses that should be rolled over to today if their deadline has passed
-    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next', 'Approved'];
+    const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next'];
     
     return activeTasks.filter(task => {
         if (!task.deadline) return false;
@@ -167,7 +168,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
             title="Approved Tasks" 
             value={approvedTasksCount} 
             icon={CheckCircle2} 
-            variant="default"
+            variant="success"
             onClick={() => handleTaskFilterClick('approved')}
             isActive={viewMode === 'tasks' && taskFilter === 'approved'}
         />
@@ -175,7 +176,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
             title="Posted Tasks" 
             value={postedTasksCount} 
             icon={ClipboardCheck} 
-            variant="success"
+            variant="default"
             onClick={() => handleTaskFilterClick('posted')}
             isActive={viewMode === 'tasks' && taskFilter === 'posted'}
         />
