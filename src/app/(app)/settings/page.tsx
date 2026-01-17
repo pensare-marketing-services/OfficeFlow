@@ -521,10 +521,11 @@ export default function SettingsPage() {
         });
     }, [clients]);
 
-    const third = Math.ceil(sortedClients.length / 3);
-    const firstColumnClients = sortedClients.slice(0, third);
-    const secondColumnClients = sortedClients.slice(third, 2 * third);
-    const thirdColumnClients = sortedClients.slice(2 * third);
+    const quarter = Math.ceil(sortedClients.length / 4);
+    const firstColumnClients = sortedClients.slice(0, quarter);
+    const secondColumnClients = sortedClients.slice(quarter, 2 * quarter);
+    const thirdColumnClients = sortedClients.slice(2 * quarter, 3 * quarter);
+    const fourthColumnClients = sortedClients.slice(3 * quarter);
 
     const employees = users.filter(u => u.role === 'employee');
     const employeeMidpoint = Math.ceil(employees.length / 2);
@@ -615,7 +616,7 @@ export default function SettingsPage() {
                     <CardTitle className="flex items-center gap-2 text-base"><Building /> Manage Clients</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-4">
                         <div>
                              <ClientTable 
                                 clients={firstColumnClients}
@@ -643,6 +644,16 @@ export default function SettingsPage() {
                                 startIndex={firstColumnClients.length + secondColumnClients.length}
                             />
                         </div>
+                        <div>
+                             <ClientTable 
+                                clients={fourthColumnClients}
+                                users={users}
+                                loading={pageLoading}
+                                onUpdate={handleUpdateClient}
+                                startIndex={firstColumnClients.length + secondColumnClients.length + thirdColumnClients.length}
+                            />
+                        </div>
+                        
                     </div>
                 </CardContent>
             </Card>
@@ -672,14 +683,3 @@ export default function SettingsPage() {
         </div>
     );
 }
-
-    
-
-    
-
-    
-
-
-
-
-    
