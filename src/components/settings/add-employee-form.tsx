@@ -29,6 +29,7 @@ export default function AddEmployeeForm() {
     defaultValues: {
       role: 'employee',
       username: '',
+      nickname: '',
       password: '',
       department: 'digitalmarketing',
     },
@@ -67,6 +68,15 @@ export default function AddEmployeeForm() {
                             <FormLabel className="col-span-1">Username</FormLabel>
                             <FormControl className="col-span-2">
                                 <Input className="h-8 text-[10px]" placeholder="e.g., janedoe" {...field} />
+                            </FormControl>
+                            <div className="col-span-3"><FormMessage /></div>
+                        </FormItem>
+                    )} />
+                     <FormField control={form.control} name="nickname" render={({ field }) => (
+                        <FormItem className="grid grid-cols-3 items-center gap-2 space-y-0">
+                            <FormLabel className="col-span-1">Nickname</FormLabel>
+                            <FormControl className="col-span-2">
+                                <Input className="h-8 text-[10px]" placeholder="e.g., Jane D" {...field} />
                             </FormControl>
                             <div className="col-span-3"><FormMessage /></div>
                         </FormItem>

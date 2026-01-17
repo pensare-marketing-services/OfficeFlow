@@ -1,4 +1,5 @@
 
+
 {
   "entities": {
     "UserProfile": {
@@ -27,9 +28,22 @@
             "type": "string",
             "description": "The user's unique username for login."
         },
+        "nickname": {
+            "type": "string",
+            "description": "The user's display name used throughout the app."
+        },
         "password": {
             "type": "string",
             "description": "The user's password for login (stored for custom auth)."
+        },
+        "priority": {
+          "type": "number",
+          "description": "A number used to sort employees. Lower numbers appear first."
+        },
+        "department": {
+          "type": "string",
+          "enum": ["digitalmarketing", "contentwriter", "designers", "videoeditor", "web", "seo"],
+          "description": "The department the employee belongs to."
         }
       },
       "required": [
@@ -80,7 +94,7 @@
           "items": {
             "type": "string"
           },
-          "description": "The UIDs of the users this task is assigned to. Can have up to 2 assignees."
+          "description": "The UIDs of the users this task is assigned to. Can have up to 3 assignees."
         },
         "clientId": {
           "type": "string",
@@ -131,6 +145,10 @@
         "activeAssigneeIndex": {
           "type": "number",
           "description": "The index of the assignee in the assigneeIds array who is currently responsible for the task."
+        },
+        "month": {
+          "type": "string",
+          "description": "The billing or work cycle this task belongs to, e.g., 'Month 1', 'July 2024'."
         }
       },
       "required": [
@@ -215,7 +233,7 @@
           "items": {
             "$ref": "#/entities/ClientNote"
           },
-          "description": "A list of notes specific to this client."
+          "description": "[DEPRECATED] A list of notes specific to this client. Now stored in the 'months' array."
         },
         "categories": {
             "type": "array",
@@ -224,6 +242,52 @@
                 "enum": ["seo", "website", "digital marketing", "gd"]
             },
             "description": "The service categories this client belongs to."
+        },
+        "months": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "plan": { "type": "string" },
+              "billDuration": { "type": "string" },
+              "socialPlatforms": { "type": "string" },
+              "monthlyReach": { "type": "string" },
+              "paidPromotionsMainBudget": { "type": "number" },
+              "planPromotionsMainBudget": { "type": "number" },
+              "notes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/entities/ClientNote"
+                }
+              }
+            }
+          },
+          "description": "A list of monthly tabs for the client page, each with its own plan details and notes."
+        },
+        "paidPromotionsMainBudget": {
+            "type": "number",
+            "description": "[DEPRECATED] The main budget manually entered for Paid Promotions."
+        },
+        "planPromotionsMainBudget": {
+            "type": "number",
+            "description": "[DEPRECATED] The main budget manually entered for Plan Promotions."
+        },
+        "paidPromotionsOldBalance": {
+            "type": "number",
+            "description": "The old balance for Paid Promotions."
+        },
+        "planPromotionsOldBalance": {
+            "type": "number",
+            "description": "The old balance for Plan Promotions."
+        },
+        "active": {
+            "type": "boolean",
+            "description": "Whether the client is currently active. Defaults to true. Inactive clients are hidden from most views."
+        },
+        "deactivationReason": {
+            "type": "string",
+            "description": "The reason why a client was made inactive."
         }
       },
       "required": [
@@ -253,37 +317,6 @@
           "format": "uri"
         }
       }
-    },
-    "Notification": {
-      "title": "Notification",
-      "description": "Represents a single notification for a user.",
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "description": "The UID of the user this notification is for."
-        },
-        "message": {
-          "type": "string"
-        },
-        "link": {
-          "type": "string",
-          "format": "uri"
-        },
-        "read": {
-          "type": "boolean"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "userId",
-        "message",
-        "read",
-        "createdAt"
-      ]
     },
      "PaidPromotion": {
       "title": "Paid Promotion",
@@ -336,6 +369,87 @@
         },
          "clientId": {
           "type": "string"
+        },
+        "linkedTaskId": {
+          "type": "string",
+          "description": "The ID of the task linked to this promotion."
+        },
+         "month": {
+          "type": "string",
+          "description": "The billing or work cycle this promotion belongs to."
+        }
+      },
+      "required": [
+        "date",
+        "campaign",
+        "adType",
+        "budget",
+        "status",
+        "assignedTo",
+        "spent",
+        "remarks",
+        "clientId"
+      ]
+    },
+    "PlanPromotion": {
+      "title": "Plan Promotion",
+      "description": "Represents a single plan promotion campaign for a client.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "campaign": {
+          "type": "string"
+        },
+        "adType": {
+          "type": "string",
+          "enum": [
+            "EG Whatsapp",
+            "EG Instagram",
+            "EG FB Post",
+            "EG Insta Post",
+            "Traffic Web",
+            "Lead Gen",
+            "Lead Call",
+            "Profile Visit Ad",
+            "FB Page Like",
+            "Carousel Ad",
+            "IG Engage",
+            "Reach Ad"
+          ]
+        },
+        "budget": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Active", "Stopped", "Scheduled"]
+        },
+        "assignedTo": {
+          "type": "string",
+          "description": "The username of the person assigned."
+        },
+        "spent": {
+          "type": "number"
+        },
+        "remarks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/ProgressNote"
+          }
+        },
+         "clientId": {
+          "type": "string"
+        },
+        "linkedTaskId": {
+          "type": "string",
+          "description": "The ID of the task linked to this promotion."
+        },
+         "month": {
+          "type": "string",
+          "description": "The billing or work cycle this promotion belongs to."
         }
       },
       "required": [
@@ -434,6 +548,12 @@
       },
       "description": "Stores all paid promotions for a specific client."
     },
+     "/clients/{clientId}/planPromotions/{planPromotionId}": {
+      "schema": {
+        "$ref": "#/entities/PlanPromotion"
+      },
+      "description": "Stores all plan promotions for a specific client."
+    },
     "/clients/{clientId}/cashInTransactions/{transactionId}": {
       "schema": {
         "$ref": "#/entities/CashInTransaction"
@@ -445,14 +565,6 @@
         "$ref": "#/entities/SeoTask"
       },
       "description": "Stores all SEO tasks for a specific client."
-    },
-    "/notifications/{notificationId}": {
-      "schema": {
-        "$ref": "#/entities/Notification"
-      },
-      "description": "Stores notifications for users."
     }
   }
 }
-
-    

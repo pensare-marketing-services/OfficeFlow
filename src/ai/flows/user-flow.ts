@@ -41,7 +41,7 @@ export async function createUser(data: CreateUserInput): Promise<{ uid: string }
     throw new Error('Invalid input data.');
   }
 
-  const { role, username, password, department } = validation.data;
+  const { role, username, password, department, nickname } = validation.data;
 
   // 1. Create user in Firebase Authentication via REST API
   // To keep things simple with custom auth, we will just use a random email
@@ -68,6 +68,7 @@ export async function createUser(data: CreateUserInput): Promise<{ uid: string }
   const userProfile: any = {
     role: { stringValue: role },
     username: { stringValue: username },
+    nickname: { stringValue: nickname },
     password: { stringValue: password },
     email: { stringValue: randomEmail },
   };

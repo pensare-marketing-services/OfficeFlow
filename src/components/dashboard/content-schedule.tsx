@@ -164,14 +164,14 @@ const AssigneeSelect = ({
     const selectedUser = employeeUsers.find(u => u.id === assigneeId);
 
     const TriggerContent = () => selectedUser ? (
-        <span className="truncate text-[10px]">{selectedUser.username}</span>
+        <span className="truncate text-[10px]">{selectedUser.nickname || selectedUser.username}</span>
     ) : <SelectValue placeholder="Assign" />;
 
 
     if (!isEditable) {
         return selectedUser ? (
             <div className="flex items-center justify-start p-1 h-7 text-[10px] truncate">
-                {selectedUser.username}
+                {selectedUser.nickname || selectedUser.username}
             </div>
         ) : (
              <div className="w-full p-2 h-7 text-[10px] text-muted-foreground">-</div>
@@ -193,9 +193,9 @@ const AssigneeSelect = ({
                         <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6">
                                 
-                                <AvatarFallback>{getInitials(user.username)}</AvatarFallback>
+                                <AvatarFallback>{getInitials(user.nickname || user.username)}</AvatarFallback>
                             </Avatar>
-                            <span className="text-[10px]">{user.username}</span>
+                            <span className="text-[10px]">{user.nickname || user.username}</span>
                         </div>
                     </SelectItem>
                 ))}
@@ -300,7 +300,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             imageUrl: note.imageUrl || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
-            authorName: currentUser.username,
+            authorName: currentUser.nickname || currentUser.username,
         };
         
         // Reset opened state for all users except sender
@@ -680,7 +680,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                                         {(task.progressNotes || []).map((note, remarkIndex) => {
                                                             const author = users.find(u => u.id === note.authorId);
-                                                            const authorName = author ? author.username : note.authorName;
+                                                            const authorName = author ? (author.nickname || author.username) : note.authorName;
                                                             const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
 
                                                             return (
@@ -738,7 +738,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                                     {note.authorId === currentUser?.uid && (
                                                                         <Avatar className="h-6 w-6 border">
                                                                             
-                                                                            <AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback>
+                                                                            <AvatarFallback>{getInitials(currentUser.nickname || currentUser.username)}</AvatarFallback>
                                                                         </Avatar>
                                                                     )}
                                                                 </div>

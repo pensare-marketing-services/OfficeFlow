@@ -45,14 +45,14 @@ export function UserNav() {
         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
           <Avatar className="h-9 w-9">
             
-            <AvatarFallback>{getInitials(user.username)}</AvatarFallback>
+            <AvatarFallback>{getInitials(user.nickname || user.username)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="font-headline text-xs font-medium leading-none">{user.username}</p>
+            <p className="font-headline text-xs font-medium leading-none">{user.nickname || user.username}</p>
             {user.role && (
               <p className="text-[10px] leading-none text-muted-foreground capitalize">
                 {user.role}

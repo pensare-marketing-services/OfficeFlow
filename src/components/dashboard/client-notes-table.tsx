@@ -111,7 +111,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
       imageUrl: remark.imageUrl || '',
       date: new Date().toISOString(),
       authorId: currentUser.uid,
-      authorName: currentUser.username,
+      authorName: currentUser.nickname || currentUser.username,
     };
     
     const existingRemarks = localNotes[noteIndex].remarks || [];
@@ -301,7 +301,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                     {(note.remarks || []).map((remark, remarkIndex) => {
                                         const author = users.find(u => u.id === remark.authorId);
-                                        const authorName = author ? author.username : remark.authorName;
+                                        const authorName = author ? (author.nickname || author.username) : remark.authorName;
                                         const isEditing = editingRemark?.noteId === note.id && editingRemark?.remarkIndex === remarkIndex;
 
                                         return (
@@ -358,7 +358,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                                 </div>
                                                 {remark.authorId === currentUser?.uid && (
                                                     <Avatar className="h-6 w-6 border">
-                                                        <AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback>
+                                                        <AvatarFallback>{getInitials(currentUser.nickname || currentUser.username)}</AvatarFallback>
                                                     </Avatar>
                                                 )}
                                             </div>

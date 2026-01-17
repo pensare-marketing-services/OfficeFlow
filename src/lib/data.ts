@@ -6,6 +6,7 @@ export type UserProfile = {
   email?: string;
   role: 'admin' | 'employee';
   username?: string;
+  nickname?: string;
   password?: string;
   priority?: number;
   department?: 'digitalmarketing' | 'contentwriter' | 'designers' | 'videoeditor' | 'web' | 'seo';

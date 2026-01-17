@@ -135,9 +135,9 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
                                                         <SelectItem key={employee.id} value={employee.id}>
                                                             <div className="flex items-center gap-2">
                                                                 <Avatar className="h-6 w-6 text-[10px]">
-                                                                    <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
+                                                                    <AvatarFallback>{getInitials(employee.nickname || employee.username)}</AvatarFallback>
                                                                 </Avatar>
-                                                                <span className="text-[10px]">{employee.username}</span>
+                                                                <span className="text-[10px]">{employee.nickname || employee.username}</span>
                                                             </div>
                                                         </SelectItem>
                                                     ))}

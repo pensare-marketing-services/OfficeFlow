@@ -15,6 +15,7 @@ interface UserContextType {
     deleteUser: (userId: string) => Promise<void>;
     updateUserPassword: (userId: string, newPassword: string) => Promise<void>;
     updateUserPriority: (userId: string, newPriority: number) => Promise<void>;
+    updateUserNickname: (userId: string, newNickname: string) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -86,6 +87,19 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, []);
 
+    const updateUserNickname = useCallback(async (userId: string, newNickname: string) => {
+        if (!newNickname || newNickname.trim().length < 2) {
+            throw new Error("Nickname must be at least 2 characters long.");
+        }
+        try {
+            const userDocRef = doc(db, 'users', userId);
+            await updateDoc(userDocRef, { nickname: newNickname });
+        } catch (e: any) {
+            console.error("Error updating nickname:", e);
+            throw new Error("Failed to update nickname. Please try again.");
+        }
+    }, []);
+
     const value = {
         users,
         loading,
@@ -93,6 +107,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         deleteUser,
         updateUserPassword,
         updateUserPriority,
+        updateUserNickname,
     };
 
     return (

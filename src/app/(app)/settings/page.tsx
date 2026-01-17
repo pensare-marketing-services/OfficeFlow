@@ -182,9 +182,9 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                                             <SelectItem key={employee.id} value={employee.id}>
                                                                 <div className="flex items-center gap-2">
                                                                     <Avatar className="h-6 w-6 text-[10px]">
-                                                                        <AvatarFallback>{getInitials(employee.username)}</AvatarFallback>
+                                                                        <AvatarFallback>{getInitials(employee.nickname || employee.username)}</AvatarFallback>
                                                                     </Avatar>
-                                                                    <span>{employee.username}</span>
+                                                                    <span>{employee.nickname || employee.username}</span>
                                                                 </div>
                                                             </SelectItem>
                                                         ))}
@@ -353,6 +353,45 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
     )
 }
 
+const EditableNicknameCell = ({ userId, initialNickname }: { userId: string, initialNickname?: string }) => {
+    const { updateUserNickname } = useUsers();
+    const [nickname, setNickname] = useState(initialNickname || '');
+    const { toast } = useToast();
+
+    const handleSave = async () => {
+        if (nickname !== initialNickname) {
+            try {
+                await updateUserNickname(userId, nickname);
+                toast({ title: "Nickname Updated", description: "The user's nickname has been updated." });
+            } catch (error: any) {
+                toast({ variant: "destructive", title: "Update Failed", description: error.message });
+                setNickname(initialNickname || ''); // Revert on failure
+            }
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.currentTarget.blur();
+        } else if (e.key === 'Escape') {
+            setNickname(initialNickname || '');
+            (e.target as HTMLInputElement).blur();
+        }
+    };
+
+    return (
+        <Input
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            className="h-7 text-[10px]"
+            placeholder="No nickname"
+        />
+    );
+}
+
+
 const EditablePasswordCell = ({ userId, initialPassword }: { userId: string, initialPassword?: string }) => {
     const { updateUserPassword } = useUsers();
     const [password, setPassword] = useState(initialPassword || '');
@@ -458,7 +497,7 @@ const AssignedEmployeesCell = ({ employeeIds, allUsers }: { employeeIds?: string
 
     return (
         <TableCell className="text-[10px] p-1">
-            {assignedEmployees.map(e => e.username).join(', ')}
+            {assignedEmployees.map(e => e.nickname || e.username).join(', ')}
         </TableCell>
     );
 };
@@ -539,6 +578,7 @@ export default function SettingsPage() {
             <TableHeader>
                 <TableRow>
                     <TableHead className="w-[10px] px-2 text-[10px] h-8">#</TableHead>
+                    <TableHead className="px-2 text-[10px] h-8">Nickname</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Username</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Password</TableHead>
                     <TableHead className="px-2 text-[10px] h-8 w-[10]">Priority</TableHead>
@@ -548,17 +588,20 @@ export default function SettingsPage() {
             <TableBody>
                 {usersLoading && Array.from({length: 3}).map((_, i) => (
                     <TableRow key={i}>
-                        <TableCell colSpan={5} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
+                        <TableCell colSpan={6} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                     </TableRow>
                 ))}
-                {error && <TableRow><TableCell colSpan={5} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
+                {error && <TableRow><TableCell colSpan={6} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
                 {!usersLoading && employeeList.map((employee, index) => (
                     <TableRow key={employee.id}>
                         <TableCell className="px-2 py-1 text-[10px]">{startIndex + index + 1}</TableCell>
+                         <TableCell className="py-1 px-2">
+                            <EditableNicknameCell userId={employee.id} initialNickname={employee.nickname} />
+                        </TableCell>
                         <TableCell className="py-1 px-2">
                             <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6">
-                                    <AvatarFallback className="text-[10px]">{getInitials(employee.username)}</AvatarFallback>
+                                    <AvatarFallback className="text-[10px]">{getInitials(employee.nickname || employee.username)}</AvatarFallback>
                                 </Avatar>
                                 <span className="font-medium text-[10px]">{employee.username}</span>
                             </div>
@@ -580,7 +623,7 @@ export default function SettingsPage() {
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete the account for <strong>{employee.username}</strong>.
+                                            This action cannot be undone. This will permanently delete the account for <strong>{employee.nickname || employee.username}</strong>.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
