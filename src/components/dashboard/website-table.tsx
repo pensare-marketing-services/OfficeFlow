@@ -115,7 +115,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
             imageUrl: note.imageUrl || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
-            authorName: currentUser.username,
+            authorName: currentUser.nickname || currentUser.username,
         };
 
         handleTaskChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
@@ -248,7 +248,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                                 <SelectTrigger className="h-7 text-[10px]"><SelectValue placeholder="Assign" /></SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="unassigned">Unassigned</SelectItem>
-                                                    {employeeUsers.filter(u => u.id !== task.assigneeIds?.[1-i]).map(user => <SelectItem key={user.id} value={user.id}>{user.username}</SelectItem>)}
+                                                    {employeeUsers.filter(u => u.id !== task.assigneeIds?.[1-i]).map(user => <SelectItem key={user.id} value={user.id}>{user.nickname || user.username}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         ))}
@@ -275,7 +275,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                                     {(task.progressNotes || []).map((note, remarkIndex) => {
                                                         const author = users.find(u => u.id === note.authorId);
-                                                        const authorName = author ? author.username : note.authorName;
+                                                        const authorName = author ? (author.nickname || author.username) : note.authorName;
                                                         const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
 
                                                         return (
@@ -316,7 +316,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                                                     <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
                                                                 </div>
                                                                 {note.authorId === currentUser?.uid && (
-                                                                    <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback></Avatar>
+                                                                    <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(currentUser.nickname || currentUser.username)}</AvatarFallback></Avatar>
                                                                 )}
                                                             </div>
                                                         );

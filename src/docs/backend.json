@@ -28,6 +28,10 @@
             "type": "string",
             "description": "The user's unique username for login."
         },
+        "nickname": {
+            "type": "string",
+            "description": "The user's display name used throughout the app."
+        },
         "password": {
             "type": "string",
             "description": "The user's password for login (stored for custom auth)."

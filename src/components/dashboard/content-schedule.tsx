@@ -468,7 +468,10 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const isStandardTask = !isPromotionTask;
                                 
                                 const clientAssignedEmployees = client?.employeeIds
-                                    ?.map(id => users.find(u => u.id === id)?.username)
+                                    ?.map(id => {
+                                        const user = users.find(u => u.id === id);
+                                        return user ? (user.nickname || user.username) : null;
+                                    })
                                     .filter(Boolean)
                                     .join(', ');
 
@@ -796,6 +799,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
+
 
 
 

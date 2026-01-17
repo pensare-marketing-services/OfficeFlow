@@ -282,7 +282,7 @@ const TaskCell = ({
                                                     )}
                                                     <p className="text-[9px] text-right mt-1 opacity-70">{format(new Date(note.date), 'MMM d, HH:mm')}</p>
                                                 </div>
-                                                {note.authorId === currentUser?.uid && ( <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback></Avatar> )}
+                                                {note.authorId === currentUser?.uid && ( <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(currentUser.nickname || currentUser.username)}</AvatarFallback></Avatar> )}
                                                 </div>
                                             );
                                         })}
@@ -405,7 +405,7 @@ const TaskCell = ({
                             {note.authorId === currentUser?.uid && (
                                 <Avatar className="h-6 w-6 border">
                                 <AvatarFallback>
-                                    {getInitials(currentUser.username)}
+                                    {getInitials(currentUser.nickname || currentUser.username)}
                                 </AvatarFallback>
                                 </Avatar>
                             )}
@@ -701,7 +701,10 @@ const DailyTaskTable: React.FC<{
             <TableBody>
               {seoWebClients.map((client, index) => {
                 const assignedEmployees = (client.employeeIds || [])
-                  .map((id) => users.find((u) => u.id === id)?.username)
+                  .map((id) => {
+                      const user = users.find((u) => u.id === id);
+                      return user ? user.nickname || user.username : null;
+                    })
                   .filter(Boolean)
                   .join(', ');
                 
@@ -762,7 +765,7 @@ const DailyTaskTable: React.FC<{
                           className="bg-muted/80 border-r p-0"
                         >
                           <div className="h-full w-full flex items-center justify-center px-1">
-                            <span className="truncate">{employee.username}</span>
+                            <span className="truncate">{employee.nickname || employee.username}</span>
                           </div>
                         </TableHead>
 

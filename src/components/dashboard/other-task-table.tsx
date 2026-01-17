@@ -115,7 +115,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
             imageUrl: note.imageUrl || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
-            authorName: currentUser.username,
+            authorName: currentUser.nickname || currentUser.username,
         };
 
         handleTaskChange(task.id, 'progressNotes', [...(task.progressNotes || []), newNote]);
@@ -247,7 +247,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                 <SelectTrigger className="h-7 text-[10px]"><SelectValue placeholder="Assign" /></SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="unassigned">Unassigned</SelectItem>
-                                                    {employeeUsers.filter(u => u.id !== task.assigneeIds?.[1-i]).map(user => <SelectItem key={user.id} value={user.id}>{user.username}</SelectItem>)}
+                                                    {employeeUsers.filter(u => u.id !== task.assigneeIds?.[1-i]).map(user => <SelectItem key={user.id} value={user.id}>{user.nickname || user.username}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         ))}
@@ -274,8 +274,9 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                                     {(task.progressNotes || []).map((note, remarkIndex) => {
                                                         const author = users.find(u => u.id === note.authorId);
-                                                        const authorName = author ? author.username : note.authorName;
+                                                        const authorName = author ? (author.nickname || author.username) : note.authorName;
                                                         const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
+
                                                         return (
                                                             <div key={remarkIndex} className={cn("flex items-start gap-2 text-[10px] group/remark", note.authorId === currentUser?.uid ? 'justify-end' : '')}>
                                                                 {note.authorId !== currentUser?.uid && (
@@ -288,6 +289,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                                       </Button>
                                                                     )}
                                                                     <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
+                                                                    
                                                                     {isEditing ? (
                                                                         <Textarea
                                                                           value={editingText}
@@ -305,15 +307,16 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                                           className="text-[10px] h-auto bg-background/80 text-foreground"
                                                                         />
                                                                     ) : (
-                                                                      <>
-                                                                        {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
-                                                                        {note.imageUrl && <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto" />}
-                                                                      </>
+                                                                        <>
+                                                                            {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
+                                                                            {note.imageUrl && <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto" />}
+                                                                        </>
                                                                     )}
+
                                                                     <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
                                                                 </div>
                                                                 {note.authorId === currentUser?.uid && (
-                                                                    <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback></Avatar>
+                                                                    <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(currentUser.nickname || currentUser.username)}</AvatarFallback></Avatar>
                                                                 )}
                                                             </div>
                                                         );

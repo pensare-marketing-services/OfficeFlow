@@ -207,7 +207,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
             imageUrl: note.imageUrl || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
-            authorName: currentUser.username,
+            authorName: currentUser.nickname || currentUser.username,
         };
         const updatedRemarks = [...(promo.remarks || []), newNote];
         await handlePromotionChange(promoId, 'remarks', updatedRemarks);
@@ -413,7 +413,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="unassigned">Unassigned</SelectItem>
-                                            {employeeUsers.map(user => <SelectItem key={user.id} value={user.username!}>{user.username!}</SelectItem>)}
+                                            {employeeUsers.map(user => <SelectItem key={user.id} value={user.username!}>{user.nickname || user.username!}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
@@ -431,7 +431,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                                 <div className="max-h-60 space-y-3 overflow-y-auto p-1">
                                                     {(promo.remarks || []).map((note: ProgressNote, remarkIndex: number) => {
                                                         const author = users.find(u => u.id === note.authorId);
-                                                        const authorName = author ? author.username : note.authorName;
+                                                        const authorName = author ? (author.nickname || author.username) : note.authorName;
                                                         const isEditing = editingRemark?.promoId === promo.id && editingRemark?.remarkIndex === remarkIndex;
 
                                                         return (
@@ -474,7 +474,7 @@ export default function PlanPromotionsTable({ client, users, totalCashIn, onClie
                                                                 </div>
                                                                 {note.authorId === currentUser?.uid && (
                                                                     <Avatar className="h-6 w-6 border">
-                                                                        <AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback>
+                                                                        <AvatarFallback>{getInitials(currentUser.nickname || currentUser.username)}</AvatarFallback>
                                                                     </Avatar>
                                                                 )}
                                                             </div>

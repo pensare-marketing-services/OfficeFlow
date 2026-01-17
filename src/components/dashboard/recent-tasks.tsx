@@ -166,7 +166,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
             note: note.note || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
-            authorName: currentUser.username,
+            authorName: currentUser.nickname || currentUser.username,
             imageUrl: note.imageUrl,
         };
 
@@ -370,7 +370,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                             <TableCell className="px-2 border-r border-t">
                                 <DropdownMenuTrigger asChild>
                                     <span className="cursor-pointer hover:underline text-[8px] truncate">
-                                        {assignees.map(a => a.username).join(', ') || '-'}
+                                        {assignees.map(a => a.nickname || a.username).join(', ') || '-'}
                                     </span>
                                 </DropdownMenuTrigger>
                             </TableCell>
@@ -435,7 +435,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                     <div className="max-h-60 space-y-4 overflow-y-auto p-1">
                                                     {(task.progressNotes || []).map((note, remarkIndex) => {
                                                         const author = users.find(u => u.id === note.authorId);
-                                                        const authorName = author ? author.username : (note.authorName || '');
+                                                        const authorName = author ? (author.nickname || author.username) : (note.authorName || '');
                                                         const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
 
                                                         return (
@@ -493,7 +493,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                                     {note.authorId === currentUser?.uid && (
                                                                         <Avatar className="h-8 w-8 border">
                                                                         
-                                                                        <AvatarFallback>{getInitials(currentUser.username)}</AvatarFallback>
+                                                                        <AvatarFallback>{getInitials(currentUser.nickname || currentUser.username)}</AvatarFallback>
                                                                     </Avatar>
                                                                 )}
                                                             </div>
