@@ -480,7 +480,7 @@ const EditablePriorityCell = ({ userId, initialPriority }: { userId: string, ini
             onChange={(e) => setPriority(Number(e.target.value) || 99)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="h-7 text-[10px] w-16 text-center"
+            className="h-7 text-[10px] w-10 text-center mx-auto"
         />
     );
 };
@@ -577,11 +577,11 @@ export default function SettingsPage() {
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead className="w-[10px] px-2 text-[10px] h-8">#</TableHead>
+                    <TableHead className=" px-2 text-[10px] h-8">No</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Nickname</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Username</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Password</TableHead>
-                    <TableHead className="px-2 text-[10px] h-8 w-[10]">Priority</TableHead>
+                    <TableHead className="text-center px-2 text-[10px] h-8">Priority</TableHead>
                     <TableHead className="text-right px-2 text-[10px] h-8">Actions</TableHead>
                 </TableRow>
             </TableHeader>
@@ -610,7 +610,7 @@ export default function SettingsPage() {
                             <EditablePasswordCell userId={employee.id} initialPassword={employee.password} />
                         </TableCell>
                         <TableCell className="py-1 px-2">
-                            <EditablePriorityCell userId={employee.id} initialPriority={employee.priority} />
+                            <EditablePriorityCell  userId={employee.id} initialPriority={employee.priority} />
                         </TableCell>
                         <TableCell className="text-right px-2 py-1">
                             <AlertDialog>
