@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Briefcase } from "lucide-react";
+import { Building } from "lucide-react";
 
 export default function ClientsPage() {
     return (
@@ -9,7 +9,7 @@ export default function ClientsPage() {
             <div className="text-center">
                 <div className="flex justify-center mb-4">
                     <div className="rounded-full bg-secondary p-4">
-                        <Briefcase className="h-8 w-8 text-muted-foreground" />
+                        <Building className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </div>
                 <h3 className="font-headline text-lg font-semibold">Select a Client</h3>
