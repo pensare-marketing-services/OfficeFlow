@@ -12,7 +12,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Building, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Settings, Contact, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useClients } from '@/hooks/use-clients';
@@ -106,7 +106,7 @@ export function SidebarNav() {
                      <SidebarMenuButton asChild isActive={pathname.startsWith('/clients')} className="group justify-between">
                          <div className="flex w-full items-center justify-between">
                             <span className='flex items-center gap-2'>
-                                <Building className="h-4 w-4"/>
+                                <Contact className="h-4 w-4"/>
                                 <span>Clients</span>
                             </span>
                           <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
