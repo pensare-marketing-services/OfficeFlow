@@ -70,7 +70,7 @@ export function SidebarNav() {
   return (
     <>
       <SidebarHeader>
-         <div className="items-center">
+         <div className="flex items-center group-data-[collapsible=icon]:justify-center">
             <AppLogo />
            
         </div>
