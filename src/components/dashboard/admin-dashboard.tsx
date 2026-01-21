@@ -154,10 +154,10 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
         <div className="flex items-center gap-4 border-b pb-2">
            <Button variant="outline" onClick={() => setViewingEmployeeId(null)}>
              <ArrowLeft className="mr-2 h-4 w-4" />
-             Back to Admin View
+             Back
            </Button>
            <h2 className="text-xl font-semibold tracking-tight">
-             Viewing Dashboard for: <span className="font-bold text-primary">{viewingEmployee.nickname || viewingEmployee.username}</span>
+             Dashboard of: <span className="font-bold text-primary">{viewingEmployee.username || viewingEmployee.nickname}</span>
            </h2>
         </div>
         <EmployeeDashboard 
