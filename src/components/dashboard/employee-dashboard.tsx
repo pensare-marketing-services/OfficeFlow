@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -18,16 +19,18 @@ interface EmployeeDashboardProps {
   users: UserWithId[];
   clients: ClientWithId[];
   onTaskUpdate: (taskId: string, updatedData: Partial<Task>) => void;
+  viewedUser?: UserWithId;
 }
 
 
 type TaskFilter = 'all' | 'inProgress' | 'completed' | 'overdue' | 'onHold' | 'toDo';
 
-export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients }: EmployeeDashboardProps) {
-  const { user } = useAuth();
+export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients, viewedUser }: EmployeeDashboardProps) {
+  const { user: authUser } = useAuth();
   const [taskFilter, setTaskFilter] = useState<TaskFilter>('all');
   const { users } = useUsers();
 
+  const user = viewedUser || authUser;
 
   if (!user) return null;
 

@@ -3,13 +3,15 @@
 
 import { useState, useMemo } from 'react';
 import { StatsCard } from './stats-card';
-import { ClipboardList, Users, CheckCircle2, AlertTriangle, PauseCircle, ClipboardCheck, ListTodo } from 'lucide-react';
+import { ClipboardList, Users, CheckCircle2, AlertTriangle, PauseCircle, ClipboardCheck, ListTodo, ArrowLeft } from 'lucide-react';
 import RecentTasks from './recent-tasks';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
 import EmployeeMasterView from './employee-master-view';
 import { useTasks } from '@/hooks/use-tasks';
 import SeoWebEmployeeMasterView from './seo-web-employee-master-view';
 import { startOfDay, isSameDay } from 'date-fns';
+import EmployeeDashboard from './employee-dashboard';
+import { Button } from '../ui/button';
 
 type UserWithId = User & { id: string };
 type ClientWithId = Client & { id: string };
@@ -26,6 +28,7 @@ type ViewMode = 'tasks' | 'employees' | 'employees-seo-web';
 export default function AdminDashboard({ tasks, users, clients }: AdminDashboardProps) {
   const [taskFilter, setTaskFilter] = useState<TaskFilter>('total');
   const [viewMode, setViewMode] = useState<ViewMode>('employees');
+  const [viewingEmployeeId, setViewingEmployeeId] = useState<string | null>(null);
   const { deleteTask, updateTask } = useTasks();
 
   const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'To Do'), [tasks]);
@@ -119,18 +122,54 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
   };
 
   const handleTaskFilterClick = (filter: TaskFilter) => {
+    setViewingEmployeeId(null);
     setViewMode('tasks');
     setTaskFilter(filter);
   };
 
   const handleEmployeeViewClick = () => {
+    setViewingEmployeeId(null);
     setViewMode('employees');
   };
 
   const handleSeoWebViewClick = () => {
+    setViewingEmployeeId(null);
     setViewMode('employees-seo-web');
   };
 
+  const viewingEmployee = useMemo(() => {
+    if (!viewingEmployeeId) return null;
+    return users.find(u => u.id === viewingEmployeeId);
+  }, [viewingEmployeeId, users]);
+
+  const employeeTasksForViewing = useMemo(() => {
+    if (!viewingEmployeeId) return [];
+    return tasks.filter(task => (task.assigneeIds || []).includes(viewingEmployeeId));
+  }, [tasks, viewingEmployeeId]);
+  
+
+  if (viewingEmployee) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-4 border-b pb-2">
+           <Button variant="outline" onClick={() => setViewingEmployeeId(null)}>
+             <ArrowLeft className="mr-2 h-4 w-4" />
+             Back to Admin View
+           </Button>
+           <h2 className="text-xl font-semibold tracking-tight">
+             Viewing Dashboard for: <span className="font-bold text-primary">{viewingEmployee.nickname || viewingEmployee.username}</span>
+           </h2>
+        </div>
+        <EmployeeDashboard 
+          employeeTasks={employeeTasksForViewing}
+          users={users}
+          clients={clients}
+          onTaskUpdate={updateTask}
+          viewedUser={viewingEmployee}
+        />
+      </div>
+    );
+  }
 
   return (
     
@@ -216,13 +255,13 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
 
       {viewMode === 'employees' && 
         <div className="w-full overflow-x-auto">
-            <EmployeeMasterView tasks={tasks} users={users} clients={clients} />
+            <EmployeeMasterView tasks={tasks} users={users} clients={clients} onViewEmployee={setViewingEmployeeId} />
         </div>
       }
 
       {viewMode === 'employees-seo-web' && 
         <div className="w-full overflow-x-auto">
-            <SeoWebEmployeeMasterView tasks={tasks} users={users} clients={clients} />
+            <SeoWebEmployeeMasterView tasks={tasks} users={users} clients={clients} onViewEmployee={setViewingEmployeeId} />
         </div>
       }
 

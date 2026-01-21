@@ -31,6 +31,7 @@ interface EmployeeMasterViewProps {
   tasks: TaskWithId[];
   users: UserWithId[];
   clients: ClientWithId[];
+  onViewEmployee?: (employeeId: string) => void;
 }
 
 const statusBackgroundColors: Record<string, string> = {
@@ -425,7 +426,7 @@ const TaskCell = ({
 };
 
 
-export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMasterViewProps) {
+export default function EmployeeMasterView({ tasks, users, clients, onViewEmployee }: EmployeeMasterViewProps) {
   const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
   
@@ -581,6 +582,7 @@ export default function EmployeeMasterView({ tasks, users, clients }: EmployeeMa
                 clients={clients}
                 employees={employees}
                 selectedDate={selectedDate}
+                onViewEmployee={onViewEmployee}
             />
         </div>
       </CardContent>
@@ -596,7 +598,8 @@ const DailyTaskTable: React.FC<{
   clients: ClientWithId[];
   employees: UserWithId[];
   selectedDate: Date;
-}> = ({ tasks, users, clients, employees, selectedDate }) => {
+  onViewEmployee?: (employeeId: string) => void;
+}> = ({ tasks, users, clients, employees, selectedDate, onViewEmployee }) => {
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
     const { scrollRef } = useHorizontalScroll();
     const tableRef = useRef<HTMLDivElement>(null);
@@ -772,7 +775,17 @@ const DailyTaskTable: React.FC<{
                           className="bg-muted/80 border-r p-0"
                         >
                           <div className="h-full w-full flex items-center justify-center px-1">
-                            <span className="truncate">{employee.nickname || employee.username}</span>
+                            {onViewEmployee ? (
+                                <Button 
+                                    variant="link"
+                                    className="text-foreground hover:text-primary h-auto p-0 text-[10px] font-semibold" 
+                                    onClick={() => onViewEmployee(employee.id)}
+                                >
+                                    <span className="truncate">{employee.nickname || employee.username}</span>
+                                </Button>
+                            ) : (
+                                <span className="truncate">{employee.nickname || employee.username}</span>
+                            )}
                           </div>
                         </TableHead>
 
