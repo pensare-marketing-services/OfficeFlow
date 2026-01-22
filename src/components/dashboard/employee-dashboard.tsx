@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import type { Task, UserProfile as User, Client } from '@/lib/data';
 import { StatsCard } from './stats-card';
-import { ClipboardList, CheckCircle2, Hourglass, AlertTriangle, PauseCircle, ListTodo } from 'lucide-react';
+import { ClipboardList, CheckCircle2, Hourglass, AlertTriangle, PauseCircle, ListTodo, ClipboardCheck } from 'lucide-react';
 import ContentSchedule from './content-schedule';
 import { useTasks } from '@/hooks/use-tasks';
 import { useUsers } from '@/hooks/use-users';
@@ -23,7 +23,7 @@ interface EmployeeDashboardProps {
 }
 
 
-type TaskFilter = 'all' | 'inProgress' | 'completed' | 'overdue' | 'onHold' | 'toDo';
+type TaskFilter = 'all' | 'inProgress' | 'completed' | 'overdue' | 'onHold' | 'toDo' | 'posted';
 
 export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients, viewedUser }: EmployeeDashboardProps) {
   const { user: authUser } = useAuth();
@@ -34,7 +34,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
 
   if (!user) return null;
 
-  const completedStatuses: Task['status'][] = ['Posted', 'Approved', 'Completed'];
+  const approvedStatuses: Task['status'][] = ['Approved', 'Completed'];
   
   const overdueTasks = useMemo(() => {
     const now = new Date();
@@ -49,8 +49,8 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
 }, [employeeTasks]);
 
   const allNonCompletedTasks = useMemo(() => {
-    return employeeTasks.filter(t => !completedStatuses.includes(t.status) && t.status !== 'To Do');
-  }, [employeeTasks]);
+    return employeeTasks.filter(t => ![...approvedStatuses, 'Posted', 'To Do'].includes(t.status));
+  }, [employeeTasks, approvedStatuses]);
   
   const toDoTasks = useMemo(() => {
     return employeeTasks.filter(t => t.status === 'To Do');
@@ -59,7 +59,8 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
   const overdueCount = overdueTasks.length;
   const toDoTasksCount = toDoTasks.length;
   const allTasksCount = allNonCompletedTasks.length;
-  const completedTasksCount = employeeTasks.filter(t => completedStatuses.includes(t.status)).length;
+  const approvedTasksCount = employeeTasks.filter(t => approvedStatuses.includes(t.status)).length;
+  const postedTasksCount = employeeTasks.filter(t => t.status === 'Posted').length;
   const onHoldTasksCount = employeeTasks.filter(t => t.status === 'Hold').length;
   const inProgressTasksCount = employeeTasks.filter(t => t.status === 'On Work').length;
   
@@ -85,7 +86,9 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
       case 'inProgress':
         return getSortedTasks(employeeTasks.filter(t => t.status === 'On Work'));
       case 'completed':
-        return getSortedTasks(employeeTasks.filter(t => completedStatuses.includes(t.status)));
+        return getSortedTasks(employeeTasks.filter(t => approvedStatuses.includes(t.status)));
+      case 'posted':
+        return getSortedTasks(employeeTasks.filter(t => t.status === 'Posted'));
       case 'overdue':
         return getSortedTasks(overdueTasks);
       case 'onHold':
@@ -96,12 +99,13 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
       default:
         return getSortedTasks(allNonCompletedTasks);
     }
-  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks, toDoTasks]);
+  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks, toDoTasks, approvedStatuses]);
 
   const filterTitles: Record<TaskFilter, string> = {
     all: "All My Tasks",
     inProgress: "My In Progress Tasks",
     completed: "My Approved Tasks",
+    posted: "My Posted Tasks",
     overdue: "My Overdue Tasks",
     onHold: "My On Hold Tasks",
     toDo: "My To Do Tasks",
@@ -114,7 +118,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-7">
         <StatsCard 
             title="All Tasks" 
             value={allTasksCount} 
@@ -139,11 +143,19 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
         />
         <StatsCard 
             title="Approved" 
-            value={completedTasksCount} 
+            value={approvedTasksCount} 
             icon={CheckCircle2} 
             variant="success"
             onClick={() => setTaskFilter('completed')}
             isActive={taskFilter === 'completed'}
+        />
+        <StatsCard 
+            title="Posted Tasks" 
+            value={postedTasksCount} 
+            icon={ClipboardCheck} 
+            variant="default"
+            onClick={() => setTaskFilter('posted')}
+            isActive={taskFilter === 'posted'}
         />
          <StatsCard
             title="Overdue"
