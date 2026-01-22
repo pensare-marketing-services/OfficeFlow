@@ -31,7 +31,7 @@ const statusColors: Record<ClientNoteStatus, string> = {
     "Pending": "bg-transparent",
     "Scheduled": "bg-gray-500",
     "On Work": "bg-orange-500",
-    "For Approval": "bg-orange-500",
+    "For Approval": "bg-green-500",
     "Done": "bg-red-500",
 };
 
@@ -199,10 +199,10 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
     };
     
     const dropdownStatuses: { value: ClientNoteStatus; label: string; color: string }[] = [
-        { value: "Pending", label: "No Color", color: "bg-transparent border" },
-        { value: "Scheduled", label: "Grey", color: "bg-gray-500" },
-        { value: "On Work", label: "Orange", color: "bg-orange-500" },
-        { value: "Done", label: "Red", color: "bg-red-500" },
+        { value: "Pending", label: "Schedule", color: "bg-transparent border" },
+        { value: "Scheduled", label: "On Work", color: "bg-gray-500" },
+        { value: "Done", label: "Urgent", color: "bg-red-500" },
+        { value: "For Approval", label: "Approved", color: "bg-green-500" },
     ];
 
 
