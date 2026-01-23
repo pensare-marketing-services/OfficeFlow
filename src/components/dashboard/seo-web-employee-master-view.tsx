@@ -431,9 +431,9 @@ const DailyTaskTable: React.FC<{
             <Table className="text-[10px] border-collapse min-w-full">
                 <TableHeader className="sticky top-0 bg-background z-30">
                 <TableRow className="h-7">
-                    <TableHead className='border-r p-1 w-[40px]'>Sl.</TableHead>
-                    <TableHead className='border-r p-1 w-[150px]'>Client</TableHead>
-                    <TableHead className='border-r p-1 w-[150px]'>Assigned</TableHead>
+                    <TableHead className='border-r p-1 w-[20px]'>Sl.</TableHead>
+                    <TableHead className='border-r p-1 w-[40px]'>Client</TableHead>
+                    <TableHead className='border-r p-1 w-[40px]'>Assigned</TableHead>
                     {employees.map((employee) => (
                     <React.Fragment key={employee.id}>
                         <TableHead
