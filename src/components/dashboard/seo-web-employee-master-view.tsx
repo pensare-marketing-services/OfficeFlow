@@ -416,10 +416,7 @@ const DailyTaskTable: React.FC<{
 
   const employeeColWidth = 80;
   const orderColWidth = 25;
-  const totalEmployeeWidth =
-    employees.length * (employeeColWidth + orderColWidth);
 
-  
   if (tasks.length === 0) {
       return (
           <div className="text-center p-8 text-muted-foreground">
@@ -430,88 +427,20 @@ const DailyTaskTable: React.FC<{
 
   return (
     <div className="border rounded-lg overflow-hidden" ref={tableRef}>
-      <div className="flex w-full min-w-0 h-full">
-        <div className="flex-shrink-0 bg-background border-r shadow-sm sticky left-0 z-10">
-          <Table className="text-[10px] border-collapse">
-            <TableHeader className="sticky top-0 z-10 bg-background">
-              <TableRow className="h-7">
-                <TableHead className='border-r p-0 w-5'>Sl.</TableHead>
-                <TableHead className='border-r p-0 w-25'>Client</TableHead>
-                <TableHead className='border-r p-0 w-30'>Assigned</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {seoWebClients.map((client, index) => {
-                const assignedEmployees = (client.employeeIds || [])
-                  .map((id) => {
-                      const user = users.find((u) => u.id === id);
-                      return user ? user.nickname || user.username : null;
-                    })
-                  .filter(Boolean)
-                  .join(', ');
-                
-                const isHighlighted = highlightedClientIds.has(client.id);
-
-                const maxTasksInRow = Math.max(1, ...employees.map(employee => {
-                    const tasksForCell = clientTasks.get(`${client.id}-${employee.id}`);
-                    return tasksForCell ? tasksForCell.length : 0;
-                }));
-                const rowHeight = `${maxTasksInRow * 1.75}rem`;
-
-                return (
-                  <TableRow
-                    key={client.id}
-                    className={cn(
-                      `border-b hover:bg-muted/30`,
-                      selectedClientId === client.id && 'bg-accent/20'
-                    )}
-                    style={{ height: rowHeight }}
-                    onClick={() => setSelectedClientId(client.id)}
-                  >
-                    <TableCell className="p-0 border-r flex items-center justify-center h-full">
-                        {index + 1}
-                    </TableCell>
-                    <TableCell 
-                      className={cn("p-0 border-r h-full flex items-center px-1", isHighlighted && "bg-yellow-200")}
-                      onDoubleClick={() => toggleHighlight(client.id)}
-                    >
-                      <div className="h-full w-full flex items-center px-1">
-                        <span className="truncate">{client.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="p-0 border-r h-full flex items-center px-1">
-                      <div className="h-full w-full flex items-center px-1">
-                        <span className="truncate">{assignedEmployees}</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              <TableRow className="h-4">
-                <TableCell colSpan={3}></TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
-        <div className="flex-grow min-w-0 relative">
-          <div
-            className="absolute inset-0 overflow-x-auto overflow-y-hidden"
-            ref={scrollRef}
-          >
-            <div
-              className="min-w-max"
-              style={{ width: `${totalEmployeeWidth}px` }}
-            >
-              <Table className="text-[10px] border-collapse">
+        <div className="overflow-x-auto" ref={scrollRef}>
+            <Table className="text-[10px] border-collapse min-w-full">
                 <TableHeader className="sticky top-0 bg-background z-10">
-                  <TableRow className="h-7">
+                <TableRow className="h-7">
+                    <TableHead className='border-r p-1 w-[40px]'>Sl.</TableHead>
+                    <TableHead className='border-r p-1 w-[150px]'>Client</TableHead>
+                    <TableHead className='border-r p-1 w-[150px]'>Assigned</TableHead>
                     {employees.map((employee) => (
-                      <React.Fragment key={employee.id}>
+                    <React.Fragment key={employee.id}>
                         <TableHead
-                          style={{ width: `${employeeColWidth}px` }}
-                          className="bg-muted/80 border-r p-0"
+                        style={{ width: `${employeeColWidth}px` }}
+                        className="bg-muted/80 border-r p-0"
                         >
-                          <div className="h-full w-full flex items-center justify-center px-1">
+                        <div className="h-full w-full flex items-center justify-center px-1">
                             {onViewEmployee ? (
                                 <Button 
                                     variant="link"
@@ -523,71 +452,86 @@ const DailyTaskTable: React.FC<{
                             ) : (
                                 <span className="truncate">{employee.nickname || employee.username}</span>
                             )}
-                          </div>
+                        </div>
                         </TableHead>
 
                         <TableHead
-                          style={{ width: `${orderColWidth}px` }}
-                          className="bg-muted/80 border-r p-0"
+                        style={{ width: `${orderColWidth}px` }}
+                        className="bg-muted/80 border-r p-0"
                         >
-                          <div className="h-full w-full flex items-center justify-center">
+                        <div className="h-full w-full flex items-center justify-center">
                             O
-                          </div>
+                        </div>
                         </TableHead>
-                      </React.Fragment>
+                    </React.Fragment>
                     ))}
-                  </TableRow>
+                </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {seoWebClients.map((client) => {
-                      const maxTasksInRow = Math.max(1, ...employees.map(employee => {
-                        const tasksForCell = clientTasks.get(`${client.id}-${employee.id}`);
-                        return tasksForCell ? tasksForCell.length : 0;
-                    }));
-                    const rowHeight = `${maxTasksInRow * 1.75}rem`;
+                {seoWebClients.map((client, clientIndex) => {
+                    const assignedEmployees = (client.employeeIds || [])
+                    .map((id) => {
+                        const user = users.find((u) => u.id === id);
+                        return user ? user.nickname || user.username : null;
+                        })
+                    .filter(Boolean)
+                    .join(', ');
+                    
+                    const isHighlighted = highlightedClientIds.has(client.id);
+
+                    const tasksByEmployee = employees.map(employee => 
+                        clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority || 99) - (b.priority || 99)) || []
+                    );
+
+                    const maxTasks = Math.max(1, ...tasksByEmployee.map(tasks => tasks.length));
 
                     return (
-                    <TableRow
-                      key={client.id}
-                      className={cn(
-                        `border-b`,
-                        selectedClientId === client.id && 'bg-accent/20'
-                      )}
-                      style={{ height: rowHeight }}
-                    >
-                      {employees.map((employee) => {
-                        const tasksForCell = clientTasks.get(`${client.id}-${employee.id}`)?.sort((a,b) => (a.priority || 99) - (b.priority || 99)) || [];
-                        
-                        return (
-                          <React.Fragment key={employee.id}>
-                           <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
-                              {tasksForCell.map(task => (
-                                <TaskDisplayItem 
-                                    key={task.id} 
-                                    task={task} 
-                                    isSelected={selectedClientId === client.id}
-                                />
-                              ))}
-                            </TableCell>
-                            <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
-                                {tasksForCell.map(task => (
-                                    <PriorityDisplayItem key={task.id} task={task} />
-                                ))}
-                            </TableCell>
-                          </React.Fragment>
-                        );
-                      })}
-                    </TableRow>
-                  )})}
-                  <TableRow className="h-4">
-                      <TableCell colSpan={employees.length * 2}></TableCell>
-                  </TableRow>
+                    <React.Fragment key={client.id}>
+                        {Array.from({ length: maxTasks }).map((_, rowIndex) => (
+                        <TableRow
+                            key={`${client.id}-${rowIndex}`}
+                            className={cn('hover:bg-muted/30', selectedClientId === client.id && 'bg-accent/20')}
+                            onClick={() => setSelectedClientId(client.id)}
+                        >
+                            {rowIndex === 0 && (
+                            <>
+                                <TableCell rowSpan={maxTasks} className="border-r align-middle text-center">
+                                {clientIndex + 1}
+                                </TableCell>
+                                <TableCell
+                                rowSpan={maxTasks}
+                                className={cn("border-r align-middle px-1", isHighlighted && "bg-yellow-200")}
+                                onDoubleClick={() => toggleHighlight(client.id)}
+                                >
+                                <span className="truncate">{client.name}</span>
+                                </TableCell>
+                                <TableCell rowSpan={maxTasks} className="border-r align-middle px-1">
+                                <span className="truncate">{assignedEmployees}</span>
+                                </TableCell>
+                            </>
+                            )}
+                            
+                            {employees.map((employee, empIndex) => {
+                            const task = tasksByEmployee[empIndex]?.[rowIndex];
+                            return (
+                                <React.Fragment key={employee.id}>
+                                <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
+                                    {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} /> : <div className='h-7 border-b'></div>}
+                                </TableCell>
+                                <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
+                                    {task ? <PriorityDisplayItem task={task} /> : <div className='h-7 border-b'></div>}
+                                </TableCell>
+                                </React.Fragment>
+                            );
+                            })}
+                        </TableRow>
+                        ))}
+                    </React.Fragment>
+                    );
+                })}
                 </TableBody>
-              </Table>
-            </div>
-          </div>
+            </Table>
         </div>
-      </div>
     </div>
   );
 };
