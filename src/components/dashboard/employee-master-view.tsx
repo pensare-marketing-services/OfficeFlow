@@ -77,7 +77,7 @@ const PriorityDisplayItem = ({ task }: { task: TaskWithId }) => {
     };
 
     return (
-        <div className="h-7 w-full flex items-center justify-center border-b">
+        <div className="h-6 w-full flex items-center justify-center border-b">
             <Input
                 type="number"
                 value={priority}
@@ -122,7 +122,7 @@ const TaskDisplayItem = ({ task, isSelected }: { task: TaskWithId; isSelected: b
             <PopoverTrigger asChild>
                 <div
                     className={cn(
-                        'h-7 w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-b px-1 gap-1',
+                        'h-6 w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-b px-1 gap-1',
                         taskStatusColor,
                         isSelected && 'ring-1 ring-accent ring-inset'
                     )}
@@ -291,11 +291,11 @@ export default function EmployeeMasterView({ tasks, users, clients, onViewEmploy
       <CardContent className="p-1 space-y-1">
         <div className="flex items-center justify-between p-1 border-b gap-2">
            <div className="flex-shrink-0 flex items-center gap-1">
-                <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(-1)}>
+                <Button variant="outline" size="icon" className="h-6 w-7" onClick={() => changeMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <h3 className="text-xs font-semibold w-24 text-center">{format(currentMonthDate, 'MMMM yyyy')}</h3>
-                 <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeMonth(1)}>
+                 <Button variant="outline" size="icon" className="h-6 w-7" onClick={() => changeMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                 </Button>
            </div>
@@ -438,7 +438,7 @@ const DailyTaskTable: React.FC<{
         <div className="overflow-x-auto relative" ref={scrollRef}>
             <Table className="text-[10px] border-collapse min-w-full">
                 <TableHeader className="sticky top-0 bg-background z-30">
-                <TableRow className="h-7">
+                <TableRow className="h-6">
                     <TableHead className='border-r p-1 w-[40px]'>Sl.</TableHead>
                     <TableHead className='border-r p-1 w-[150px]'>Client</TableHead>
                     <TableHead className='border-r p-1 w-[150px]'>Assigned</TableHead>
@@ -523,10 +523,10 @@ const DailyTaskTable: React.FC<{
                             return (
                                 <React.Fragment key={employee.id}>
                                 <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
-                                    {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} /> : <div className='h-7 border-b'></div>}
+                                    {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} /> : <div className='h-6 border-b'></div>}
                                 </TableCell>
                                 <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
-                                    {task ? <PriorityDisplayItem task={task} /> : <div className='h-7 border-b'></div>}
+                                    {task ? <PriorityDisplayItem task={task} /> : <div className='h-6 border-b'></div>}
                                 </TableCell>
                                 </React.Fragment>
                             );

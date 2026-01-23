@@ -32,7 +32,7 @@ export function StatsCard({
       'ring-emerald-500': isActive && variant === 'success',
       'bg-amber-500/10 border-amber-500/30 text-amber-600': variant === 'warning',
       'ring-amber-500': isActive && variant === 'warning',
-      'bg-blue-500/10 border-blue-500/30 text-blue-600': variant === 'default' && title.includes('Posted'),
+      'bg-cyan-500/10 border-cyan-500/30 text-blue-600': variant === 'default' && title.includes('Posted'),
       'ring-blue-500': isActive && variant === 'default' && title.includes('Posted'),
     }
   );
