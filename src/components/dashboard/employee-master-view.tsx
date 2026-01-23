@@ -462,15 +462,14 @@ const DailyTaskTable: React.FC<{
                             )}
                         </div>
                         </TableHead>
-
                         <TableHead
-                        style={{ width: `${orderColWidth}px` }}
-                        className="bg-muted/80 border-r p-0"
-                        >
-                        <div className="h-full w-full flex items-center justify-center">
-                            O
-                        </div>
-                        </TableHead>
+  style={{ width: '10px' }}
+  className="bg-muted/80 border-r p-0"
+>
+  <div className="h-full w-[10px] flex items-center justify-center text-center">
+    O
+  </div>
+</TableHead>
                     </React.Fragment>
                     ))}
                 </TableRow>
