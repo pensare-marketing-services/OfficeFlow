@@ -427,9 +427,9 @@ const DailyTaskTable: React.FC<{
 
   return (
     <div className="border rounded-lg overflow-hidden" ref={tableRef}>
-        <div className="overflow-x-auto" ref={scrollRef}>
+        <div className="overflow-x-auto relative" ref={scrollRef}>
             <Table className="text-[10px] border-collapse min-w-full">
-                <TableHeader className="sticky top-0 bg-background z-20">
+                <TableHeader className="sticky top-0 bg-background z-30">
                 <TableRow className="h-7">
                     <TableHead className='border-r p-1 w-[40px]'>Sl.</TableHead>
                     <TableHead className='border-r p-1 w-[150px]'>Client</TableHead>
