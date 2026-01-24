@@ -536,4 +536,3 @@ const DailyTaskTable: React.FC<{
         </div>
     );
 };
-```
