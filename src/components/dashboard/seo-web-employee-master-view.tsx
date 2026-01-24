@@ -325,213 +325,431 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients, onView
 
 
 
-const DailyTaskTable: React.FC<{
-  tasks: TaskWithId[];
-  users: UserWithId[];
-  clients: ClientWithId[];
-  employees: UserWithId[];
-  selectedDate: Date;
-  onViewEmployee?: (employeeId: string) => void;
-}> = ({ tasks, users, clients, employees, selectedDate, onViewEmployee }) => {
-    const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-    const { scrollRef } = useHorizontalScroll();
-    const tableRef = useRef<HTMLDivElement>(null);
-    const [highlightedClientIds, setHighlightedClientIds] = useState<Set<string>>(new Set());
+// const DailyTaskTable: React.FC<{
+//   tasks: TaskWithId[];
+//   users: UserWithId[];
+//   clients: ClientWithId[];
+//   employees: UserWithId[];
+//   selectedDate: Date;
+//   onViewEmployee?: (employeeId: string) => void;
+// }> = ({ tasks, users, clients, employees, selectedDate, onViewEmployee }) => {
+//     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+//     const { scrollRef } = useHorizontalScroll();
+//     const tableRef = useRef<HTMLDivElement>(null);
+//     const [highlightedClientIds, setHighlightedClientIds] = useState<Set<string>>(new Set());
 
-    const getStorageKey = (date: Date) => `seo_highlightedClients_${format(date, 'yyyy-MM-dd')}`;
+//     const getStorageKey = (date: Date) => `seo_highlightedClients_${format(date, 'yyyy-MM-dd')}`;
 
-    useEffect(() => {
-        const storageKey = getStorageKey(selectedDate);
-        try {
-            const item = window.localStorage.getItem(storageKey);
-            if (item) {
-                setHighlightedClientIds(new Set(JSON.parse(item)));
-            } else {
-                setHighlightedClientIds(new Set());
-            }
-        } catch (error) {
-            console.error("Failed to read from localStorage", error);
-            setHighlightedClientIds(new Set());
-        }
-    }, [selectedDate]);
+//     useEffect(() => {
+//         const storageKey = getStorageKey(selectedDate);
+//         try {
+//             const item = window.localStorage.getItem(storageKey);
+//             if (item) {
+//                 setHighlightedClientIds(new Set(JSON.parse(item)));
+//             } else {
+//                 setHighlightedClientIds(new Set());
+//             }
+//         } catch (error) {
+//             console.error("Failed to read from localStorage", error);
+//             setHighlightedClientIds(new Set());
+//         }
+//     }, [selectedDate]);
 
-    const toggleHighlight = (clientId: string) => {
-        const newSet = new Set(highlightedClientIds);
-        if (newSet.has(clientId)) {
-            newSet.delete(clientId);
-        } else {
-            newSet.add(clientId);
-        }
-        setHighlightedClientIds(newSet);
+//     const toggleHighlight = (clientId: string) => {
+//         const newSet = new Set(highlightedClientIds);
+//         if (newSet.has(clientId)) {
+//             newSet.delete(clientId);
+//         } else {
+//             newSet.add(clientId);
+//         }
+//         setHighlightedClientIds(newSet);
 
-        try {
-            const storageKey = getStorageKey(selectedDate);
-            window.localStorage.setItem(storageKey, JSON.stringify(Array.from(newSet)));
-        } catch (error) {
-            console.error("Failed to write to localStorage", error);
-        }
-    };
+//         try {
+//             const storageKey = getStorageKey(selectedDate);
+//             window.localStorage.setItem(storageKey, JSON.stringify(Array.from(newSet)));
+//         } catch (error) {
+//             console.error("Failed to write to localStorage", error);
+//         }
+//     };
 
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (tableRef.current && !tableRef.current.contains(event.target as Node)) {
-        setSelectedClientId(null);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [tableRef]);
+//   useEffect(() => {
+//     function handleClickOutside(event: MouseEvent) {
+//       if (tableRef.current && !tableRef.current.contains(event.target as Node)) {
+//         setSelectedClientId(null);
+//       }
+//     }
+//     document.addEventListener("mousedown", handleClickOutside);
+//     return () => {
+//       document.removeEventListener("mousedown", handleClickOutside);
+//     };
+//   }, [tableRef]);
 
-  const seoWebClients = useMemo(
-    () =>
-      clients
-        .filter(c => c.active !== false)
-        .filter(
-          (c) =>
-            c.categories?.includes('seo') ||
-            c.categories?.includes('website')
-        )
-        .sort((a, b) => (a.priority || 0) - (b.priority || 0)),
-    [clients]
-  );
+//   const seoWebClients = useMemo(
+//     () =>
+//       clients
+//         .filter(c => c.active !== false)
+//         .filter(
+//           (c) =>
+//             c.categories?.includes('seo') ||
+//             c.categories?.includes('website')
+//         )
+//         .sort((a, b) => (a.priority || 0) - (b.priority || 0)),
+//     [clients]
+//   );
   
-    const clientTasks = useMemo(() => {
-        const map = new Map<string, TaskWithId[]>();
-        tasks.forEach((task) => {
-            (task.assigneeIds || []).forEach(assigneeId => {
-                 if (task.clientId && assigneeId) {
-                    const key = `${task.clientId}-${assigneeId}`;
-                    if (!map.has(key)) {
-                        map.set(key, []);
-                    }
-                    map.get(key)!.push(task);
-                }
-            });
-        });
-        return map;
-    }, [tasks]);
+//     const clientTasks = useMemo(() => {
+//         const map = new Map<string, TaskWithId[]>();
+//         tasks.forEach((task) => {
+//             (task.assigneeIds || []).forEach(assigneeId => {
+//                  if (task.clientId && assigneeId) {
+//                     const key = `${task.clientId}-${assigneeId}`;
+//                     if (!map.has(key)) {
+//                         map.set(key, []);
+//                     }
+//                     map.get(key)!.push(task);
+//                 }
+//             });
+//         });
+//         return map;
+//     }, [tasks]);
 
-  const employeeColWidth = 80;
-  const orderColWidth = 25;
+//   const employeeColWidth = 80;
+//   const orderColWidth = 25;
 
-  if (tasks.length === 0) {
+//   if (tasks.length === 0) {
+//       return (
+//           <div className="text-center p-8 text-muted-foreground">
+//               No tasks scheduled for this day for SEO/Web teams.
+//           </div>
+//       );
+//   }
+
+//   return (
+//     <div className="border rounded-lg overflow-hidden" ref={tableRef}>
+//         <div className="overflow-x-auto relative" ref={scrollRef}>
+//             <Table className="text-[10px] border-collapse">
+//                 <TableHeader className="sticky top-0 bg-background z-30">
+//                 <TableRow className="h-6">
+//                     <TableHead className='border-r p-1 w-[20px]'>Sl.</TableHead>
+//                     <TableHead className='border-r p-1 w-[40px]'>Client</TableHead>
+//                     <TableHead className='border-r p-1 w-[40px]'>Assigned</TableHead>
+//                     {employees.map((employee) => (
+//                     <React.Fragment key={employee.id}>
+//                         <TableHead
+//                         style={{ width: `${employeeColWidth}px` }}
+//                         className="bg-muted/80 border-r p-0"
+//                         >
+//                         <div className="h-full w-full flex items-center justify-center px-1">
+//                             {onViewEmployee ? (
+//                                 <Button 
+//                                     variant="link"
+//                                     className="text-foreground hover:text-primary h-auto p-0 text-[10px] font-semibold" 
+//                                     onClick={() => onViewEmployee(employee.id)}
+//                                 >
+//                                     <span className="truncate">{employee.nickname || employee.username}</span>
+//                                 </Button>
+//                             ) : (
+//                                 <span className="truncate">{employee.nickname || employee.username}</span>
+//                             )}
+//                         </div>
+//                         </TableHead>
+
+//                         <TableHead
+//                         style={{ width: `${orderColWidth}px` }}
+//                         className="bg-muted/80 border-r p-0"
+//                         >
+//                         <div className="h-full w-full flex items-center justify-center text-center">
+//                             O
+//                         </div>
+//                         </TableHead>
+//                     </React.Fragment>
+//                     ))}
+//                 </TableRow>
+//                 </TableHeader>
+//                 <TableBody>
+//                 {seoWebClients.map((client, clientIndex) => {
+//                     const assignedEmployees = (client.employeeIds || [])
+//                     .map((id) => {
+//                         const user = users.find((u) => u.id === id);
+//                         return user ? user.nickname || user.username : null;
+//                         })
+//                     .filter(Boolean)
+//                     .join(', ');
+                    
+//                     const isHighlighted = highlightedClientIds.has(client.id);
+
+//                     const tasksByEmployee = employees.map(employee => 
+//                         clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority || 99) - (b.priority || 99)) || []
+//                     );
+
+//                     const maxTasks = Math.max(1, ...tasksByEmployee.map(tasks => tasks.length));
+
+//                     return (
+//                     <React.Fragment key={client.id}>
+//                         {Array.from({ length: maxTasks }).map((_, rowIndex) => (
+//                         <TableRow
+//                             key={`${client.id}-${rowIndex}`}
+//                             className={cn('hover:bg-muted/30', selectedClientId === client.id && 'bg-accent/20')}
+//                             onClick={() => setSelectedClientId(client.id)}
+//                         >
+//                             {rowIndex === 0 && (
+//                             <>
+//                                 <TableCell rowSpan={maxTasks} className="border-r align-middle text-center">
+//                                 {clientIndex + 1}
+//                                 </TableCell>
+//                                 <TableCell
+//                                 rowSpan={maxTasks}
+//                                 className={cn("border-r align-middle px-1", isHighlighted && "bg-yellow-200")}
+//                                 onDoubleClick={() => toggleHighlight(client.id)}
+//                                 >
+//                                 <span className="truncate">{client.name}</span>
+//                                 </TableCell>
+//                                 <TableCell rowSpan={maxTasks} className="border-r align-middle px-1">
+//                                 <span className="truncate">{assignedEmployees}</span>
+//                                 </TableCell>
+//                             </>
+//                             )}
+                            
+//                             {employees.map((employee, empIndex) => {
+//                             const task = tasksByEmployee[empIndex]?.[rowIndex];
+//                             return (
+//                                 <React.Fragment key={employee.id}>
+//                                 <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
+//                                     {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} /> : <div className='h-6 border-b'></div>}
+//                                 </TableCell>
+//                                 <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
+//                                     {task ? <PriorityDisplayItem task={task} /> : <div className='h-6 border-b'></div>}
+//                                 </TableCell>
+//                                 </React.Fragment>
+//                             );
+//                             })}
+//                         </TableRow>
+//                         ))}
+//                     </React.Fragment>
+//                     );
+//                 })}
+//                 </TableBody>
+//             </Table>
+//         </div>
+//     </div>
+//   );
+// };
+
+
+const DailyTaskTable: React.FC<{
+    tasks: TaskWithId[];
+    users: UserWithId[];
+    clients: ClientWithId[];
+    employees: UserWithId[];
+    selectedDate: Date;
+    onViewEmployee?: (employeeId: string) => void;
+  }> = ({ tasks, users, clients, employees, selectedDate, onViewEmployee }) => {
+      const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+      const { scrollRef } = useHorizontalScroll();
+      const tableRef = useRef<HTMLDivElement>(null);
+      const [highlightedClientIds, setHighlightedClientIds] = useState<Set<string>>(new Set());
+  
+      const getStorageKey = (date: Date) => `seo_highlightedClients_${format(date, 'yyyy-MM-dd')}`;
+  
+      useEffect(() => {
+          const storageKey = getStorageKey(selectedDate);
+          try {
+              const item = window.localStorage.getItem(storageKey);
+              if (item) {
+                  setHighlightedClientIds(new Set(JSON.parse(item)));
+              } else {
+                  setHighlightedClientIds(new Set());
+              }
+          } catch (error) {
+              console.error("Failed to read from localStorage", error);
+              setHighlightedClientIds(new Set());
+          }
+      }, [selectedDate]);
+  
+      const toggleHighlight = (clientId: string) => {
+          const newSet = new Set(highlightedClientIds);
+          if (newSet.has(clientId)) {
+              newSet.delete(clientId);
+          } else {
+              newSet.add(clientId);
+          }
+          setHighlightedClientIds(newSet);
+  
+          try {
+              const storageKey = getStorageKey(selectedDate);
+              window.localStorage.setItem(storageKey, JSON.stringify(Array.from(newSet)));
+          } catch (error) {
+              console.error("Failed to write to localStorage", error);
+          }
+      };
+  
+      useEffect(() => {
+          function handleClickOutside(event: MouseEvent) {
+              if (tableRef.current && !tableRef.current.contains(event.target as Node)) {
+                  setSelectedClientId(null);
+              }
+          }
+          document.addEventListener("mousedown", handleClickOutside);
+          return () => {
+              document.removeEventListener("mousedown", handleClickOutside);
+          };
+      }, [tableRef]);
+  
+      const seoWebClients = useMemo(
+          () =>
+              clients
+                  .filter(c => c.active !== false)
+                  .filter(
+                      (c) =>
+                          c.categories?.includes('seo') ||
+                          c.categories?.includes('website')
+                  )
+                  .sort((a, b) => (a.priority || 0) - (b.priority || 0)),
+          [clients]
+      );
+  
+      const clientTasks = useMemo(() => {
+          const map = new Map<string, TaskWithId[]>();
+          tasks.forEach((task) => {
+              (task.assigneeIds || []).forEach(assigneeId => {
+                  if (task.clientId && assigneeId) {
+                      const key = `${task.clientId}-${assigneeId}`;
+                      if (!map.has(key)) {
+                          map.set(key, []);
+                      }
+                      map.get(key)!.push(task);
+                  }
+              });
+          });
+          return map;
+      }, [tasks]);
+  
+      const employeeColWidth = 80;
+      const orderColWidth = 25;
+  
+      if (tasks.length === 0) {
+          return (
+              <div className="text-center p-8 text-muted-foreground">
+                  No tasks scheduled for this day for SEO/Web teams.
+              </div>
+          );
+      }
+  
       return (
-          <div className="text-center p-8 text-muted-foreground">
-              No tasks scheduled for this day for SEO/Web teams.
+          <div className="border rounded-lg overflow-hidden" ref={tableRef}>
+              {/* Parent container with fixed height and proper scrolling */}
+              <div className="relative overflow-hidden" style={{ height: 'calc(100vh - 200px)' }}>
+                  {/* Horizontal scrolling container */}
+                  <div className="overflow-x-auto h-full" ref={scrollRef}>
+                      <Table className="text-[10px] border-collapse">
+                          {/* Sticky header */}
+                          <TableHeader className="sticky top-0 bg-background z-30 shadow-sm">
+                              <TableRow className="h-6">
+                                  <TableHead className='border-r p-1 w-[20px] sticky left-0 bg-background z-40'>Sl.</TableHead>
+                                  <TableHead className='border-r p-1 w-[40px] sticky left-[20px] bg-background z-40'>Client</TableHead>
+                                  <TableHead className='border-r p-1 w-[40px] sticky left-[60px] bg-background z-40'>Assigned</TableHead>
+                                  {employees.map((employee) => (
+                                      <React.Fragment key={employee.id}>
+                                          <TableHead
+                                              style={{ width: `${employeeColWidth}px` }}
+                                              className="bg-muted/80 border-r p-0"
+                                          >
+                                              <div className="h-full w-full flex items-center justify-center px-1">
+                                                  {onViewEmployee ? (
+                                                      <Button
+                                                          variant="link"
+                                                          className="text-foreground hover:text-primary h-auto p-0 text-[10px] font-semibold"
+                                                          onClick={() => onViewEmployee(employee.id)}
+                                                      >
+                                                          <span className="truncate">{employee.nickname || employee.username}</span>
+                                                      </Button>
+                                                  ) : (
+                                                      <span className="truncate">{employee.nickname || employee.username}</span>
+                                                  )}
+                                              </div>
+                                          </TableHead>
+  
+                                          <TableHead
+                                              style={{ width: `${orderColWidth}px` }}
+                                              className="bg-muted/80 border-r p-0"
+                                          >
+                                              <div className="h-full w-full flex items-center justify-center text-center">
+                                                  O
+                                              </div>
+                                          </TableHead>
+                                      </React.Fragment>
+                                  ))}
+                              </TableRow>
+                          </TableHeader>
+                          
+                          {/* Scrollable body */}
+                          <TableBody className="overflow-y-auto">
+                              {seoWebClients.map((client, clientIndex) => {
+                                  const assignedEmployees = (client.employeeIds || [])
+                                      .map((id) => {
+                                          const user = users.find((u) => u.id === id);
+                                          return user ? user.nickname || user.username : null;
+                                      })
+                                      .filter(Boolean)
+                                      .join(', ');
+  
+                                  const isHighlighted = highlightedClientIds.has(client.id);
+  
+                                  const tasksByEmployee = employees.map(employee =>
+                                      clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority || 99) - (b.priority || 99)) || []
+                                  );
+  
+                                  const maxTasks = Math.max(1, ...tasksByEmployee.map(tasks => tasks.length));
+  
+                                  return (
+                                      <React.Fragment key={client.id}>
+                                          {Array.from({ length: maxTasks }).map((_, rowIndex) => (
+                                              <TableRow
+                                                  key={`${client.id}-${rowIndex}`}
+                                                  className={cn('hover:bg-muted/30', selectedClientId === client.id && 'bg-accent/20')}
+                                                  onClick={() => setSelectedClientId(client.id)}
+                                              >
+                                                  {rowIndex === 0 && (
+                                                      <>
+                                                          <TableCell rowSpan={maxTasks} className="border-r align-middle text-center sticky left-0 bg-background z-30">
+                                                              {clientIndex + 1}
+                                                          </TableCell>
+                                                          <TableCell
+                                                              rowSpan={maxTasks}
+                                                              className={cn("border-r align-middle px-1 sticky left-[20px] bg-background z-30", isHighlighted && "bg-yellow-200")}
+                                                              onDoubleClick={() => toggleHighlight(client.id)}
+                                                          >
+                                                              <span className="truncate">{client.name}</span>
+                                                          </TableCell>
+                                                          <TableCell rowSpan={maxTasks} className="border-r align-middle px-1 sticky left-[60px] bg-background z-30">
+                                                              <span className="truncate">{assignedEmployees}</span>
+                                                          </TableCell>
+                                                      </>
+                                                  )}
+  
+                                                  {employees.map((employee, empIndex) => {
+                                                      const task = tasksByEmployee[empIndex]?.[rowIndex];
+                                                      return (
+                                                          <React.Fragment key={employee.id}>
+                                                              <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
+                                                                  {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} /> : <div className='h-6 border-b'></div>}
+                                                              </TableCell>
+                                                              <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
+                                                                  {task ? <PriorityDisplayItem task={task} /> : <div className='h-6 border-b'></div>}
+                                                              </TableCell>
+                                                          </React.Fragment>
+                                                      );
+                                                  })}
+                                              </TableRow>
+                                          ))}
+                                      </React.Fragment>
+                                  );
+                              })}
+                          </TableBody>
+                      </Table>
+                  </div>
+              </div>
           </div>
       );
-  }
-
-  return (
-    <div className="border rounded-lg overflow-hidden" ref={tableRef}>
-        <div className="overflow-x-auto relative" ref={scrollRef}>
-            <Table className="text-[10px] border-collapse min-w-full">
-                <TableHeader className="sticky top-0 bg-background z-30">
-                <TableRow className="h-6">
-                    <TableHead className='border-r p-1 w-[20px]'>Sl.</TableHead>
-                    <TableHead className='border-r p-1 w-[40px]'>Client</TableHead>
-                    <TableHead className='border-r p-1 w-[40px]'>Assigned</TableHead>
-                    {employees.map((employee) => (
-                    <React.Fragment key={employee.id}>
-                        <TableHead
-                        style={{ width: `${employeeColWidth}px` }}
-                        className="bg-muted/80 border-r p-0"
-                        >
-                        <div className="h-full w-full flex items-center justify-center px-1">
-                            {onViewEmployee ? (
-                                <Button 
-                                    variant="link"
-                                    className="text-foreground hover:text-primary h-auto p-0 text-[10px] font-semibold" 
-                                    onClick={() => onViewEmployee(employee.id)}
-                                >
-                                    <span className="truncate">{employee.nickname || employee.username}</span>
-                                </Button>
-                            ) : (
-                                <span className="truncate">{employee.nickname || employee.username}</span>
-                            )}
-                        </div>
-                        </TableHead>
-
-                        <TableHead
-                        style={{ width: `${orderColWidth}px` }}
-                        className="bg-muted/80 border-r p-0"
-                        >
-                        <div className="h-full w-full flex items-center justify-center text-center">
-                            O
-                        </div>
-                        </TableHead>
-                    </React.Fragment>
-                    ))}
-                </TableRow>
-                </TableHeader>
-                <TableBody>
-                {seoWebClients.map((client, clientIndex) => {
-                    const assignedEmployees = (client.employeeIds || [])
-                    .map((id) => {
-                        const user = users.find((u) => u.id === id);
-                        return user ? user.nickname || user.username : null;
-                        })
-                    .filter(Boolean)
-                    .join(', ');
-                    
-                    const isHighlighted = highlightedClientIds.has(client.id);
-
-                    const tasksByEmployee = employees.map(employee => 
-                        clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority || 99) - (b.priority || 99)) || []
-                    );
-
-                    const maxTasks = Math.max(1, ...tasksByEmployee.map(tasks => tasks.length));
-
-                    return (
-                    <React.Fragment key={client.id}>
-                        {Array.from({ length: maxTasks }).map((_, rowIndex) => (
-                        <TableRow
-                            key={`${client.id}-${rowIndex}`}
-                            className={cn('hover:bg-muted/30', selectedClientId === client.id && 'bg-accent/20')}
-                            onClick={() => setSelectedClientId(client.id)}
-                        >
-                            {rowIndex === 0 && (
-                            <>
-                                <TableCell rowSpan={maxTasks} className="border-r align-middle text-center">
-                                {clientIndex + 1}
-                                </TableCell>
-                                <TableCell
-                                rowSpan={maxTasks}
-                                className={cn("border-r align-middle px-1", isHighlighted && "bg-yellow-200")}
-                                onDoubleClick={() => toggleHighlight(client.id)}
-                                >
-                                <span className="truncate">{client.name}</span>
-                                </TableCell>
-                                <TableCell rowSpan={maxTasks} className="border-r align-middle px-1">
-                                <span className="truncate">{assignedEmployees}</span>
-                                </TableCell>
-                            </>
-                            )}
-                            
-                            {employees.map((employee, empIndex) => {
-                            const task = tasksByEmployee[empIndex]?.[rowIndex];
-                            return (
-                                <React.Fragment key={employee.id}>
-                                <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
-                                    {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} /> : <div className='h-6 border-b'></div>}
-                                </TableCell>
-                                <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
-                                    {task ? <PriorityDisplayItem task={task} /> : <div className='h-6 border-b'></div>}
-                                </TableCell>
-                                </React.Fragment>
-                            );
-                            })}
-                        </TableRow>
-                        ))}
-                    </React.Fragment>
-                    );
-                })}
-                </TableBody>
-            </Table>
-        </div>
-    </div>
-  );
-};
+  };
