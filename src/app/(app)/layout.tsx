@@ -85,7 +85,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </Sidebar>
               <SidebarInset>
                 <Header />
-                <main className="p-2 sm:p-3 lg:p-4">{children}</main>
+                <main className="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-4">{children}</main>
               </SidebarInset>
             </SidebarProvider>
         </ClientProvider>

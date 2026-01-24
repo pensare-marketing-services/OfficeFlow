@@ -34,7 +34,7 @@ const statusBackgroundColors: Record<string, string> = {
   'On Work': 'bg-gray-500/40',
   'For Approval': 'bg-[#ffb131]',
   'Approved': 'bg-[#42f925]',
-  'Posted': 'bg-indigo-400',
+  'Posted': 'bg-cyan-400',
   'Completed': 'bg-indigo-400',
   'Hold': 'bg-gray-500/40',
   'To Do': 'bg-gray-400/40',
@@ -421,8 +421,8 @@ const DailyTaskTable: React.FC<{
                     <TableHeader className="sticky top-0 bg-background z-30 shadow-sm">
                         <TableRow className="h-6">
                             <TableHead className='border-r p-1 w-[40px] sticky left-0 bg-background z-40'>Sl.</TableHead>
-                            <TableHead className='border-r p-1 w-[150px] sticky left-[40px] bg-background z-40'>Client</TableHead>
-                            <TableHead className='border-r p-1 w-[100px] sticky left-[190px] bg-background z-40'>Assigned</TableHead>
+                            <TableHead className='border-r p-1 w-[100px] sticky left-[40px] bg-background z-40'>Client</TableHead>
+                            <TableHead className='border-r p-1 w-[100px] sticky  bg-background z-40'>Assigned</TableHead>
                             {employees.map((employee) => (
                                 <React.Fragment key={employee.id}>
                                     <TableHead
