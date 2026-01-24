@@ -54,15 +54,15 @@ export function StatsCard({
 
   return (
     <Card className={cardClasses} onClick={onClick}>
-      <CardContent className='p-3'>
+      <CardContent className='p-1'>
         <div className="flex items-center justify-between">
           {/* Left side: Title */}
-          <div className="text-[10px] font-medium text-muted-foreground">
+          <div className="text-[10px]  text-muted-foreground">
             {title}
           </div>
           
           {/* Right side: Value and Icon */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[12px]">
             <span className={valueClasses}>{value}</span>
             <Icon className={iconClasses} />
           </div>

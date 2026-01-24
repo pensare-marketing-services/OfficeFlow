@@ -176,7 +176,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
     <div className="space-y-4">
      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
         <StatsCard 
-            title="Digital Marketing" 
+            title="DM" 
             value={dmTasksTodayCount} 
             icon={Users}
             onClick={handleEmployeeViewClick}
@@ -204,7 +204,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
             isActive={viewMode === 'tasks' && taskFilter === 'total'}
         />
         <StatsCard 
-            title="Approved Tasks" 
+            title="Approved" 
             value={approvedTasksCount} 
             icon={CheckCircle2} 
             variant="success"
@@ -212,7 +212,7 @@ export default function AdminDashboard({ tasks, users, clients }: AdminDashboard
             isActive={viewMode === 'tasks' && taskFilter === 'approved'}
         />
         <StatsCard 
-            title="Posted Tasks" 
+            title="Posted" 
             value={postedTasksCount} 
             icon={ClipboardCheck} 
             variant="default"
