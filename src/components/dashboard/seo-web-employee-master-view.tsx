@@ -519,5 +519,5 @@ const DailyTaskTable: React.FC<{
                 </Table>
             </div>
         </div>
-      );
+    );
 };
