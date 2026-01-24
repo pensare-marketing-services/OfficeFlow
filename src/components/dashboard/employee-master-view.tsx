@@ -121,7 +121,7 @@ const TaskDisplayItem = ({ task, isSelected }: { task: TaskWithId; isSelected: b
             <PopoverTrigger asChild>
                 <div
                     className={cn(
-                        'h-6 w-full flex items-center justify-center cursor-pointer text-[10px] font-medium border-b px-1 gap-1',
+                        'h-6 w-full flex items-center justify-start cursor-pointer text-[10px] font-medium border-b px-1',
                         taskStatusColor,
                         isSelected && 'ring-1 ring-accent ring-inset'
                     )}
@@ -536,3 +536,4 @@ const DailyTaskTable: React.FC<{
         </div>
     );
 };
+```
