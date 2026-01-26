@@ -187,7 +187,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between p-3">
-                <CardTitle className="text-base font-headline">Other Task</CardTitle>
+                <CardTitle className="text-base font-headline">Other Works</CardTitle>
                 <Button size="sm" onClick={addTask} className="h-7 gap-1">
                     <Plus className="h-4 w-4" />
                     Add Task

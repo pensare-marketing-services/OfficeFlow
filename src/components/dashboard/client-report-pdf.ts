@@ -16,7 +16,8 @@ export const generateClientReportPDF = (data: ReportData) => {
     const { client, monthData, dmTasks, otherTasks, cashIn, paidPromotions } = data;
     const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height;
-    let finalY = 15; // starting Y position
+    const pageMargin = 15;
+    let finalY = pageMargin; // starting Y position
 
     // Title
     doc.setFontSize(18);
@@ -24,7 +25,6 @@ export const generateClientReportPDF = (data: ReportData) => {
     finalY += 10;
     
     doc.setFontSize(12);
-    doc.text('Client Plan Summary', 14, finalY);
     finalY += 5;
 
     // Client Plan Summary Table
@@ -42,15 +42,17 @@ export const generateClientReportPDF = (data: ReportData) => {
     });
     finalY = (doc as any).lastAutoTable.finalY + 10;
     
-    // Helper function to add a table
+    // Helper function to add a table, preventing orphaned headers
     const addTable = (title: string, head: any, body: any) => {
-        if (finalY + 40 > pageHeight) { // check if new page is needed
+        // Minimum space needed: title + header + one row
+        const MIN_SECTION_HEIGHT = 40; 
+        if (finalY + MIN_SECTION_HEIGHT > pageHeight - pageMargin) {
             doc.addPage();
-            finalY = 15;
+            finalY = pageMargin;
         }
         doc.setFontSize(12);
         doc.text(title, 14, finalY);
-        finalY += 5;
+        finalY += 7; // Move Y down for the table
 
         autoTable(doc, {
             head,
@@ -81,7 +83,7 @@ export const generateClientReportPDF = (data: ReportData) => {
     // Other Tasks
     if (otherTasks.length > 0) {
         addTable(
-            'Other Tasks',
+            'Other Works',
             [['Date', 'Task', 'Status']],
             otherTasks.map(task => [
                 format(new Date(task.deadline), 'MMM dd, yyyy'),
@@ -109,13 +111,15 @@ export const generateClientReportPDF = (data: ReportData) => {
 
     // Paid Ads Budget
     if (cashIn.length > 0 || client.paidPromotionsOldBalance) {
-         if (finalY + 40 > pageHeight) {
+        // This table has a large, non-breaking footer, so we need a larger height check
+        const MIN_BUDGET_TABLE_HEIGHT = 80;
+         if (finalY + MIN_BUDGET_TABLE_HEIGHT > pageHeight - pageMargin) {
             doc.addPage();
-            finalY = 15;
+            finalY = pageMargin;
         }
         doc.setFontSize(12);
         doc.text('Paid Ads - Budget', 14, finalY);
-        finalY += 5;
+        finalY += 7;
 
         const totalSpent = paidPromotions.reduce((acc, p) => acc + Number(p.spent || 0), 0);
         const gst = totalSpent * 0.18;
