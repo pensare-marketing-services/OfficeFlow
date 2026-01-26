@@ -32,6 +32,8 @@ type ClientWithId = Client & { id: string };
 interface PaidPromotionsTableProps {
     client: ClientWithId;
     users: UserWithId[];
+    promotions: (PaidPromotion & { id: string })[];
+    loading: boolean;
     totalCashIn: number;
     onClientUpdate: (updatedData: Partial<Client>) => void;
     activeMonth: string;
@@ -96,10 +98,8 @@ const EditableCell: React.FC<{
     );
 };
 
-export default function PaidPromotionsTable({ client, users, totalCashIn, onClientUpdate, activeMonth, monthData }: PaidPromotionsTableProps) {
+export default function PaidPromotionsTable({ client, users, promotions, loading, totalCashIn, onClientUpdate, activeMonth, monthData }: PaidPromotionsTableProps) {
     const { user: currentUser } = useAuth();
-    const [promotions, setPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
-    const [loading, setLoading] = useState(true);
     const { addTask, updateTask, deleteTask, tasks } = useTasks();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -129,22 +129,6 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
     const handleOldBalanceChange = () => {
         onClientUpdate({ paidPromotionsOldBalance: Number(oldBalance) || 0 });
     };
-
-    useEffect(() => {
-        if (!client.id) return;
-        setLoading(true);
-        const promotionsQuery = query(collection(db, `clients/${client.id}/promotions`), where("month", "==", activeMonth));
-        const unsubscribe = onSnapshot(promotionsQuery, (snapshot) => {
-            const promotionsData = snapshot.docs.map(doc => ({ ...doc.data() as PaidPromotion, id: doc.id }));
-            setPromotions(promotionsData);
-            setLoading(false);
-        }, (error) => {
-            console.error("Error fetching promotions:", error);
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
-    }, [client.id, activeMonth]);
 
     const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any) => {
         const promotionRef = doc(db, `clients/${client.id}/promotions`, id);
@@ -334,7 +318,7 @@ export default function PaidPromotionsTable({ client, users, totalCashIn, onClie
                             <TableHead className="w-[40px] text-[10px]">Date</TableHead>
                             <TableHead className="w-[120px] text-[10px]">Campaign</TableHead>
                             <TableHead className="w-[110px] text-[10px]">Type</TableHead>
-                            <TableHead className="w-[20px] text-right text-[10px]">Budget</TableHead>
+                            <TableHead className="w-[40px] text-right text-[10px]">Budget</TableHead>
                             <TableHead className="w-[90px] text-[10px]">Status</TableHead>
                             <TableHead className="w-[90px] text-[10px]">Assign</TableHead>
                             <TableHead className="w-[70px] text-right text-[10px]">Spent</TableHead>

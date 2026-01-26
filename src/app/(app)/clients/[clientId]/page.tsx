@@ -4,7 +4,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction, MonthData } from '@/lib/data';
+import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction, MonthData, PaidPromotion, PlanPromotion } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
 import { Input } from '@/components/ui/input';
-import { Pen, Plus, Trash2, MoreVertical } from 'lucide-react';
+import { Pen, Plus, Trash2, MoreVertical, Download } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
 import ClientNotesTable from '@/components/dashboard/client-notes-table';
 import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
@@ -30,6 +30,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Loader2 } from 'lucide-react';
+import { generateClientReportPDF } from '@/components/dashboard/client-report-pdf';
 
 
 type UserWithId = User & { id: string };
@@ -244,6 +245,10 @@ export default function ClientIdPage() {
     const [loading, setLoading] = useState(true);
     const [cashInTransactions, setCashInTransactions] = useState<(CashInTransaction & { id: string })[]>([]);
     const [cashInLoading, setCashInLoading] = useState(true);
+    const [paidPromotions, setPaidPromotions] = useState<(PaidPromotion & { id: string })[]>([]);
+    const [paidPromotionsLoading, setPaidPromotionsLoading] = useState(true);
+    const [planPromotions, setPlanPromotions] = useState<(PlanPromotion & { id: string })[]>([]);
+    const [planPromotionsLoading, setPlanPromotionsLoading] = useState(true);
     const { toast } = useToast();
     
     const params = useParams();
@@ -443,7 +448,7 @@ export default function ClientIdPage() {
         });
 
         return () => unsubscribe();
-    }, [clientId]); 
+    }, [clientId, activeMonth]); 
     
     useEffect(() => {
         if (!clientId) return;
@@ -460,6 +465,38 @@ export default function ClientIdPage() {
 
         return () => unsubscribe();
     }, [clientId]);
+
+    useEffect(() => {
+        if (!clientId || !activeMonth) return;
+        setPaidPromotionsLoading(true);
+        const promotionsQuery = query(collection(db, `clients/${clientId}/promotions`), where("month", "==", activeMonth));
+        const unsubscribe = onSnapshot(promotionsQuery, (snapshot) => {
+            const promotionsData = snapshot.docs.map(doc => ({ ...doc.data() as PaidPromotion, id: doc.id }));
+            setPaidPromotions(promotionsData);
+            setPaidPromotionsLoading(false);
+        }, (error) => {
+            console.error("Error fetching paid promotions:", error);
+            setPaidPromotionsLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [clientId, activeMonth]);
+
+    useEffect(() => {
+        if (!clientId || !activeMonth) return;
+        setPlanPromotionsLoading(true);
+        const promotionsQuery = query(collection(db, `clients/${clientId}/planPromotions`), where("month", "==", activeMonth));
+        const unsubscribe = onSnapshot(promotionsQuery, (snapshot) => {
+            const promotionsData = snapshot.docs.map(doc => ({ ...doc.data() as PlanPromotion, id: doc.id }));
+            setPlanPromotions(promotionsData);
+            setPlanPromotionsLoading(false);
+        }, (error) => {
+            console.error("Error fetching plan promotions:", error);
+            setPlanPromotionsLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [clientId, activeMonth]);
 
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
@@ -548,8 +585,21 @@ export default function ClientIdPage() {
         return cashInTransactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
     }, [cashInTransactions]);
 
-    const pageLoading = loading || tasksLoading || usersLoading || cashInLoading;
+    const pageLoading = loading || tasksLoading || usersLoading || cashInLoading || paidPromotionsLoading || planPromotionsLoading;
     const activeMonthData = useMemo(() => monthlyTabs.find(m => m.name === activeMonth), [monthlyTabs, activeMonth]);
+
+    const handleDownloadPDF = () => {
+        if (!client || !activeMonthData) return;
+
+        generateClientReportPDF({
+            client,
+            monthData: activeMonthData,
+            dmTasks: filteredTasks,
+            otherTasks: otherTasks,
+            cashIn: cashInTransactions,
+            paidPromotions: paidPromotions,
+        });
+    };
 
     return (
         <div className="space-y-4">
@@ -628,6 +678,8 @@ export default function ClientIdPage() {
                         <PaidPromotionsTable 
                             client={client}
                             users={users as UserWithId[]}
+                            promotions={paidPromotions}
+                            loading={paidPromotionsLoading}
                             totalCashIn={totalCashIn}
                             onClientUpdate={handleClientUpdate}
                             activeMonth={activeMonth}
@@ -666,6 +718,8 @@ export default function ClientIdPage() {
                         <PlanPromotionsTable 
                             client={client}
                             users={users as UserWithId[]}
+                            promotions={planPromotions}
+                            loading={planPromotionsLoading}
                             totalCashIn={totalCashIn}
                             onClientUpdate={handleClientUpdate}
                             activeMonth={activeMonth}
@@ -700,6 +754,17 @@ export default function ClientIdPage() {
                         />
                     )}
                 </div>
+            </div>
+             <div className="fixed bottom-6 right-6 z-50">
+                <Button
+                    size="icon"
+                    className="h-14 w-14 rounded-full shadow-lg"
+                    onClick={handleDownloadPDF}
+                    disabled={pageLoading}
+                    aria-label="Download Report"
+                >
+                    <Download className="h-6 w-6" />
+                </Button>
             </div>
         </div>
     );

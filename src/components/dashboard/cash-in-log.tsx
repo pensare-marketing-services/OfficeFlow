@@ -55,7 +55,7 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
     return (
         <Card>
             <CardHeader className="p-3">
-                <CardTitle className="text-base font-headline">Cash In Log</CardTitle>
+                <CardTitle className="text-base font-headline">Paid Ads - Budget</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
                  <Table>
