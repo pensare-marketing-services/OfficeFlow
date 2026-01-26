@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogD
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { AppLogoBlack } from '../shared/app-logo';
 import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
@@ -30,7 +29,6 @@ const billItemSchema = z.object({
 
 const billSchema = z.object({
   duration: z.string().min(1, "Duration is required."),
-  status: z.enum(["Issued", "Paid", "Overdue", "Cancelled"]),
   balance: z.preprocess(
     (val) => val === '' ? 0 : parseFloat(String(val)),
     z.number().min(0, "Balance cannot be negative.")
@@ -57,7 +55,6 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     resolver: zodResolver(billSchema),
     defaultValues: {
       duration: '',
-      status: 'Issued',
       balance: 0,
       items: [{ description: '', amount: 0 }],
     },
@@ -73,14 +70,12 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
       if (existingBill) {
         form.reset({
           duration: existingBill.duration,
-          status: existingBill.status,
           balance: existingBill.balance,
           items: existingBill.items && existingBill.items.length > 0 ? existingBill.items : [{ description: '', amount: 0 }],
         });
       } else {
         form.reset({
           duration: '',
-          status: 'Issued',
           balance: 0,
           items: [{ description: '', amount: 0 }],
         });
@@ -100,6 +95,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
       const billDataPayload = {
         ...data,
         billAmount: totalAmount,
+        status: existingBill ? existingBill.status : 'Issued'
       };
 
       if (existingBill) {
@@ -136,7 +132,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
               <AppLogoBlack />
             </div>
             <div className="text-right text-xs text-muted-foreground">
-              <p className="font-bold text-sm text-foreground">OfficeFlow</p>
+              <p className="font-bold text-sm text-foreground">PENSARE MARKETING</p>
               <p>First Floor, #1301, TK Tower</p>
               <p>Above Chicking Koduvally</p>
               <p>Calicut, Kerala-673572</p>
@@ -250,16 +246,23 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                 Add Item
               </Button>
             
-            <DialogFooter className='pt-4'>
-                <div className='w-full text-left'>
-                    <p className='text-sm font-bold'>Thank you for your business!</p>
-                    <p className='text-xs text-muted-foreground'>Please make payments to the details provided separately.</p>
+            <DialogFooter className='pt-4 sm:justify-between sm:items-end'>
+                <div className='text-left'>
+                    <p className='text-sm font-bold mb-2'>Thank you for your business!</p>
+                    <h4 className="text-xs font-bold mb-1">Bank Details:</h4>
+                    <p className='text-[10px] text-muted-foreground'>PENSARE MARKETING</p>
+                    <p className='text-[10px] text-muted-foreground'>State Bank of India, Koduvally Branch</p>
+                    <p className='text-[10px] text-muted-foreground'>A/C No: 39003560642</p>
+                    <p className='text-[10px] text-muted-foreground'>IFSC Code: SBIN0001442</p>
+                    <p className='text-[10px] text-muted-foreground'>GPay: 9745600523</p>
                 </div>
-                <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={loading}>
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {existingBill ? "Save Changes" : "Issue Bill"}
-                </Button>
+                <div className="flex gap-2 mt-4 sm:mt-0">
+                  <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
+                  <Button type="submit" disabled={loading}>
+                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {existingBill ? "Save Changes" : "Issue Bill"}
+                  </Button>
+                </div>
             </DialogFooter>
           </form>
         </Form>

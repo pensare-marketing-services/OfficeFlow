@@ -45,7 +45,6 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     autoTable(doc, {
         startY: finalY,
         body: [
-            ['Bill Status:', bill.status],
             ['Date of Issue:', format(new Date(bill.issuedDate), 'MMM dd, yyyy')],
             ['Service Duration:', bill.duration],
         ],
@@ -77,12 +76,28 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
         alternateRowStyles: { fillColor: [248, 249, 250] },
         columnStyles: { 1: { halign: 'right' } }
     });
-    finalY = (doc as any).lastAutoTable.finalY + 20;
+    finalY = (doc as any).lastAutoTable.finalY + 15;
 
     // Footer / Notes
     doc.setFontSize(9);
     doc.text('Thank you for your business!', 14, finalY);
-    doc.text('Please make payments to the details provided separately.', 14, finalY + 5);
+
+    finalY += 10;
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Bank Details:', 14, finalY);
+    
+    finalY += 4;
+    doc.setFont('helvetica', 'normal');
+    doc.text('PENSARE MARKETING', 14, finalY);
+    finalY += 4;
+    doc.text('State Bank of India, Koduvally Branch', 14, finalY);
+    finalY += 4;
+    doc.text('A/C No: 39003560642', 14, finalY);
+    finalY += 4;
+    doc.text('IFSC Code: SBIN0001442', 14, finalY);
+    finalY += 4;
+    doc.text('GPay: 9745600523', 14, finalY);
 
     return doc.output('blob');
 };
