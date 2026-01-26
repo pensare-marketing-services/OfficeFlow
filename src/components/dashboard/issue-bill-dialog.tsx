@@ -18,6 +18,7 @@ import type { Bill, BillStatus, Client, BillItem } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '../ui/table';
+import { format } from 'date-fns';
 
 const billItemSchema = z.object({
   description: z.string().min(1, "Description is required."),
