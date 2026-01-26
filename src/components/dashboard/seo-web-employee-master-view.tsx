@@ -34,7 +34,7 @@ const statusBackgroundColors: Record<string, string> = {
   'On Work': 'bg-gray-500/40',
   'For Approval': 'bg-[#ffb131]',
   'Approved': 'bg-[#42f925]',
-  'Posted': 'bg-indigo-400',
+  'Posted': 'bg-cyan-400',
   'Completed': 'bg-indigo-400',
   'Hold': 'bg-gray-500/40',
   'To Do': 'bg-gray-400/40',

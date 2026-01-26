@@ -12,7 +12,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Building, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Settings, Building, ChevronDown, User } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useClients } from '@/hooks/use-clients';
@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
+  { href: '/account', label: 'Account', icon: User, adminOnly: false },
 ];
 
 const settingsNavItem = { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true };
