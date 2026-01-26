@@ -72,7 +72,7 @@ const PriorityDisplayItem = ({ task }: { task: TaskWithId }) => {
     };
 
     return (
-        <div className="h-6 w-full flex items-center justify-center border-b">
+        <div className="h-4 w-full flex items-center justify-center border-b">
             <Input
                 type="number"
                 value={priority}
@@ -81,7 +81,7 @@ const PriorityDisplayItem = ({ task }: { task: TaskWithId }) => {
                 onChange={(e) => setPriority(Number(e.target.value))}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
-                className="h-6 w-8 text-[10px] text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
+                className="h-4 w-8 text-[10px] text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
             />
         </div>
     );
@@ -116,7 +116,7 @@ const TaskDisplayItem = ({ task, isSelected, isOverdue }: { task: TaskWithId; is
             <PopoverTrigger asChild>
                 <div
                     className={cn(
-                        'h-6 w-full flex items-center justify-start cursor-pointer text-[10px] font-medium border-b px-1',
+                        'h-4 w-full flex items-center justify-start cursor-pointer text-[10px] font-medium border-b px-1',
                         taskStatusColor,
                         isSelected && 'ring-1 ring-accent ring-inset'
                     )}
@@ -420,7 +420,7 @@ const DailyTaskTable: React.FC<{
             <div className="overflow-auto relative" style={{ height: 'calc(100vh - 150px)' }}>
                 <Table className="text-[10px] border-collapse min-w-full">
                     <TableHeader className="sticky top-0 bg-background z-30 shadow-sm">
-                        <TableRow className="h-6">
+                        <TableRow className="h-4">
                             <TableHead className='border-r p-1 w-[30px] sticky left-0 bg-background z-40'>Sl.</TableHead>
                             <TableHead className='border-r p-1 w-[120px] sticky left-[30px] bg-background z-40'>Client</TableHead>
                             <TableHead className='border-r p-1 w-[100px] sticky left-[150px] bg-background z-40'>Assigned</TableHead>
@@ -510,10 +510,10 @@ const DailyTaskTable: React.FC<{
                                                 return (
                                                     <React.Fragment key={employee.id}>
                                                         <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
-                                                            {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} isOverdue={isOverdue} /> : <div className='h-6 border-b'></div>}
+                                                            {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} isOverdue={isOverdue} /> : <div className='h-4 border-b'></div>}
                                                         </TableCell>
                                                         <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
-                                                            {task ? <PriorityDisplayItem task={task} /> : <div className='h-6 border-b'></div>}
+                                                            {task ? <PriorityDisplayItem task={task} /> : <div className='h-4 border-b'></div>}
                                                         </TableCell>
                                                     </React.Fragment>
                                                 );
