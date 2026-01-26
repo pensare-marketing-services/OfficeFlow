@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction, MonthData, PaidPromotion, PlanPromotion } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
@@ -34,6 +34,7 @@ import { generateClientReportPDF } from '@/components/dashboard/client-report-pd
 import html2canvas from 'html2canvas';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { format } from 'date-fns';
 
 
 type UserWithId = User & { id: string };
@@ -86,7 +87,7 @@ const EditableTabTrigger: React.FC<{
     const [currentValue, setCurrentValue] = useState(value);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = React.useRef<HTMLInputElement>(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
   
     useEffect(() => {
@@ -238,7 +239,125 @@ const EditableTabTrigger: React.FC<{
     );
   };
 
+  async function createReportImage(
+    title: string,
+    headers: string[],
+    rows: (string | number)[][],
+    footerData: { label: string; value: string; isTotal?: boolean }[] = []
+): Promise<Blob | null> {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.backgroundColor = 'white';
+    container.style.padding = '20px';
+    container.style.fontFamily = 'Helvetica, Arial, sans-serif';
+    container.style.width = '800px'; 
+    container.style.border = '1px solid transparent'; 
 
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = title;
+    titleElement.style.fontSize = '1.25rem';
+    titleElement.style.fontWeight = '600';
+    titleElement.style.marginBottom = '1rem';
+    titleElement.style.color = '#333';
+    container.appendChild(titleElement);
+
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    table.style.fontSize = '0.875rem';
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    headerRow.style.backgroundColor = '#2980b9'; 
+    headerRow.style.color = 'white';
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        th.style.padding = '10px 12px';
+        th.style.textAlign = 'left';
+        th.style.fontWeight = '600';
+        th.style.border = '1px solid #ddd';
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    if (rows.length > 0) {
+        rows.forEach(rowData => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #ddd';
+            rowData.forEach((cellData) => {
+                const td = document.createElement('td');
+                td.textContent = String(cellData);
+                td.style.padding = '10px 12px';
+                td.style.border = '1px solid #ddd';
+                if (typeof cellData === 'number' || (typeof cellData === 'string' && !isNaN(parseFloat(cellData)))) {
+                    td.style.textAlign = 'right';
+                }
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    } else {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = headers.length;
+        td.textContent = 'No data available.';
+        td.style.padding = '20px';
+        td.style.textAlign = 'center';
+        td.style.color = '#777';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+
+    if (footerData.length > 0) {
+        const tfoot = document.createElement('tfoot');
+        footerData.forEach(item => {
+            const tr = document.createElement('tr');
+             tr.style.borderTop = item.isTotal ? '2px solid #555' : '1px solid #ddd';
+             tr.style.backgroundColor = '#f9f9f9';
+             if(item.isTotal) {
+                tr.style.fontWeight = 'bold';
+             }
+
+            const labelTd = document.createElement('td');
+            labelTd.textContent = item.label;
+            labelTd.colSpan = headers.length - 1;
+            labelTd.style.textAlign = 'right';
+            labelTd.style.padding = '10px 12px';
+            labelTd.style.border = '1px solid #ddd';
+
+            const valueTd = document.createElement('td');
+            valueTd.textContent = item.value;
+            valueTd.style.textAlign = 'right';
+            valueTd.style.padding = '10px 12px';
+            valueTd.style.border = '1px solid #ddd';
+
+            tr.appendChild(labelTd);
+            tr.appendChild(valueTd);
+            tfoot.appendChild(tr);
+        });
+        table.appendChild(tfoot);
+    }
+
+    container.appendChild(table);
+    document.body.appendChild(container);
+
+    const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: 'white'
+    });
+
+    document.body.removeChild(container);
+
+    return new Promise(resolve => {
+        canvas.toBlob(blob => resolve(blob), 'image/png');
+    });
+}
   
 export default function ClientIdPage() {
     const { user: currentUser } = useAuth();
@@ -267,11 +386,7 @@ export default function ClientIdPage() {
     });
 
     const [isDownloading, setIsDownloading] = useState(false);
-    const dmTasksRef = useRef<HTMLDivElement>(null);
-    const otherTasksRef = useRef<HTMLDivElement>(null);
-    const paidPromotionsRef = useRef<HTMLDivElement>(null);
-    const cashInLogRef = useRef<HTMLDivElement>(null);
-
+    
     useEffect(() => {
         if (clientId) {
             sessionStorage.setItem(`activeMonth_${clientId}`, activeMonth);
@@ -602,34 +717,76 @@ export default function ClientIdPage() {
             toast({ variant: 'destructive', title: 'Cannot Download', description: 'Client data is not fully loaded.' });
             return;
         }
-
-        const elementsToCapture = [
-            { ref: dmTasksRef.current, name: 'digital-marketing-tasks.png' },
-            { ref: otherTasksRef.current, name: 'other-tasks.png' },
-            { ref: paidPromotionsRef.current, name: 'paid-promotions.png' },
-            { ref: cashInLogRef.current, name: 'paid-ads-budget.png' },
-        ];
-    
-        if (elementsToCapture.some(e => !e.ref)) {
-            toast({ variant: 'destructive', title: 'Cannot Download', description: 'One or more report sections could not be found.' });
-            return;
-        }
         
         setIsDownloading(true);
 
         try {
             const zip = new JSZip();
 
-            // 1. Generate images from components
-            for (const { ref, name } of elementsToCapture) {
-                if (ref) {
-                    const canvas = await html2canvas(ref, { useCORS: true, scale: 2 });
-                    const pngBlob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
-                    if (pngBlob) {
-                        zip.file(name, pngBlob);
-                    }
-                }
+            // 1. Generate PNGs from data
+            if (filteredTasks.length > 0) {
+                const dmBlob = await createReportImage(
+                    'Digital Marketing Tasks',
+                    ['Date', 'Title', 'Type', 'Status'],
+                    filteredTasks.map(task => [
+                        format(new Date(task.deadline), 'MMM dd, yyyy'),
+                        task.title,
+                        task.contentType || '-',
+                        task.status
+                    ])
+                );
+                if (dmBlob) zip.file('digital-marketing-tasks.png', dmBlob);
             }
+    
+            if (otherTasks.length > 0) {
+                const otherBlob = await createReportImage(
+                    'Other Works',
+                    ['Date', 'Task', 'Status'],
+                    otherTasks.map(task => [
+                        format(new Date(task.deadline), 'MMM dd, yyyy'),
+                        task.title,
+                        task.status
+                    ])
+                );
+                if (otherBlob) zip.file('other-tasks.png', otherBlob);
+            }
+            
+            if (paidPromotions.length > 0) {
+                const paidPromoBlob = await createReportImage(
+                    'Paid Promotions',
+                    ['Date', 'Campaign', 'Type', 'Budget', 'Status', 'Spent'],
+                    paidPromotions.map(p => [
+                        format(new Date(p.date), 'MMM dd, yyyy'),
+                        p.campaign,
+                        p.adType,
+                        p.budget.toFixed(2),
+                        p.status,
+                        p.spent.toFixed(2),
+                    ])
+                );
+                if (paidPromoBlob) zip.file('paid-promotions.png', paidPromoBlob);
+            }
+
+            const totalSpent = paidPromotions.reduce((acc, p) => acc + Number(p.spent || 0), 0);
+            const gst = totalSpent * 0.18;
+            const grandTotal = totalSpent + gst;
+            const oldBalanceVal = client.paidPromotionsOldBalance || 0;
+            const balance = (totalCashIn + oldBalanceVal) - grandTotal;
+            const cashInBlob = await createReportImage(
+                'Paid Ads - Budget',
+                ['Date', 'Amount', 'Status'],
+                cashInTransactions.map(t => [format(new Date(t.date), 'MMM dd, yyyy'), t.amount.toFixed(2), t.status]),
+                [
+                    { label: 'Total Spent', value: totalSpent.toFixed(2) },
+                    { label: 'Old Balance', value: oldBalanceVal.toFixed(2) },
+                    { label: 'GST 18%', value: gst.toFixed(2) },
+                    { label: 'Grand Total', value: grandTotal.toFixed(2), isTotal: true },
+                    { label: 'Total Cash In', value: totalCashIn.toFixed(2) },
+                    { label: 'Balance', value: balance.toFixed(2), isTotal: true },
+                ]
+            );
+            if (cashInBlob) zip.file('paid-ads-budget.png', cashInBlob);
+
             
             // 2. Generate PDF blob
             const pdfBlob = generateClientReportPDF({
@@ -644,7 +801,7 @@ export default function ClientIdPage() {
 
             // 3. Generate and download zip
             const zipBlob = await zip.generateAsync({ type: 'blob' });
-            saveAs(zipBlob, `${client.name}_Report_Bundle.zip`);
+            saveAs(zipBlob, `${client.name}_Report_Bundle_${activeMonthData.name}.zip`);
 
         } catch (error) {
             console.error("Failed to generate report bundle:", error);
@@ -707,7 +864,7 @@ export default function ClientIdPage() {
                     </Card>
 
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
-                        <div ref={dmTasksRef}>
+                        <div>
                          <Card>
                             <CardHeader className="flex flex-row items-center justify-between p-3">
                                 <CardTitle className="text-base font-headline">Digital Marketing</CardTitle>
@@ -734,7 +891,7 @@ export default function ClientIdPage() {
                             </CardContent>
                         </Card>
                     )}
-                    <div ref={paidPromotionsRef}>
+                    <div>
                        {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <PaidPromotionsTable 
                             client={client}
@@ -789,7 +946,7 @@ export default function ClientIdPage() {
                         />
                     )}
                     
-                     <div ref={otherTasksRef}>
+                     <div>
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                        <OtherTaskTable
                             clientId={client.id}
@@ -809,7 +966,7 @@ export default function ClientIdPage() {
                             onUpdate={handleNotesUpdate}
                        />
                     )}
-                    <div ref={cashInLogRef}>
+                    <div>
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <CashInLog
                             clientId={client.id}
