@@ -197,11 +197,18 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
+                            {/* <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
                             <TableHead className="w-[30px] text-[10px]">Date</TableHead>
-                            <TableHead className="w-[150px] text-[10px]">Task</TableHead>
-                            <TableHead className='text-[10px]'>Assigned</TableHead>
+                            <TableHead className="w-[100px] text-[10px]">Task</TableHead>
+                            <TableHead className='text-[10px] w-[50px]'>Assigned</TableHead>
                             <TableHead className='text-[10px]'>Status</TableHead>
+                            <TableHead className="w-[20px] text-[10px]">Note</TableHead>
+                            <TableHead className="w-[40px]"></TableHead> */}
+                            <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
+                            <TableHead className="w-[50px] text-[10px]">Date</TableHead>
+                            <TableHead className=" text-[10px]">Task</TableHead>
+                            <TableHead className='w-[250px] text-[10px] '>Assigned</TableHead>
+                            <TableHead className='w-[100px] text-[10px]'>Status</TableHead>
                             <TableHead className="w-[20px] text-[10px]">Note</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                         </TableRow>
