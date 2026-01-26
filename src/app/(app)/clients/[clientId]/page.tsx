@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction, MonthData, PaidPromotion, PlanPromotion } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
