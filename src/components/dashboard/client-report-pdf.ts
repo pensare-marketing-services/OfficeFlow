@@ -12,7 +12,7 @@ interface ReportData {
     paidPromotions: (PaidPromotion & { id: string })[];
 }
 
-export const generateClientReportPDF = (data: ReportData) => {
+export const generateClientReportPDF = (data: ReportData): Blob => {
     const { client, monthData, dmTasks, otherTasks, cashIn, paidPromotions } = data;
     const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height;
@@ -149,6 +149,6 @@ export const generateClientReportPDF = (data: ReportData) => {
         finalY = (doc as any).lastAutoTable.finalY + 10;
     }
     
-    // Save the PDF
-    doc.save(`${client.name}_Report_${monthData.name}.pdf`);
+    // Return the PDF as a blob
+    return doc.output('blob');
 };

@@ -31,6 +31,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Loader2 } from 'lucide-react';
 import { generateClientReportPDF } from '@/components/dashboard/client-report-pdf';
+import html2canvas from 'html2canvas';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 
 type UserWithId = User & { id: string };
@@ -262,6 +265,12 @@ export default function ClientIdPage() {
         }
         return "Month 1";
     });
+
+    const [isDownloading, setIsDownloading] = useState(false);
+    const dmTasksRef = useRef<HTMLDivElement>(null);
+    const otherTasksRef = useRef<HTMLDivElement>(null);
+    const paidPromotionsRef = useRef<HTMLDivElement>(null);
+    const cashInLogRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (clientId) {
@@ -588,18 +597,67 @@ export default function ClientIdPage() {
     const pageLoading = loading || tasksLoading || usersLoading || cashInLoading || paidPromotionsLoading || planPromotionsLoading;
     const activeMonthData = useMemo(() => monthlyTabs.find(m => m.name === activeMonth), [monthlyTabs, activeMonth]);
 
-    const handleDownloadPDF = () => {
-        if (!client || !activeMonthData) return;
+    const handleDownloadBundle = async () => {
+        if (!client || !activeMonthData) {
+            toast({ variant: 'destructive', title: 'Cannot Download', description: 'Client data is not fully loaded.' });
+            return;
+        }
 
-        generateClientReportPDF({
-            client,
-            monthData: activeMonthData,
-            dmTasks: filteredTasks,
-            otherTasks: otherTasks,
-            cashIn: cashInTransactions,
-            paidPromotions: paidPromotions,
-        });
+        const elementsToCapture = [
+            { ref: dmTasksRef.current, name: 'digital-marketing-tasks.png' },
+            { ref: otherTasksRef.current, name: 'other-tasks.png' },
+            { ref: paidPromotionsRef.current, name: 'paid-promotions.png' },
+            { ref: cashInLogRef.current, name: 'paid-ads-budget.png' },
+        ];
+    
+        if (elementsToCapture.some(e => !e.ref)) {
+            toast({ variant: 'destructive', title: 'Cannot Download', description: 'One or more report sections could not be found.' });
+            return;
+        }
+        
+        setIsDownloading(true);
+
+        try {
+            const zip = new JSZip();
+
+            // 1. Generate images from components
+            for (const { ref, name } of elementsToCapture) {
+                if (ref) {
+                    const canvas = await html2canvas(ref, { useCORS: true, scale: 2 });
+                    const pngBlob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+                    if (pngBlob) {
+                        zip.file(name, pngBlob);
+                    }
+                }
+            }
+            
+            // 2. Generate PDF blob
+            const pdfBlob = generateClientReportPDF({
+                client,
+                monthData: activeMonthData,
+                dmTasks: filteredTasks,
+                otherTasks: otherTasks,
+                cashIn: cashInTransactions,
+                paidPromotions: paidPromotions,
+            });
+            zip.file(`${client.name}_Report_${activeMonthData.name}.pdf`, pdfBlob);
+
+            // 3. Generate and download zip
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            saveAs(zipBlob, `${client.name}_Report_Bundle.zip`);
+
+        } catch (error) {
+            console.error("Failed to generate report bundle:", error);
+            toast({
+                variant: 'destructive',
+                title: 'Download Failed',
+                description: 'There was an error creating the report bundle.',
+            });
+        } finally {
+            setIsDownloading(false);
+        }
     };
+
 
     return (
         <div className="space-y-4">
@@ -649,6 +707,7 @@ export default function ClientIdPage() {
                     </Card>
 
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client ? (
+                        <div ref={dmTasksRef}>
                          <Card>
                             <CardHeader className="flex flex-row items-center justify-between p-3">
                                 <CardTitle className="text-base font-headline">Digital Marketing</CardTitle>
@@ -667,6 +726,7 @@ export default function ClientIdPage() {
                                 />
                             </CardContent>
                         </Card>
+                        </div>
                     ) : (
                         <Card>
                             <CardContent className="text-center text-muted-foreground py-16">
@@ -674,6 +734,7 @@ export default function ClientIdPage() {
                             </CardContent>
                         </Card>
                     )}
+                    <div ref={paidPromotionsRef}>
                        {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <PaidPromotionsTable 
                             client={client}
@@ -686,6 +747,7 @@ export default function ClientIdPage() {
                             monthData={activeMonthData}
                         />
                     )}
+                    </div>
 
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <SeoTable 
@@ -727,6 +789,7 @@ export default function ClientIdPage() {
                         />
                     )}
                     
+                     <div ref={otherTasksRef}>
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                        <OtherTaskTable
                             clientId={client.id}
@@ -738,6 +801,7 @@ export default function ClientIdPage() {
                             activeMonth={activeMonth}
                         />
                     )}
+                    </div>
 
                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && activeMonthData && (
                        <ClientNotesTable 
@@ -745,7 +809,7 @@ export default function ClientIdPage() {
                             onUpdate={handleNotesUpdate}
                        />
                     )}
-
+                    <div ref={cashInLogRef}>
                      {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
                         <CashInLog
                             clientId={client.id}
@@ -753,17 +817,18 @@ export default function ClientIdPage() {
                             totalCashIn={totalCashIn}
                         />
                     )}
+                    </div>
                 </div>
             </div>
              <div className="fixed bottom-6 right-6 z-50">
                 <Button
                     size="icon"
                     className="h-14 w-14 rounded-full shadow-lg"
-                    onClick={handleDownloadPDF}
-                    disabled={pageLoading}
+                    onClick={handleDownloadBundle}
+                    disabled={pageLoading || isDownloading}
                     aria-label="Download Report"
                 >
-                    <Download className="h-6 w-6" />
+                    {isDownloading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Download className="h-6 w-6" />}
                 </Button>
             </div>
         </div>
