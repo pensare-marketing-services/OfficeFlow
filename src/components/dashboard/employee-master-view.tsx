@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -14,11 +13,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
 import { useTasks } from '@/hooks/use-tasks';
-import { useHorizontalScroll } from '@/hooks/use-horizontal-scroll';
 import { Button } from '../ui/button';
-import { ChevronLeft, ChevronRight, ChevronDown, Pen } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { Badge } from '../ui/badge';
+import { ChevronLeft, ChevronRight, Pen } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 
 
@@ -38,7 +34,7 @@ const statusBackgroundColors: Record<string, string> = {
   'On Work': 'bg-gray-500/40',
   'For Approval': 'bg-[#ffb131]',
   'Approved': 'bg-[#42f925]',
-  'Posted': 'bg-cyan-400',
+  'Posted': 'bg-indigo-400',
   'Completed': 'bg-indigo-400',
   'Hold': 'bg-gray-500/40',
   'To Do': 'bg-gray-400/40',
@@ -92,7 +88,7 @@ const PriorityDisplayItem = ({ task }: { task: TaskWithId }) => {
 };
 
 
-const TaskDisplayItem = ({ task, isSelected }: { task: TaskWithId; isSelected: boolean }) => {
+const TaskDisplayItem = ({ task, isSelected, isOverdue }: { task: TaskWithId; isSelected: boolean; isOverdue: boolean; }) => {
     const { user: currentUser } = useAuth();
     const { updateTask } = useTasks();
     const [editingRemark, setEditingRemark] = useState<{ taskId: string; remarkIndex: number } | null>(null);
@@ -114,7 +110,7 @@ const TaskDisplayItem = ({ task, isSelected }: { task: TaskWithId; isSelected: b
         setEditingText('');
     };
 
-    const taskStatusColor = statusBackgroundColors[task.status] || 'bg-transparent';
+    const taskStatusColor = isOverdue ? statusBackgroundColors['Overdue'] : (statusBackgroundColors[task.status] || 'bg-transparent');
 
     return (
         <Popover>
@@ -342,6 +338,7 @@ const DailyTaskTable: React.FC<{
       const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
       const tableRef = useRef<HTMLDivElement>(null);
       const [highlightedClientIds, setHighlightedClientIds] = useState<Set<string>>(new Set());
+      const now = new Date();
   
       const getStorageKey = (date: Date) => `dm_highlightedClients_${format(date, 'yyyy-MM-dd')}`;
   
@@ -437,7 +434,7 @@ const DailyTaskTable: React.FC<{
                         <TableRow className="h-6">
                             <TableHead className='border-r p-1 w-[40px] sticky left-0 bg-background z-40'>Sl.</TableHead>
                             <TableHead className='border-r p-1 w-[150px] sticky left-[40px] bg-background z-40'>Client</TableHead>
-                            <TableHead className='border-r p-1 w-[100px] sticky bg-background z-40'>Assigned</TableHead>
+                            <TableHead className='border-r p-1 w-[100px] sticky left-[190px] bg-background z-40'>Assigned</TableHead>
                             {employees.map((employee) => (
                                 <React.Fragment key={employee.id}>
                                     <TableHead
@@ -514,10 +511,17 @@ const DailyTaskTable: React.FC<{
                                             
                                             {employees.map((employee, empIndex) => {
                                                 const task = tasksByEmployee[empIndex]?.[rowIndex];
+                                                const isOverdue = task ? (() => {
+                                                    const deadline = new Date(task.deadline);
+                                                    deadline.setHours(23, 59, 59, 999);
+                                                    const isPromotionTask = task.description === 'Paid Promotion' || task.description === 'Plan Promotion';
+                                                    return !isPromotionTask && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && task.status !== 'To Do' && deadline < now;
+                                                })() : false;
+                                                
                                                 return (
                                                     <React.Fragment key={employee.id}>
                                                         <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
-                                                            {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} /> : <div className='h-6 border-b'></div>}
+                                                            {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} isOverdue={isOverdue} /> : <div className='h-6 border-b'></div>}
                                                         </TableCell>
                                                         <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
                                                             {task ? <PriorityDisplayItem task={task} /> : <div className='h-6 border-b'></div>}
