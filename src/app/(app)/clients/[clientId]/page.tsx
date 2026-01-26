@@ -630,11 +630,12 @@ export default function ClientIdPage() {
         setBillsLoading(true);
         const billsQuery = query(
             collection(db, `clients/${clientId}/bills`), 
-            where("month", "==", activeMonth),
-            orderBy("slNo")
+            where("month", "==", activeMonth)
         );
         const unsubscribe = onSnapshot(billsQuery, (snapshot) => {
             const billsData = snapshot.docs.map(doc => ({ ...doc.data() as Bill, id: doc.id }));
+            // Sort on the client side to avoid needing a composite index
+            billsData.sort((a, b) => a.slNo - b.slNo);
             setBills(billsData);
             setBillsLoading(false);
         }, (error) => {
