@@ -112,6 +112,11 @@ export type CashInTransaction = {
 
 export type BillStatus = "Issued" | "Paid" | "Overdue" | "Cancelled";
 
+export type BillItem = {
+    description: string;
+    amount: number;
+};
+
 export type Bill = {
   id: string;
   slNo: number;
@@ -123,4 +128,5 @@ export type Bill = {
   clientId: string;
   month: string;
   issuedDate: string;
+  items?: BillItem[];
 };

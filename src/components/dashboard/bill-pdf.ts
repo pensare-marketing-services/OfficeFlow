@@ -13,12 +13,11 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     // doc.addImage('/avatars/app-logo-black.png', 'PNG', 14, 15, 50, 20);
     
     doc.setFontSize(10);
-    doc.text('Your Company Name', 195, 15, { align: 'right' });
-    doc.text('123 Business Rd.', 195, 20, { align: 'right' });
-    doc.text('Business City, BC 12345', 195, 25, { align: 'right' });
-    doc.text('contact@yourcompany.com', 195, 30, { align: 'right' });
+    doc.text('First Floor, #1301, TK Tower', 195, 15, { align: 'right' });
+    doc.text('Above Chicking Koduvally', 195, 20, { align: 'right' });
+    doc.text('Calicut, Kerala-673572', 195, 25, { align: 'right' });
     
-    finalY += 25;
+    finalY += 20;
     doc.setDrawColor(200);
     doc.line(14, finalY, 196, finalY);
     finalY += 10;
@@ -57,13 +56,14 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     finalY = (doc as any).lastAutoTable.finalY + 10;
     
     // Bill Items Table
+    const tableBody = bill.items && bill.items.length > 0
+        ? bill.items.map(item => [item.description, item.amount.toFixed(2)])
+        : [['No items specified', '0.00']];
+
     autoTable(doc, {
         startY: finalY,
         head: [['Description', 'Amount']],
-        body: [
-            [`Services for the period: ${bill.duration}`, bill.billAmount.toFixed(2)],
-            // Add more items here if they exist in the bill data model
-        ],
+        body: tableBody,
         foot: [
             [{ content: 'Total Amount', colSpan: 1, styles: { halign: 'right', fontStyle: 'bold' } }, bill.billAmount.toFixed(2)],
             [{ content: 'Balance Due', colSpan: 1, styles: { halign: 'right', fontStyle: 'bold' } }, bill.balance.toFixed(2)],
@@ -71,6 +71,7 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
         theme: 'striped',
         headStyles: { fillColor: [33, 37, 41] },
         footStyles: { fillColor: [248, 249, 250], textColor: 0 },
+        columnStyles: { 1: { halign: 'right' } }
     });
     finalY = (doc as any).lastAutoTable.finalY + 20;
 

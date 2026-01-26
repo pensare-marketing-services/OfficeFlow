@@ -530,7 +530,18 @@
         "balance": { "type": "number" },
         "clientId": { "type": "string" },
         "month": { "type": "string" },
-        "issuedDate": { "type": "string", "format": "date-time" }
+        "issuedDate": { "type": "string", "format": "date-time" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "amount": { "type": "number" }
+            },
+            "required": ["description", "amount"]
+          }
+        }
       },
       "required": ["slNo", "duration", "status", "billAmount", "balance", "clientId", "month", "issuedDate"]
     }

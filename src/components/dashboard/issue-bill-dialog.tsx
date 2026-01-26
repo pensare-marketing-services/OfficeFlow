@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useMemo } from 'react';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -14,22 +14,27 @@ import { Separator } from '@/components/ui/separator';
 import { AppLogoBlack } from '../shared/app-logo';
 import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
-import type { Bill, BillStatus, Client } from '@/lib/data';
+import type { Bill, BillStatus, Client, BillItem } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '../ui/table';
+
+const billItemSchema = z.object({
+  description: z.string().min(1, "Description is required."),
+  amount: z.preprocess(
+    (val) => val === '' ? 0 : parseFloat(String(val)),
+    z.number().min(0, "Amount must be a positive number.")
+  ),
+});
 
 const billSchema = z.object({
   duration: z.string().min(1, "Duration is required."),
-  view: z.string().optional(),
   status: z.enum(["Issued", "Paid", "Overdue", "Cancelled"]),
-  billAmount: z.preprocess(
-    (a) => parseFloat(z.string().parse(a)),
-    z.number().positive("Amount must be positive.")
-  ),
   balance: z.preprocess(
-    (a) => parseFloat(z.string().parse(a)),
+    (val) => val === '' ? 0 : parseFloat(String(val)),
     z.number().min(0, "Balance cannot be negative.")
   ),
+  items: z.array(billItemSchema).min(1, "At least one item is required."),
 });
 
 type BillFormValues = z.infer<typeof billSchema>;
@@ -51,49 +56,63 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     resolver: zodResolver(billSchema),
     defaultValues: {
       duration: '',
-      view: '',
       status: 'Issued',
-      billAmount: 0,
       balance: 0,
+      items: [{ description: '', amount: 0 }],
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "items",
+  });
+
   useEffect(() => {
-    if (existingBill) {
-      form.reset({
-        duration: existingBill.duration,
-        view: existingBill.view || '',
-        status: existingBill.status,
-        billAmount: existingBill.billAmount,
-        balance: existingBill.balance,
-      });
-    } else {
-      form.reset({
-        duration: '',
-        view: '',
-        status: 'Issued',
-        billAmount: 0,
-        balance: 0,
-      });
+    if (isOpen) {
+      if (existingBill) {
+        form.reset({
+          duration: existingBill.duration,
+          status: existingBill.status,
+          balance: existingBill.balance,
+          items: existingBill.items && existingBill.items.length > 0 ? existingBill.items : [{ description: '', amount: 0 }],
+        });
+      } else {
+        form.reset({
+          duration: '',
+          status: 'Issued',
+          balance: 0,
+          items: [{ description: '', amount: 0 }],
+        });
+      }
     }
   }, [existingBill, isOpen, form]);
+
+  const watchedItems = form.watch('items');
+  const totalAmount = useMemo(() => {
+    return watchedItems?.reduce((acc, item) => acc + (Number(item.amount) || 0), 0) || 0;
+  }, [watchedItems]);
+
 
   const onSubmit = async (data: BillFormValues) => {
     setLoading(true);
     try {
+      const billDataPayload = {
+        ...data,
+        billAmount: totalAmount,
+      };
+
       if (existingBill) {
-        // Update existing bill
         const billRef = doc(db, `clients/${client.id}/bills`, existingBill.id);
-        await updateDoc(billRef, data);
+        await updateDoc(billRef, billDataPayload);
         toast({ title: "Bill Updated", description: "The bill has been successfully updated." });
       } else {
-        // Create new bill
         const newBillData = {
-          ...data,
+          ...billDataPayload,
           slNo: billCount + 1,
           clientId: client.id,
           month: activeMonth,
           issuedDate: new Date().toISOString(),
+          view: '', // Not in the new form
         };
         await addDoc(collection(db, `clients/${client.id}/bills`), newBillData);
         toast({ title: "Bill Issued", description: "The new bill has been successfully created." });
@@ -103,25 +122,25 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
       console.error("Failed to save bill:", error);
       toast({ variant: 'destructive', title: "Error", description: "Failed to save the bill." });
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <div className="flex justify-between items-start">
             <AppLogoBlack />
             <div className="text-right text-xs text-muted-foreground">
-              <p className="font-bold text-sm text-foreground">Your Company Name</p>
-              <p>123 Business Rd.</p>
-              <p>Business City, BC 12345</p>
-              <p>contact@yourcompany.com</p>
+              <p className="font-bold text-sm text-foreground">OfficeFlow</p>
+              <p>First Floor, #1301, TK Tower</p>
+              <p>Above Chicking Koduvally</p>
+              <p>Calicut, Kerala-673572</p>
             </div>
           </div>
           <Separator className="my-4" />
-          <DialogTitle>{existingBill ? `Edit Bill #${existingBill.slNo}`: "Issue New Bill"}</DialogTitle>
+          <DialogTitle>{existingBill ? `Edit Bill #${existingBill.slNo}` : "Issue New Bill"}</DialogTitle>
           <DialogDescription>
             Fill in the details below to {existingBill ? 'update the' : 'create a new'} bill for {client.name}.
           </DialogDescription>
@@ -144,18 +163,93 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                         <FormMessage />
                     </FormItem>
                 )} />
-                <FormField control={form.control} name="billAmount" render={({ field }) => (
-                    <FormItem><FormLabel>Bill Amount</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="balance" render={({ field }) => (
-                    <FormItem><FormLabel>Balance</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                 <div className="col-span-2">
-                    <FormField control={form.control} name="view" render={({ field }) => (
-                        <FormItem><FormLabel>View (Note/Link)</FormLabel><FormControl><Input placeholder="Add a short note or a link..." {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                </div>
             </div>
+            
+            <Separator />
+
+            <div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="w-[150px] text-right">Amount</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {fields.map((field, index) => (
+                    <TableRow key={field.id}>
+                      <TableCell className="p-1">
+                        <FormField
+                          control={form.control}
+                          name={`items.${index}.description`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl><Input placeholder="Service description" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell className="p-1">
+                        <FormField
+                          control={form.control}
+                          name={`items.${index}.amount`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl><Input type="number" placeholder="0.00" className="text-right" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell className="p-1 text-right">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive"
+                          onClick={() => remove(index)}
+                          disabled={fields.length <= 1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <TableCell colSpan={2} className="text-right font-bold">Total</TableCell>
+                        <TableCell className="text-right font-bold">{totalAmount.toFixed(2)}</TableCell>
+                    </TableRow>
+                </TableFooter>
+              </Table>
+               <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => append({ description: "", amount: 0 })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Item
+                </Button>
+            </div>
+            
+            <Separator />
+            
+            <div className="grid grid-cols-2 gap-4">
+                <div />
+                <FormField control={form.control} name="balance" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Balance Due</FormLabel>
+                        <FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+            </div>
+
 
             <DialogFooter>
                 <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
