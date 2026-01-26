@@ -125,7 +125,7 @@ const TaskDisplayItem = ({ task, isSelected, isOverdue }: { task: TaskWithId; is
                 </div>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-2" side="bottom" align="start">
-                <div className="max-h-60 space-y-3 p-1 overflow-y-auto">
+                <div className="max-h-40 space-y-3 p-1 overflow-y-auto">
                     <h4 className="font-medium text-xs">{task.title}</h4>
                     {(task.progressNotes || []).map((note, remarkIndex) => {
                         const authorName = note.authorName || 'User';
@@ -133,7 +133,7 @@ const TaskDisplayItem = ({ task, isSelected, isOverdue }: { task: TaskWithId; is
 
                         return (
                             <div key={remarkIndex} className={cn('flex items-start gap-2 text-[10px] group/remark', note.authorId === currentUser?.uid ? 'justify-end' : '')}>
-                                {note.authorId !== currentUser?.uid && <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(authorName)}</AvatarFallback></Avatar>}
+                                {note.authorId !== currentUser?.uid && <Avatar className="h-4 w-6 border"><AvatarFallback>{getInitials(authorName)}</AvatarFallback></Avatar>}
                                 <div className={cn('max-w-[75%] rounded-lg p-2 relative', note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                     {currentUser?.role === 'admin' && !isEditing && (
                                         <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2" onClick={() => handleEditRemark(task, remarkIndex)}><Pen className="h-2 w-2" /></Button>
@@ -149,7 +149,7 @@ const TaskDisplayItem = ({ task, isSelected, isOverdue }: { task: TaskWithId; is
                                     )}
                                     <p className="text-[9px] text-right mt-1 opacity-70">{format(new Date(note.date), 'MMM d, HH:mm')}</p>
                                 </div>
-                                {note.authorId === currentUser?.uid && <Avatar className="h-6 w-6 border"><AvatarFallback>{getInitials(currentUser.nickname || currentUser.username)}</AvatarFallback></Avatar>}
+                                {note.authorId === currentUser?.uid && <Avatar className="h-4 w-6 border"><AvatarFallback>{getInitials(currentUser.nickname || currentUser.username)}</AvatarFallback></Avatar>}
                             </div>
                         );
                     })}
@@ -276,11 +276,11 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients, onView
       <CardContent className="p-1 space-y-1">
         <div className="flex items-center justify-between p-1 border-b gap-2">
            <div className="flex-shrink-0 flex items-center gap-1">
-                <Button variant="outline" size="icon" className="h-6 w-7" onClick={() => changeMonth(-1)}>
+                <Button variant="outline" size="icon" className="h-4 w-7" onClick={() => changeMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <h3 className="text-xs font-semibold w-24 text-center">{format(currentMonthDate, 'MMMM yyyy')}</h3>
-                 <Button variant="outline" size="icon" className="h-6 w-7" onClick={() => changeMonth(1)}>
+                 <Button variant="outline" size="icon" className="h-4 w-7" onClick={() => changeMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                 </Button>
            </div>
@@ -290,7 +290,7 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients, onView
                         key={day} 
                         variant={isSameDay(selectedDate, setDate(currentMonthDate, day)) ? 'default' : daysWithTasksInCurrentMonth.has(day) ? 'secondary' : 'outline'}
                         size="sm"
-                        className="h-6 w-6 p-0 text-[10px]"
+                        className="h-4 w-6 p-0 text-[10px]"
                         onClick={() => {
                             setSelectedDate(startOfDay(setDate(currentMonthDate, day)));
                         }}
