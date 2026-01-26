@@ -801,7 +801,7 @@ export default function ClientIdPage() {
 
             // 3. Generate and download zip
             const zipBlob = await zip.generateAsync({ type: 'blob' });
-            saveAs(zipBlob, `${client.name}_Report_Bundle_${activeMonthData.name}.zip`);
+            saveAs(zipBlob, `${client.name}_Report_${activeMonthData.name}.zip`);
 
         } catch (error) {
             console.error("Failed to generate report bundle:", error);
