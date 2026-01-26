@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useMemo } from 'react';
@@ -127,6 +126,10 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
+           <DialogTitle className="sr-only">{existingBill ? "Edit Bill" : "Issue New Bill"}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {existingBill ? `Update the details for bill #${existingBill.slNo}.` : 'Create a new bill for this client.'}
+          </DialogDescription>
           <div className="flex justify-between items-start">
             <div className='pt-2'>
               <AppLogoBlack />
