@@ -150,26 +150,18 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
               </div>
               <div className='text-right'>
                   <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>
+                  {existingBill && (
+                     <p className="text-sm text-muted-foreground">Status: <span className='font-medium text-foreground'>{existingBill.status}</span></p>
+                  )}
               </div>
            </div>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-             <div className="grid grid-cols-3 gap-4 p-3 border rounded-md">
+             <div className="grid grid-cols-2 gap-4 p-3 border rounded-md">
                 <FormField control={form.control} name="duration" render={({ field }) => (
                     <FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g., Aug 2024" {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="status" render={({ field }) => (
-                    <FormItem><FormLabel>Bill Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                            <SelectContent>
-                                {(["Issued", "Paid", "Overdue", "Cancelled"] as BillStatus[]).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                    </FormItem>
                 )} />
                 <FormItem>
                     <FormLabel>Date of Issue</FormLabel>
