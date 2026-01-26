@@ -34,7 +34,7 @@ const statusBackgroundColors: Record<string, string> = {
   'On Work': 'bg-gray-500/40',
   'For Approval': 'bg-[#ffb131]',
   'Approved': 'bg-[#42f925]',
-  'Posted': 'bg-cyan-400',
+  'Posted': 'bg-indigo-400',
   'Completed': 'bg-indigo-400',
   'Hold': 'bg-gray-500/40',
   'To Do': 'bg-gray-400/40',
@@ -421,9 +421,9 @@ const DailyTaskTable: React.FC<{
                 <Table className="text-[10px] border-collapse min-w-full">
                     <TableHeader className="sticky top-0 bg-background z-30 shadow-sm">
                         <TableRow className="h-6">
-                            <TableHead className='border-r p-1 w-[40px] sticky left-0 bg-background z-40'>Sl.</TableHead>
-                            <TableHead className='border-r p-1 w-[150px] sticky left-[40px] bg-background z-40'>Client</TableHead>
-                            <TableHead className='border-r p-1 w-[100px] sticky left-[190px] bg-background z-40'>Assigned</TableHead>
+                            <TableHead className='border-r p-1 w-[30px] sticky left-0 bg-background z-40'>Sl.</TableHead>
+                            <TableHead className='border-r p-1 w-[120px] sticky left-[30px] bg-background z-40'>Client</TableHead>
+                            <TableHead className='border-r p-1 w-[100px] sticky left-[150px] bg-background z-40'>Assigned</TableHead>
                             {employees.map((employee) => (
                                 <React.Fragment key={employee.id}>
                                     <TableHead
@@ -487,12 +487,12 @@ const DailyTaskTable: React.FC<{
                                                     </TableCell>
                                                     <TableCell
                                                         rowSpan={maxTasks}
-                                                        className={cn("border-r align-middle px-1 sticky left-[40px] bg-background z-20", isHighlighted && "bg-yellow-200")}
+                                                        className={cn("border-r align-middle px-1 sticky left-[30px] bg-background z-20", isHighlighted && "bg-yellow-200")}
                                                         onDoubleClick={() => toggleHighlight(client.id)}
                                                     >
                                                         <span className="truncate">{client.name}</span>
                                                     </TableCell>
-                                                    <TableCell rowSpan={maxTasks} className="border-r align-middle px-1 sticky left-[190px] bg-background z-20">
+                                                    <TableCell rowSpan={maxTasks} className="border-r align-middle px-1 sticky left-[150px] bg-background z-20">
                                                         <span className="truncate">{assignedEmployees}</span>
                                                     </TableCell>
                                                 </>
@@ -500,13 +500,13 @@ const DailyTaskTable: React.FC<{
                                             
                                             {employees.map((employee, empIndex) => {
                                                 const task = tasksByEmployee[empIndex]?.[rowIndex];
-                                                 const isOverdue = task ? (() => {
+                                                const isOverdue = task ? (() => {
                                                     const deadline = new Date(task.deadline);
                                                     deadline.setHours(23, 59, 59, 999);
                                                     const isPromotionTask = task.description === 'Paid Promotion' || task.description === 'Plan Promotion';
                                                     return !isPromotionTask && !['For Approval', 'Approved', 'Posted', 'Completed'].includes(task.status) && task.status !== 'To Do' && deadline < now;
                                                 })() : false;
-
+                                                
                                                 return (
                                                     <React.Fragment key={employee.id}>
                                                         <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
