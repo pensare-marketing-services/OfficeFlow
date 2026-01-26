@@ -131,7 +131,9 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <div className="flex justify-between items-start">
-            <AppLogoBlack />
+            <div className='pt-2'>
+              <AppLogoBlack />
+            </div>
             <div className="text-right text-xs text-muted-foreground">
               <p className="font-bold text-sm text-foreground">OfficeFlow</p>
               <p>First Floor, #1301, TK Tower</p>
@@ -140,20 +142,25 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
             </div>
           </div>
           <Separator className="my-4" />
-          <DialogTitle>{existingBill ? `Edit Bill #${existingBill.slNo}` : "Issue New Bill"}</DialogTitle>
-          <DialogDescription>
-            Fill in the details below to {existingBill ? 'update the' : 'create a new'} bill for {client.name}.
-          </DialogDescription>
+           <div className="flex justify-between items-end">
+              <div>
+                  <h3 className="font-bold">BILL TO:</h3>
+                  <p className="text-muted-foreground">{client.name}</p>
+              </div>
+              <div className='text-right'>
+                  <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>
+              </div>
+           </div>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+             <div className="grid grid-cols-3 gap-4 p-3 border rounded-md">
                 <FormField control={form.control} name="duration" render={({ field }) => (
                     <FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g., Aug 2024" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="status" render={({ field }) => (
-                    <FormItem><FormLabel>Status</FormLabel>
+                    <FormItem><FormLabel>Bill Status</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                             <SelectContent>
@@ -163,16 +170,18 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                         <FormMessage />
                     </FormItem>
                 )} />
+                <FormItem>
+                    <FormLabel>Date of Issue</FormLabel>
+                    <Input value={format(new Date(existingBill?.issuedDate || Date.now()), "MMM dd, yyyy")} disabled />
+                </FormItem>
             </div>
             
-            <Separator />
-
-            <div>
+            <div className='border rounded-lg overflow-hidden'>
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="w-[150px] text-right">Amount</TableHead>
+                  <TableRow className="bg-gray-800 hover:bg-gray-800">
+                    <TableHead className="text-white">Description</TableHead>
+                    <TableHead className="w-[150px] text-right text-white">Amount</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -220,38 +229,39 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                 </TableBody>
                 <TableFooter>
                     <TableRow>
-                        <TableCell colSpan={2} className="text-right font-bold">Total</TableCell>
-                        <TableCell className="text-right font-bold">{totalAmount.toFixed(2)}</TableCell>
+                        <TableCell colSpan={2} className="text-right font-bold">Total Amount</TableCell>
+                        <TableCell className="text-right font-bold pr-8">{totalAmount.toFixed(2)}</TableCell>
+                    </TableRow>
+                     <TableRow>
+                        <TableCell colSpan={2} className="text-right font-bold">Balance Due</TableCell>
+                        <TableCell className="p-1 text-right pr-2">
+                           <FormField control={form.control} name="balance" render={({ field }) => (
+                                <FormItem>
+                                    <FormControl><Input type="number" placeholder="0.00" className="text-right h-8" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        </TableCell>
                     </TableRow>
                 </TableFooter>
               </Table>
-               <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => append({ description: "", amount: 0 })}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Item
-                </Button>
             </div>
+             <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => append({ description: "", amount: 0 })}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Item
+              </Button>
             
-            <Separator />
-            
-            <div className="grid grid-cols-2 gap-4">
-                <div />
-                <FormField control={form.control} name="balance" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Balance Due</FormLabel>
-                        <FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )} />
-            </div>
-
-
-            <DialogFooter>
+            <DialogFooter className='pt-4'>
+                <div className='w-full text-left'>
+                    <p className='text-sm font-bold'>Thank you for your business!</p>
+                    <p className='text-xs text-muted-foreground'>Please make payments to the details provided separately.</p>
+                </div>
                 <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

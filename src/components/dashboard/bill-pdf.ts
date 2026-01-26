@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
@@ -8,38 +9,39 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     let finalY = 20;
 
     // Header
-    // Note: The logo path is hardcoded. Ensure '/avatars/app-logo-black.png' exists in your public folder.
-    // As we cannot add binary files, this will only work if the image is already present.
-    // doc.addImage('/avatars/app-logo-black.png', 'PNG', 14, 15, 50, 20);
+    // Note: The logo path is hardcoded. It MUST exist in `/public/avatars/app-logo-black.png`.
+    try {
+        doc.addImage('/avatars/app-logo-black.png', 'PNG', 14, 15, 50, 15);
+    } catch(e) {
+        console.error("Error adding logo to PDF. Make sure the image exists at /public/avatars/app-logo-black.png", e);
+        doc.setFontSize(14);
+        doc.text('OfficeFlow', 14, 25);
+    }
     
-    doc.setFontSize(10);
-    doc.text('First Floor, #1301, TK Tower', 195, 15, { align: 'right' });
-    doc.text('Above Chicking Koduvally', 195, 20, { align: 'right' });
-    doc.text('Calicut, Kerala-673572', 195, 25, { align: 'right' });
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('First Floor, #1301, TK Tower', 196, 15, { align: 'right' });
+    doc.text('Above Chicking Koduvally', 196, 20, { align: 'right' });
+    doc.text('Calicut, Kerala-673572', 196, 25, { align: 'right' });
     
-    finalY += 20;
+    finalY = 35;
     doc.setDrawColor(200);
     doc.line(14, finalY, 196, finalY);
     finalY += 10;
 
-    // Bill To
-    doc.setFontSize(12);
+    // Bill To & Invoice Details
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.text('BILL TO:', 14, finalY);
     doc.setFont('helvetica', 'normal');
     doc.text(client.name, 14, finalY + 5);
-    // Add more client details if available
-    // doc.text(client.address, 14, finalY + 10);
-    finalY += 20;
 
-    // Bill Details
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(`INVOICE #${bill.slNo}`, 195, finalY, { align: 'right' });
+    doc.text(`INVOICE #${bill.slNo}`, 196, finalY, { align: 'right' });
+
     finalY += 8;
 
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
     autoTable(doc, {
         startY: finalY,
         body: [
@@ -48,10 +50,10 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
             ['Service Duration:', bill.duration],
         ],
         theme: 'plain',
-        styles: { fontSize: 10, cellPadding: 1 },
+        styles: { fontSize: 9, cellPadding: 0.5 },
         columnStyles: { 0: { fontStyle: 'bold', halign: 'right' }, 1: { halign: 'left' } },
         tableWidth: 'wrap',
-        margin: { left: 120 }
+        margin: { left: 130 }
     });
     finalY = (doc as any).lastAutoTable.finalY + 10;
     
@@ -65,18 +67,20 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
         head: [['Description', 'Amount']],
         body: tableBody,
         foot: [
-            [{ content: 'Total Amount', colSpan: 1, styles: { halign: 'right', fontStyle: 'bold' } }, bill.billAmount.toFixed(2)],
-            [{ content: 'Balance Due', colSpan: 1, styles: { halign: 'right', fontStyle: 'bold' } }, bill.balance.toFixed(2)],
+            [{ content: 'Total Amount', styles: { halign: 'right', fontStyle: 'bold' } }, { content: bill.billAmount.toFixed(2), styles: { halign: 'right' } }],
+            [{ content: 'Balance Due', styles: { halign: 'right', fontStyle: 'bold' } }, { content: bill.balance.toFixed(2), styles: { halign: 'right' } }],
         ],
         theme: 'striped',
-        headStyles: { fillColor: [33, 37, 41] },
-        footStyles: { fillColor: [248, 249, 250], textColor: 0 },
+        headStyles: { fillColor: [33, 37, 41], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+        footStyles: { fillColor: false, textColor: 0, fontStyle: 'normal' },
+        bodyStyles: { fontSize: 9 },
+        alternateRowStyles: { fillColor: [248, 249, 250] },
         columnStyles: { 1: { halign: 'right' } }
     });
     finalY = (doc as any).lastAutoTable.finalY + 20;
 
     // Footer / Notes
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.text('Thank you for your business!', 14, finalY);
     doc.text('Please make payments to the details provided separately.', 14, finalY + 5);
 
