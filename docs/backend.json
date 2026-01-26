@@ -516,6 +516,23 @@
         "status",
         "clientId"
       ]
+    },
+    "Bill": {
+      "title": "Bill",
+      "description": "Represents a bill issued to a client.",
+      "type": "object",
+      "properties": {
+        "slNo": { "type": "number" },
+        "duration": { "type": "string" },
+        "status": { "type": "string", "enum": ["Issued", "Paid", "Overdue", "Cancelled"] },
+        "view": { "type": "string" },
+        "billAmount": { "type": "number" },
+        "balance": { "type": "number" },
+        "clientId": { "type": "string" },
+        "month": { "type": "string" },
+        "issuedDate": { "type": "string", "format": "date-time" }
+      },
+      "required": ["slNo", "duration", "status", "billAmount", "balance", "clientId", "month", "issuedDate"]
     }
   },
   "auth": {
@@ -565,6 +582,13 @@
         "$ref": "#/entities/SeoTask"
       },
       "description": "Stores all SEO tasks for a specific client."
+    },
+    "/clients/{clientId}/bills/{billId}": {
+      "schema": {
+        "$ref": "#/entities/Bill"
+      },
+      "description": "Stores all bills for a specific client."
     }
   }
 }
+

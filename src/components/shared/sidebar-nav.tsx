@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { href: '/account', label: 'Account', icon: User, adminOnly: false },
+  { href: '/account', label: 'Accounts', icon: User, adminOnly: false },
 ];
 
 const settingsNavItem = { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true };

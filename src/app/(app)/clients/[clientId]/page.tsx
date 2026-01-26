@@ -4,7 +4,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction, MonthData, PaidPromotion, PlanPromotion } from '@/lib/data';
+import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction, MonthData, PaidPromotion, PlanPromotion, Bill } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -24,6 +24,7 @@ import SeoTable from '@/components/dashboard/seo-table';
 import WebsiteTable from '@/components/dashboard/website-table';
 import OtherTaskTable from '@/components/dashboard/other-task-table';
 import PlanPromotionsTable from '@/components/dashboard/plan-promotions-table';
+import BillsReportTable from '@/components/dashboard/bills-report-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -371,6 +372,8 @@ export default function ClientIdPage() {
     const [paidPromotionsLoading, setPaidPromotionsLoading] = useState(true);
     const [planPromotions, setPlanPromotions] = useState<(PlanPromotion & { id: string })[]>([]);
     const [planPromotionsLoading, setPlanPromotionsLoading] = useState(true);
+    const [bills, setBills] = useState<(Bill & { id: string })[]>([]);
+    const [billsLoading, setBillsLoading] = useState(true);
     const { toast } = useToast();
     
     const params = useParams();
@@ -621,6 +624,25 @@ export default function ClientIdPage() {
 
         return () => unsubscribe();
     }, [clientId, activeMonth]);
+    
+    useEffect(() => {
+        if (!clientId || !activeMonth) return;
+        setBillsLoading(true);
+        const billsQuery = query(
+            collection(db, `clients/${clientId}/bills`), 
+            where("month", "==", activeMonth),
+            orderBy("slNo")
+        );
+        const unsubscribe = onSnapshot(billsQuery, (snapshot) => {
+            const billsData = snapshot.docs.map(doc => ({ ...doc.data() as Bill, id: doc.id }));
+            setBills(billsData);
+            setBillsLoading(false);
+        }, (error) => {
+            console.error("Error fetching bills:", error);
+            setBillsLoading(false);
+        });
+        return () => unsubscribe();
+    }, [clientId, activeMonth]);
 
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
@@ -709,7 +731,7 @@ export default function ClientIdPage() {
         return cashInTransactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
     }, [cashInTransactions]);
 
-    const pageLoading = loading || tasksLoading || usersLoading || cashInLoading || paidPromotionsLoading || planPromotionsLoading;
+    const pageLoading = loading || tasksLoading || usersLoading || cashInLoading || paidPromotionsLoading || planPromotionsLoading || billsLoading;
     const activeMonthData = useMemo(() => monthlyTabs.find(m => m.name === activeMonth), [monthlyTabs, activeMonth]);
 
     const handleDownloadBundle = async () => {
@@ -972,6 +994,16 @@ export default function ClientIdPage() {
                             clientId={client.id}
                             transactions={cashInTransactions}
                             totalCashIn={totalCashIn}
+                        />
+                    )}
+                    </div>
+                    <div>
+                     {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                        <BillsReportTable
+                            client={client}
+                            bills={bills}
+                            loading={billsLoading}
+                            activeMonth={activeMonth}
                         />
                     )}
                     </div>

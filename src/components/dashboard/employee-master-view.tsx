@@ -72,7 +72,7 @@ const PriorityDisplayItem = ({ task }: { task: TaskWithId }) => {
     };
 
     return (
-        <div className="h-4 w-full flex items-center justify-center border-b">
+        <div className="h-6 w-full flex items-center justify-center border-b">
             <Input
                 type="number"
                 value={priority}
@@ -81,7 +81,7 @@ const PriorityDisplayItem = ({ task }: { task: TaskWithId }) => {
                 onChange={(e) => setPriority(Number(e.target.value))}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
-                className="h-4 w-8 text-[10px] text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
+                className="h-6 w-8 text-[10px] text-center p-1 bg-transparent border-transparent hover:border-border focus:border-ring"
             />
         </div>
     );
@@ -117,7 +117,7 @@ const TaskDisplayItem = ({ task, isSelected, isOverdue }: { task: TaskWithId; is
             <PopoverTrigger asChild>
                 <div
                     className={cn(
-                        'h-4 w-full flex items-center justify-start cursor-pointer text-[10px] font-medium border-b px-1',
+                        'h-6 w-full flex items-center justify-start cursor-pointer text-[10px] font-medium border-b px-1',
                         taskStatusColor,
                         isSelected && 'ring-1 ring-accent ring-inset'
                     )}
@@ -287,11 +287,11 @@ export default function EmployeeMasterView({ tasks, users, clients, onViewEmploy
         <div className="flex items-center justify-between p-1 border-b gap-2">
            <div className="flex-shrink-0 flex items-center gap-1">
                 <Button variant="outline" size="icon" className="h-6 w-7" onClick={() => changeMonth(-1)}>
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-6 w-4" />
                 </Button>
                 <h3 className="text-xs font-semibold w-24 text-center">{format(currentMonthDate, 'MMMM yyyy')}</h3>
                  <Button variant="outline" size="icon" className="h-6 w-7" onClick={() => changeMonth(1)}>
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-6 w-4" />
                 </Button>
            </div>
             <div className="flex-grow flex flex-wrap gap-1 justify-around">
@@ -431,7 +431,7 @@ const DailyTaskTable: React.FC<{
             <div className="overflow-auto relative" style={{ height: 'calc(100vh - 150px)' }}>
                 <Table className="text-[10px] border-collapse min-w-full">
                     <TableHeader className="sticky top-0 bg-background z-30 shadow-sm">
-                        <TableRow className="h-4">
+                        <TableRow className="h-6">
                             <TableHead className='border-r p-1 w-[40px] sticky left-0 bg-background z-40'>Sl.</TableHead>
                             <TableHead className='border-r p-1 w-[150px] sticky left-[40px] bg-background z-40'>Client</TableHead>
                             <TableHead className='border-r p-1 w-[100px] sticky left-[190px] bg-background z-40'>Assigned</TableHead>
@@ -521,10 +521,10 @@ const DailyTaskTable: React.FC<{
                                                 return (
                                                     <React.Fragment key={employee.id}>
                                                         <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
-                                                            {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} isOverdue={isOverdue} /> : <div className='h-4 border-b'></div>}
+                                                            {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} isOverdue={isOverdue} /> : <div className='h-6 border-b'></div>}
                                                         </TableCell>
                                                         <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
-                                                            {task ? <PriorityDisplayItem task={task} /> : <div className='h-4 border-b'></div>}
+                                                            {task ? <PriorityDisplayItem task={task} /> : <div className='h-6 border-b'></div>}
                                                         </TableCell>
                                                     </React.Fragment>
                                                 );
