@@ -52,6 +52,14 @@ interface IssueBillDialogProps {
   billCount: number;
 }
 
+const billableServices = [
+    "graphic design",
+    "posted",
+    "trade mark",
+    "seo",
+    "web",
+];
+
 export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsOpen, client, existingBill, billCount }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -165,20 +173,20 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
             <div className="p-6">
               <DialogHeader>
                 <div className="flex justify-between items-start">
-                  <div className='pt-2'>
-                    <AppLogoBlack />
-                  </div>
-                  <div className="text-right">
-                    <DialogTitle className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 101}</DialogTitle>
-                    <DialogDescription asChild>
-                        <div className="text-xs text-muted-foreground mt-1">
-                            <p className="font-bold text-sm text-foreground">PENSARE MARKETING</p>
-                            <p>First Floor, #1301, TK Tower</p>
-                            <p>Above Chicking Koduvally</p>
-                            <p>Calicut, Kerala-673572</p>
-                        </div>
-                    </DialogDescription>
-                  </div>
+                    <div className='pt-2'>
+                        <AppLogoBlack />
+                    </div>
+                    <div className="text-right">
+                        <DialogTitle className="text-xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 101}</DialogTitle>
+                        <DialogDescription asChild>
+                            <div className="text-xs text-muted-foreground mt-1">
+                                <p className="font-bold text-sm text-foreground">PENSARE MARKETING</p>
+                                <p>First Floor, #1301, TK Tower</p>
+                                <p>Above Chicking Koduvally</p>
+                                <p>Calicut, Kerala-673572</p>
+                            </div>
+                        </DialogDescription>
+                    </div>
                 </div>
                 <Separator className="my-4" />
                 <div className="flex justify-between items-start">
@@ -253,12 +261,20 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                             name={`items.${index}.description`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormControl>
-                                  <Input 
-                                    placeholder="Service description" 
-                                    {...field} 
-                                  />
-                                </FormControl>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select a service" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {billableServices.map(service => (
+                                      <SelectItem key={service} value={service} className="capitalize">
+                                        {service}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 <FormMessage />
                               </FormItem>
                             )}
