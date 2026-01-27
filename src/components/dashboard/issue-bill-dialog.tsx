@@ -5,7 +5,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -66,7 +66,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
       items: [{ description: '', amount: '' }],
       issuedDate: new Date(),
     },
-    mode: 'onChange', // Change to onChange for real-time validation
+    mode: 'onChange',
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -81,13 +81,11 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     return ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6'];
   }, [client]);
 
-  // Use useWatch to watch items array - this is more efficient than watch()
   const watchedItems = useWatch({
     control: form.control,
     name: "items",
   });
 
-  // Calculate total amount whenever watchedItems changes
   const totalAmount = useMemo(() => {
     if (!watchedItems || !Array.isArray(watchedItems)) return 0;
     
@@ -175,11 +173,14 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                   <div className='pt-2'>
                     <AppLogoBlack />
                   </div>
-                  <div className="text-right text-xs text-muted-foreground">
-                    <p className="font-bold text-sm text-foreground">PENSARE MARKETING</p>
-                    <p>First Floor, #1301, TK Tower</p>
-                    <p>Above Chicking Koduvally</p>
-                    <p>Calicut, Kerala-673572</p>
+                  <div className="text-right">
+                    <DialogTitle className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</DialogTitle>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      <p className="font-bold text-sm text-foreground">PENSARE MARKETING</p>
+                      <p>First Floor, #1301, TK Tower</p>
+                      <p>Above Chicking Koduvally</p>
+                      <p>Calicut, Kerala-673572</p>
+                    </div>
                   </div>
                 </div>
                 <Separator className="my-4" />
@@ -191,16 +192,13 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                       <p className="text-xs text-muted-foreground whitespace-pre-line">{client.address}</p>
                     )}
                   </div>
-                  <div className='text-right'>
-                    <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>
-                    
-                    <div className='flex flex-col items-end gap-2 mt-4'>
+                  <div className='flex flex-col items-end gap-2'>
                       <FormField control={form.control} name="month" render={({ field }) => (
                         <FormItem className="flex items-center gap-2">
                           <FormLabel>Month:</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
-                              <SelectTrigger className="w-[140px]">
+                              <SelectTrigger className="w-[140px] h-8 text-[10px]">
                                 <SelectValue placeholder="Select month" />
                               </SelectTrigger>
                             </FormControl>
@@ -214,7 +212,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                       <FormField control={form.control} name="duration" render={({ field }) => (
                           <FormItem className="flex items-center gap-2">
                             <FormLabel>Duration:</FormLabel>
-                            <FormControl><Input placeholder="e.g., Aug 2024" {...field} className='w-[140px]' /></FormControl>
+                            <FormControl><Input placeholder="e.g., Aug 2024" {...field} className='w-[140px] h-8 text-[10px]' /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
@@ -227,7 +225,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                                   <Button
                                     variant={"outline"}
                                     className={cn(
-                                      "w-[140px] pl-3 text-left font-normal",
+                                      "w-[140px] pl-3 text-left font-normal h-8 text-[10px]",
                                       !field.value && "text-muted-foreground"
                                     )}
                                   >
@@ -252,7 +250,6 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                             <FormMessage />
                           </FormItem>
                         )} />
-                    </div>
                   </div>
                 </div>
               </DialogHeader>
