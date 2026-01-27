@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,6 @@ const billItemSchema = z.object({
 });
 
 const billSchema = z.object({
-  month: z.string().min(1, "A month is required."),
   duration: z.string().min(1, "Duration is required."),
   balance: z.preprocess(
     (val) => val === '' ? 0 : parseFloat(String(val)),
@@ -60,7 +59,6 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billSchema),
     defaultValues: {
-      month: '',
       duration: '',
       balance: 0,
       items: [{ description: '', amount: '' }],
@@ -73,13 +71,6 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     control: form.control,
     name: "items",
   });
-
-  const monthOptions = useMemo(() => {
-    if (client?.months && client.months.length > 0) {
-        return client.months.map(m => m.name);
-    }
-    return ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6'];
-  }, [client]);
 
   const watchedItems = useWatch({
     control: form.control,
@@ -99,7 +90,6 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     if (isOpen) {
       if (existingBill) {
         form.reset({
-          month: existingBill.month,
           duration: existingBill.duration,
           balance: existingBill.balance,
           items: existingBill.items && existingBill.items.length > 0 
@@ -112,7 +102,6 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
         });
       } else {
         form.reset({
-          month: monthOptions[0] || '',
           duration: '',
           balance: 0,
           items: [{ description: '', amount: '' }],
@@ -120,7 +109,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
         });
       }
     }
-  }, [existingBill, isOpen, form, monthOptions]);
+  }, [existingBill, isOpen, form]);
 
   const onSubmit = async (data: BillFormValues) => {
     setLoading(true);
@@ -130,6 +119,8 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
         amount: parseFloat(item.amount) || 0,
       }));
 
+      const calculatedMonth = format(data.issuedDate, "MMMM yyyy");
+
       if (existingBill) {
         const billRef = doc(db, `clients/${client.id}/bills`, existingBill.id);
         const updatePayload = {
@@ -137,6 +128,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
           items: itemsWithNumbers,
           issuedDate: data.issuedDate.toISOString(),
           billAmount: totalAmount,
+          month: calculatedMonth,
         };
         await updateDoc(billRef, updatePayload as any);
         toast({ title: "Bill Updated", description: "The bill details have been successfully updated." });
@@ -150,7 +142,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
           status: 'Issued',
           slNo: billCount + 1,
           clientId: client.id,
-          month: data.month,
+          month: calculatedMonth,
           view: '', 
         };
         await addDoc(collection(db, `clients/${client.id}/bills`), newBillData);
@@ -178,12 +170,14 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                   </div>
                   <div className="text-right">
                     <DialogTitle className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</DialogTitle>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      <p className="font-bold text-sm text-foreground">PENSARE MARKETING</p>
-                      <p>First Floor, #1301, TK Tower</p>
-                      <p>Above Chicking Koduvally</p>
-                      <p>Calicut, Kerala-673572</p>
-                    </div>
+                    <DialogDescription asChild>
+                        <div className="text-xs text-muted-foreground mt-1">
+                            <p className="font-bold text-sm text-foreground">PENSARE MARKETING</p>
+                            <p>First Floor, #1301, TK Tower</p>
+                            <p>Above Chicking Koduvally</p>
+                            <p>Calicut, Kerala-673572</p>
+                        </div>
+                    </DialogDescription>
                   </div>
                 </div>
                 <Separator className="my-4" />
@@ -239,22 +233,6 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                         )} />
                   </div>
                 </div>
-                 <FormField control={form.control} name="month" render={({ field }) => (
-                    <FormItem className="flex items-center gap-2 mt-2">
-                        <FormLabel className='text-[10px]'>Month:</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                            <SelectTrigger className="w-[140px] h-8 text-[10px]">
-                            <SelectValue placeholder="Select month" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            {monthOptions.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-                        </SelectContent>
-                        </Select>
-                        <FormMessage />
-                    </FormItem>
-                )} />
               </DialogHeader>
 
               <div className='border rounded-lg overflow-hidden mt-6'>

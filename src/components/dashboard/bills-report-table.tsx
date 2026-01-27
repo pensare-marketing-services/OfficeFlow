@@ -110,7 +110,7 @@ export default function BillsReportTable({ bills, client, loading }: BillsReport
         <>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between p-3">
-                    <CardTitle className="text-base font-headline">Bills Report</CardTitle>
+                    <CardTitle className="text-base font-headline">Bills Report for {client.name}</CardTitle>
                     <Button size="sm" onClick={handleIssueNewBill} className="h-7 gap-1">
                         <Plus className="h-4 w-4" />
                         Issue Bill
@@ -123,10 +123,10 @@ export default function BillsReportTable({ bills, client, loading }: BillsReport
                                 <TableHead className="w-[40px] text-[10px]">No</TableHead>
                                 <TableHead className="text-[10px]">Duration</TableHead>
                                 <TableHead className="w-[120px] text-[10px]">Status</TableHead>
-                                <TableHead className="text-[10px]">View</TableHead>
+                                <TableHead className="w-[50px] text-center text-[10px]">View</TableHead>
                                 <TableHead className="text-right text-[10px]">Bill Amount</TableHead>
                                 <TableHead className="text-right text-[10px]">Balance</TableHead>
-                                <TableHead className="w-[120px] text-center text-[10px]">Actions</TableHead>
+                                <TableHead className="w-[80px] text-center text-[10px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -156,15 +156,15 @@ export default function BillsReportTable({ bills, client, loading }: BillsReport
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                    <TableCell className="py-1 px-2 text-[10px] truncate">{bill.view}</TableCell>
+                                    <TableCell className="p-0 text-center">
+                                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleViewBill(bill)}>
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
                                     <TableCell className="py-1 px-2 text-[10px] text-right">{bill.billAmount.toFixed(2)}</TableCell>
                                     <TableCell className="py-1 px-2 text-[10px] text-right">{bill.balance.toFixed(2)}</TableCell>
                                     <TableCell className="p-0 text-center">
                                          <div className="flex items-center justify-center gap-0">
-                                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleViewBill(bill)}>
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
-                                            
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>
                                                     <Button variant="ghost" size="icon" className="h-7 w-7">
