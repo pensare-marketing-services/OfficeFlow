@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useMemo } from 'react';
@@ -170,11 +169,17 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                           <p className="text-xs text-muted-foreground whitespace-pre-line">{client.address}</p>
                         )}
                     </div>
-                    <div className='text-right flex flex-col items-end gap-2'>
+                     <div className='text-right flex flex-col items-end gap-2'>
                         <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>
-                        <div className='grid grid-cols-2 gap-4'>
+                        <div className='flex gap-2'>
                           <FormField control={form.control} name="duration" render={({ field }) => (
-                              <FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g., Aug 2024" {...field} /></FormControl><FormMessage /></FormItem>
+                              <FormItem>
+                                <FormLabel>Duration</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., Aug 2024" {...field} className="w-[140px]" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
                           )} />
                           <FormField control={form.control} name="issuedDate" render={({ field }) => (
                               <FormItem className="flex flex-col">
@@ -185,7 +190,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                                           <Button
                                           variant={"outline"}
                                           className={cn(
-                                              "w-[240px] pl-3 text-left font-normal",
+                                              "w-[140px] pl-3 text-left font-normal",
                                               !field.value && "text-muted-foreground"
                                           )}
                                           >
@@ -198,7 +203,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                                           </Button>
                                       </FormControl>
                                       </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0" align="start">
+                                      <PopoverContent className="w-auto p-0" align="end">
                                       <Calendar
                                           mode="single"
                                           selected={field.value}
@@ -299,7 +304,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
             
             <DialogFooter className='bg-muted p-6 pt-4 sm:justify-between sm:items-end'>
                 <div className='text-left'>
-                    <p className='text-sm font-bold mb-2'>Thank you for your business!</p>
+                    
                     <h4 className="text-xs font-bold mb-1">Bank Details:</h4>
                     <p className='text-[10px] text-muted-foreground'>PENSARE MARKETING</p>
                     <p className='text-[10px] text-muted-foreground'>State Bank of India, Koduvally Branch</p>
@@ -307,12 +312,15 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                     <p className='text-[10px] text-muted-foreground'>IFSC Code: SBIN0001442</p>
                     <p className='text-[10px] text-muted-foreground'>GPay: 9745600523</p>
                 </div>
-                <div className="flex gap-2 mt-4 sm:mt-0">
-                  <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={loading}>
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {existingBill ? "Save Changes" : "Issue Bill"}
-                  </Button>
+                 <div className="flex flex-col items-center gap-4">
+                    <p className='text-sm font-bold'>Thank you for your business!</p>
+                    <div className="flex gap-2">
+                      <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
+                      <Button type="submit" disabled={loading}>
+                          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {existingBill ? "Save Changes" : "Issue Bill"}
+                      </Button>
+                    </div>
                 </div>
             </DialogFooter>
           </form>
