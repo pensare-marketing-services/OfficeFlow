@@ -96,7 +96,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
   const watchedItems = form.watch('items');
   const totalAmount = useMemo(() => {
     return watchedItems?.reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0) || 0;
-  }, [JSON.stringify(watchedItems)]);
+  }, [watchedItems]);
 
 
   const onSubmit = async (data: BillFormValues) => {
@@ -117,7 +117,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
 
       if (existingBill) {
         const billRef = doc(db, `clients/${client.id}/bills`, existingBill.id);
-        await updateDoc(billRef, billDataPayload);
+        await updateDoc(billRef, billDataPayload as any); // Use `any` to bypass strict type check for update
         toast({ title: "Bill Updated", description: "The bill has been successfully updated." });
       } else {
         const newBillData = {
@@ -141,161 +141,163 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-3xl">
-        <DialogHeader>
-           <DialogTitle className="sr-only">{existingBill ? "Edit Bill" : "Issue New Bill"}</DialogTitle>
-           <DialogDescription className="sr-only">
-            {existingBill ? `Update the details for bill #${existingBill.slNo}.` : 'Create a new bill for this client.'}
-          </DialogDescription>
-          <div className="flex justify-between items-start">
-            <div className='pt-2'>
-              <AppLogoBlack />
-            </div>
-            <div className="text-right text-xs text-muted-foreground">
-              <p className="font-bold text-sm text-foreground">PENSARE MARKETING</p>
-              <p>First Floor, #1301, TK Tower</p>
-              <p>Above Chicking Koduvally</p>
-              <p>Calicut, Kerala-673572</p>
-            </div>
-          </div>
-          <Separator className="my-4" />
-           <div className="flex justify-between items-start">
-              <div>
-                  <h3 className="font-bold">BILL TO:</h3>
-                  <p className="text-muted-foreground">{client.name}</p>
-                  {client.address && (
-                    <p className="text-xs text-muted-foreground whitespace-pre-line">{client.address}</p>
-                  )}
-              </div>
-              <div className='text-right flex flex-col items-end gap-2'>
-                  <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>
-                  <div className='grid grid-cols-2 gap-4'>
-                    <FormField control={form.control} name="duration" render={({ field }) => (
-                        <FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g., Aug 2024" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="issuedDate" render={({ field }) => (
-                         <FormItem className="flex flex-col">
-                            <FormLabel>Date of Issue</FormLabel>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                <FormControl>
-                                    <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-[240px] pl-3 text-left font-normal",
-                                        !field.value && "text-muted-foreground"
-                                    )}
-                                    >
-                                    {field.value ? (
-                                        format(field.value, "MMM dd, yyyy")
-                                    ) : (
-                                        <span>Pick a date</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    initialFocus
-                                />
-                                </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                         </FormItem>
-                     )} />
-                   </div>
-              </div>
-           </div>
-        </DialogHeader>
-
+      <DialogContent className="sm:max-w-3xl p-0">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className='border rounded-lg overflow-hidden'>
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-800 hover:bg-gray-800">
-                    <TableHead className="text-white">Description</TableHead>
-                    <TableHead className="w-[150px] text-right text-white">Amount</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {fields.map((field, index) => (
-                    <TableRow key={field.id}>
-                      <TableCell className="p-1">
-                        <FormField
-                          control={form.control}
-                          name={`items.${index}.description`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl><Input placeholder="Service description" {...field} /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell className="p-1">
-                        <FormField
-                          control={form.control}
-                          name={`items.${index}.amount`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl><Input type="number" placeholder="0.00" className="text-right" {...field} /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell className="p-1 text-right">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive"
-                          onClick={() => remove(index)}
-                          disabled={fields.length <= 1}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="p-6">
+              <DialogHeader>
+                <DialogTitle className="sr-only">{existingBill ? "Edit Bill" : "Issue New Bill"}</DialogTitle>
+                <DialogDescription className="sr-only">
+                  {existingBill ? `Update the details for bill #${existingBill.slNo}.` : 'Create a new bill for this client.'}
+                </DialogDescription>
+                <div className="flex justify-between items-start">
+                  <div className='pt-2'>
+                    <AppLogoBlack />
+                  </div>
+                  <div className="text-right text-xs text-muted-foreground">
+                    <p className="font-bold text-sm text-foreground">PENSARE MARKETING</p>
+                    <p>First Floor, #1301, TK Tower</p>
+                    <p>Above Chicking Koduvally</p>
+                    <p>Calicut, Kerala-673572</p>
+                  </div>
+                </div>
+                <Separator className="my-4" />
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h3 className="font-bold">BILL TO:</h3>
+                        <p className="text-muted-foreground">{client.name}</p>
+                        {client.address && (
+                          <p className="text-xs text-muted-foreground whitespace-pre-line">{client.address}</p>
+                        )}
+                    </div>
+                    <div className='text-right flex flex-col items-end gap-2'>
+                        <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>
+                        <div className='grid grid-cols-2 gap-4'>
+                          <FormField control={form.control} name="duration" render={({ field }) => (
+                              <FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g., Aug 2024" {...field} /></FormControl><FormMessage /></FormItem>
+                          )} />
+                          <FormField control={form.control} name="issuedDate" render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                  <FormLabel>Date of Issue</FormLabel>
+                                  <Popover>
+                                      <PopoverTrigger asChild>
+                                      <FormControl>
+                                          <Button
+                                          variant={"outline"}
+                                          className={cn(
+                                              "w-[240px] pl-3 text-left font-normal",
+                                              !field.value && "text-muted-foreground"
+                                          )}
+                                          >
+                                          {field.value ? (
+                                              format(field.value, "MMM dd, yyyy")
+                                          ) : (
+                                              <span>Pick a date</span>
+                                          )}
+                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                          </Button>
+                                      </FormControl>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-auto p-0" align="start">
+                                      <Calendar
+                                          mode="single"
+                                          selected={field.value}
+                                          onSelect={field.onChange}
+                                          initialFocus
+                                      />
+                                      </PopoverContent>
+                                  </Popover>
+                                  <FormMessage />
+                              </FormItem>
+                          )} />
+                        </div>
+                    </div>
+                </div>
+              </DialogHeader>
+
+              <div className='border rounded-lg overflow-hidden mt-6'>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-800 hover:bg-gray-800">
+                      <TableHead className="text-white">Description</TableHead>
+                      <TableHead className="w-[150px] text-right text-white">Amount</TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-                <TableFooter>
-                    <TableRow>
-                        <TableCell colSpan={2} className="text-right font-bold">Total Amount</TableCell>
-                        <TableCell className="text-right font-bold pr-8">{totalAmount.toFixed(2)}</TableCell>
-                    </TableRow>
-                     <TableRow>
-                        <TableCell colSpan={2} className="text-right font-bold">Balance Due</TableCell>
-                        <TableCell className="p-1 text-right pr-2">
-                           <FormField control={form.control} name="balance" render={({ field }) => (
-                                <FormItem>
-                                    <FormControl><Input type="number" placeholder="0.00" className="text-right h-8" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
+                  </TableHeader>
+                  <TableBody>
+                    {fields.map((field, index) => (
+                      <TableRow key={field.id}>
+                        <TableCell className="p-1">
+                          <FormField
+                            control={form.control}
+                            name={`items.${index}.description`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl><Input placeholder="Service description" {...field} /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </TableCell>
-                    </TableRow>
-                </TableFooter>
-              </Table>
+                        <TableCell className="p-1">
+                          <FormField
+                            control={form.control}
+                            name={`items.${index}.amount`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl><Input type="number" placeholder="0.00" className="text-right" {...field} /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell className="p-1 text-right">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive"
+                            onClick={() => remove(index)}
+                            disabled={fields.length <= 1}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                  <TableFooter>
+                      <TableRow>
+                          <TableCell colSpan={2} className="text-right font-bold">Total Amount</TableCell>
+                          <TableCell className="text-right font-bold pr-8">{totalAmount.toFixed(2)}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                          <TableCell colSpan={2} className="text-right font-bold">Balance Due</TableCell>
+                          <TableCell className="p-1 text-right pr-2">
+                            <FormField control={form.control} name="balance" render={({ field }) => (
+                                  <FormItem>
+                                      <FormControl><Input type="number" placeholder="0.00" className="text-right h-8" {...field} /></FormControl>
+                                      <FormMessage />
+                                  </FormItem>
+                              )} />
+                          </TableCell>
+                      </TableRow>
+                  </TableFooter>
+                </Table>
+              </div>
+              <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => append({ description: "", amount: "" })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Item
+                </Button>
             </div>
-             <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={() => append({ description: "", amount: "" })}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Item
-              </Button>
             
-            <DialogFooter className='pt-4 sm:justify-between sm:items-end'>
+            <DialogFooter className='bg-muted p-6 pt-4 sm:justify-between sm:items-end'>
                 <div className='text-left'>
                     <p className='text-sm font-bold mb-2'>Thank you for your business!</p>
                     <h4 className="text-xs font-bold mb-1">Bank Details:</h4>
