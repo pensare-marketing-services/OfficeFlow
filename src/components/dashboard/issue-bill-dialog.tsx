@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const billItemSchema = z.object({
   description: z.string().min(1, "Description is required."),
@@ -29,6 +30,7 @@ const billItemSchema = z.object({
 });
 
 const billSchema = z.object({
+  month: z.string().min(1, "A month is required."),
   duration: z.string().min(1, "Duration is required."),
   balance: z.preprocess(
     (val) => val === '' ? 0 : parseFloat(String(val)),
@@ -46,18 +48,18 @@ interface IssueBillDialogProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   client: Client;
-  activeMonth: string;
   existingBill: (Bill & { id: string }) | null;
   billCount: number;
 }
 
-export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsOpen, client, activeMonth, existingBill, billCount }) => {
+export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsOpen, client, existingBill, billCount }) => {
   const { toast } = useToast();
-  const [loading, setLoading] = React.useState(false);
+  const [loading, React.useState(false);
 
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billSchema),
     defaultValues: {
+      month: '',
       duration: '',
       balance: 0,
       items: [{ description: '', amount: '' }],
@@ -70,6 +72,13 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     control: form.control,
     name: "items",
   });
+
+  const monthOptions = useMemo(() => {
+    if (client?.months && client.months.length > 0) {
+        return client.months.map(m => m.name);
+    }
+    return ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6'];
+  }, [client]);
 
   // Use useWatch to watch items array - this is more efficient than watch()
   const watchedItems = useWatch({
@@ -91,6 +100,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     if (isOpen) {
       if (existingBill) {
         form.reset({
+          month: existingBill.month,
           duration: existingBill.duration,
           balance: existingBill.balance,
           items: existingBill.items && existingBill.items.length > 0 
@@ -103,6 +113,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
         });
       } else {
         form.reset({
+          month: monthOptions[0] || '',
           duration: '',
           balance: 0,
           items: [{ description: '', amount: '' }],
@@ -110,7 +121,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
         });
       }
     }
-  }, [existingBill, isOpen, form]);
+  }, [existingBill, isOpen, form, monthOptions]);
 
   const onSubmit = async (data: BillFormValues) => {
     setLoading(true);
@@ -137,7 +148,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
           ...billDataPayload,
           slNo: billCount + 1,
           clientId: client.id,
-          month: activeMonth,
+          month: data.month,
           view: '', 
         };
         await addDoc(collection(db, `clients/${client.id}/bills`), newBillData);
@@ -159,10 +170,6 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="p-6">
               <DialogHeader>
-                <DialogTitle className="sr-only">{existingBill ? "Edit Bill" : "Issue New Bill"}</DialogTitle>
-                <DialogDescription className="sr-only">
-                  {existingBill ? `Update the details for bill #${existingBill.slNo}.` : 'Create a new bill for this client.'}
-                </DialogDescription>
                 <div className="flex justify-between items-start">
                   <div className='pt-2'>
                     <AppLogoBlack />
@@ -186,31 +193,40 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                   <div className='text-right'>
                     <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>
                     
-                    {/* Row layout for Duration and Date */}
                     <div className='flex flex-col items-end gap-2 mt-4'>
-                      <div className='flex items-center gap-2'>
-                        <FormLabel>Duration:</FormLabel>
-                        <FormField control={form.control} name="duration" render={({ field }) => (
-                          <FormItem className='w-[140px]'>
+                      <FormField control={form.control} name="month" render={({ field }) => (
+                        <FormItem className="flex items-center gap-2">
+                          <FormLabel>Month:</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
-                              <Input placeholder="e.g., Aug 2024" {...field} />
+                              <SelectTrigger className="w-[140px]">
+                                <SelectValue placeholder="Select month" />
+                              </SelectTrigger>
                             </FormControl>
+                            <SelectContent>
+                              {monthOptions.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="duration" render={({ field }) => (
+                          <FormItem className="flex items-center gap-2">
+                            <FormLabel>Duration:</FormLabel>
+                            <FormControl><Input placeholder="e.g., Aug 2024" {...field} className='w-[140px]' /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
-                      </div>
-                      
-                      <div className='flex items-center gap-2'>
-                        <FormLabel>Date of Issue:</FormLabel>
-                        <FormField control={form.control} name="issuedDate" render={({ field }) => (
-                          <FormItem className="flex flex-col w-[140px]">
+                      <FormField control={form.control} name="issuedDate" render={({ field }) => (
+                          <FormItem className="flex items-center gap-2">
+                            <FormLabel>Date of Issue:</FormLabel>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <FormControl>
                                   <Button
                                     variant={"outline"}
                                     className={cn(
-                                      "pl-3 text-left font-normal",
+                                      "w-[140px] pl-3 text-left font-normal",
                                       !field.value && "text-muted-foreground"
                                     )}
                                   >
@@ -235,7 +251,6 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                             <FormMessage />
                           </FormItem>
                         )} />
-                      </div>
                     </div>
                   </div>
                 </div>

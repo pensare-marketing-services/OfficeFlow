@@ -9,7 +9,6 @@ import { Skeleton } from '../ui/skeleton';
 interface ClientBillOverviewTableProps {
     clients: (Client & { id: string })[];
     bills: (Bill & { id: string; clientId: string })[];
-    activeMonth: string;
     selectedClientId: string | null;
     onClientSelect: (clientId: string) => void;
     loading: boolean;
@@ -23,31 +22,31 @@ const statusColors: Record<BillStatus | 'Not Issued', string> = {
     "Not Issued": "bg-gray-100 text-gray-800"
 };
 
-export default function ClientBillOverviewTable({ clients, bills, activeMonth, selectedClientId, onClientSelect, loading }: ClientBillOverviewTableProps) {
+export default function ClientBillOverviewTable({ clients, bills, selectedClientId, onClientSelect, loading }: ClientBillOverviewTableProps) {
     
     const getClientBillStatus = (clientId: string): { status: BillStatus | "Not Issued", color: string } => {
-        const clientBillsForMonth = bills
-            .filter(b => b.clientId === clientId && b.month === activeMonth)
+        const clientBills = bills
+            .filter(b => b.clientId === clientId)
             .sort((a, b) => new Date(b.issuedDate).getTime() - new Date(a.issuedDate).getTime());
 
-        if (clientBillsForMonth.length === 0) {
+        if (clientBills.length === 0) {
             return { status: "Not Issued", color: statusColors["Not Issued"] };
         }
         
         // If any bill is unpaid (Issued or Overdue), that's the primary status
-        const unpaidBill = clientBillsForMonth.find(b => b.status === "Overdue" || b.status === "Issued");
+        const unpaidBill = clientBills.find(b => b.status === "Overdue" || b.status === "Issued");
         if (unpaidBill) {
             return { status: unpaidBill.status, color: statusColors[unpaidBill.status] };
         }
 
         // Otherwise, show "Paid" if all are paid
-        const allPaid = clientBillsForMonth.every(b => b.status === "Paid");
+        const allPaid = clientBills.every(b => b.status === "Paid");
         if(allPaid) {
             return { status: "Paid", color: statusColors["Paid"] };
         }
 
         // Fallback to the latest bill's status
-        const latestBill = clientBillsForMonth[0];
+        const latestBill = clientBills[0];
         return { status: latestBill.status, color: statusColors[latestBill.status] };
     };
 
@@ -63,14 +62,13 @@ export default function ClientBillOverviewTable({ clients, bills, activeMonth, s
                             <TableRow>
                                 <TableHead className="w-[40px] text-[10px]">No</TableHead>
                                 <TableHead className="text-[10px]">Client</TableHead>
-                                <TableHead className="text-[10px]">Duration</TableHead>
                                 <TableHead className="w-[100px] text-[10px]">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading && Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={i}>
-                                    <TableCell colSpan={4}><Skeleton className="h-7 w-full" /></TableCell>
+                                    <TableCell colSpan={3}><Skeleton className="h-7 w-full" /></TableCell>
                                 </TableRow>
                             ))}
                             {!loading && clients.map((client, index) => {
@@ -83,7 +81,6 @@ export default function ClientBillOverviewTable({ clients, bills, activeMonth, s
                                     >
                                         <TableCell className="py-1 px-2 text-[10px] font-medium">{index + 1}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">{client.name}</TableCell>
-                                        <TableCell className="py-1 px-2 text-[10px]">{activeMonth}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">
                                             <span className={cn("px-2 py-0.5 rounded-full text-xs", color)}>
                                                 {status}
@@ -94,7 +91,7 @@ export default function ClientBillOverviewTable({ clients, bills, activeMonth, s
                             })}
                             {!loading && clients.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                    <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
                                         No clients found.
                                     </TableCell>
                                 </TableRow>

@@ -33,7 +33,6 @@ interface BillsReportTableProps {
     bills: (Bill & { id: string })[];
     client: Client;
     loading: boolean;
-    activeMonth: string;
 }
 
 const statusColors: Record<BillStatus, string> = {
@@ -43,7 +42,7 @@ const statusColors: Record<BillStatus, string> = {
     "Cancelled": "bg-gray-100 text-gray-800"
 };
 
-export default function BillsReportTable({ bills, client, loading, activeMonth }: BillsReportTableProps) {
+export default function BillsReportTable({ bills, client, loading }: BillsReportTableProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill & { id: string } | null>(null);
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -192,7 +191,7 @@ export default function BillsReportTable({ bills, client, loading, activeMonth }
                             {!loading && bills.length === 0 && (
                                 <TableRow>
                                     <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                                        No bills issued for this month yet.
+                                        No bills issued for this client yet.
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -204,7 +203,6 @@ export default function BillsReportTable({ bills, client, loading, activeMonth }
                 isOpen={dialogOpen} 
                 setIsOpen={setDialogOpen} 
                 client={client}
-                activeMonth={activeMonth}
                 existingBill={selectedBill}
                 billCount={bills.length}
             />

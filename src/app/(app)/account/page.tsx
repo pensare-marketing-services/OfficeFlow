@@ -3,13 +3,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { Client, Bill } from '@/lib/data';
 import { useClients } from '@/hooks/use-clients';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Skeleton } from '@/components/ui/skeleton';
 import BillsReportTable from '@/components/dashboard/bills-report-table';
 import { db } from '@/firebase/client';
 import { collection, query, onSnapshot, Unsubscribe } from 'firebase/firestore';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ClientBillOverviewTable from '@/components/dashboard/client-bill-overview-table';
 
 type ClientWithId = Client & { id: string };
@@ -26,35 +24,6 @@ export default function AccountPage() {
         }
         return null;
     });
-    
-    // Create a list of unique months from clients data for the tabs
-    const allMonths = useMemo(() => {
-        if (clients.length === 0) return ['Month 1'];
-        const monthsSet = new Set<string>();
-        clients.forEach(c => {
-            if (c.months && c.months.length > 0) {
-                c.months.forEach(m => monthsSet.add(m.name));
-            } else {
-                 monthsSet.add('Month 1');
-            }
-        });
-        return Array.from(monthsSet).sort((a, b) => {
-            const aMatch = a.match(/\d+/);
-            const bMatch = b.match(/\d+/);
-            if (aMatch && bMatch) {
-                return parseInt(aMatch[0]) - parseInt(bMatch[0]);
-            }
-            return a.localeCompare(b);
-        });
-    }, [clients]);
-
-    const [activeMonth, setActiveMonth] = useState<string>(allMonths[0]);
-
-     useEffect(() => {
-        if (allMonths.length > 0 && !allMonths.includes(activeMonth)) {
-            setActiveMonth(allMonths[0]);
-        }
-     }, [allMonths, activeMonth]);
 
     useEffect(() => {
         if (clients.length === 0) {
@@ -98,7 +67,7 @@ export default function AccountPage() {
     }, [selectedClientId]);
 
     const selectedClient = useMemo(() => clients.find(c => c.id === selectedClientId) || null, [clients, selectedClientId]);
-    const billsForSelectedClient = useMemo(() => allBills.filter(b => b.clientId === selectedClientId && b.month === activeMonth).sort((a,b) => a.slNo - b.slNo), [allBills, selectedClientId, activeMonth]);
+    const billsForSelectedClient = useMemo(() => allBills.filter(b => b.clientId === selectedClientId).sort((a,b) => new Date(b.issuedDate).getTime() - new Date(a.issuedDate).getTime()), [allBills, selectedClientId]);
     const sortedClients = useMemo(() => [...clients].filter(c => c.active !== false).sort((a, b) => (a.priority || 0) - (b.priority || 0)), [clients]);
 
     return (
@@ -109,23 +78,10 @@ export default function AccountPage() {
                     <CardDescription>Manage all client billing from one central location.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                     <Tabs value={activeMonth} onValueChange={setActiveMonth}>
-                        <ScrollArea className="w-full whitespace-nowrap">
-                            <TabsList>
-                                {allMonths.map(month => (
-                                    <TabsTrigger key={month} value={month}>
-                                        {month}
-                                    </TabsTrigger>
-                                ))}
-                            </TabsList>
-                            <ScrollBar orientation="horizontal" />
-                        </ScrollArea>
-                    </Tabs>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <ClientBillOverviewTable
                             clients={sortedClients}
                             bills={allBills}
-                            activeMonth={activeMonth}
                             selectedClientId={selectedClientId}
                             onClientSelect={setSelectedClientId}
                             loading={clientsLoading || billsLoading}
@@ -137,7 +93,6 @@ export default function AccountPage() {
                                     client={selectedClient}
                                     bills={billsForSelectedClient}
                                     loading={billsLoading}
-                                    activeMonth={activeMonth}
                                 />
                             ) : (
                                 <div className="flex h-full min-h-[300px] items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 bg-card">
