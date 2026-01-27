@@ -62,9 +62,9 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
         theme: 'plain',
         startY: billToStartY - 1, // Align top of this table with "BILL TO"
         styles: { fontSize: 9, cellPadding: 1 },
-        columnStyles: { 0: { fontStyle: 'bold', halign: 'right' }, 1: { halign: 'left' } },
+        columnStyles: { 0: { fontStyle: 'bold', halign: 'left' }, 1: { halign: 'left' } },
         tableWidth: 'wrap',
-        margin: { left: pageWidth - pageMargin - 80 } // Position it from the right edge
+        margin: { left: pageWidth - pageMargin - 95 } // Position it from the right edge
     });
 
     finalY = Math.max(
@@ -103,14 +103,9 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
 
     // --- FOOTER / NOTES ---
     const pageHeight = doc.internal.pageSize.getHeight();
-    const footerStartY = pageHeight - 55;
-
-    // Use a fixed position for the footer content at the bottom of the page
-    doc.setFontSize(9).setFont('helvetica', 'normal');
-    doc.text('Thank you for your business!', pageMargin, footerStartY);
 
     doc.setFontSize(8).setFont('helvetica', 'bold');
-    doc.text('Bank Details:', pageMargin, footerStartY + 10);
+    doc.text('Bank Details:', pageMargin, pageHeight - 40);
     
     doc.setFont('helvetica', 'normal');
     const bankDetails = [
@@ -120,7 +115,10 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
         'IFSC Code: SBIN0001442',
         'GPay: 9745600523'
     ];
-    doc.text(bankDetails, pageMargin, footerStartY + 14);
+    doc.text(bankDetails, pageMargin, pageHeight - 36);
+
+    doc.setFontSize(9).setFont('helvetica', 'normal');
+    doc.text('Thank you for your business!', pageWidth / 2, pageHeight - 15, { align: 'center' });
     
     return doc.output('blob');
 };

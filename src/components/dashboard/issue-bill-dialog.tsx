@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useMemo } from 'react';
@@ -55,7 +56,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     defaultValues: {
       duration: '',
       balance: 0,
-      items: [{ description: '', amount: 0 }],
+      items: [{ description: '', amount: '' as any }],
     },
   });
 
@@ -70,13 +71,13 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
         form.reset({
           duration: existingBill.duration,
           balance: existingBill.balance,
-          items: existingBill.items && existingBill.items.length > 0 ? existingBill.items : [{ description: '', amount: 0 }],
+          items: existingBill.items && existingBill.items.length > 0 ? existingBill.items : [{ description: '', amount: '' as any }],
         });
       } else {
         form.reset({
           duration: '',
           balance: 0,
-          items: [{ description: '', amount: 0 }],
+          items: [{ description: '', amount: '' as any }],
         });
       }
     }
@@ -246,7 +247,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                 variant="outline"
                 size="sm"
                 className="mt-2"
-                onClick={() => append({ description: "", amount: 0 })}
+                onClick={() => append({ description: "", amount: "" as any })}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Item
