@@ -38,12 +38,12 @@ interface BillsReportTableProps {
 const statusColors: Record<BillStatus, string> = {
     "Issued": "bg-blue-100 text-blue-800",
     "Paid": "bg-green-100 text-green-800",
-    "Partially Paid": "bg-yellow-100 text-yellow-800",
+    "Partially": "bg-yellow-100 text-yellow-800",
     "Overdue": "bg-red-100 text-red-800",
     "Cancelled": "bg-gray-100 text-gray-800"
 };
 
-const allStatuses: BillStatus[] = ["Issued", "Partially Paid", "Paid", "Overdue", "Cancelled"];
+const allStatuses: BillStatus[] = ["Issued", "Partially", "Paid", "Overdue", "Cancelled"];
 
 export default function BillsReportTable({ bills, client, loading }: BillsReportTableProps) {
     const [dialogOpen, setDialogOpen] = useState(false);

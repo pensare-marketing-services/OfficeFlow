@@ -140,7 +140,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
           issuedDate: data.issuedDate.toISOString(),
           billAmount: totalAmount,
           status: 'Issued',
-          slNo: billCount + 1,
+          slNo: billCount + 101,
           clientId: client.id,
           month: calculatedMonth,
           view: '', 
@@ -169,7 +169,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                     <AppLogoBlack />
                   </div>
                   <div className="text-right">
-                    <DialogTitle className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</DialogTitle>
+                    <DialogTitle className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 101}</DialogTitle>
                     <DialogDescription asChild>
                         <div className="text-xs text-muted-foreground mt-1">
                             <p className="font-bold text-sm text-foreground">PENSARE MARKETING</p>

@@ -34,7 +34,7 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     finalY += 15;
 
     // --- INVOICE TITLE ---
-    doc.setFontSize(26);
+    doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(50, 50, 50); // Dark grey text
     doc.text('INVOICE', pageWidth / 2, finalY, { align: 'center' });

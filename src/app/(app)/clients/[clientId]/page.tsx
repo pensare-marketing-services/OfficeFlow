@@ -977,17 +977,17 @@ export default function ClientIdPage() {
                     </div>
                 </div>
             </div>
-             <div className="fixed bottom-6 z-50 transition-[left] duration-200 ease-linear left-4 md:left-[calc(var(--sidebar-width-icon)_-_1rem)] peer-data-[state=expanded]:left-[calc(var(--sidebar-width)_-_1rem)] w-14">
-                <Button
-                    size="icon"
-                    className="h-14 w-14 rounded-full shadow-lg"
-                    onClick={handleDownloadBundle}
-                    disabled={pageLoading || isDownloading}
-                    aria-label="Download Report"
-                >
-                    {isDownloading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Download className="h-6 w-6" />}
-                </Button>
-            </div>
+            <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-14">
+    <Button
+        size="icon"
+        className="h-14 w-14 rounded-full shadow-lg"
+        onClick={handleDownloadBundle}
+        disabled={pageLoading || isDownloading}
+        aria-label="Download Report"
+    >
+        {isDownloading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Download className="h-6 w-6" />}
+    </Button>
+</div>
         </div>
     );
 }
