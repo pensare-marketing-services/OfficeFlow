@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -26,8 +24,9 @@ import { cn } from '@/lib/utils';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { href: '/account', label: 'Accounts', icon: User, adminOnly: false },
 ];
+
+const accountNavItem = { href: '/account', label: 'Accounts', icon: User, adminOnly: false };
 
 const settingsNavItem = { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true };
 
@@ -44,11 +43,6 @@ export function SidebarNav() {
     setClientCollapsibleOpen(pathname.startsWith('/clients'));
   }, [pathname]);
 
-
-  const filteredMainNavItems = mainNavItems.filter(item => {
-    if (!item.adminOnly) return true;
-    return user?.role === 'admin';
-  });
 
   const activeClients = useMemo(() => clients.filter(c => c.active !== false).sort((a, b) => (a.priority || 0) - (b.priority || 0)), [clients]);
 
@@ -78,7 +72,7 @@ export function SidebarNav() {
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
-          {filteredMainNavItems.map((item) => (
+          {mainNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <Link href={item.href!}>
                     <SidebarMenuButton
@@ -156,6 +150,24 @@ export function SidebarNav() {
                 </CollapsibleContent>
              </Collapsible>
           )}
+
+          <SidebarMenuItem>
+            <Link href={accountNavItem.href!}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith(accountNavItem.href!)}
+                  tooltip={{
+                    children: accountNavItem.label,
+                  }}
+                >
+                    <span>
+                      <accountNavItem.icon />
+                      <span>{accountNavItem.label}</span>
+                    </span>
+                </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+
            {user?.role === 'admin' && (
              <SidebarMenuItem>
                 <Link href={settingsNavItem.href!}>
