@@ -17,13 +17,16 @@ export default function AccountPage() {
     const { clients, loading: clientsLoading } = useClients();
     const [allBills, setAllBills] = useState<BillWithClientId[]>([]);
     const [billsLoading, setBillsLoading] = useState(true);
+    const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
-    const [selectedClientId, setSelectedClientId] = useState<string | null>(() => {
-        if (typeof window !== 'undefined') {
-            return sessionStorage.getItem('selectedBillClientId');
+    // On initial mount, try to get the client from session storage.
+    useEffect(() => {
+        const savedClientId = sessionStorage.getItem('selectedBillClientId');
+        if (savedClientId) {
+            setSelectedClientId(savedClientId);
         }
-        return null;
-    });
+    }, []);
+
 
     useEffect(() => {
         if (clients.length === 0) {
@@ -96,7 +99,7 @@ export default function AccountPage() {
                                 />
                             ) : (
                                 <div className="flex h-full min-h-[300px] items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 bg-card">
-                                    <p className="text-muted-foreground text-center">Select a client from the list on the left to view their bills.</p>
+                                    <p className="text-muted-foreground text-center">Select a client to view and issue bills.</p>
                                 </div>
                             )}
                         </div>
