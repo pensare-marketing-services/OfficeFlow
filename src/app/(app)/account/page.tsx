@@ -19,15 +19,6 @@ export default function AccountPage() {
     const [billsLoading, setBillsLoading] = useState(true);
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
-    // On initial mount, try to get the client from session storage.
-    useEffect(() => {
-        const savedClientId = sessionStorage.getItem('selectedBillClientId');
-        if (savedClientId) {
-            setSelectedClientId(savedClientId);
-        }
-    }, []);
-
-
     useEffect(() => {
         if (clients.length === 0) {
             setAllBills([]);
@@ -59,15 +50,6 @@ export default function AccountPage() {
             unsubs.forEach(unsub => unsub());
         };
     }, [clients]);
-
-     // Save selected client ID to session storage
-    useEffect(() => {
-        if (selectedClientId) {
-            sessionStorage.setItem('selectedBillClientId', selectedClientId);
-        } else {
-            sessionStorage.removeItem('selectedBillClientId');
-        }
-    }, [selectedClientId]);
 
     const selectedClient = useMemo(() => clients.find(c => c.id === selectedClientId) || null, [clients, selectedClientId]);
     const billsForSelectedClient = useMemo(() => allBills.filter(b => b.clientId === selectedClientId).sort((a,b) => new Date(b.issuedDate).getTime() - new Date(a.issuedDate).getTime()), [allBills, selectedClientId]);
