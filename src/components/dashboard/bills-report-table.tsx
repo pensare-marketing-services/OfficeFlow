@@ -3,16 +3,31 @@
 
 import React, { useState } from 'react';
 import type { Bill, BillStatus, Client } from '@/lib/data';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Plus, Eye, Download, Share2, MoreVertical } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { Plus, Eye, Download, Share2, MoreVertical, Trash2, Loader2 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { IssueBillDialog } from './issue-bill-dialog';
 import { generateBillPDF } from './bill-pdf';
 import { saveAs } from 'file-saver';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { db } from '@/firebase/client';
+
 
 interface BillsReportTableProps {
     bills: (Bill & { id: string })[];
@@ -32,6 +47,8 @@ export default function BillsReportTable({ bills, client, loading, activeMonth }
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill & { id: string } | null>(null);
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const { toast } = useToast();
 
     const handleIssueNewBill = () => {
         setSelectedBill(null);
@@ -47,6 +64,28 @@ export default function BillsReportTable({ bills, client, loading, activeMonth }
         const pdfBlob = generateBillPDF(bill, client);
         saveAs(pdfBlob, `Bill_${client.name}_${bill.slNo}.pdf`);
     };
+
+    const handleDelete = async (billId: string) => {
+        setIsDeleting(true);
+        try {
+            const billRef = doc(db, `clients/${client.id}/bills`, billId);
+            await deleteDoc(billRef);
+            toast({
+                title: "Bill Deleted",
+                description: "The bill has been successfully deleted.",
+            });
+        } catch (error) {
+            console.error("Error deleting bill:", error);
+            toast({
+                variant: "destructive",
+                title: "Deletion Failed",
+                description: "There was an error deleting the bill.",
+            });
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
 
     return (
         <>
@@ -101,8 +140,10 @@ export default function BillsReportTable({ bills, client, loading, activeMonth }
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem onSelect={() => {
-                                                    handleViewBill(bill);
                                                     setOpenDropdownId(null);
+                                                    setTimeout(() => {
+                                                        handleViewBill(bill)
+                                                    }, 50)
                                                 }}>
                                                     <Eye className="mr-2 h-4 w-4" /> View/Edit
                                                 </DropdownMenuItem>
@@ -112,6 +153,37 @@ export default function BillsReportTable({ bills, client, loading, activeMonth }
                                                 <DropdownMenuItem onSelect={() => handleDownload(bill)}>
                                                     <Share2 className="mr-2 h-4 w-4" /> Share
                                                 </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <DropdownMenuItem
+                                                            onSelect={(e) => e.preventDefault()}
+                                                            className="text-destructive focus:text-destructive"
+                                                        >
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Delete
+                                                        </DropdownMenuItem>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                This action cannot be undone. This will permanently delete bill #{bill.slNo}.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                disabled={isDeleting}
+                                                                onClick={() => handleDelete(bill.id)}
+                                                                className="bg-destructive hover:bg-destructive/90"
+                                                            >
+                                                                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                                Yes, delete
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>

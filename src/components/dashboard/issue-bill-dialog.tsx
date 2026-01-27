@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -23,8 +23,8 @@ import { cn } from '@/lib/utils';
 
 const billItemSchema = z.object({
   description: z.string().min(1, "Description is required."),
-  amount: z.string().refine(val => val === '' || !isNaN(parseFloat(val)), {
-    message: "Must be a number."
+  amount: z.string().min(1, "Amount is required").refine(val => !isNaN(parseFloat(val)), {
+    message: "Must be a valid number."
   }),
 });
 
@@ -63,12 +63,29 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
       items: [{ description: '', amount: '' }],
       issuedDate: new Date(),
     },
+    mode: 'onChange', // Change to onChange for real-time validation
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "items",
   });
+
+  // Use useWatch to watch items array - this is more efficient than watch()
+  const watchedItems = useWatch({
+    control: form.control,
+    name: "items",
+  });
+
+  // Calculate total amount whenever watchedItems changes
+  const totalAmount = useMemo(() => {
+    if (!watchedItems || !Array.isArray(watchedItems)) return 0;
+    
+    return watchedItems.reduce((acc, item) => {
+      const amount = parseFloat(item?.amount || '0') || 0;
+      return acc + amount;
+    }, 0);
+  }, [watchedItems]);
 
   useEffect(() => {
     if (isOpen) {
@@ -77,7 +94,10 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
           duration: existingBill.duration,
           balance: existingBill.balance,
           items: existingBill.items && existingBill.items.length > 0 
-            ? existingBill.items.map(item => ({ ...item, amount: String(item.amount) })) 
+            ? existingBill.items.map(item => ({ 
+                description: item.description || '', 
+                amount: String(item.amount || '') 
+              })) 
             : [{ description: '', amount: '' }],
           issuedDate: new Date(existingBill.issuedDate),
         });
@@ -92,17 +112,11 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     }
   }, [existingBill, isOpen, form]);
 
-  const watchedItems = form.watch('items');
-  const totalAmount = useMemo(() => {
-    return watchedItems?.reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0) || 0;
-  }, [watchedItems]);
-
-
   const onSubmit = async (data: BillFormValues) => {
     setLoading(true);
     try {
       const itemsWithNumbers = data.items.map(item => ({
-        ...item,
+        description: item.description,
         amount: parseFloat(item.amount) || 0,
       }));
 
@@ -116,7 +130,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
 
       if (existingBill) {
         const billRef = doc(db, `clients/${client.id}/bills`, existingBill.id);
-        await updateDoc(billRef, billDataPayload as any); // Use `any` to bypass strict type check for update
+        await updateDoc(billRef, billDataPayload as any);
         toast({ title: "Bill Updated", description: "The bill has been successfully updated." });
       } else {
         const newBillData = {
@@ -162,61 +176,68 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                 </div>
                 <Separator className="my-4" />
                 <div className="flex justify-between items-start">
-                    <div>
-                        <h3 className="font-bold">BILL TO:</h3>
-                        <p className="text-muted-foreground">{client.name}</p>
-                        {client.address && (
-                          <p className="text-xs text-muted-foreground whitespace-pre-line">{client.address}</p>
-                        )}
-                    </div>
-                     <div className='text-right flex flex-col items-end gap-2'>
-                        <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>
-                        <div className='flex gap-2'>
-                          <FormField control={form.control} name="duration" render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Duration</FormLabel>
+                  <div>
+                    <h3 className="font-bold">BILL TO:</h3>
+                    <p className="text-muted-foreground">{client.name}</p>
+                    {client.address && (
+                      <p className="text-xs text-muted-foreground whitespace-pre-line">{client.address}</p>
+                    )}
+                  </div>
+                  <div className='text-right'>
+                    <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>
+                    
+                    {/* Row layout for Duration and Date */}
+                    <div className='flex flex-col items-end gap-2 mt-4'>
+                      <div className='flex items-center gap-2'>
+                        <FormLabel>Duration:</FormLabel>
+                        <FormField control={form.control} name="duration" render={({ field }) => (
+                          <FormItem className='w-[140px]'>
+                            <FormControl>
+                              <Input placeholder="e.g., Aug 2024" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
+                      
+                      <div className='flex items-center gap-2'>
+                        <FormLabel>Date of Issue:</FormLabel>
+                        <FormField control={form.control} name="issuedDate" render={({ field }) => (
+                          <FormItem className="flex flex-col w-[140px]">
+                            <Popover>
+                              <PopoverTrigger asChild>
                                 <FormControl>
-                                    <Input placeholder="e.g., Aug 2024" {...field} className="w-[140px]" />
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "MMM dd, yyyy")
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
                                 </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                          )} />
-                          <FormField control={form.control} name="issuedDate" render={({ field }) => (
-                              <FormItem className="flex flex-col">
-                                  <FormLabel>Date of Issue</FormLabel>
-                                  <Popover>
-                                      <PopoverTrigger asChild>
-                                      <FormControl>
-                                          <Button
-                                          variant={"outline"}
-                                          className={cn(
-                                              "w-[140px] pl-3 text-left font-normal",
-                                              !field.value && "text-muted-foreground"
-                                          )}
-                                          >
-                                          {field.value ? (
-                                              format(field.value, "MMM dd, yyyy")
-                                          ) : (
-                                              <span>Pick a date</span>
-                                          )}
-                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                          </Button>
-                                      </FormControl>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0" align="end">
-                                      <Calendar
-                                          mode="single"
-                                          selected={field.value}
-                                          onSelect={field.onChange}
-                                          initialFocus
-                                      />
-                                      </PopoverContent>
-                                  </Popover>
-                                  <FormMessage />
-                              </FormItem>
-                          )} />
-                        </div>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="end">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
                     </div>
+                  </div>
                 </div>
               </DialogHeader>
 
@@ -238,7 +259,12 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                             name={`items.${index}.description`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormControl><Input placeholder="Service description" {...field} /></FormControl>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Service description" 
+                                    {...field} 
+                                  />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -250,7 +276,19 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                             name={`items.${index}.amount`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormControl><Input type="number" placeholder="0.00" className="text-right" {...field} /></FormControl>
+                                <FormControl>
+                                  <Input 
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00" 
+                                    className="text-right" 
+                                    {...field}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      field.onChange(value);
+                                    }}
+                                  />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -272,56 +310,66 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                     ))}
                   </TableBody>
                   <TableFooter>
-                      <TableRow>
-                          <TableCell colSpan={2} className="text-right font-bold">Total Amount</TableCell>
-                          <TableCell className="text-right font-bold pr-8">{totalAmount.toFixed(2)}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                          <TableCell colSpan={2} className="text-right font-bold">Balance Due</TableCell>
-                          <TableCell className="p-1 text-right pr-2">
-                            <FormField control={form.control} name="balance" render={({ field }) => (
-                                  <FormItem>
-                                      <FormControl><Input type="number" placeholder="0.00" className="text-right h-8" {...field} /></FormControl>
-                                      <FormMessage />
-                                  </FormItem>
-                              )} />
-                          </TableCell>
-                      </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-right font-bold">Total Amount</TableCell>
+                      <TableCell className="text-right font-bold pr-8">
+                        {totalAmount.toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-right font-bold">Balance Due</TableCell>
+                      <TableCell className="p-1 text-right pr-2">
+                        <FormField control={form.control} name="balance" render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input 
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00" 
+                                className="text-right h-8" 
+                                {...field} 
+                                value={field.value}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </TableCell>
+                    </TableRow>
                   </TableFooter>
                 </Table>
               </div>
               <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => append({ description: "", amount: "" })}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Item
-                </Button>
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => append({ description: "", amount: "" })}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Item
+              </Button>
             </div>
             
             <DialogFooter className='bg-muted p-6 pt-4 sm:justify-between sm:items-end'>
-                <div className='text-left'>
-                    
-                    <h4 className="text-xs font-bold mb-1">Bank Details:</h4>
-                    <p className='text-[10px] text-muted-foreground'>PENSARE MARKETING</p>
-                    <p className='text-[10px] text-muted-foreground'>State Bank of India, Koduvally Branch</p>
-                    <p className='text-[10px] text-muted-foreground'>A/C No: 39003560642</p>
-                    <p className='text-[10px] text-muted-foreground'>IFSC Code: SBIN0001442</p>
-                    <p className='text-[10px] text-muted-foreground'>GPay: 9745600523</p>
+              <div className='text-left'>
+                <h4 className="text-xs font-bold mb-1">Bank Details:</h4>
+                <p className='text-[10px] text-muted-foreground'>PENSARE MARKETING</p>
+                <p className='text-[10px] text-muted-foreground'>State Bank of India, Koduvally Branch</p>
+                <p className='text-[10px] text-muted-foreground'>A/C No: 39003560642</p>
+                <p className='text-[10px] text-muted-foreground'>IFSC Code: SBIN0001442</p>
+                <p className='text-[10px] text-muted-foreground'>GPay: 9745600523</p>
+              </div>
+              <div className="flex flex-col items-center gap-4">
+                <p className='text-sm font-bold'>Thank you for your business!</p>
+                <div className="flex gap-2">
+                  <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
+                  <Button type="submit" disabled={loading}>
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {existingBill ? "Save Changes" : "Issue Bill"}
+                  </Button>
                 </div>
-                 <div className="flex flex-col items-center gap-4">
-                    <p className='text-sm font-bold'>Thank you for your business!</p>
-                    <div className="flex gap-2">
-                      <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
-                      <Button type="submit" disabled={loading}>
-                          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          {existingBill ? "Save Changes" : "Issue Bill"}
-                      </Button>
-                    </div>
-                </div>
+              </div>
             </DialogFooter>
           </form>
         </Form>
