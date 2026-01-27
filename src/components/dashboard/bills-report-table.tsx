@@ -62,7 +62,7 @@ export default function BillsReportTable({ bills, client, loading, activeMonth }
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[40px] text-[10px]">Sl No</TableHead>
+                                <TableHead className="w-[40px] text-[10px]">No</TableHead>
                                 <TableHead className="text-[10px]">Duration</TableHead>
                                 <TableHead className="w-[100px] text-[10px]">Status</TableHead>
                                 <TableHead className="text-[10px]">View</TableHead>

@@ -65,6 +65,7 @@ export type MonthData = {
 export type Client = {
   id: string;
   name: string;
+  address?: string;
   socialPlatforms?: string;
   plan?: string;
   billDuration?: string;

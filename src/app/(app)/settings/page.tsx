@@ -42,6 +42,7 @@ const categories = ["seo", "website", "digital marketing", "gd"] as const;
 
 const editClientSchema = z.object({
   name: z.string().min(2, 'Client name must be at least 2 characters.'),
+  address: z.string().optional(),
   employeeId1: z.string().optional(),
   employeeId2: z.string().optional(),
   employeeId3: z.string().optional(),
@@ -66,6 +67,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
         resolver: zodResolver(editClientSchema),
         defaultValues: {
             name: client.name,
+            address: client.address || '',
             employeeId1: client.employeeIds?.[0] || 'unassigned',
             employeeId2: client.employeeIds?.[1] || 'unassigned',
             employeeId3: client.employeeIds?.[2] || 'unassigned',
@@ -79,6 +81,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
         if(open) {
             form.reset({
                 name: client.name,
+                address: client.address || '',
                 employeeId1: client.employeeIds?.[0] || 'unassigned',
                 employeeId2: client.employeeIds?.[1] || 'unassigned',
                 employeeId3: client.employeeIds?.[2] || 'unassigned',
@@ -102,6 +105,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
 
         const updateData: Partial<Client> = {
             name: data.name, 
+            address: data.address,
             employeeIds: uniqueEmployeeIds,
             categories: data.categories || [],
             active: data.active,
@@ -151,6 +155,16 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem><FormLabel>Client Name</FormLabel><FormControl><Input placeholder="e.g., Acme Inc." {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+
+                        <FormField control={form.control} name="address" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Address</FormLabel>
+                                <FormControl>
+                                    <Textarea placeholder="Client's billing address" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
                         )} />
 
                         <div className="space-y-2">

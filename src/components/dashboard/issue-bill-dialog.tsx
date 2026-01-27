@@ -146,6 +146,9 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
               <div>
                   <h3 className="font-bold">BILL TO:</h3>
                   <p className="text-muted-foreground">{client.name}</p>
+                  {client.address && (
+                    <p className="text-xs text-muted-foreground whitespace-pre-line">{client.address}</p>
+                  )}
               </div>
               <div className='text-right'>
                   <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>

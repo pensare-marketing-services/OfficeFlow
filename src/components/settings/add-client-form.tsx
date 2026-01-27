@@ -18,11 +18,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Checkbox } from '../ui/checkbox';
 import { Separator } from '../ui/separator';
+import { Textarea } from '../ui/textarea';
 
 const categories = ["seo", "website", "digital marketing", "gd"] as const;
 
 const clientSchema = z.object({
   name: z.string().min(2, 'Client name must be at least 2 characters.'),
+  address: z.string().optional(),
   employeeId1: z.string().optional(),
   employeeId2: z.string().optional(),
   employeeId3: z.string().optional(),
@@ -43,6 +45,7 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
     resolver: zodResolver(clientSchema),
     defaultValues: {
       name: '',
+      address: '',
       employeeId1: 'unassigned',
       employeeId2: 'unassigned',
       employeeId3: 'unassigned',
@@ -70,6 +73,7 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
     try {
         await addDoc(collection(db, 'clients'), { 
             name: data.name,
+            address: data.address,
             employeeIds: uniqueEmployeeIds,
             priority: clientCount + 1,
             categories: data.categories || []
@@ -101,6 +105,16 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
                             <FormLabel className="col-span-1 text-[10px]">Client Name</FormLabel>
                             <FormControl className="col-span-2">
                                 <Input placeholder="e.g., Acme Inc." {...field} className="h-8 text-[10px]" />
+                            </FormControl>
+                            <div className="col-span-3 col-start-2"><FormMessage /></div>
+                        </FormItem>
+                    )} />
+                    
+                    <FormField control={form.control} name="address" render={({ field }) => (
+                         <FormItem className="grid grid-cols-3 items-start gap-2 space-y-0">
+                            <FormLabel className="col-span-1 text-[10px] pt-2">Address</FormLabel>
+                            <FormControl className="col-span-2">
+                                <Textarea placeholder="Client's billing address" {...field} className="h-20 text-[10px]" />
                             </FormControl>
                             <div className="col-span-3 col-start-2"><FormMessage /></div>
                         </FormItem>

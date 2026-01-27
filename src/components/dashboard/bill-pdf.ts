@@ -36,14 +36,21 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     doc.setFont('helvetica', 'normal');
     doc.text(client.name, 14, finalY + 5);
 
+    if (client.address) {
+        const addressLines = doc.splitTextToSize(client.address, 80);
+        doc.text(addressLines, 14, finalY + 10);
+        finalY += (addressLines.length * 4);
+    }
+
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(`INVOICE #${bill.slNo}`, 196, finalY, { align: 'right' });
+    const invoiceY = client.address ? finalY - (doc.splitTextToSize(client.address, 80).length * 4) : finalY;
+    doc.text(`INVOICE #${bill.slNo}`, 196, invoiceY, { align: 'right' });
 
     finalY += 8;
 
     autoTable(doc, {
-        startY: finalY,
+        startY: invoiceY,
         body: [
             ['Date of Issue:', format(new Date(bill.issuedDate), 'MMM dd, yyyy')],
             ['Service Duration:', bill.duration],
