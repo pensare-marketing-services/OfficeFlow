@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Client, Bill, BillStatus } from '@/lib/data';
@@ -17,6 +18,7 @@ interface ClientBillOverviewTableProps {
 const statusColors: Record<BillStatus | 'Not Issued', string> = {
     "Issued": "bg-blue-100 text-blue-800",
     "Paid": "bg-green-100 text-green-800",
+    "Partially Paid": "bg-yellow-100 text-yellow-800",
     "Overdue": "bg-red-100 text-red-800",
     "Cancelled": "bg-gray-100 text-gray-800",
     "Not Issued": "bg-gray-100 text-gray-800"
@@ -33,19 +35,26 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
             return { status: "Not Issued", color: statusColors["Not Issued"] };
         }
         
-        // If any bill is unpaid (Issued or Overdue), that's the primary status
-        const unpaidBill = clientBills.find(b => b.status === "Overdue" || b.status === "Issued");
-        if (unpaidBill) {
-            return { status: unpaidBill.status, color: statusColors[unpaidBill.status] };
+        // Check for highest priority status across all bills
+        if (clientBills.some(b => b.status === 'Overdue')) {
+            return { status: "Overdue", color: statusColors["Overdue"] };
+        }
+        if (clientBills.some(b => b.status === 'Partially Paid')) {
+            return { status: "Partially Paid", color: statusColors["Partially Paid"] };
+        }
+        if (clientBills.some(b => b.status === 'Issued')) {
+            return { status: "Issued", color: statusColors["Issued"] };
         }
 
-        // Otherwise, show "Paid" if all are paid
-        const allPaid = clientBills.every(b => b.status === "Paid");
-        if(allPaid) {
-            return { status: "Paid", color: statusColors["Paid"] };
+        // If we are here, all non-cancelled bills must be Paid
+        if (clientBills.every(b => b.status === 'Paid' || b.status === 'Cancelled')) {
+            // If there are any paid bills, show paid. Otherwise it's all cancelled.
+            if (clientBills.some(b => b.status === 'Paid')) {
+                return { status: "Paid", color: statusColors["Paid"] };
+            }
         }
 
-        // Fallback to the latest bill's status
+        // Fallback to the latest bill's status (could be 'Cancelled')
         const latestBill = clientBills[0];
         return { status: latestBill.status, color: statusColors[latestBill.status] };
     };
@@ -62,7 +71,7 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                             <TableRow>
                                 <TableHead className="w-[40px] text-[10px]">No</TableHead>
                                 <TableHead className="text-[10px]">Client</TableHead>
-                                <TableHead className="w-[100px] text-[10px]">Status</TableHead>
+                                <TableHead className="w-[120px] text-[10px]">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

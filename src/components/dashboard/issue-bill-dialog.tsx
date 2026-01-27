@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -55,7 +55,7 @@ interface IssueBillDialogProps {
 
 export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsOpen, client, existingBill, billCount }) => {
   const { toast } = useToast();
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billSchema),
@@ -130,21 +130,24 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
         amount: parseFloat(item.amount) || 0,
       }));
 
-      const billDataPayload = {
-        ...data,
-        items: itemsWithNumbers,
-        issuedDate: data.issuedDate.toISOString(),
-        billAmount: totalAmount,
-        status: existingBill ? existingBill.status : 'Issued'
-      };
-
       if (existingBill) {
         const billRef = doc(db, `clients/${client.id}/bills`, existingBill.id);
-        await updateDoc(billRef, billDataPayload as any);
-        toast({ title: "Bill Updated", description: "The bill has been successfully updated." });
+        const updatePayload = {
+          ...data,
+          items: itemsWithNumbers,
+          issuedDate: data.issuedDate.toISOString(),
+          billAmount: totalAmount,
+        };
+        await updateDoc(billRef, updatePayload as any);
+        toast({ title: "Bill Updated", description: "The bill details have been successfully updated." });
+
       } else {
         const newBillData = {
-          ...billDataPayload,
+          ...data,
+          items: itemsWithNumbers,
+          issuedDate: data.issuedDate.toISOString(),
+          billAmount: totalAmount,
+          status: 'Issued',
           slNo: billCount + 1,
           clientId: client.id,
           month: data.month,
@@ -192,33 +195,17 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                       <p className="text-xs text-muted-foreground whitespace-pre-line">{client.address}</p>
                     )}
                   </div>
-                  <div className='flex flex-col items-end gap-2'>
-                      <FormField control={form.control} name="month" render={({ field }) => (
-                        <FormItem className="flex items-center gap-2">
-                          <FormLabel>Month:</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="w-[140px] h-8 text-[10px]">
-                                <SelectValue placeholder="Select month" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {monthOptions.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={form.control} name="duration" render={({ field }) => (
-                          <FormItem className="flex items-center gap-2">
-                            <FormLabel>Duration:</FormLabel>
+                   <div className="flex items-start gap-4">
+                        <FormField control={form.control} name="duration" render={({ field }) => (
+                          <FormItem className="flex flex-col items-start gap-1">
+                            <FormLabel className='text-[10px]'>Duration</FormLabel>
                             <FormControl><Input placeholder="e.g., Aug 2024" {...field} className='w-[140px] h-8 text-[10px]' /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
                       <FormField control={form.control} name="issuedDate" render={({ field }) => (
-                          <FormItem className="flex items-center gap-2">
-                            <FormLabel>Date of Issue:</FormLabel>
+                          <FormItem className="flex flex-col items-start gap-1">
+                            <FormLabel className='text-[10px]'>Date of Issue</FormLabel>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <FormControl>
@@ -252,6 +239,22 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                         )} />
                   </div>
                 </div>
+                 <FormField control={form.control} name="month" render={({ field }) => (
+                    <FormItem className="flex items-center gap-2 mt-2">
+                        <FormLabel className='text-[10px]'>Month:</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                            <SelectTrigger className="w-[140px] h-8 text-[10px]">
+                            <SelectValue placeholder="Select month" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {monthOptions.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )} />
               </DialogHeader>
 
               <div className='border rounded-lg overflow-hidden mt-6'>
@@ -296,10 +299,6 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                                     placeholder="0.00" 
                                     className="text-right" 
                                     {...field}
-                                    onChange={(e) => {
-                                      const value = e.target.value;
-                                      field.onChange(value);
-                                    }}
                                   />
                                 </FormControl>
                                 <FormMessage />

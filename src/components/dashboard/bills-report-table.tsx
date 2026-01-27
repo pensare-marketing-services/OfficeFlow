@@ -25,8 +25,9 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 
 interface BillsReportTableProps {
@@ -38,9 +39,12 @@ interface BillsReportTableProps {
 const statusColors: Record<BillStatus, string> = {
     "Issued": "bg-blue-100 text-blue-800",
     "Paid": "bg-green-100 text-green-800",
+    "Partially Paid": "bg-yellow-100 text-yellow-800",
     "Overdue": "bg-red-100 text-red-800",
     "Cancelled": "bg-gray-100 text-gray-800"
 };
+
+const allStatuses: BillStatus[] = ["Issued", "Partially Paid", "Paid", "Overdue", "Cancelled"];
 
 export default function BillsReportTable({ bills, client, loading }: BillsReportTableProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -84,6 +88,24 @@ export default function BillsReportTable({ bills, client, loading }: BillsReport
             setIsDeleting(false);
         }
     };
+    
+    const handleStatusChange = async (billId: string, newStatus: BillStatus) => {
+        try {
+            const billRef = doc(db, `clients/${client.id}/bills`, billId);
+            await updateDoc(billRef, { status: newStatus });
+            toast({
+                title: "Status Updated",
+                description: "The bill status has been changed.",
+            });
+        } catch (error) {
+            console.error("Error updating bill status:", error);
+            toast({
+                variant: "destructive",
+                title: "Update Failed",
+                description: "There was an error updating the bill status.",
+            });
+        }
+    };
 
 
     return (
@@ -102,7 +124,7 @@ export default function BillsReportTable({ bills, client, loading }: BillsReport
                             <TableRow>
                                 <TableHead className="w-[40px] text-[10px]">No</TableHead>
                                 <TableHead className="text-[10px]">Duration</TableHead>
-                                <TableHead className="w-[100px] text-[10px]">Status</TableHead>
+                                <TableHead className="w-[120px] text-[10px]">Status</TableHead>
                                 <TableHead className="text-[10px]">View</TableHead>
                                 <TableHead className="text-right text-[10px]">Bill Amount</TableHead>
                                 <TableHead className="text-right text-[10px]">Balance</TableHead>
@@ -120,9 +142,21 @@ export default function BillsReportTable({ bills, client, loading }: BillsReport
                                     <TableCell className="py-1 px-2 text-[10px] font-medium">{bill.slNo}</TableCell>
                                     <TableCell className="py-1 px-2 text-[10px]">{bill.duration}</TableCell>
                                     <TableCell className="py-1 px-2 text-[10px]">
-                                        <span className={cn("px-2 py-0.5 rounded-full text-xs", statusColors[bill.status])}>
-                                            {bill.status}
-                                        </span>
+                                        <Select value={bill.status} onValueChange={(newStatus: BillStatus) => handleStatusChange(bill.id, newStatus)}>
+                                            <SelectTrigger className={cn("h-7 text-xs border-0 focus:ring-0", statusColors[bill.status])}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {allStatuses.map(status => (
+                                                    <SelectItem key={status} value={status}>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className={cn("h-2 w-2 rounded-full", statusColors[status].replace('bg-','').replace('-100','').replace(/text-.*/, ''))} />
+                                                            {status}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </TableCell>
                                     <TableCell className="py-1 px-2 text-[10px] truncate">{bill.view}</TableCell>
                                     <TableCell className="py-1 px-2 text-[10px] text-right">{bill.billAmount.toFixed(2)}</TableCell>

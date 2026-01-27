@@ -111,7 +111,7 @@ export type CashInTransaction = {
     status: CashInTransactionStatus;
 }
 
-export type BillStatus = "Issued" | "Paid" | "Overdue" | "Cancelled";
+export type BillStatus = "Issued" | "Paid" | "Partially Paid" | "Overdue" | "Cancelled";
 
 export type BillItem = {
     description: string;
