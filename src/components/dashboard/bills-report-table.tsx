@@ -31,6 +31,7 @@ const statusColors: Record<BillStatus, string> = {
 export default function BillsReportTable({ bills, client, loading, activeMonth }: BillsReportTableProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill & { id: string } | null>(null);
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
     const handleIssueNewBill = () => {
         setSelectedBill(null);
@@ -89,17 +90,19 @@ export default function BillsReportTable({ bills, client, loading, activeMonth }
                                     <TableCell className="py-1 px-2 text-[10px] text-right">{bill.billAmount.toFixed(2)}</TableCell>
                                     <TableCell className="py-1 px-2 text-[10px] text-right">{bill.balance.toFixed(2)}</TableCell>
                                     <TableCell className="p-0 text-center">
-                                        <DropdownMenu>
+                                        <DropdownMenu
+                                            open={openDropdownId === bill.id}
+                                            onOpenChange={(isOpen) => setOpenDropdownId(isOpen ? bill.id : null)}
+                                        >
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="icon" className="h-7 w-7">
                                                     <MoreVertical className="h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
+                                            <DropdownMenuContent align="end">
                                                 <DropdownMenuItem onSelect={() => {
-                                                    setTimeout(() => {
-                                                        handleViewBill(bill);
-                                                    }, 50);
+                                                    handleViewBill(bill);
+                                                    setOpenDropdownId(null);
                                                 }}>
                                                     <Eye className="mr-2 h-4 w-4" /> View/Edit
                                                 </DropdownMenuItem>
