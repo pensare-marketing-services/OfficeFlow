@@ -31,7 +31,6 @@ const statusColors: Record<BillStatus, string> = {
 export default function BillsReportTable({ bills, client, loading, activeMonth }: BillsReportTableProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill & { id: string } | null>(null);
-    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
     const handleIssueNewBill = () => {
         setSelectedBill(null);
@@ -90,20 +89,17 @@ export default function BillsReportTable({ bills, client, loading, activeMonth }
                                     <TableCell className="py-1 px-2 text-[10px] text-right">{bill.billAmount.toFixed(2)}</TableCell>
                                     <TableCell className="py-1 px-2 text-[10px] text-right">{bill.balance.toFixed(2)}</TableCell>
                                     <TableCell className="p-0 text-center">
-                                        <DropdownMenu 
-                                            open={openMenuId === bill.id} 
-                                            onOpenChange={(isOpen) => setOpenMenuId(isOpen ? bill.id : null)}
-                                        >
+                                        <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="icon" className="h-7 w-7">
                                                     <MoreVertical className="h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onSelect={(e) => {
-                                                    e.preventDefault();
-                                                    setOpenMenuId(null);
-                                                    handleViewBill(bill);
+                                            <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
+                                                <DropdownMenuItem onSelect={() => {
+                                                    setTimeout(() => {
+                                                        handleViewBill(bill);
+                                                    }, 50);
                                                 }}>
                                                     <Eye className="mr-2 h-4 w-4" /> View/Edit
                                                 </DropdownMenuItem>
