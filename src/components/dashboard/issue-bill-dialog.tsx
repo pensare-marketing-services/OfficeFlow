@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useMemo } from 'react';
@@ -54,7 +55,7 @@ interface IssueBillDialogProps {
 
 export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsOpen, client, existingBill, billCount }) => {
   const { toast } = useToast();
-  const [loading, React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billSchema),
