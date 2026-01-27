@@ -1010,7 +1010,7 @@ export default function ClientIdPage() {
                     </div>
                 </div>
             </div>
-             <div className="fixed bottom-6 right-5 z-50 md:left-[calc(var(--sidebar-width-icon)_+_15.5rem)] md:peer-data-[state=expanded]:left-[calc(var(--sidebar-width)_+_1.5rem)] transition-[left] duration-200 ease-linear">
+             <div className="fixed bottom-6 right-5 z-50 md:left-[calc(var(--sidebar-width-icon)_+_15.5rem)] md:peer-data-[state=expanded]:left-[calc(var(--sidebar-width)_+_1.5rem)] transition-[left] duration-200 ease-linear w-[40px]">
                 <Button
                     size="icon"
                     className="h-14 w-14 rounded-full shadow-lg"
