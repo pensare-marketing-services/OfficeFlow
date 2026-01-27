@@ -15,16 +15,18 @@ import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import type { Bill, BillStatus, Client, BillItem } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, CalendarIcon } from 'lucide-react';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '../ui/table';
 import { format } from 'date-fns';
+import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
+import { Calendar } from '../ui/calendar';
+import { cn } from '@/lib/utils';
 
 const billItemSchema = z.object({
   description: z.string().min(1, "Description is required."),
-  amount: z.preprocess(
-    (val) => val === '' ? 0 : parseFloat(String(val)),
-    z.number().min(0, "Amount must be a positive number.")
-  ),
+  amount: z.string().refine(val => val === '' || !isNaN(parseFloat(val)), {
+    message: "Must be a number."
+  }),
 });
 
 const billSchema = z.object({
@@ -34,6 +36,9 @@ const billSchema = z.object({
     z.number().min(0, "Balance cannot be negative.")
   ),
   items: z.array(billItemSchema).min(1, "At least one item is required."),
+  issuedDate: z.date({
+    required_error: "A date of issue is required.",
+  }),
 });
 
 type BillFormValues = z.infer<typeof billSchema>;
@@ -56,7 +61,8 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     defaultValues: {
       duration: '',
       balance: 0,
-      items: [{ description: '', amount: '' as any }],
+      items: [{ description: '', amount: '' }],
+      issuedDate: new Date(),
     },
   });
 
@@ -71,13 +77,17 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
         form.reset({
           duration: existingBill.duration,
           balance: existingBill.balance,
-          items: existingBill.items && existingBill.items.length > 0 ? existingBill.items : [{ description: '', amount: '' as any }],
+          items: existingBill.items && existingBill.items.length > 0 
+            ? existingBill.items.map(item => ({ ...item, amount: String(item.amount) })) 
+            : [{ description: '', amount: '' }],
+          issuedDate: new Date(existingBill.issuedDate),
         });
       } else {
         form.reset({
           duration: '',
           balance: 0,
-          items: [{ description: '', amount: '' as any }],
+          items: [{ description: '', amount: '' }],
+          issuedDate: new Date(),
         });
       }
     }
@@ -85,15 +95,22 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
 
   const watchedItems = form.watch('items');
   const totalAmount = useMemo(() => {
-    return watchedItems?.reduce((acc, item) => acc + (Number(item.amount) || 0), 0) || 0;
-  }, [watchedItems]);
+    return watchedItems?.reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0) || 0;
+  }, [JSON.stringify(watchedItems)]);
 
 
   const onSubmit = async (data: BillFormValues) => {
     setLoading(true);
     try {
+      const itemsWithNumbers = data.items.map(item => ({
+        ...item,
+        amount: parseFloat(item.amount) || 0,
+      }));
+
       const billDataPayload = {
         ...data,
+        items: itemsWithNumbers,
+        issuedDate: data.issuedDate.toISOString(),
         billAmount: totalAmount,
         status: existingBill ? existingBill.status : 'Issued'
       };
@@ -108,8 +125,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
           slNo: billCount + 1,
           clientId: client.id,
           month: activeMonth,
-          issuedDate: new Date().toISOString(),
-          view: '', // Not in the new form
+          view: '', 
         };
         await addDoc(collection(db, `clients/${client.id}/bills`), newBillData);
         toast({ title: "Bill Issued", description: "The new bill has been successfully created." });
@@ -128,7 +144,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
            <DialogTitle className="sr-only">{existingBill ? "Edit Bill" : "Issue New Bill"}</DialogTitle>
-          <DialogDescription className="sr-only">
+           <DialogDescription className="sr-only">
             {existingBill ? `Update the details for bill #${existingBill.slNo}.` : 'Create a new bill for this client.'}
           </DialogDescription>
           <div className="flex justify-between items-start">
@@ -143,7 +159,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
             </div>
           </div>
           <Separator className="my-4" />
-           <div className="flex justify-between items-end">
+           <div className="flex justify-between items-start">
               <div>
                   <h3 className="font-bold">BILL TO:</h3>
                   <p className="text-muted-foreground">{client.name}</p>
@@ -151,27 +167,53 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                     <p className="text-xs text-muted-foreground whitespace-pre-line">{client.address}</p>
                   )}
               </div>
-              <div className='text-right'>
+              <div className='text-right flex flex-col items-end gap-2'>
                   <h2 className="text-2xl font-bold tracking-tight">INVOICE #{existingBill ? existingBill.slNo : billCount + 1}</h2>
-                  {existingBill && (
-                     <p className="text-sm text-muted-foreground">Status: <span className='font-medium text-foreground'>{existingBill.status}</span></p>
-                  )}
+                  <div className='grid grid-cols-2 gap-4'>
+                    <FormField control={form.control} name="duration" render={({ field }) => (
+                        <FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g., Aug 2024" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="issuedDate" render={({ field }) => (
+                         <FormItem className="flex flex-col">
+                            <FormLabel>Date of Issue</FormLabel>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                <FormControl>
+                                    <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-[240px] pl-3 text-left font-normal",
+                                        !field.value && "text-muted-foreground"
+                                    )}
+                                    >
+                                    {field.value ? (
+                                        format(field.value, "MMM dd, yyyy")
+                                    ) : (
+                                        <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    initialFocus
+                                />
+                                </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                         </FormItem>
+                     )} />
+                   </div>
               </div>
            </div>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-             <div className="grid grid-cols-2 gap-4 p-3 border rounded-md">
-                <FormField control={form.control} name="duration" render={({ field }) => (
-                    <FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g., Aug 2024" {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormItem>
-                    <FormLabel>Date of Issue</FormLabel>
-                    <Input value={format(new Date(existingBill?.issuedDate || Date.now()), "MMM dd, yyyy")} disabled />
-                </FormItem>
-            </div>
-            
             <div className='border rounded-lg overflow-hidden'>
               <Table>
                 <TableHeader>
@@ -247,7 +289,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                 variant="outline"
                 size="sm"
                 className="mt-2"
-                onClick={() => append({ description: "", amount: "" as any })}
+                onClick={() => append({ description: "", amount: "" })}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Item
