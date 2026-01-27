@@ -6,8 +6,7 @@ import type { Bill, BillStatus, Client } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Plus, Eye, Download, Share2, MoreVertical, Trash2, Loader2 } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { Plus, Eye, Download, Trash2, Loader2 } from 'lucide-react';
 import { IssueBillDialog } from './issue-bill-dialog';
 import { generateBillPDF } from './bill-pdf';
 import { saveAs } from 'file-saver';
@@ -49,7 +48,6 @@ const allStatuses: BillStatus[] = ["Issued", "Partially Paid", "Paid", "Overdue"
 export default function BillsReportTable({ bills, client, loading }: BillsReportTableProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill & { id: string } | null>(null);
-    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const { toast } = useToast();
 
@@ -128,7 +126,7 @@ export default function BillsReportTable({ bills, client, loading }: BillsReport
                                 <TableHead className="text-[10px]">View</TableHead>
                                 <TableHead className="text-right text-[10px]">Bill Amount</TableHead>
                                 <TableHead className="text-right text-[10px]">Balance</TableHead>
-                                <TableHead className="w-[60px] text-center text-[10px]">Actions</TableHead>
+                                <TableHead className="w-[120px] text-center text-[10px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -162,63 +160,58 @@ export default function BillsReportTable({ bills, client, loading }: BillsReport
                                     <TableCell className="py-1 px-2 text-[10px] text-right">{bill.billAmount.toFixed(2)}</TableCell>
                                     <TableCell className="py-1 px-2 text-[10px] text-right">{bill.balance.toFixed(2)}</TableCell>
                                     <TableCell className="p-0 text-center">
-                                        <DropdownMenu
-                                            open={openDropdownId === bill.id}
-                                            onOpenChange={(isOpen) => setOpenDropdownId(isOpen ? bill.id : null)}
-                                        >
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-7 w-7">
-                                                    <MoreVertical className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onSelect={() => {
-                                                    setOpenDropdownId(null);
-                                                    setTimeout(() => {
-                                                        handleViewBill(bill)
-                                                    }, 50)
-                                                }}>
-                                                    <Eye className="mr-2 h-4 w-4" /> View/Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onSelect={() => handleDownload(bill)}>
-                                                    <Download className="mr-2 h-4 w-4" /> Download
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onSelect={() => handleDownload(bill)}>
-                                                    <Share2 className="mr-2 h-4 w-4" /> Share
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <DropdownMenuItem
-                                                            onSelect={(e) => e.preventDefault()}
-                                                            className="text-destructive focus:text-destructive"
+                                         <div className="flex items-center justify-center gap-0">
+                                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleViewBill(bill)}>
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                                                        <Download className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Confirm Download</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Are you sure you want to download the PDF for bill #{bill.slNo}?
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDownload(bill)}>Download</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action cannot be undone. This will permanently delete bill #{bill.slNo}.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            disabled={isDeleting}
+                                                            onClick={() => handleDelete(bill.id)}
+                                                            className="bg-destructive hover:bg-destructive/90"
                                                         >
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            Delete
-                                                        </DropdownMenuItem>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                This action cannot be undone. This will permanently delete bill #{bill.slNo}.
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                                                            <AlertDialogAction
-                                                                disabled={isDeleting}
-                                                                onClick={() => handleDelete(bill.id)}
-                                                                className="bg-destructive hover:bg-destructive/90"
-                                                            >
-                                                                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                                Yes, delete
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                                            {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                            Yes, delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
