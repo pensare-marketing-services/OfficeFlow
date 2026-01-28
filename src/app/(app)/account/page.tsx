@@ -16,34 +16,48 @@ type ClientWithId = Client & { id: string };
 type BillWithClientId = Bill & { id: string; clientId: string };
 
 function getEndDateFromDuration(durationStr: string): Date | null {
-    if (!durationStr || !durationStr.includes('-')) return null;
+    if (!durationStr) return null;
+
+    // Normalize separators and handle various formats
+    const normalizedDuration = durationStr.replace(/\s+to\s+/i, '-');
+    const parts = normalizedDuration.split('-');
+    
+    if (parts.length < 2) return null;
 
     try {
-        const endDatePart = durationStr.split('-')[1].trim(); // e.g., "Jan 31"
+        const endDatePart = parts[parts.length - 1].trim();
         if (!endDatePart) return null;
 
-        const currentYear = new Date().getFullYear();
         const today = new Date();
+        const currentYear = today.getFullYear();
         
-        // Attempt to parse with current year
-        let endDate = new Date(`${endDatePart} ${currentYear}`);
-        if (isNaN(endDate.getTime())) return null;
-        
-        // If the calculated date is more than a month in the past, assume it's for next year.
-        // This handles the case where it's December and the bill is for January.
-        const oneMonthAgo = new Date(today);
-        oneMonthAgo.setMonth(today.getMonth() - 1);
+        // Create candidate dates for previous, current, and next year
+        const datesToTest = [
+            new Date(`${endDatePart} ${currentYear - 1}`),
+            new Date(`${endDatePart} ${currentYear}`),
+            new Date(`${endDatePart} ${currentYear + 1}`),
+        ];
 
-        if (endDate < oneMonthAgo) {
-            endDate.setFullYear(currentYear + 1);
+        // Filter out any dates that failed to parse
+        const validDates = datesToTest.filter(d => !isNaN(d.getTime()));
+
+        if (validDates.length === 0) {
+            return null; // Can't parse at all
         }
 
-        return endDate;
+        // Find the date that is closest in time to today's date
+        const todayTimestamp = today.getTime();
+        validDates.sort((a, b) => Math.abs(a.getTime() - todayTimestamp) - Math.abs(b.getTime() - todayTimestamp));
+
+        // The closest date is the most likely candidate
+        return validDates[0];
+
     } catch (e) {
-        console.error("Error parsing duration string:", e);
+        console.error("Error parsing duration string:", durationStr, e);
         return null;
     }
 }
+
 
 export default function AccountPage() {
     const { clients, loading: clientsLoading } = useClients();
