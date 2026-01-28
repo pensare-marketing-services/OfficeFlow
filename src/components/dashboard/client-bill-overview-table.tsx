@@ -82,8 +82,7 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                             ))}
                             {!loading && clients.map((client, index) => {
                                 const { status, color } = getClientBillStatus(client.id);
-                                const latestMonth = client.months && client.months.length > 0 ? client.months[client.months.length - 1] : null;
-                                const duration = latestMonth?.billDuration || client.billDuration || '-';
+                                const duration = client.billDuration || '-';
 
                                 return (
                                     <TableRow
@@ -104,8 +103,8 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                             })}
                             {!loading && clients.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center text-muted-foreground">
-                                        No clients found.
+                                    <TableCell colSpan={4} className="text-center text-muted-foreground p-4">
+                                        No clients found for this month filter.
                                     </TableCell>
                                 </TableRow>
                             )}
