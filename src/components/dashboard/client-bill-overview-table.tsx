@@ -37,7 +37,7 @@ export default function ClientBillOverviewTable({ clients, selectedClientId, onC
                                 <TableHead className="w-[40px] text-[10px]">No</TableHead>
                                 <TableHead className="text-[10px]">Client</TableHead>
                                 <TableHead className="text-[10px]">Duration</TableHead>
-                                <TableHead className="w-[120px] text-[10px]">Status</TableHead>
+                                <TableHead className="w-[140px] text-[10px]">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
