@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { Client, Bill, BillStatus } from '@/lib/data';
@@ -18,7 +17,7 @@ interface ClientBillOverviewTableProps {
 const statusColors: Record<BillStatus | 'Not Issued', string> = {
     "Issued": "bg-blue-100 text-blue-800",
     "Paid": "bg-green-100 text-green-800",
-    "Partially": "bg-yellow-100 text-yellow-800",
+    "Partially Paid": "bg-yellow-100 text-yellow-800",
     "Overdue": "bg-red-100 text-red-800",
     "Cancelled": "bg-gray-100 text-gray-800",
     "Not Issued": "bg-gray-100 text-gray-800"
@@ -39,8 +38,8 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
         if (clientBills.some(b => b.status === 'Overdue')) {
             return { status: "Overdue", color: statusColors["Overdue"] };
         }
-        if (clientBills.some(b => b.status === 'Partially')) {
-            return { status: "Partially", color: statusColors["Partially"] };
+        if (clientBills.some(b => b.status === 'Partially Paid')) {
+            return { status: "Partially Paid", color: statusColors["Partially Paid"] };
         }
         if (clientBills.some(b => b.status === 'Issued')) {
             return { status: "Issued", color: statusColors["Issued"] };
@@ -71,13 +70,14 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                             <TableRow>
                                 <TableHead className="w-[40px] text-[10px]">No</TableHead>
                                 <TableHead className="text-[10px]">Client</TableHead>
+                                <TableHead className="text-[10px]">Duration</TableHead>
                                 <TableHead className="w-[120px] text-[10px]">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading && Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={i}>
-                                    <TableCell colSpan={3}><Skeleton className="h-7 w-full" /></TableCell>
+                                    <TableCell colSpan={4}><Skeleton className="h-7 w-full" /></TableCell>
                                 </TableRow>
                             ))}
                             {!loading && clients.map((client, index) => {
@@ -90,6 +90,7 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                                     >
                                         <TableCell className="py-1 px-2 text-[10px] font-medium">{index + 1}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">{client.name}</TableCell>
+                                        <TableCell className="py-1 px-2 text-[10px]">{client.billDuration || '-'}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">
                                             <span className={cn("px-2 py-0.5 rounded-full text-xs", color)}>
                                                 {status}
@@ -100,7 +101,7 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                             })}
                             {!loading && clients.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
+                                    <TableCell colSpan={4} className="text-center text-muted-foreground">
                                         No clients found.
                                     </TableCell>
                                 </TableRow>
