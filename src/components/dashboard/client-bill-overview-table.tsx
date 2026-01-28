@@ -82,6 +82,9 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                             ))}
                             {!loading && clients.map((client, index) => {
                                 const { status, color } = getClientBillStatus(client.id);
+                                const latestMonth = client.months && client.months.length > 0 ? client.months[client.months.length - 1] : null;
+                                const duration = latestMonth?.billDuration || client.billDuration || '-';
+
                                 return (
                                     <TableRow
                                         key={client.id}
@@ -90,7 +93,7 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                                     >
                                         <TableCell className="py-1 px-2 text-[10px] font-medium">{index + 1}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">{client.name}</TableCell>
-                                        <TableCell className="py-1 px-2 text-[10px]">{client.billDuration || '-'}</TableCell>
+                                        <TableCell className="py-1 px-2 text-[10px]">{duration}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">
                                             <span className={cn("px-2 py-0.5 rounded-full text-xs", color)}>
                                                 {status}
