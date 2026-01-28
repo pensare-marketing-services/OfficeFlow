@@ -7,10 +7,11 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import BillsReportTable from '@/components/dashboard/bills-report-table';
 import { db } from '@/firebase/client';
-import { collection, query, onSnapshot, Unsubscribe } from 'firebase/firestore';
+import { collection, query, onSnapshot, Unsubscribe, doc, updateDoc } from 'firebase/firestore';
 import ClientBillOverviewTable from '@/components/dashboard/client-bill-overview-table';
 import { Button } from '@/components/ui/button';
 import { startOfDay } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 type ClientWithId = Client & { id: string };
 type BillWithClientId = Bill & { id: string; clientId: string };
@@ -65,6 +66,7 @@ export default function AccountPage() {
     const [billsLoading, setBillsLoading] = useState(true);
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
     const [monthFilter, setMonthFilter] = useState<number>(1);
+    const { toast } = useToast();
 
     useEffect(() => {
         if (clients.length === 0) {
@@ -97,6 +99,37 @@ export default function AccountPage() {
             unsubs.forEach(unsub => unsub());
         };
     }, [clients]);
+    
+    const handleBillingStatusChange = async (clientId: string, newStatus: 'Issued' | 'Not Issued') => {
+        const client = clients.find(c => c.id === clientId);
+        if (!client || !client.months) return;
+
+        const monthIndex = monthFilter - 1;
+        if (monthIndex < 0 || monthIndex >= client.months.length) return;
+
+        const newMonths = [...client.months];
+        newMonths[monthIndex] = {
+            ...newMonths[monthIndex],
+            billingStatus: newStatus,
+        };
+        
+        const clientRef = doc(db, 'clients', clientId);
+        try {
+            await updateDoc(clientRef, { months: newMonths });
+            toast({
+                title: "Status Updated",
+                description: `Billing status for ${client.name} set to ${newStatus}.`,
+            });
+        } catch (error) {
+            console.error("Error updating billing status:", error);
+            toast({
+                variant: "destructive",
+                title: "Update Failed",
+                description: "Could not update billing status.",
+            });
+        }
+    };
+
 
     const clientsForTable = useMemo(() => {
         if (!clients || clients.length === 0) return [];
@@ -121,7 +154,8 @@ export default function AccountPage() {
                     ...client,
                     billDuration,
                     endDate,
-                    isEndingSoon
+                    isEndingSoon,
+                    billingStatus: monthData?.billingStatus || 'Not Issued'
                 };
             })
             .sort((a, b) => {
@@ -178,10 +212,10 @@ export default function AccountPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <ClientBillOverviewTable
                             clients={clientsForTable}
-                            bills={allBills}
                             selectedClientId={selectedClientId}
                             onClientSelect={setSelectedClientId}
                             loading={clientsLoading || billsLoading}
+                            onStatusChange={handleBillingStatusChange}
                         />
 
                         <div>

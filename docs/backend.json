@@ -260,6 +260,10 @@
                 "items": {
                   "$ref": "#/entities/ClientNote"
                 }
+              },
+              "billingStatus": {
+                "type": "string",
+                "enum": ["Issued", "Not Issued"]
               }
             }
           },

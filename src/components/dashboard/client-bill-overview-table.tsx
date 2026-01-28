@@ -1,63 +1,29 @@
 'use client';
 
-import type { Client, Bill, BillStatus } from '@/lib/data';
+import type { Client, MonthData } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type MonthlyBillingStatus = 'Issued' | 'Not Issued';
 
 interface ClientBillOverviewTableProps {
-    clients: (Client & { id: string; billDuration: string; isEndingSoon: boolean })[];
-    bills: (Bill & { id: string; clientId: string })[];
+    clients: (Client & { id: string; billDuration: string; isEndingSoon: boolean; billingStatus: MonthlyBillingStatus })[];
     selectedClientId: string | null;
     onClientSelect: (clientId: string) => void;
     loading: boolean;
+    onStatusChange: (clientId: string, newStatus: MonthlyBillingStatus) => void;
 }
 
-const statusColors: Record<BillStatus | 'Not Issued', string> = {
+const monthlyStatusColors: Record<MonthlyBillingStatus, string> = {
     "Issued": "bg-blue-100 text-blue-800",
-    "Paid": "bg-green-100 text-green-800",
-    "Partially": "bg-yellow-100 text-yellow-800",
-    "Overdue": "bg-red-100 text-red-800",
-    "Cancelled": "bg-gray-100 text-gray-800",
-    "Not Issued": "bg-gray-100 text-gray-800"
+    "Not Issued": "bg-gray-100 text-gray-800",
 };
 
-export default function ClientBillOverviewTable({ clients, bills, selectedClientId, onClientSelect, loading }: ClientBillOverviewTableProps) {
+export default function ClientBillOverviewTable({ clients, selectedClientId, onClientSelect, loading, onStatusChange }: ClientBillOverviewTableProps) {
     
-    const getClientBillStatus = (clientId: string): { status: BillStatus | "Not Issued", color: string } => {
-        const clientBills = bills
-            .filter(b => b.clientId === clientId)
-            .sort((a, b) => new Date(b.issuedDate).getTime() - new Date(a.issuedDate).getTime());
-
-        if (clientBills.length === 0) {
-            return { status: "Not Issued", color: statusColors["Not Issued"] };
-        }
-        
-        // Check for highest priority status across all bills
-        if (clientBills.some(b => b.status === 'Overdue')) {
-            return { status: "Overdue", color: statusColors["Overdue"] };
-        }
-        if (clientBills.some(b => b.status === 'Partially')) {
-            return { status: "Partially", color: statusColors["Partially"] };
-        }
-        if (clientBills.some(b => b.status === 'Issued')) {
-            return { status: "Issued", color: statusColors["Issued"] };
-        }
-
-        // If we are here, all non-cancelled bills must be Paid
-        if (clientBills.every(b => b.status === 'Paid' || b.status === 'Cancelled')) {
-            // If there are any paid bills, show paid. Otherwise it's all cancelled.
-            if (clientBills.some(b => b.status === 'Paid')) {
-                return { status: "Paid", color: statusColors["Paid"] };
-            }
-        }
-
-        // Fallback to the latest bill's status (could be 'Cancelled')
-        const latestBill = clientBills[0];
-        return { status: latestBill.status, color: statusColors[latestBill.status] };
-    };
-
     return (
         <Card>
             <CardHeader className="p-3">
@@ -81,7 +47,6 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                                 </TableRow>
                             ))}
                             {!loading && clients.map((client, index) => {
-                                const { status, color } = getClientBillStatus(client.id);
                                 const { billDuration, isEndingSoon } = client;
 
                                 return (
@@ -94,9 +59,27 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                                         <TableCell className="py-1 px-2 text-[10px]">{client.name}</TableCell>
                                         <TableCell className={cn("py-1 px-2 text-[10px]", isEndingSoon && "font-bold text-red-600")}>{billDuration}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">
-                                            <span className={cn("px-2 py-0.5 rounded-full text-xs", color)}>
-                                                {status}
-                                            </span>
+                                             <Select
+                                                value={client.billingStatus}
+                                                onValueChange={(newStatus: MonthlyBillingStatus) => onStatusChange(client.id, newStatus)}
+                                            >
+                                                <SelectTrigger 
+                                                    className={cn("h-7 text-xs border-0 focus:ring-0", monthlyStatusColors[client.billingStatus])} 
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {(['Issued', 'Not Issued'] as MonthlyBillingStatus[]).map(status => (
+                                                        <SelectItem key={status} value={status}>
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={cn("h-2 w-2 rounded-full", status === 'Issued' ? 'bg-blue-500' : 'bg-gray-500')} />
+                                                                {status}
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
                                         </TableCell>
                                     </TableRow>
                                 );

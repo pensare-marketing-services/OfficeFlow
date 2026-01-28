@@ -60,6 +60,7 @@ export type MonthData = {
     paidPromotionsMainBudget?: number;
     planPromotionsMainBudget?: number;
     notes?: ClientNote[];
+    billingStatus?: 'Issued' | 'Not Issued';
 };
 
 export type Client = {
