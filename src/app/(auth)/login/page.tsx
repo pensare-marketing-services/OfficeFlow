@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { AppLogo, AppLogoBlack } from '@/components/shared/app-logo';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const loginSchema = z.object({
@@ -43,6 +44,11 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -76,61 +82,79 @@ export default function LoginPage() {
           <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
           <CardDescription>Enter credentials to sign in.</CardDescription>
         </CardHeader>
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-                <CardContent className="grid gap-4">
-                    {error && (
-                        <Alert variant="destructive">
-                            <AlertTitle>Login Failed</AlertTitle>
-                            <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                    )}
-                    <FormField
-                        control={form.control}
-                        name="identifier"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Username</FormLabel>
-                                <FormControl>
-                                    <Input className="placeholder:text-sm" placeholder="Enter your username " {...field} autoComplete="off"/>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                     <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Password</FormLabel>
-                                <FormControl>
-                                    <div className="relative">
-                                        <Input className="placeholder:text-sm" type={isPasswordVisible ? 'text' : 'password'} placeholder="Enter your password" {...field} autoComplete="off" />
-                                        <Button 
-                                            type="button"
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
-                                            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                                        >
-                                            {isPasswordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                        </Button>
-                                    </div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                </CardContent>
-                <CardFooter>
-                    <Button type="submit" className="w-full" disabled={loading}>
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {loading ? 'Signing In...' : 'Sign In'}
-                    </Button>
-                </CardFooter>
-            </form>
-        </Form>
+        {isClient ? (
+          <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <CardContent className="grid gap-4">
+                      {error && (
+                          <Alert variant="destructive">
+                              <AlertTitle>Login Failed</AlertTitle>
+                              <AlertDescription>{error}</AlertDescription>
+                          </Alert>
+                      )}
+                      <FormField
+                          control={form.control}
+                          name="identifier"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Username</FormLabel>
+                                  <FormControl>
+                                      <Input className="placeholder:text-sm" placeholder="Enter your username " {...field} autoComplete="off"/>
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                          />
+                       <FormField
+                          control={form.control}
+                          name="password"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Password</FormLabel>
+                                  <FormControl>
+                                      <div className="relative">
+                                          <Input className="placeholder:text-sm" type={isPasswordVisible ? 'text' : 'password'} placeholder="Enter your password" {...field} autoComplete="off" />
+                                          <Button 
+                                              type="button"
+                                              variant="ghost" 
+                                              size="icon" 
+                                              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                                              onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                                          >
+                                              {isPasswordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                          </Button>
+                                      </div>
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                          />
+                  </CardContent>
+                  <CardFooter>
+                      <Button type="submit" className="w-full" disabled={loading}>
+                          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {loading ? 'Signing In...' : 'Sign In'}
+                      </Button>
+                  </CardFooter>
+              </form>
+          </Form>
+        ) : (
+          <>
+            <CardContent className="grid gap-4">
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            </CardContent>
+            <CardFooter>
+                <Skeleton className="h-10 w-full" />
+            </CardFooter>
+          </>
+        )}
       </Card>
     </div>
   );
