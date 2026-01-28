@@ -10,9 +10,40 @@ import { db } from '@/firebase/client';
 import { collection, query, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import ClientBillOverviewTable from '@/components/dashboard/client-bill-overview-table';
 import { Button } from '@/components/ui/button';
+import { startOfDay } from 'date-fns';
 
 type ClientWithId = Client & { id: string };
 type BillWithClientId = Bill & { id: string; clientId: string };
+
+function getEndDateFromDuration(durationStr: string): Date | null {
+    if (!durationStr || !durationStr.includes('-')) return null;
+
+    try {
+        const endDatePart = durationStr.split('-')[1].trim(); // e.g., "Jan 31"
+        if (!endDatePart) return null;
+
+        const currentYear = new Date().getFullYear();
+        const today = new Date();
+        
+        // Attempt to parse with current year
+        let endDate = new Date(`${endDatePart} ${currentYear}`);
+        if (isNaN(endDate.getTime())) return null;
+        
+        // If the calculated date is more than a month in the past, assume it's for next year.
+        // This handles the case where it's December and the bill is for January.
+        const oneMonthAgo = new Date(today);
+        oneMonthAgo.setMonth(today.getMonth() - 1);
+
+        if (endDate < oneMonthAgo) {
+            endDate.setFullYear(currentYear + 1);
+        }
+
+        return endDate;
+    } catch (e) {
+        console.error("Error parsing duration string:", e);
+        return null;
+    }
+}
 
 export default function AccountPage() {
     const { clients, loading: clientsLoading } = useClients();
@@ -55,30 +86,40 @@ export default function AccountPage() {
 
     const clientsForTable = useMemo(() => {
         if (!clients || clients.length === 0) return [];
-
-        const getLatestBillTimestamp = (clientId: string): number => {
-            const clientBills = allBills.filter(b => b.clientId === clientId);
-            if (clientBills.length === 0) return 0;
-            return Math.max(...clientBills.map(b => new Date(b.issuedDate).getTime()));
-        };
+        const today = startOfDay(new Date());
 
         return clients
             .filter(c => c.active !== false && c.months && c.months.length >= monthFilter)
             .map(client => {
                 const monthData = client.months?.[monthFilter - 1];
+                const billDuration = monthData?.billDuration || client.billDuration || '-';
+                
+                const endDate = getEndDateFromDuration(billDuration);
+                let isEndingSoon = false;
+
+                if (endDate) {
+                    const daysUntilEnd = (endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+                    // A duration is ending soon if it's within the next 7 days or has already passed
+                    isEndingSoon = daysUntilEnd <= 7;
+                }
+
                 return {
                     ...client,
-                    billDuration: monthData?.billDuration || client.billDuration || '-',
-                    latestBillTimestamp: getLatestBillTimestamp(client.id),
+                    billDuration,
+                    endDate,
+                    isEndingSoon
                 };
             })
             .sort((a, b) => {
-                if (b.latestBillTimestamp !== a.latestBillTimestamp) {
-                    return b.latestBillTimestamp - a.latestBillTimestamp;
+                if (a.endDate && b.endDate) {
+                    // Sort by end date ascending (earlier dates first)
+                    return a.endDate.getTime() - b.endDate.getTime();
                 }
+                if (a.endDate && !b.endDate) return -1; // Clients with dates come before those without
+                if (!a.endDate && b.endDate) return 1;
                 return (a.priority || 0) - (b.priority || 0); // fallback to priority
             });
-    }, [clients, allBills, monthFilter]);
+    }, [clients, monthFilter]);
 
     useEffect(() => {
         if (selectedClientId && !clientsForTable.some(c => c.id === selectedClientId)) {

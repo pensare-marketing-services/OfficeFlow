@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
 
 interface ClientBillOverviewTableProps {
-    clients: (Client & { id: string })[];
+    clients: (Client & { id: string; billDuration: string; isEndingSoon: boolean })[];
     bills: (Bill & { id: string; clientId: string })[];
     selectedClientId: string | null;
     onClientSelect: (clientId: string) => void;
@@ -17,7 +17,7 @@ interface ClientBillOverviewTableProps {
 const statusColors: Record<BillStatus | 'Not Issued', string> = {
     "Issued": "bg-blue-100 text-blue-800",
     "Paid": "bg-green-100 text-green-800",
-    "Partially Paid": "bg-yellow-100 text-yellow-800",
+    "Partially": "bg-yellow-100 text-yellow-800",
     "Overdue": "bg-red-100 text-red-800",
     "Cancelled": "bg-gray-100 text-gray-800",
     "Not Issued": "bg-gray-100 text-gray-800"
@@ -38,8 +38,8 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
         if (clientBills.some(b => b.status === 'Overdue')) {
             return { status: "Overdue", color: statusColors["Overdue"] };
         }
-        if (clientBills.some(b => b.status === 'Partially Paid')) {
-            return { status: "Partially Paid", color: statusColors["Partially Paid"] };
+        if (clientBills.some(b => b.status === 'Partially')) {
+            return { status: "Partially", color: statusColors["Partially"] };
         }
         if (clientBills.some(b => b.status === 'Issued')) {
             return { status: "Issued", color: statusColors["Issued"] };
@@ -82,8 +82,7 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                             ))}
                             {!loading && clients.map((client, index) => {
                                 const { status, color } = getClientBillStatus(client.id);
-                                const duration = client.billDuration || '-';
-                                const isOverdue = status === 'Overdue';
+                                const { billDuration, isEndingSoon } = client;
 
                                 return (
                                     <TableRow
@@ -93,7 +92,7 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                                     >
                                         <TableCell className="py-1 px-2 text-[10px] font-medium">{index + 1}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">{client.name}</TableCell>
-                                        <TableCell className={cn("py-1 px-2 text-[10px]", isOverdue && "text-red-600")}>{duration}</TableCell>
+                                        <TableCell className={cn("py-1 px-2 text-[10px]", isEndingSoon && "font-bold text-red-600")}>{billDuration}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">
                                             <span className={cn("px-2 py-0.5 rounded-full text-xs", color)}>
                                                 {status}
