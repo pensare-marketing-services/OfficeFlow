@@ -83,6 +83,7 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                             {!loading && clients.map((client, index) => {
                                 const { status, color } = getClientBillStatus(client.id);
                                 const duration = client.billDuration || '-';
+                                const isOverdue = status === 'Overdue';
 
                                 return (
                                     <TableRow
@@ -92,7 +93,7 @@ export default function ClientBillOverviewTable({ clients, bills, selectedClient
                                     >
                                         <TableCell className="py-1 px-2 text-[10px] font-medium">{index + 1}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">{client.name}</TableCell>
-                                        <TableCell className="py-1 px-2 text-[10px]">{duration}</TableCell>
+                                        <TableCell className={cn("py-1 px-2 text-[10px]", isOverdue && "text-red-600")}>{duration}</TableCell>
                                         <TableCell className="py-1 px-2 text-[10px]">
                                             <span className={cn("px-2 py-0.5 rounded-full text-xs", color)}>
                                                 {status}

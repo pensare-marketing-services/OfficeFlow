@@ -56,6 +56,12 @@ export default function AccountPage() {
     const clientsForTable = useMemo(() => {
         if (!clients || clients.length === 0) return [];
 
+        const getLatestBillTimestamp = (clientId: string): number => {
+            const clientBills = allBills.filter(b => b.clientId === clientId);
+            if (clientBills.length === 0) return 0;
+            return Math.max(...clientBills.map(b => new Date(b.issuedDate).getTime()));
+        };
+
         return clients
             .filter(c => c.active !== false && c.months && c.months.length >= monthFilter)
             .map(client => {
@@ -63,10 +69,16 @@ export default function AccountPage() {
                 return {
                     ...client,
                     billDuration: monthData?.billDuration || client.billDuration || '-',
+                    latestBillTimestamp: getLatestBillTimestamp(client.id),
                 };
             })
-            .sort((a, b) => (a.priority || 0) - (b.priority || 0));
-    }, [clients, monthFilter]);
+            .sort((a, b) => {
+                if (b.latestBillTimestamp !== a.latestBillTimestamp) {
+                    return b.latestBillTimestamp - a.latestBillTimestamp;
+                }
+                return (a.priority || 0) - (b.priority || 0); // fallback to priority
+            });
+    }, [clients, allBills, monthFilter]);
 
     useEffect(() => {
         if (selectedClientId && !clientsForTable.some(c => c.id === selectedClientId)) {
@@ -89,7 +101,7 @@ export default function AccountPage() {
              <Card>
                 <CardHeader>
                     <CardTitle>Billing Center</CardTitle>
-                    <CardDescription>Manage all client billing from one central location.</CardDescription>
+                    
                 </CardHeader>
                 <CardContent className="space-y-4">
                      <div className="flex items-center gap-2 p-2 bg-muted rounded-md flex-wrap">
