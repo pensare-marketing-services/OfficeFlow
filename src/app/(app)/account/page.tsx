@@ -16,6 +16,8 @@ import { useToast } from '@/hooks/use-toast';
 
 type ClientWithId = Client & { id: string };
 type BillWithClientId = Bill & { id: string };
+type MonthlyBillingStatus = 'all' | 'Issued' | 'Not Issued';
+
 
 function getEndDateFromDuration(durationStr: string): Date | null {
     if (!durationStr) return null;
@@ -67,6 +69,7 @@ export default function AccountPage() {
     const [billsLoading, setBillsLoading] = useState(true);
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
     const [monthFilter, setMonthFilter] = useState<number>(1);
+    const [billingStatusFilter, setBillingStatusFilter] = useState<MonthlyBillingStatus>('all');
     const { toast } = useToast();
 
     useEffect(() => {
@@ -137,7 +140,13 @@ export default function AccountPage() {
         const today = startOfDay(new Date());
 
         return clients
-            .filter(c => c.active !== false && c.months && c.months.length >= monthFilter)
+            .filter(c => {
+                if (c.active === false || !c.months || c.months.length < monthFilter) return false;
+                if (billingStatusFilter === 'all') return true;
+                const monthData = c.months[monthFilter - 1];
+                const currentStatus = monthData?.billingStatus || 'Not Issued';
+                return currentStatus === billingStatusFilter;
+            })
             .map(client => {
                 const monthData = client.months?.[monthFilter - 1];
                 const currentMonthName = monthData?.name;
@@ -179,7 +188,7 @@ export default function AccountPage() {
                 if (!a.endDate && b.endDate) return 1;
                 return (a.priority || 0) - (b.priority || 0);
             });
-    }, [clients, monthFilter, allBills]);
+    }, [clients, monthFilter, allBills, billingStatusFilter]);
 
     const summaryData = useMemo(() => {
         if (!clientsForTable || clientsForTable.length === 0) {
@@ -242,6 +251,13 @@ export default function AccountPage() {
                                 </Button>
                             ))}
                         </div>
+                        <div className="border-l border-border h-6 mx-2"></div>
+                        <span className="text-sm font-medium mr-2">Filter by Status:</span>
+                         <div className="flex flex-wrap gap-1">
+                            <Button variant={billingStatusFilter === 'all' ? 'default' : 'outline'} size="sm" className="h-7" onClick={() => setBillingStatusFilter('all')}>All</Button>
+                            <Button variant={billingStatusFilter === 'Issued' ? 'default' : 'outline'} size="sm" className="h-7" onClick={() => setBillingStatusFilter('Issued')}>Issued</Button>
+                            <Button variant={billingStatusFilter === 'Not Issued' ? 'default' : 'outline'} size="sm" className="h-7" onClick={() => setBillingStatusFilter('Not Issued')}>Not Issued</Button>
+                         </div>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div className="space-y-4">

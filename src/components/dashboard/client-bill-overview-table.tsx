@@ -74,14 +74,14 @@ export default function ClientBillOverviewTable({ clients, selectedClientId, onC
                                                 onValueChange={(newStatus: MonthlyBillingStatus) => onStatusChange(client.id, newStatus)}
                                             >
                                                 <SelectTrigger 
-                                                    className={cn("h-7 text-xs border-0 focus:ring-0", monthlyStatusColors[client.billingStatus])} 
+                                                    className={cn("h-7 text-[10px] border-0 focus:ring-0 w-[120px]", monthlyStatusColors[client.billingStatus])} 
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {(['Issued', 'Not Issued'] as MonthlyBillingStatus[]).map(status => (
-                                                        <SelectItem key={status} value={status}>
+                                                        <SelectItem key={status} value={status} className="text-[10px]">
                                                             <div className="flex items-center gap-2">
                                                                 <div className={cn("h-2 w-2 rounded-full", status === 'Issued' ? 'bg-blue-500' : 'bg-gray-500')} />
                                                                 {status}
