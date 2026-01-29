@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -33,6 +32,7 @@ interface BillsReportTableProps {
     bills: (Bill & { id: string })[];
     client: Client;
     loading: boolean;
+    activeMonthName: string | null;
 }
 
 const statusColors: Record<BillStatus, string> = {
@@ -45,13 +45,21 @@ const statusColors: Record<BillStatus, string> = {
 
 const allStatuses: BillStatus[] = ["Issued", "Partially", "Paid", "Overdue", "Cancelled"];
 
-export default function BillsReportTable({ bills, client, loading }: BillsReportTableProps) {
+export default function BillsReportTable({ bills, client, loading, activeMonthName }: BillsReportTableProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill & { id: string } | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const { toast } = useToast();
 
     const handleIssueNewBill = () => {
+        if (!activeMonthName) {
+            toast({
+                variant: 'destructive',
+                title: 'Cannot Issue Bill',
+                description: 'A valid month must be selected for the client.',
+            });
+            return;
+        }
         setSelectedBill(null);
         setDialogOpen(true);
     };
@@ -218,7 +226,7 @@ export default function BillsReportTable({ bills, client, loading }: BillsReport
                             {!loading && bills.length === 0 && (
                                 <TableRow>
                                     <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                                        No bills issued for this client yet.
+                                        No bills issued for this month.
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -232,6 +240,7 @@ export default function BillsReportTable({ bills, client, loading }: BillsReport
                 client={client}
                 existingBill={selectedBill}
                 billCount={bills.length}
+                activeMonthName={activeMonthName}
             />
         </>
     );

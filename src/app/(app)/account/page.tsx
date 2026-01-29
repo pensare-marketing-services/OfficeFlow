@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import type { Client, Bill } from '@/lib/data';
 import { useClients } from '@/hooks/use-clients';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import BillsReportTable from '@/components/dashboard/bills-report-table';
 import { db } from '@/firebase/client';
@@ -139,6 +140,16 @@ export default function AccountPage() {
             .filter(c => c.active !== false && c.months && c.months.length >= monthFilter)
             .map(client => {
                 const monthData = client.months?.[monthFilter - 1];
+                const currentMonthName = monthData?.name;
+                
+                const clientMonthBills = allBills.filter(bill => 
+                    bill.clientId === client.id && bill.month === currentMonthName
+                );
+
+                const totalBillAmount = clientMonthBills.reduce((acc, bill) => acc + (bill.billAmount || 0), 0);
+                const totalPaid = clientMonthBills.reduce((acc, bill) => acc + (bill.balance || 0), 0); // User interprets 'balance' as 'paid'
+                const totalBalanceDue = totalBillAmount - totalPaid;
+                
                 const billDuration = monthData?.billDuration || client.billDuration || '-';
                 
                 const endDate = getEndDateFromDuration(billDuration);
@@ -146,7 +157,6 @@ export default function AccountPage() {
 
                 if (endDate) {
                     const daysUntilEnd = (endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
-                    // A duration is ending soon if it's within the next 7 days or has already passed
                     isEndingSoon = daysUntilEnd <= 7;
                 }
 
@@ -155,19 +165,34 @@ export default function AccountPage() {
                     billDuration,
                     endDate,
                     isEndingSoon,
-                    billingStatus: monthData?.billingStatus || 'Not Issued'
+                    billingStatus: monthData?.billingStatus || 'Not Issued',
+                    totalPaid,
+                    totalBalanceDue,
+                    totalBillAmount,
                 };
             })
             .sort((a, b) => {
                 if (a.endDate && b.endDate) {
-                    // Sort by end date ascending (earlier dates first)
                     return a.endDate.getTime() - b.endDate.getTime();
                 }
-                if (a.endDate && !b.endDate) return -1; // Clients with dates come before those without
+                if (a.endDate && !b.endDate) return -1;
                 if (!a.endDate && b.endDate) return 1;
-                return (a.priority || 0) - (b.priority || 0); // fallback to priority
+                return (a.priority || 0) - (b.priority || 0);
             });
-    }, [clients, monthFilter]);
+    }, [clients, monthFilter, allBills]);
+
+    const summaryData = useMemo(() => {
+        if (!clientsForTable || clientsForTable.length === 0) {
+            return { totalPaid: 0, totalUnpaid: 0, totalBilled: 0 };
+        }
+        return clientsForTable.reduce((acc, client) => {
+            acc.totalPaid += client.totalPaid;
+            acc.totalUnpaid += client.totalBalanceDue;
+            acc.totalBilled += client.totalBillAmount;
+            return acc;
+        }, { totalPaid: 0, totalUnpaid: 0, totalBilled: 0 });
+    }, [clientsForTable]);
+
 
     useEffect(() => {
         if (selectedClientId && !clientsForTable.some(c => c.id === selectedClientId)) {
@@ -176,7 +201,16 @@ export default function AccountPage() {
     }, [selectedClientId, clientsForTable]);
 
     const selectedClient = useMemo(() => clients.find(c => c.id === selectedClientId) || null, [clients, selectedClientId]);
-    const billsForSelectedClient = useMemo(() => allBills.filter(b => b.clientId === selectedClientId).sort((a,b) => new Date(b.issuedDate).getTime() - new Date(a.issuedDate).getTime()), [allBills, selectedClientId]);
+    
+    const selectedClientMonthName = useMemo(() => {
+        if (!selectedClient || !selectedClient.months || selectedClient.months.length < monthFilter) return null;
+        return selectedClient.months[monthFilter - 1].name;
+    }, [selectedClient, monthFilter]);
+
+    const billsForSelectedClient = useMemo(() => {
+        return allBills.filter(b => b.clientId === selectedClientId && b.month === selectedClientMonthName)
+                       .sort((a,b) => new Date(b.issuedDate).getTime() - new Date(a.issuedDate).getTime())
+    }, [allBills, selectedClientId, selectedClientMonthName]);
 
     const maxMonths = useMemo(() => {
         if (!clients || clients.length === 0) return 1;
@@ -210,13 +244,38 @@ export default function AccountPage() {
                         </div>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <ClientBillOverviewTable
-                            clients={clientsForTable}
-                            selectedClientId={selectedClientId}
-                            onClientSelect={setSelectedClientId}
-                            loading={clientsLoading || billsLoading}
-                            onStatusChange={handleBillingStatusChange}
-                        />
+                        <div className="space-y-4">
+                            <ClientBillOverviewTable
+                                clients={clientsForTable}
+                                selectedClientId={selectedClientId}
+                                onClientSelect={setSelectedClientId}
+                                loading={clientsLoading || billsLoading}
+                                onStatusChange={handleBillingStatusChange}
+                            />
+                             <Card>
+                                <CardHeader className="p-3">
+                                    <CardTitle className="text-base font-headline">Billing Summary (Month {monthFilter})</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Total Paid</TableHead>
+                                                <TableHead>Total Unpaid</TableHead>
+                                                <TableHead>Total Billed</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            <TableRow>
+                                                <TableCell className="font-bold text-green-600 font-mono">{summaryData.totalPaid.toFixed(2)}</TableCell>
+                                                <TableCell className="font-bold text-red-600 font-mono">{summaryData.totalUnpaid.toFixed(2)}</TableCell>
+                                                <TableCell className="font-bold font-mono">{summaryData.totalBilled.toFixed(2)}</TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                        </div>
 
                         <div>
                             {selectedClient ? (
@@ -224,6 +283,7 @@ export default function AccountPage() {
                                     client={selectedClient}
                                     bills={billsForSelectedClient}
                                     loading={billsLoading}
+                                    activeMonthName={selectedClientMonthName}
                                 />
                             ) : (
                                 <div className="flex h-full min-h-[300px] items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 bg-card">

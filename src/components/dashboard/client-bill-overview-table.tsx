@@ -1,6 +1,6 @@
 'use client';
 
-import type { Client, MonthData } from '@/lib/data';
+import type { Client } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
@@ -10,7 +10,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 type MonthlyBillingStatus = 'Issued' | 'Not Issued';
 
 interface ClientBillOverviewTableProps {
-    clients: (Client & { id: string; billDuration: string; isEndingSoon: boolean; billingStatus: MonthlyBillingStatus })[];
+    clients: (Client & { 
+        id: string; 
+        billDuration: string; 
+        isEndingSoon: boolean; 
+        billingStatus: MonthlyBillingStatus;
+        totalPaid: number;
+        totalBalanceDue: number;
+        totalBillAmount: number;
+    })[];
     selectedClientId: string | null;
     onClientSelect: (clientId: string) => void;
     loading: boolean;
@@ -37,13 +45,15 @@ export default function ClientBillOverviewTable({ clients, selectedClientId, onC
                                 <TableHead className="w-[40px] text-[10px]">No</TableHead>
                                 <TableHead className="text-[10px]">Client</TableHead>
                                 <TableHead className="text-[10px]">Duration</TableHead>
-                                <TableHead className="w-[140px] text-[10px]">Status</TableHead>
+                                <TableHead className="w-[120px] text-[10px]">Status</TableHead>
+                                <TableHead className="w-[80px] text-right text-[10px]">Paid</TableHead>
+                                <TableHead className="w-[80px] text-right text-[10px]">Balance</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading && Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={i}>
-                                    <TableCell colSpan={4}><Skeleton className="h-7 w-full" /></TableCell>
+                                    <TableCell colSpan={6}><Skeleton className="h-7 w-full" /></TableCell>
                                 </TableRow>
                             ))}
                             {!loading && clients.map((client, index) => {
@@ -81,12 +91,14 @@ export default function ClientBillOverviewTable({ clients, selectedClientId, onC
                                                 </SelectContent>
                                             </Select>
                                         </TableCell>
+                                        <TableCell className="py-1 px-2 text-[10px] text-right font-mono">{client.totalPaid.toFixed(2)}</TableCell>
+                                        <TableCell className="py-1 px-2 text-[10px] text-right font-mono">{client.totalBalanceDue.toFixed(2)}</TableCell>
                                     </TableRow>
                                 );
                             })}
                             {!loading && clients.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center text-muted-foreground p-4">
+                                    <TableCell colSpan={6} className="text-center text-muted-foreground p-4">
                                         No clients found for this month filter.
                                     </TableCell>
                                 </TableRow>

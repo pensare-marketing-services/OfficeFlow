@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -50,6 +49,7 @@ interface IssueBillDialogProps {
   client: Client;
   existingBill: (Bill & { id: string }) | null;
   billCount: number;
+  activeMonthName: string | null;
 }
 
 const billableServices = [
@@ -60,7 +60,7 @@ const billableServices = [
     "web",
 ];
 
-export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsOpen, client, existingBill, billCount }) => {
+export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsOpen, client, existingBill, billCount, activeMonthName }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -122,12 +122,16 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
   const onSubmit = async (data: BillFormValues) => {
     setLoading(true);
     try {
+      if (!activeMonthName && !existingBill?.month) {
+        throw new Error("Month information is missing.");
+      }
+
       const itemsWithNumbers = data.items.map(item => ({
         description: item.description,
         amount: parseFloat(item.amount) || 0,
       }));
 
-      const calculatedMonth = format(data.issuedDate, "MMMM yyyy");
+      const billMonth = activeMonthName || existingBill!.month;
 
       if (existingBill) {
         const billRef = doc(db, `clients/${client.id}/bills`, existingBill.id);
@@ -136,7 +140,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
           items: itemsWithNumbers,
           issuedDate: data.issuedDate.toISOString(),
           billAmount: totalAmount,
-          month: calculatedMonth,
+          month: billMonth,
         };
         await updateDoc(billRef, updatePayload as any);
         toast({ title: "Bill Updated", description: "The bill details have been successfully updated." });
@@ -150,7 +154,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
           status: 'Issued',
           slNo: billCount + 101,
           clientId: client.id,
-          month: calculatedMonth,
+          month: billMonth,
           view: '', 
         };
         await addDoc(collection(db, `clients/${client.id}/bills`), newBillData);
