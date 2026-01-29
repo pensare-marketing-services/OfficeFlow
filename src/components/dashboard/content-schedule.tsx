@@ -435,6 +435,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                             <TableRow>
                                 <TableHead className="w-[20px] p-1 border-r h-8 text-center">No</TableHead>
                                 <TableHead className="w-[40px] p-1 border-r h-8">Date</TableHead>
+                                <TableHead className="w-[30px] p-1 border-r h-8 text-center">Order</TableHead>
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
                                 {currentUser?.role === 'employee' && <TableHead className="w-[120px] p-1 border-r h-8">Assigned By</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
@@ -531,6 +532,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
+                                    <TableCell className="p-0 px-1 border-r text-center text-[10px] font-medium">{task.priority || '-'}</TableCell>
                                     {showClient && <TableCell className="p-1 border-r font-medium text-[10px]">{client?.name || '-'}</TableCell>}
                                     {currentUser?.role === 'employee' && (
                                         <TableCell className="p-1 border-r text-[10px] text-muted-foreground">
@@ -799,6 +801,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         </Card>
     );
 }
+
 
 
 

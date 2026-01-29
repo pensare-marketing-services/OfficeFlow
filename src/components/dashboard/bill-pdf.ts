@@ -88,7 +88,7 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
         ],
         theme: 'striped',
         headStyles: { fillColor: [33, 37, 41], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-        footStyles: { fillColor: false, textColor: 0, fontStyle: 'normal', cellPadding: {top: 4, bottom: 4}, HlineColor: [33,37,41]},
+        footStyles: { fillColor: false, textColor: 0, fontStyle: 'normal', cellPadding: {top: 4, bottom: 4}, lineColor: [33,37,41]},
         bodyStyles: { fontSize: 9 },
         alternateRowStyles: { fillColor: [248, 249, 250] },
         columnStyles: { 1: { halign: 'right' } },
