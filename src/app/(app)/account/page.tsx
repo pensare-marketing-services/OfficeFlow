@@ -15,7 +15,7 @@ import { startOfDay } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
 type ClientWithId = Client & { id: string };
-type BillWithClientId = Bill & { id: string; clientId: string };
+type BillWithClientId = Bill & { id: string };
 
 function getEndDateFromDuration(durationStr: string): Date | null {
     if (!durationStr) return null;
@@ -258,18 +258,18 @@ export default function AccountPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Total Paid</TableHead>
-                                                <TableHead>Total Unpaid</TableHead>
-                                                <TableHead>Total Billed</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
                                         <TableBody>
                                             <TableRow>
-                                                <TableCell className="font-bold text-green-600 font-mono">{summaryData.totalPaid.toFixed(2)}</TableCell>
-                                                <TableCell className="font-bold text-red-600 font-mono">{summaryData.totalUnpaid.toFixed(2)}</TableCell>
-                                                <TableCell className="font-bold font-mono">{summaryData.totalBilled.toFixed(2)}</TableCell>
+                                                <TableHead className="font-bold">Total Paid</TableHead>
+                                                <TableCell className="font-bold text-green-600 font-mono text-right">{summaryData.totalPaid.toFixed(2)}</TableCell>
+                                            </TableRow>
+                                             <TableRow>
+                                                <TableHead className="font-bold">Total Unpaid</TableHead>
+                                                <TableCell className="font-bold text-red-600 font-mono text-right">{summaryData.totalUnpaid.toFixed(2)}</TableCell>
+                                            </TableRow>
+                                             <TableRow>
+                                                <TableHead className="font-bold">Total Billed</TableHead>
+                                                <TableCell className="font-bold font-mono text-right">{summaryData.totalBilled.toFixed(2)}</TableCell>
                                             </TableRow>
                                         </TableBody>
                                     </Table>
