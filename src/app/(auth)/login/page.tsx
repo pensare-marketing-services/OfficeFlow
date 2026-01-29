@@ -39,16 +39,19 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    // If the user is already logged in, redirect them to the dashboard.
+    // This prevents them from seeing the login page if they navigate back.
+    if (!authLoading && user) {
+      router.replace('/dashboard');
+    }
+  }, [user, authLoading, router]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -60,7 +63,8 @@ export default function LoginPage() {
     setError(null);
     try {
       await login(data.identifier, data.password);
-      router.push('/dashboard');
+      // Use replace instead of push to prevent the login page from being in the history.
+      router.replace('/dashboard');
     } catch (e: any) {
       if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential' || e.message.includes('No user found')) {
         setError('Invalid credentials. Please try again.');
@@ -70,6 +74,21 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  // Show a loading screen while checking auth status or if a user is found (before redirect).
+  if (authLoading || user) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
@@ -82,7 +101,6 @@ export default function LoginPage() {
           <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
           <CardDescription>Enter credentials to sign in.</CardDescription>
         </CardHeader>
-        {isClient ? (
           <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                   <CardContent className="grid gap-4">
@@ -138,23 +156,6 @@ export default function LoginPage() {
                   </CardFooter>
               </form>
           </Form>
-        ) : (
-          <>
-            <CardContent className="grid gap-4">
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-10 w-full" />
-                </div>
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-10 w-full" />
-                </div>
-            </CardContent>
-            <CardFooter>
-                <Skeleton className="h-10 w-full" />
-            </CardFooter>
-          </>
-        )}
       </Card>
     </div>
   );
