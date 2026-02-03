@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
@@ -77,10 +78,11 @@ export const generateClientReportPDF = (data: ReportData): Blob => {
     if (dmTasks.length > 0) {
         addTable(
             'Digital Marketing Tasks',
-            [['Date', 'Title', 'Type', 'Status']],
+            [['Date', 'Title', 'Description', 'Type', 'Status']],
             dmTasks.map(task => [
                 format(new Date(task.deadline), 'MMM dd, yyyy'),
                 task.title,
+                task.description || '-',
                 task.contentType || '-',
                 task.status
             ])

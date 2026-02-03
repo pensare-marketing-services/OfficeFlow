@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -16,6 +17,8 @@ import { useTasks } from '@/hooks/use-tasks';
 import { Button } from '../ui/button';
 import { ChevronLeft, ChevronRight, Pen } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { db } from '@/firebase/client';
 
 
 type UserWithId = UserProfile & { id: string };
@@ -340,37 +343,38 @@ const DailyTaskTable: React.FC<{
       const [highlightedClientIds, setHighlightedClientIds] = useState<Set<string>>(new Set());
       const now = new Date();
   
-      const getStorageKey = (date: Date) => `dm_highlightedClients_${format(date, 'yyyy-MM-dd')}`;
+      const getSyncKey = (date: Date) => `dm_highlights_${format(date, 'yyyy-MM-dd')}`;
   
       useEffect(() => {
-          const storageKey = getStorageKey(selectedDate);
-          try {
-              const item = window.localStorage.getItem(storageKey);
-              if (item) {
-                  setHighlightedClientIds(new Set(JSON.parse(item)));
+          const syncKey = getSyncKey(selectedDate);
+          const highlightsRef = doc(db, 'dailyHighlights', syncKey);
+          
+          const unsubscribe = onSnapshot(highlightsRef, (docSnap) => {
+              if (docSnap.exists()) {
+                  setHighlightedClientIds(new Set(docSnap.data().clientIds || []));
               } else {
                   setHighlightedClientIds(new Set());
               }
-          } catch (error) {
-              console.error("Failed to read from localStorage", error);
-              setHighlightedClientIds(new Set());
-          }
+          });
+
+          return () => unsubscribe();
       }, [selectedDate]);
   
-      const toggleHighlight = (clientId: string) => {
+      const toggleHighlight = async (clientId: string) => {
           const newSet = new Set(highlightedClientIds);
           if (newSet.has(clientId)) {
               newSet.delete(clientId);
           } else {
               newSet.add(clientId);
           }
-          setHighlightedClientIds(newSet);
-  
+          
+          const syncKey = getSyncKey(selectedDate);
+          const highlightsRef = doc(db, 'dailyHighlights', syncKey);
+          
           try {
-              const storageKey = getStorageKey(selectedDate);
-              window.localStorage.setItem(storageKey, JSON.stringify(Array.from(newSet)));
+              await setDoc(highlightsRef, { clientIds: Array.from(newSet) });
           } catch (error) {
-              console.error("Failed to write to localStorage", error);
+              console.error("Failed to sync highlights to database", error);
           }
       };
   

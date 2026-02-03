@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -13,6 +14,8 @@ import ClientBillOverviewTable from '@/components/dashboard/client-bill-overview
 import { Button } from '@/components/ui/button';
 import { startOfDay } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 type ClientWithId = Client & { id: string };
 type BillWithClientId = Bill & { id: string };
@@ -64,6 +67,8 @@ function getEndDateFromDuration(durationStr: string): Date | null {
 
 
 export default function AccountPage() {
+    const { user, loading: userLoading } = useAuth();
+    const router = useRouter();
     const { clients, loading: clientsLoading } = useClients();
     const [allBills, setAllBills] = useState<BillWithClientId[]>([]);
     const [billsLoading, setBillsLoading] = useState(true);
@@ -71,6 +76,12 @@ export default function AccountPage() {
     const [monthFilter, setMonthFilter] = useState<number>(1);
     const [billingStatusFilter, setBillingStatusFilter] = useState<MonthlyBillingStatus>('all');
     const { toast } = useToast();
+
+    useEffect(() => {
+        if (!userLoading && user?.role !== 'admin') {
+            router.push('/dashboard');
+        }
+    }, [user, userLoading, router]);
 
     useEffect(() => {
         if (clients.length === 0) {
@@ -227,6 +238,10 @@ export default function AccountPage() {
     }, [clients]);
     
     const monthFilterButtons = Array.from({ length: maxMonths }, (_, i) => i + 1);
+
+    if (userLoading || !user || user.role !== 'admin') {
+        return null;
+    }
 
     return (
         <div className="space-y-4">

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -26,7 +27,7 @@ const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
 ];
 
-const accountNavItem = { href: '/account', label: 'Accounts', icon: User, adminOnly: false };
+const accountNavItem = { href: '/account', label: 'Accounts', icon: User, adminOnly: true };
 
 const settingsNavItem = { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true };
 
@@ -151,22 +152,24 @@ export function SidebarNav() {
              </Collapsible>
           )}
 
-          <SidebarMenuItem>
-            <Link href={accountNavItem.href!}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith(accountNavItem.href!)}
-                  tooltip={{
-                    children: accountNavItem.label,
-                  }}
-                >
-                    <span>
-                      <accountNavItem.icon />
-                      <span>{accountNavItem.label}</span>
-                    </span>
-                </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
+          {user?.role === 'admin' && (
+            <SidebarMenuItem>
+              <Link href={accountNavItem.href!}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith(accountNavItem.href!)}
+                    tooltip={{
+                      children: accountNavItem.label,
+                    }}
+                  >
+                      <span>
+                        <accountNavItem.icon />
+                        <span>{accountNavItem.label}</span>
+                      </span>
+                  </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          )}
 
            {user?.role === 'admin' && (
              <SidebarMenuItem>
