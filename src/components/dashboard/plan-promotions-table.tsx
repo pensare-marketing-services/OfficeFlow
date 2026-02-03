@@ -313,7 +313,7 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
-                            <TableHead className="w-[20px] text-[10px]">Date</TableHead>
+                            <TableHead className="w-[40px] text-[10px]">Date</TableHead>
                             <TableHead className="w-[120px] text-[10px]">Campaign</TableHead>
                             <TableHead className="w-[100px] text-[10px]">Type</TableHead>
                             <TableHead className="w-[40px] text-right text-[10px]">Budget</TableHead>

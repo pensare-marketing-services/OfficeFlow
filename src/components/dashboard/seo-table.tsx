@@ -101,6 +101,14 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
     const [editingRemark, setEditingRemark] = useState<{ taskId: string; remarkIndex: number } | null>(null);
     const [editingText, setEditingText] = useState('');
 
+    const sortedTasks = useMemo(() => {
+        return [...tasks].sort((a, b) => {
+            const dateA = a.deadline ? new Date(a.deadline).getTime() : 0;
+            const dateB = b.deadline ? new Date(b.deadline).getTime() : 0;
+            return dateB - dateA; // Newest first
+        });
+    }, [tasks]);
+
     const handleTaskChange = (id: string, field: keyof Task, value: any) => {
         onTaskUpdate(id, { [field]: value });
     };
@@ -207,7 +215,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {tasks.map((task, index) => (
+                        {sortedTasks.map((task, index) => (
                             <TableRow key={task.id}>
                                 <TableCell className="px-2 py-1 text-[10px] text-center">{index + 1}</TableCell>
                                 <TableCell className="p-0">
