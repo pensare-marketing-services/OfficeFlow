@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -40,6 +39,7 @@ interface ContentScheduleProps {
     onTaskUpdate: (task: Partial<Task> & { id: string }) => void;
     onTaskDelete?: (taskId: string) => void;
     showClient?: boolean;
+    showOrder?: boolean;
 }
 
 const adTypes: (ContentType)[] = [
@@ -204,7 +204,7 @@ const AssigneeSelect = ({
 };
 
 
-export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDelete, showClient = true, clients: propClients }: ContentScheduleProps) {
+export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDelete, showClient = true, showOrder = false, clients: propClients }: ContentScheduleProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const { toast } = useToast();
@@ -434,6 +434,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                             <TableRow>
                                 <TableHead className="w-[20px] p-1 border-r h-8 text-center">No</TableHead>
                                 <TableHead className="w-[40px] p-1 border-r h-8">Date</TableHead>
+                                {showOrder && <TableHead className="w-[30px] p-1 border-r h-8 text-center">O</TableHead>}
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
                                 {currentUser?.role === 'employee' && <TableHead className="w-[120px] p-1 border-r h-8">Assigned By</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
@@ -530,6 +531,11 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             </PopoverContent>
                                         </Popover>
                                     </TableCell>
+                                    {showOrder && (
+                                        <TableCell className="p-1 border-r text-center font-bold text-[10px]">
+                                            {task.priority || 9}
+                                        </TableCell>
+                                    )}
                                     {showClient && <TableCell className="p-1 border-r font-medium text-[10px]">{client?.name || '-'}</TableCell>}
                                     {currentUser?.role === 'employee' && (
                                         <TableCell className="p-1 border-r text-[10px] text-muted-foreground">

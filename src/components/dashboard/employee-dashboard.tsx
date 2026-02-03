@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -181,6 +180,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
             users={users}
             onTaskUpdate={handleTaskUpdate}
             showClient={true}
+            showOrder={true}
             clients={clients}
         />
       </div>
