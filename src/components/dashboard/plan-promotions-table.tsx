@@ -54,7 +54,7 @@ const adTypes: PlanPromotion['adType'][] = [
     "IG Engage",
     "Reach Ad"
 ];
-const statuses: PlanPromotion['status'][] = ["Active", "Stopped", "Scheduled"];
+const statuses: PlanPromotion['status'][] = ["To Do", "Active", "Stopped", "Scheduled"];
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
@@ -245,7 +245,7 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
             campaign: '',
             adType: 'Lead Call' as const,
             budget: 0,
-            status: 'To Do' as const,
+            status: 'To Do',
             assignedTo: '',
             spent: 0,
             remarks: [],
@@ -273,7 +273,7 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
 
     const balance = (totalCashIn + oldBalance) - grandTotal;
 
-    const getPromotionDisplayStatus = (promo: PlanPromotion & { id: string }): PlanPromotion['status'] | 'To Do' => {
+    const getPromotionDisplayStatus = (promo: PlanPromotion & { id: string }): PlanPromotion['status'] => {
         if (promo.status === 'Stopped') {
             return 'Stopped';
         }
@@ -382,7 +382,6 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
                                             </SelectPrimitive.Icon>
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="To Do">To Do</SelectItem>
                                             {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
                                     </Select>

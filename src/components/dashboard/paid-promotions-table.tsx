@@ -54,7 +54,7 @@ const adTypes: PaidPromotion['adType'][] = [
     "IG Engage",
     "Reach Ad"
 ];
-const statuses: PaidPromotion['status'][] = ["Active", "Stopped", "Scheduled"];
+const statuses: PaidPromotion['status'][] = ["To Do", "Active", "Stopped", "Scheduled"];
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
 
@@ -245,7 +245,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
             campaign: '',
             adType: 'Lead Call' as const,
             budget: 0,
-            status: 'To Do' as const,
+            status: 'To Do',
             assignedTo: '',
             spent: 0,
             remarks: [],
@@ -274,7 +274,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
     const balance = (totalCashIn + oldBalance) - grandTotal;
 
 
-    const getPromotionDisplayStatus = (promo: PaidPromotion & { id: string }): PaidPromotion['status'] | 'To Do' => {
+    const getPromotionDisplayStatus = (promo: PaidPromotion & { id: string }): PaidPromotion['status'] => {
         if (promo.status === 'Stopped') {
             return 'Stopped';
         }
@@ -384,7 +384,6 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                                             </SelectPrimitive.Icon>
                                         </SelectTrigger>
                                         <SelectContent>
-                                             <SelectItem value="To Do">To Do</SelectItem>
                                             {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
                                     </Select>

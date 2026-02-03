@@ -1,5 +1,4 @@
 
-
 export type UserProfile = {
   uid?: string;
   name?: string;
@@ -90,7 +89,7 @@ export type PromotionBase = {
     campaign: string;
     adType: 'EG Whatsapp' | 'EG Instagram' | 'EG FB Post' | 'EG Insta Post' | 'Traffic Web' | 'Lead Gen' | 'Lead Call' | 'Profile Visit Ad' | 'FB Page Like' | 'Carousel Ad' | 'IG Engage' | 'Reach Ad';
     budget: number;
-    status: 'Active' | 'Stopped' | 'Scheduled';
+    status: 'Active' | 'Stopped' | 'Scheduled' | 'To Do';
     assignedTo: string;
     spent: number;
     remarks: ProgressNote[];
