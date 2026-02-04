@@ -1,4 +1,3 @@
-
 'use client';
 import { useMemo, useState, useEffect } from 'react';
 import { Users, Building, Trash2, Eye, EyeOff, Pen, Settings  } from "lucide-react";
@@ -590,7 +589,7 @@ export default function SettingsPage() {
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead className=" px-2 text-[10px] h-8">No</TableHead>
+                    <TableHead className="w-[30px] px-1 text-[10px] h-8 text-center">No</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Nickname</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Username</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Password</TableHead>
@@ -607,7 +606,7 @@ export default function SettingsPage() {
                 {error && <TableRow><TableCell colSpan={6} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
                 {!usersLoading && employeeList.map((employee, index) => (
                     <TableRow key={employee.id}>
-                        <TableCell className="px-2 py-1 text-[10px]">{startIndex + index + 1}</TableCell>
+                        <TableCell className="px-1 py-1 text-[10px] text-center w-[30px]">{startIndex + index + 1}</TableCell>
                          <TableCell className="py-1 px-2">
                             <EditableNicknameCell userId={employee.id} initialNickname={employee.nickname} />
                         </TableCell>

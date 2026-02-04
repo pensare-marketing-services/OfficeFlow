@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -130,7 +129,14 @@ const TaskDisplayItem = ({ task, isSelected, isOverdue }: { task: TaskWithId; is
             </PopoverTrigger>
             <PopoverContent className="w-80 p-2" side="bottom" align="start">
                 <div className="max-h-60 space-y-3 p-1 overflow-y-auto">
-                    <h4 className="font-medium text-xs">{task.title}</h4>
+                    <div className="space-y-1">
+                        <h4 className="font-medium text-xs">{task.title}</h4>
+                        {task.description && (
+                            <div className="text-[10px] text-muted-foreground bg-muted/30 p-1.5 rounded border border-border/50">
+                                <LinkifiedText text={task.description} />
+                            </div>
+                        )}
+                    </div>
                     {(task.progressNotes || []).map((note, remarkIndex) => {
                         const authorName = note.authorName || 'User';
                         const isEditing = editingRemark?.taskId === task.id && editingRemark?.remarkIndex === remarkIndex;
