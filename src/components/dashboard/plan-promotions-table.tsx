@@ -309,7 +309,7 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
                 </Button>
             </CardHeader>
             <CardContent className="p-0">
-                <Table>
+                <Table className="min-w-[800px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
@@ -325,7 +325,6 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <div className="contents min-w-[800px]">
                         {loading && <TableRow><TableCell colSpan={10} className="h-24 text-center">Loading...</TableCell></TableRow>}
                         {!loading && promotions.map((promo, index) => {
                             const displayStatus = getPromotionDisplayStatus(promo);
@@ -493,7 +492,6 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
                                 </TableCell>
                             </TableRow>
                         )})}
-                        </div>
                         {!loading && promotions.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">

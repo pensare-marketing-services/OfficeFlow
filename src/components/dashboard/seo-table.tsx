@@ -15,7 +15,7 @@ import { format, isValid } from 'date-fns';
 import { cn, capitalizeSentences } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { Textarea } from '../ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { LinkifiedText } from '../shared/linkified-text';
 import { InsertLinkPopover } from '../shared/insert-link-popover';
@@ -202,7 +202,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                 </Button>
             </CardHeader>
             <CardContent className="p-0">
-                <Table>
+                <Table className="min-w-[800px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[40px] px-2 text-[10px]">No</TableHead>
@@ -216,7 +216,6 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <div className="contents min-w-[800px]">
                         {sortedTasks.map((task, index) => (
                             <TableRow key={task.id}>
                                 <TableCell className="px-2 py-1 text-[10px] text-center">{index + 1}</TableCell>
@@ -360,7 +359,6 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                                 </TableCell>
                             </TableRow>
                         ))}
-                        </div>
                          {tasks.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">

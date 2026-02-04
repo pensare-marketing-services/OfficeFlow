@@ -15,7 +15,7 @@ import { format, isValid } from 'date-fns';
 import { cn, capitalizeSentences } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { Textarea } from '../ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { LinkifiedText } from '../shared/linkified-text';
 import { InsertLinkPopover } from '../shared/insert-link-popover';
@@ -202,7 +202,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                 </Button>
             </CardHeader>
             <CardContent className="p-0">
-                <Table>
+                <Table className="min-w-[800px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
@@ -215,7 +215,6 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <div className="contents min-w-[800px]">
                         {sortedTasks.map((task, index) => (
                             <TableRow key={task.id}>
                                 <TableCell className="px-2 py-1 text-[10px] text-center">{index + 1}</TableCell>
@@ -244,7 +243,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                         </PopoverContent>
                                     </Popover>
                                 </TableCell>
-                                <TableCell className="p-0"><EditableCell value={task.title} onSave={(v) => handleTaskChange(task.id, 'title', v)} /></TableCell>
+                                <TableCell className="p-0"><EditableCell value={task.title} onSave={(v) => handleTaskChange(task.id, 'title', v)} placeholder="New Task"/></TableCell>
                                 <TableCell className="p-1">
                                     <div className="flex items-center gap-1">
                                         {[0, 1].map(i => (
@@ -359,7 +358,6 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                 </TableCell>
                             </TableRow>
                         ))}
-                        </div>
                          {tasks.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">

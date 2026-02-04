@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { Task, UserProfile as User, ProgressNote, Client, TaskStatus, ContentType } from '@/lib/data';
@@ -249,9 +248,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         <CardTitle className="font-headline text-xs">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
-            
-        <Table className="table-fixed">
+        <Table className="table-fixed min-w-[800px]">
           <TableHeader>
             <TableRow>
               <TableHead className="p-1 border-r border-t text-[8px] h-6 w-[8px]">#</TableHead>
@@ -541,7 +538,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
             })}
           </TableBody>
         </Table>
-        </div>
          {tasks.length === 0 && (
             <div className="text-center text-muted-foreground p-8">No tasks to display.</div>
         )}
