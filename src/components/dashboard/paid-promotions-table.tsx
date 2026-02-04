@@ -211,7 +211,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
             e.preventDefault();
             const noteText = noteInput.trim();
             if (noteText) {
-                addNote(promoId, { note: noteText });
+                addNote(promoId, { note: text });
                 setNoteInput('');
             }
         }
@@ -327,6 +327,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                         </TableRow>
                     </TableHeader>
                     <TableBody>
+                        <div className="contents min-w-[800px]">
                         {loading && <TableRow><TableCell colSpan={10} className="h-24 text-center">Loading...</TableCell></TableRow>}
                         {!loading && promotions.map((promo, index) => {
                             const displayStatus = getPromotionDisplayStatus(promo);
@@ -494,6 +495,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                                 </TableCell>
                             </TableRow>
                         )})}
+                        </div>
                         {!loading && promotions.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">

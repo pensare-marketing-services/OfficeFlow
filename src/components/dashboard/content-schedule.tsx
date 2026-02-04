@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -429,7 +430,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     return (
         <Card>
             <CardContent className="p-0">
-                    <Table className="text-[10px]">
+                    <Table className="text-[10px] min-w-[800px]">
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[20px] p-1 border-r h-8 text-center">No</TableHead>

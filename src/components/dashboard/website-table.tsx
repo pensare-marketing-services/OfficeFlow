@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -215,6 +216,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                         </TableRow>
                     </TableHeader>
                     <TableBody>
+                        <div className="contents min-w-[800px]">
                         {sortedTasks.map((task, index) => (
                             <TableRow key={task.id}>
                                 <TableCell className="px-2 py-1 text-[10px] text-center">{index + 1}</TableCell>
@@ -357,6 +359,7 @@ export default function WebsiteTable({ clientId, users, tasks, onTaskAdd, onTask
                                 </TableCell>
                             </TableRow>
                         ))}
+                        </div>
                          {tasks.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
