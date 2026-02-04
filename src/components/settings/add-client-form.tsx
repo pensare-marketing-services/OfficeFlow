@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -20,7 +21,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Separator } from '../ui/separator';
 import { Textarea } from '../ui/textarea';
 
-const categories = ["seo", "website", "digital marketing", "gd"] as const;
+const categories = ["seo", "website", "digital marketing", "gd", "logo/branding", "trademark/company"] as const;
 
 const clientSchema = z.object({
   name: z.string().min(2, 'Client name must be at least 2 characters.'),
@@ -174,7 +175,7 @@ export default function AddClientForm({ clientCount }: { clientCount: number }) 
                                 <div className="mb-2">
                                     <FormLabel className="text-[10px]">Categories</FormLabel>
                                 </div>
-                                <div className="flex flex-wrap gap-4">
+                                <div className="flex flex-wrap gap-x-4 gap-y-2">
                                 {categories.map((item) => (
                                     <FormField
                                     key={item}

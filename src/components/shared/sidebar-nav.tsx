@@ -31,7 +31,7 @@ const accountNavItem = { href: '/account', label: 'Accounts', icon: User, adminO
 
 const settingsNavItem = { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true };
 
-type CategoryFilter = "all" | "digital marketing" | "seo" | "website" | "gd";
+type CategoryFilter = "all" | "digital marketing" | "seo" | "website" | "gd" | "logo/branding" | "trademark/company";
 
 export function SidebarNav() {
   const pathname = usePathname();
@@ -109,11 +109,13 @@ export function SidebarNav() {
                         </div>
                     </SidebarMenuButton>
                     </CollapsibleTrigger>
-                    <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden px-2 pt-1">
-                        <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-[10px] border-sidebar-border w-full", categoryFilter === 'digital marketing' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('digital marketing'); }}>DM</Button>
-                        <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-[10px] border-sidebar-border w-full", categoryFilter === 'seo' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('seo'); }}>SEO</Button>
-                        <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-[10px] border-sidebar-border w-full", categoryFilter === 'website' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('website'); }}>Web</Button>
-                        <Button size="sm" variant={categoryFilter === 'gd' ? 'secondary' : 'outline'} className={cn("h-5 px-1.5 text-[10px] border-sidebar-border w-full", categoryFilter === 'gd' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('gd'); }}>GD</Button>
+                    <div className="flex items-center gap-0.5 group-data-[collapsible=icon]:hidden px-1 pt-1">
+                        <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'digital marketing' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('digital marketing'); }}>DM</Button>
+                        <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'seo' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('seo'); }}>SEO</Button>
+                        <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'website' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('website'); }}>Web</Button>
+                        <Button size="sm" variant={categoryFilter === 'gd' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'gd' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('gd'); }}>GD</Button>
+                        <Button size="sm" variant={categoryFilter === 'logo/branding' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'logo/branding' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('logo/branding'); }}>L/B</Button>
+                        <Button size="sm" variant={categoryFilter === 'trademark/company' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'trademark/company' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('trademark/company'); }}>TM/C</Button>
                     </div>
                 </SidebarMenuItem>
                 <CollapsibleContent>

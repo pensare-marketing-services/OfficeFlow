@@ -1,5 +1,4 @@
 
-
 {
   "entities": {
     "UserProfile": {
@@ -201,6 +200,10 @@
         "name": {
           "type": "string"
         },
+        "address": {
+          "type": "string",
+          "description": "The billing address of the client."
+        },
         "socialPlatforms": {
           "type": "string",
           "description": "Social media platforms managed for the client."
@@ -239,7 +242,7 @@
             "type": "array",
             "items": {
                 "type": "string",
-                "enum": ["seo", "website", "digital marketing", "gd"]
+                "enum": ["seo", "website", "digital marketing", "gd", "logo/branding", "trademark/company"]
             },
             "description": "The service categories this client belongs to."
         },
@@ -356,7 +359,7 @@
         },
         "status": {
           "type": "string",
-          "enum": ["Active", "Stopped", "Scheduled"]
+          "enum": ["Active", "Stopped", "Scheduled", "To Do"]
         },
         "assignedTo": {
           "type": "string",
@@ -429,7 +432,7 @@
         },
         "status": {
           "type": "string",
-          "enum": ["Active", "Stopped", "Scheduled"]
+          "enum": ["Active", "Stopped", "Scheduled", "To Do"]
         },
         "assignedTo": {
           "type": "string",
@@ -606,4 +609,3 @@
     }
   }
 }
-

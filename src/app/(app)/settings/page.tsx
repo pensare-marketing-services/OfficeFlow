@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useMemo, useState, useEffect } from 'react';
 import { Users, Building, Trash2, Eye, EyeOff, Pen, Settings  } from "lucide-react";
@@ -38,7 +37,7 @@ const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() :
 type ClientWithId = Client & { id: string };
 type UserWithId = UserProfile & { id: string };
 
-const categories = ["seo", "website", "digital marketing", "gd"] as const;
+const categories = ["seo", "website", "digital marketing", "gd", "logo/branding", "trademark/company"] as const;
 
 const editClientSchema = z.object({
   name: z.string().min(2, 'Client name must be at least 2 characters.'),
