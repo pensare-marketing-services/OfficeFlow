@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { Task, UserProfile as User, ProgressNote, Client, TaskStatus, ContentType } from '@/lib/data';
@@ -254,6 +253,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
               <TableHead className="p-1 border-r border-t text-[8px] h-6 w-[20px]">Date</TableHead>
               <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[30px]">Client</TableHead>
               <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[40px]">Task</TableHead>
+              <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[80px]">Description</TableHead>
                {isAdmin && <TableHead className="px-1 border-r border-t text-[8px] h-6 w-[30px]">Assigned</TableHead>}
               <TableHead className="px-1 border-t text-[8px] h-6 w-[30px]">Status</TableHead>
               {currentUser?.role === 'employee' && <TableHead className="text-[10px] h-6 w-[30px]">Note</TableHead>}
@@ -362,6 +362,18 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                     </TooltipContent>
                                 </Tooltip>
                             </TableCell>
+                            <TableCell className="px-2 border-r border-t w-[80px] max-w-[80px]">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="text-[8px] text-muted-foreground truncate">
+                                            {task.description || '-'}
+                                        </div>
+                                    </TooltipTrigger>
+                                     <TooltipContent className="max-w-xs">
+                                        <p className="text-[10px]"><LinkifiedText text={task.description || ''} /></p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TableCell>
                             {isAdmin && (
                             <TableCell className="px-2 border-r border-t">
                                 <DropdownMenuTrigger asChild>
@@ -420,7 +432,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                         <PopoverContent className="w-96" side="bottom" align="end">
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-center">
-                                                    <h4 className="font-medium leading-none">Note</h4>
+                                                    h4 className="font-medium leading-none">Note</h4>
                                                     {(task.progressNotes || []).length > 0 && (
                                                         <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-[10px] text-muted-foreground">
                                                             <Trash2 className="mr-1 h-3 w-3" />

@@ -115,7 +115,7 @@ const statusDotColors: Record<string, string> = {
     'Stopped': 'bg-red-500',
 };
 
-const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea', placeholder?: string }> = ({ value, onSave, type = 'text', placeholder }) => {
+const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => void; type?: 'text' | 'textarea', placeholder?: string, className?: string }> = ({ value, onSave, type = 'text', placeholder, className }) => {
     const [currentValue, setCurrentValue] = useState(value);
 
     useEffect(() => {
@@ -141,10 +141,10 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
     const commonClasses = "bg-transparent border-0 focus-visible:ring-1 text-[10px] p-1 h-auto placeholder:text-muted-foreground/70 w-full";
 
     if (type === 'textarea') {
-         return <Textarea value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={cn(commonClasses, "h-auto")} placeholder={placeholder} />;
+         return <Textarea value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={cn(commonClasses, "h-auto", className)} placeholder={placeholder} />;
     }
 
-    return <Input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={cn(commonClasses, 'h-7')} placeholder={placeholder} />;
+    return <Input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={cn(commonClasses, 'h-7', className)} placeholder={placeholder} />;
 };
 
 const AssigneeSelect = ({
@@ -438,7 +438,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
                                 {currentUser?.role === 'employee' && <TableHead className="w-[120px] p-1 border-r h-8">Assigned By</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
-                                <TableHead className="p-1 border-r h-8 min-w-[150px]">Description</TableHead>
+                                <TableHead className="w-[150px] p-1 border-r h-8">Description</TableHead>
                                 <TableHead className="w-[50px] p-1 border-r h-8">Type</TableHead>
                                 <TableHead className="w-[240px] p-1 border-r h-8">Assigned To</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Status</TableHead>
@@ -549,19 +549,20 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                             <div className="text-[10px] p-1 h-7 flex items-center truncate" title={task.title}>{task.title || '-'}</div>
                                         )}
                                     </TableCell>
-                                    <TableCell className="p-0 border-r" style={{maxWidth: '200px'}}>
+                                    <TableCell className="p-0 border-r w-[150px] max-w-[150px]">
                                         {isAdmin ? (
                                             <EditableTableCell 
                                                 value={task.description || ''} 
                                                 onSave={(value) => handleFieldChange(task.id, 'description', value)}
                                                 type="text"
-                                                placeholder="Add a description..."
+                                                placeholder="Description..."
+                                                className="truncate"
                                             />
                                         ) : (
                                             <Dialog>
                                                 <DialogTrigger asChild>
                                                     <p className="text-[10px] text-muted-foreground p-1 truncate cursor-pointer hover:text-foreground">
-                                                        {(task.description || '-').substring(0, 30)}{task.description && task.description.length > 30 ? '...' : ''}
+                                                        {task.description || '-'}
                                                     </p>
                                                 </DialogTrigger>
                                                 <DialogContent className="sm:max-w-[60vw]">
