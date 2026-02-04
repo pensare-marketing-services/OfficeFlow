@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -15,10 +14,11 @@ import { format, isValid } from 'date-fns';
 import { cn, capitalizeSentences } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { Textarea } from '../ui/textarea';
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { LinkifiedText } from '../shared/linkified-text';
 import { InsertLinkPopover } from '../shared/insert-link-popover';
+import { useToast } from '@/hooks/use-toast';
 
 type UserWithId = User & { id: string };
 type TaskWithId = Task & { id: string };
@@ -35,6 +35,7 @@ interface SeoTableProps {
 
 const allStatuses: Task['status'][] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
+const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
 const statusColors: Record<string, string> = {
     'Scheduled': 'bg-transparent text-foreground',
@@ -97,6 +98,7 @@ const EditableCell: React.FC<{
 export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpdate, onTaskDelete, activeMonth }: SeoTableProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
+    const { toast } = useToast();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
     const [editingRemark, setEditingRemark] = useState<{ taskId: string; remarkIndex: number } | null>(null);
@@ -136,6 +138,36 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
             if (text) {
                 addNote(task, { note: text });
                 setNoteInput('');
+            }
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>, task: TaskWithId) => {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                if (!file) return;
+
+                if (file.size > MAX_IMAGE_SIZE_BYTES) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Image too large',
+                        description: `Please paste an image smaller than ${MAX_IMAGE_SIZE_BYTES / 1024 / 1024}MB.`
+                    });
+                    e.preventDefault();
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    if(event.target && typeof event.target.result === 'string') {
+                       addNote(task, { imageUrl: event.target.result });
+                    }
+                };
+                reader.readAsDataURL(file);
+                e.preventDefault();
+                return;
             }
         }
     };
@@ -338,6 +370,7 @@ export default function SeoTable({ clientId, users, tasks, onTaskAdd, onTaskUpda
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
                                                         onKeyDown={(e) => handleNewNote(e, task)}
+                                                        onPaste={(e) => handlePaste(e, task)}
                                                         className="pr-8 text-[10px]"
                                                     />
                                                     <div className="absolute bottom-1 right-1">

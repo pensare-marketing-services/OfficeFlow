@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -24,6 +23,7 @@ import { LinkifiedText } from '@/components/shared/linkified-text';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { InsertLinkPopover } from '../shared/insert-link-popover';
 import * as SelectPrimitive from "@radix-ui/react-select"
+import { useToast } from '@/hooks/use-toast';
 
 
 type UserWithId = User & { id: string };
@@ -57,6 +57,7 @@ const adTypes: PlanPromotion['adType'][] = [
 const statuses: PlanPromotion['status'][] = ["To Do", "Active", "Stopped", "Scheduled"];
 
 const getInitials = (name: string = '') => name ? name.charAt(0).toUpperCase() : '';
+const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
 const EditableCell: React.FC<{
     value: string | number;
@@ -100,6 +101,7 @@ const EditableCell: React.FC<{
 
 export default function PlanPromotionsTable({ client, users, promotions, loading, totalCashIn, onClientUpdate, activeMonth, monthData }: PlanPromotionsTableProps) {
     const { user: currentUser } = useAuth();
+    const { toast } = useToast();
     const { addTask, updateTask, deleteTask, tasks } = useTasks();
     const [noteInput, setNoteInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -211,8 +213,38 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
             e.preventDefault();
             const noteText = noteInput.trim();
             if (noteText) {
-                addNote(promoId, { note: text });
+                addNote(promoId, { note: noteText });
                 setNoteInput('');
+            }
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>, promoId: string) => {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                if (!file) return;
+
+                if (file.size > MAX_IMAGE_SIZE_BYTES) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Image too large',
+                        description: `Please paste an image smaller than ${MAX_IMAGE_SIZE_BYTES / 1024 / 1024}MB.`
+                    });
+                    e.preventDefault();
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    if(event.target && typeof event.target.result === 'string') {
+                       addNote(promoId, { imageUrl: event.target.result });
+                    }
+                };
+                reader.readAsDataURL(file);
+                e.preventDefault();
+                return;
             }
         }
     };
@@ -451,6 +483,7 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
                                                                     ) : (
                                                                         <>
                                                                             {note.note && <div className="text-[11px] whitespace-pre-wrap break-words"><LinkifiedText text={note.note} /></div>}
+                                                                            {note.imageUrl && <img src={note.imageUrl} alt="remark" className="mt-1 rounded-md max-w-full h-auto" />}
                                                                         </>
                                                                     )}
                                                                     <p className={cn("text-right text-[9px] mt-1 opacity-70", note.authorId === currentUser?.uid ? 'text-primary-foreground/70' : 'text-muted-foreground/70')}>{format(new Date(note.date), "MMM d, HH:mm")}</p>
@@ -471,6 +504,7 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
                                                         onKeyDown={(e) => handleNewNote(e, promo.id)}
+                                                        onPaste={(e) => handlePaste(e, promo.id)}
                                                         className="pr-8 text-[10px]"
                                                     />
                                                     <div className="absolute bottom-1 right-1">
