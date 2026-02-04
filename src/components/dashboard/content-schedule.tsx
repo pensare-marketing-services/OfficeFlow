@@ -297,7 +297,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
         const newNote: ProgressNote = {
             note: note.note ? capitalizeSentences(note.note) : '',
-            imageUrl: note.imageUrl || '',
+            imageUrl: remark.imageUrl || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.nickname || currentUser.username,
@@ -430,7 +430,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     return (
         <Card>
             <CardContent className="p-0">
-                    <Table className="text-[10px] min-w-[800px]">
+                    <Table className="text-[10px]">
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[20px] p-1 border-r h-8 text-center">No</TableHead>
@@ -439,7 +439,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 {showClient && <TableHead className="w-[120px] p-1 border-r h-8">Client</TableHead>}
                                 {currentUser?.role === 'employee' && <TableHead className="w-[120px] p-1 border-r h-8">Assigned By</TableHead>}
                                 <TableHead className="w-[150px] p-1 border-r h-8">Title</TableHead>
-                                <TableHead className="p-1 border-r h-8 w-[200px]">Description</TableHead>
+                                <TableHead className="p-1 border-r h-8 min-w-[150px]">Description</TableHead>
                                 <TableHead className="w-[50px] p-1 border-r h-8">Type</TableHead>
                                 <TableHead className="w-[240px] p-1 border-r h-8">Assigned To</TableHead>
                                 <TableHead className="w-[80px] p-1 border-r h-8">Status</TableHead>

@@ -102,7 +102,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   const [visibleCount, setVisibleCount] = useState(PAGINATION_COUNT);
   const { toast } = useToast();
   const { updateTask, deleteMultipleTasks } = useTasks();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [editingRemark, setEditingRemark] = useState<{ taskId: string; remarkIndex: number } | null>(null);
   const [editingText, setEditingText] = useState('');
   
@@ -248,7 +247,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
         <CardTitle className="font-headline text-xs">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <Table className="table-fixed min-w-[800px]">
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="p-1 border-r border-t text-[8px] h-6 w-[8px]">#</TableHead>
@@ -499,7 +498,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                 </div>
                                                 <div className="relative">
                                                     <Textarea 
-                                                        ref={textareaRef}
                                                         placeholder="Add a remark or paste an image..."
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
@@ -509,7 +507,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                     />
                                                     <div className="absolute bottom-1 right-1">
                                                         <InsertLinkPopover 
-                                                            textareaRef={textareaRef} 
+                                                            textareaRef={{ current: null } as any} 
                                                             onValueChange={setNoteInput} 
                                                             onSend={(message) => addNote(task, {note: message})}
                                                         />

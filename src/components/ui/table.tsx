@@ -10,7 +10,7 @@ const Table = React.forwardRef<
   <div className="relative w-full border border-border rounded-md overflow-auto">
     <table
       ref={ref}
-      className={cn("w-full caption-bottom text-xs table-fixed border-collapse", className)}
+      className={cn("w-full caption-bottom text-xs border-collapse", className)}
       {...props}
     />
   </div>

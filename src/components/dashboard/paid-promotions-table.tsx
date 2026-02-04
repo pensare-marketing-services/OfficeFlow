@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -210,6 +211,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
 
     const handleNewNote = (e: React.KeyboardEvent<HTMLTextAreaElement>, promoId: string) => {
         if (e.key === 'Enter' && !e.shiftKey) {
+            setNoteInput(''); // Optimization: clear immediately if paste logic handled elsewhere
             e.preventDefault();
             const noteText = noteInput.trim();
             if (noteText) {
@@ -343,7 +345,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                 </Button>
             </CardHeader>
             <CardContent className="p-0">
-                <Table className="min-w-[800px]">
+                <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>

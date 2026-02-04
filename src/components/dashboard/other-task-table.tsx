@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -98,7 +99,6 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const { toast } = useToast();
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
     const [editingRemark, setEditingRemark] = useState<{ taskId: string; remarkIndex: number } | null>(null);
     const [editingText, setEditingText] = useState('');
@@ -233,7 +233,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                 </Button>
             </CardHeader>
             <CardContent className="p-0">
-                <Table className="min-w-[800px]">
+                <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
@@ -323,9 +323,9 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                                 )}
                                                                 <div className={cn("max-w-[75%] rounded-lg p-2 relative", note.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                                     {currentUser?.role === 'admin' && !isEditing && (
-                                                                      <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2" onClick={() => handleEditRemark(task, remarkIndex)}>
-                                                                        <Pen className="h-2 w-2"/>
-                                                                      </Button>
+                                                                        <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2" onClick={() => handleEditRemark(task, remarkIndex)}>
+                                                                            <Pen className="h-2 w-2" />
+                                                                        </Button>
                                                                     )}
                                                                     <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
                                                                     
@@ -363,7 +363,6 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                 </div>
                                                 <div className="relative">
                                                     <Textarea 
-                                                        ref={textareaRef}
                                                         placeholder="Add a remark..."
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
@@ -373,7 +372,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                     />
                                                     <div className="absolute bottom-1 right-1">
                                                         <InsertLinkPopover 
-                                                            textareaRef={textareaRef} 
+                                                            textareaRef={{ current: null } as any}
                                                             onValueChange={setNoteInput} 
                                                             onSend={(message) => addNote(task, {note: message})}
                                                         />
