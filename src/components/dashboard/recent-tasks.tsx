@@ -432,7 +432,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                         <PopoverContent className="w-96" side="bottom" align="end">
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-center">
-                                                    h4 className="font-medium leading-none">Note</h4>
+                                                    <h4 className="font-medium leading-none">Note</h4>
                                                     {(task.progressNotes || []).length > 0 && (
                                                         <Button variant="ghost" size="sm" onClick={() => handleClearChat(task.id)} className="text-[10px] text-muted-foreground">
                                                             <Trash2 className="mr-1 h-3 w-3" />
