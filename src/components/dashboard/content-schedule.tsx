@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -297,7 +296,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
 
         const newNote: ProgressNote = {
             note: note.note ? capitalizeSentences(note.note) : '',
-            imageUrl: remark.imageUrl || '',
+            imageUrl: note.imageUrl || '',
             date: new Date().toISOString(),
             authorId: currentUser.uid,
             authorName: currentUser.nickname || currentUser.username,
