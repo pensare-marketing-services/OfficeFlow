@@ -249,7 +249,7 @@ const EditableTabTrigger: React.FC<{
     container.style.backgroundColor = 'white';
     container.style.padding = '20px';
     container.style.fontFamily = 'Helvetica, Arial, sans-serif';
-    container.style.width = '800px'; 
+    container.style.width = '1000px'; 
     container.style.border = '1px solid transparent'; 
 
     const titleElement = document.createElement('h2');
@@ -733,10 +733,11 @@ export default function ClientIdPage() {
             if (filteredTasks.length > 0) {
                 const dmBlob = await createReportImage(
                     'Digital Marketing Tasks',
-                    ['Date', 'Title', 'Type', 'Status'],
+                    ['Date', 'Title', 'Description', 'Type', 'Status'],
                     filteredTasks.map(task => [
                         format(new Date(task.deadline), 'MMM dd, yyyy'),
                         task.title,
+                        task.description || '-',
                         task.contentType || '-',
                         task.status
                     ])
@@ -747,10 +748,11 @@ export default function ClientIdPage() {
             if (otherTasks.length > 0) {
                 const otherBlob = await createReportImage(
                     'Other Works',
-                    ['Date', 'Task', 'Status'],
+                    ['Date', 'Task', 'Description', 'Status'],
                     otherTasks.map(task => [
                         format(new Date(task.deadline), 'MMM dd, yyyy'),
                         task.title,
+                        task.description || '-',
                         task.status
                     ])
                 );

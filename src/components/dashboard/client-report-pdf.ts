@@ -93,10 +93,11 @@ export const generateClientReportPDF = (data: ReportData): Blob => {
     if (otherTasks.length > 0) {
         addTable(
             'Other Works',
-            [['Date', 'Task', 'Status']],
+            [['Date', 'Task', 'Description', 'Status']],
             otherTasks.map(task => [
                 format(new Date(task.deadline), 'MMM dd, yyyy'),
                 task.title,
+                task.description || '-',
                 task.status
             ])
         );
