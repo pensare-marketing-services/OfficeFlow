@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -334,7 +332,7 @@ const EditableTabTrigger: React.FC<{
             valueTd.textContent = item.value;
             valueTd.style.textAlign = 'right';
             valueTd.style.padding = '10px 12px';
-            valueTd.style.border = '1px solid #ddd';
+            labelTd.style.border = '1px solid #ddd';
 
             tr.appendChild(labelTd);
             tr.appendChild(valueTd);
@@ -686,22 +684,30 @@ export default function ClientIdPage() {
             task.contentType !== 'SEO' &&
             task.contentType !== 'Website' &&
             task.contentType !== 'Web Blogs'
-        );
+        ).sort((a, b) => {
+            const dateA = new Date(a.deadline).getTime();
+            const dateB = new Date(b.deadline).getTime();
+            if (dateA !== dateB) return dateB - dateA;
+            return (a.priority || 99) - (b.priority || 99);
+        });
     }, [tasksForCurrentMonth, client]);
     
     const seoTasks = useMemo(() => {
         if (!tasksForCurrentMonth || !client) return [];
-        return tasksForCurrentMonth.filter(task => task.clientId === client.id && task.contentType === 'SEO');
+        return tasksForCurrentMonth.filter(task => task.clientId === client.id && task.contentType === 'SEO')
+            .sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime());
     }, [tasksForCurrentMonth, client]);
     
     const websiteTasks = useMemo(() => {
         if (!tasksForCurrentMonth || !client) return [];
-        return tasksForCurrentMonth.filter(task => task.clientId === client.id && (task.contentType === 'Website' || task.contentType === 'Web Blogs'));
+        return tasksForCurrentMonth.filter(task => task.clientId === client.id && (task.contentType === 'Website' || task.contentType === 'Web Blogs'))
+            .sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime());
     }, [tasksForCurrentMonth, client]);
 
     const otherTasks = useMemo(() => {
         if (!tasksForCurrentMonth || !client) return [];
-        return tasksForCurrentMonth.filter(task => task.clientId === client.id && task.contentType === 'Other');
+        return tasksForCurrentMonth.filter(task => task.clientId === client.id && task.contentType === 'Other')
+            .sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime());
     }, [tasksForCurrentMonth, client]);
 
 

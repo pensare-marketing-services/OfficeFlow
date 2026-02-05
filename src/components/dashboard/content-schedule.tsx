@@ -226,7 +226,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                 return dateB - dateA; // Newest deadline first
             }
             const priorityA = a.priority || 99;
-            const priorityB = b.priority || 9;
+            const priorityB = b.priority || 99;
             return priorityA - priorityB; 
         });
         return sortableTasks;
