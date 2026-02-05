@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
@@ -12,6 +11,7 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
 
     // --- HEADER ---
     try {
+        // logo path must be relative to the public folder or a base64 string
         doc.addImage('/avatars/app-logo-black.png', 'PNG', pageMargin, 15, 50, 15);
     } catch(e) {
         console.error("Error adding logo to PDF.", e);
@@ -31,83 +31,96 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     doc.setDrawColor(220, 220, 220);
     doc.line(pageMargin, finalY, pageWidth - pageMargin, finalY);
     
-    finalY += 15;
+    finalY += 8;
 
-    // --- INVOICE TITLE ---
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(50, 50, 50); // Dark grey text
-    doc.text('INVOICE', pageWidth / 2, finalY, { align: 'center' });
-    finalY += 20;
-    doc.setTextColor(0, 0, 0); // Reset text color
-
-    // --- BILL TO & DETAILS ---
-    const billToStartY = finalY;
-    doc.setFontSize(10).setFont('helvetica', 'bold');
-    doc.text('BILL TO', pageMargin, billToStartY);
-    doc.setFontSize(10).setFont('helvetica', 'normal');
-    const billToLines = [client.name];
-    if (client.address) {
-        billToLines.push(...doc.splitTextToSize(client.address, 80));
-    }
-    doc.text(billToLines, pageMargin, billToStartY + 7);
+    // --- CLIENT ADDRESS & INVOICE HEADING ---
+    const blockStartY = finalY;
     
-    // Details section (right aligned table)
-    autoTable(doc, {
-        body: [
-            ['Invoice #:', `${bill.slNo}`],
-            ['Date of Issue:', format(new Date(bill.issuedDate), 'MMM dd, yyyy')],
-            ['Service Duration:', bill.duration],
-        ],
-        theme: 'plain',
-        startY: billToStartY - 1, // Align top of this table with "BILL TO"
-        styles: { fontSize: 9, cellPadding: 1 },
-        columnStyles: { 0: { fontStyle: 'bold', halign: 'left' }, 1: { halign: 'left' } },
-        tableWidth: 'wrap',
-        margin: { left: pageWidth - pageMargin - 95 } // Position it from the right edge
-    });
-
+    // Left side: Client Address
+    doc.setFontSize(10).setFont('helvetica', 'bold');
+    doc.text(client.name, pageMargin, blockStartY);
+    
+    // Add INVOICE heading in parallel (right aligned) - Size 10 as requested
+    doc.setFontSize(10).setFont('helvetica', 'bold');
+    doc.setTextColor(50, 50, 50);
+    doc.text('INVOICE', pageWidth - pageMargin, blockStartY, { align: 'right' });
+    doc.setTextColor(0, 0, 0); // Reset color
+    
+    doc.setFontSize(9).setFont('helvetica', 'normal');
+    let addressOffset = 6;
+    if (client.address) {
+        const addressLines = doc.splitTextToSize(client.address, 80);
+        const maxLines = Math.min(addressLines.length, 3);
+        for (let i = 0; i < maxLines; i++) {
+            doc.text(addressLines[i], pageMargin, blockStartY + addressOffset + (i * 4.5));
+        }
+        addressOffset += (maxLines * 4.5);
+    }
+    
+    // Right side: Invoice Details (smaller text, moved closer to INVOICE heading)
+    doc.setFontSize(8).setFont('helvetica', 'bold');
+    const invoiceDetails = [
+        `Invoice No: #${bill.slNo}`,
+        `Issued Date: ${format(new Date(bill.issuedDate), 'dd/MM/yyyy')}`
+    ];
+    
+    // Tightened the gap significantly here
+    const invoiceDetailsY = blockStartY + 6; 
+    doc.text(invoiceDetails, pageWidth - pageMargin, invoiceDetailsY, { align: 'right' });
+    
+    // Update finalY to be after client block with a small gap
     finalY = Math.max(
-        (doc as any).lastAutoTable.finalY, 
-        billToStartY + 7 + (billToLines.length * 5)
-    ) + 15;
-
+        blockStartY + addressOffset,
+        invoiceDetailsY + (invoiceDetails.length * 4)
+    ) + 8;
 
     // --- ITEMS TABLE ---
+    // Changed ₹ to Rs. because standard PDF fonts do not support the Unicode Rupee symbol
     const tableBody = bill.items && bill.items.length > 0
-        ? bill.items.map(item => [item.description, item.amount.toFixed(2)])
-        : [['No items specified', '0.00']];
+        ? bill.items.map((item, index) => [`${index + 1}`, item.description, `Rs. ${item.amount.toFixed(2)}`])
+        : [['1', 'No items specified', 'Rs. 0.00']];
 
     autoTable(doc, {
         startY: finalY,
-        head: [['Description', 'Amount']],
+        head: [['SI No.', 'Description', 'Amount']],
         body: tableBody,
-        foot: [
-            [{ content: 'Total Amount', styles: { halign: 'right', fontStyle: 'bold' } }, { content: bill.billAmount.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } }],
-            [{ content: 'Balance Due', styles: { halign: 'right', fontStyle: 'bold' } }, { content: bill.balance.toFixed(2), styles: { halign: 'right', fontStyle: 'bold', fontSize: 10 } }],
-        ],
-        theme: 'striped',
-        headStyles: { fillColor: [33, 37, 41], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-        footStyles: { fillColor: false, textColor: 0, fontStyle: 'normal', cellPadding: {top: 4, bottom: 4}, lineColor: [33,37,41]},
-        bodyStyles: { fontSize: 9 },
-        alternateRowStyles: { fillColor: [248, 249, 250] },
-        columnStyles: { 1: { halign: 'right' } },
-        didDrawPage: (data) => {
-            // Redraw header on new page
-            if (data.pageNumber > 1) {
-                 // You can add headers for subsequent pages here if needed
-            }
-        }
+        theme: 'grid',
+        headStyles: { 
+            fillColor: [33, 37, 41], 
+            textColor: 255, 
+            fontStyle: 'bold', 
+            fontSize: 9,
+            lineWidth: 0.1
+        },
+        bodyStyles: { 
+            fontSize: 9,
+            lineWidth: 0.1,
+            lineColor: [200, 200, 200]
+        },
+        columnStyles: {
+            0: { cellWidth: 20, halign: 'center' }, // SI No.
+            1: { halign: 'left' }, // Description
+            2: { halign: 'right' } // Amount
+        },
+        styles: { 
+            lineColor: [200, 200, 200],
+            lineWidth: 0.1
+        },
+        margin: { left: pageMargin, right: pageMargin },
+        tableWidth: 'auto'
     });
-    finalY = (doc as any).lastAutoTable.finalY + 20;
-
-    // --- FOOTER / NOTES ---
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    doc.setFontSize(8).setFont('helvetica', 'bold');
-    doc.text('Bank Details:', pageMargin, pageHeight - 40);
     
-    doc.setFont('helvetica', 'normal');
+    finalY = (doc as any).lastAutoTable.finalY + 10;
+
+    // --- TOTAL & BANK DETAILS BLOCK ---
+    const totalBankY = finalY;
+    const totalWidth = 60; // Slightly narrower to ensure it fits the amount section properly
+    
+    // Left side: Bank Details
+    doc.setFontSize(9).setFont('helvetica', 'bold');
+    doc.text('Bank Details:', pageMargin, totalBankY);
+    
+    doc.setFontSize(8).setFont('helvetica', 'normal');
     const bankDetails = [
         'PENSARE MARKETING',
         'State Bank of India, Koduvally Branch',
@@ -115,10 +128,53 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
         'IFSC Code: SBIN0001442',
         'GPay: 9745600523'
     ];
-    doc.text(bankDetails, pageMargin, pageHeight - 36);
-
-    doc.setFontSize(9).setFont('helvetica', 'normal');
-    doc.text('Thank you for your business!', pageWidth / 2, pageHeight - 15, { align: 'center' });
+    doc.text(bankDetails, pageMargin, totalBankY + 5);
     
+    // Right side: Total with light blue background
+    const totalX = pageWidth - pageMargin - totalWidth;
+    const totalHeight = 20;
+    
+    // Draw background rectangle
+    doc.setFillColor(240, 245, 255);
+    doc.rect(totalX - 2, totalBankY - 3, totalWidth + 2, totalHeight, 'F');
+    
+    // Aligned to the right margin to match table Amount column
+    const alignX = pageWidth - pageMargin;
+
+    doc.setFontSize(9).setFont('helvetica', 'bold');
+    doc.text('Total:', totalX, totalBankY + 5);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Rs. ${bill.billAmount.toFixed(2)}`, alignX, totalBankY + 5, { align: 'right' });
+    
+    // Balance text
+    doc.setFontSize(9).setFont('helvetica', 'bold');
+    doc.text('Balance:', totalX, totalBankY + 11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Rs. ${bill.balance.toFixed(2)}`, alignX, totalBankY + 11, { align: 'right' });
+    
+    finalY = totalBankY + totalHeight + 10;
+
+    // --- THANK YOU NOTE ---
+    doc.setFontSize(10).setFont('helvetica', 'italic');
+    doc.text('Thank you for your business!', pageMargin, finalY);
+    
+    finalY += 8;
+
+    // --- SEPARATOR LINE ---
+    doc.setDrawColor(220, 220, 220);
+    doc.line(pageMargin, finalY, pageWidth - pageMargin, finalY);
+    
+    finalY += 8;
+
+    // --- CONTACT FOOTER ---
+    doc.setFontSize(8).setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    
+    doc.text('www.pensare.in', pageMargin, finalY, { align: 'left' });
+    doc.text('+91 97452006353', pageWidth / 2, finalY, { align: 'center' });
+    doc.text('info@pensare.in', pageWidth - pageMargin, finalY, { align: 'right' });
+    
+    doc.setTextColor(0, 0, 0);
+
     return doc.output('blob');
 };
