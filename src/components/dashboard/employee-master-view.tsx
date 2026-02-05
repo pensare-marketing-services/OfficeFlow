@@ -124,7 +124,7 @@ const TaskDisplayItem = ({ task, isSelected, isOverdue }: { task: TaskWithId; is
                         isSelected && 'ring-1 ring-accent ring-inset'
                     )}
                 >
-                    <span className="truncate">{task.title}</span>
+                    <span className="truncate w-full block">{task.title}</span>
                 </div>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-2" side="bottom" align="start">
@@ -439,7 +439,7 @@ const DailyTaskTable: React.FC<{
       return (
         <div className="border rounded-lg overflow-hidden" ref={tableRef}>
             <div className="overflow-auto relative" style={{ height: 'calc(100vh - 150px)' }}>
-                <Table className="text-[10px] border-collapse min-w-full">
+                <Table className="text-[10px] border-collapse min-w-full table-fixed">
                     <TableHeader className="sticky top-0 bg-background z-30 shadow-sm">
                         <TableRow className="h-6">
                             <TableHead className='border-r p-1 w-[40px] sticky left-0 bg-background z-40'>Sl.</TableHead>
@@ -548,5 +548,5 @@ const DailyTaskTable: React.FC<{
                 </Table>
             </div>
         </div>
-    );
+      );
 };
