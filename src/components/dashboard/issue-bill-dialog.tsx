@@ -6,7 +6,7 @@ import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -21,7 +21,7 @@ import { format } from 'date-fns';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const billItemSchema = z.object({
   description: z.string().min(1, "Description is required."),
@@ -276,9 +276,9 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                 </div>
               </DialogHeader>
 
-              <div className='border rounded-lg overflow-hidden mt-6'>
+              <div className='border rounded-lg overflow-hidden mt-6 max-h-[40vh] overflow-y-auto'>
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 z-10">
                     <TableRow className="bg-gray-800 hover:bg-gray-800">
                       <TableHead className="text-white">Description</TableHead>
                       <TableHead className="w-[150px] text-right text-white">Amount</TableHead>
@@ -361,7 +361,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                       </TableRow>
                     ))}
                   </TableBody>
-                  <TableFooter>
+                  <TableFooter className="sticky bottom-0 bg-background">
                     <TableRow>
                       <TableCell colSpan={2} className="text-right font-bold">Total Amount</TableCell>
                       <TableCell className="text-right font-bold pr-8">
