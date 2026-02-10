@@ -1,3 +1,4 @@
+
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
@@ -10,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TaskProvider } from '@/hooks/use-tasks';
 import { UserProvider } from '@/hooks/use-users';
 import { ClientProvider } from '@/hooks/use-clients';
+import { NoteProvider } from '@/hooks/use-notes';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -23,10 +25,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [user, loading, router]);
   
   useEffect(() => {
-    // This is a common pattern to handle chunk loading errors in Next.js
-    // after a new deployment. When a user navigates, their browser might
-    // request an old JS chunk that no longer exists. This catches the
-    // error and forces a page reload to get the new assets.
     const originalFetch = window.fetch;
     window.fetch = async (...args) => {
       try {
@@ -39,25 +37,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         throw error;
       }
     };
-     // A listener for Next.js's router events can also be effective
-    const handleRouteChangeError = (err: any, url: string) => {
-        if (err.cancelled) {
-            return;
-        }
-        if (/Loading chunk .* failed/i.test(err.message)) {
-            console.warn(`Chunk load error on route change to ${url}, forcing reload.`);
-            window.location.href = url; // Use window.location to force a full reload
-        }
-    };
-
-    // The 'next/router' events are not available in App Router,
-    // so we rely on the fetch override which is a more general solution.
-    // However, if using Pages Router, you could add:
-    // router.events.on('routeChangeError', handleRouteChangeError);
-    // return () => {
-    //   router.events.off('routeChangeError', handleRouteChangeError);
-    // };
-
   }, [pathname]);
 
 
@@ -79,6 +58,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <UserProvider>
       <TaskProvider>
         <ClientProvider>
+          <NoteProvider>
             <SidebarProvider>
               <Sidebar>
                 <SidebarNav />
@@ -88,6 +68,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <main className="flex-1 overflow-y-auto p-1 sm:p-3 lg:p-4">{children}</main>
               </SidebarInset>
             </SidebarProvider>
+          </NoteProvider>
         </ClientProvider>
       </TaskProvider>
     </UserProvider>

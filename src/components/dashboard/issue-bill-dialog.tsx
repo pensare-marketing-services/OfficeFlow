@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -93,18 +94,15 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     name: "items",
   });
 
-  // Get currently selected descriptions
   const selectedServices = useMemo(() => {
     if (!watchedItems || !Array.isArray(watchedItems)) return [];
     return watchedItems.map(item => item.description).filter(Boolean);
   }, [watchedItems]);
 
-  // Filter billableServices to exclude already selected ones
   const availableServices = useMemo(() => {
     return billableServices.filter(service => !selectedServices.includes(service));
   }, [selectedServices]);
 
-  // Also include the service that's already selected in the current row
   const getAvailableServicesForRow = (currentIndex: number) => {
     const currentDescription = watchedItems?.[currentIndex]?.description || '';
     const otherSelectedServices = selectedServices.filter((service, index) => 

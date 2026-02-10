@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -223,7 +224,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             const dateA = new Date(a.deadline).getTime();
             const dateB = new Date(b.deadline).getTime();
             if (dateA !== dateB) {
-                return dateB - dateA; // Newest deadline first
+                return dateB - dateA;
             }
             const priorityA = a.priority || 99;
             const priorityB = b.priority || 99;
@@ -287,7 +288,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
         const newAssigneeIds = [...(task.assigneeIds || [])];
         newAssigneeIds[index] = newId;
         const finalAssignees = [...new Set(newAssigneeIds.filter(id => id && id !== 'unassigned'))];
-        onTaskUpdate({ id: taskId, assigneeIds: finalAssignees, activeAssigneeIndex: 0 }); // Reset index on change
+        onTaskUpdate({ id: taskId, assigneeIds: finalAssignees, activeAssigneeIndex: 0 });
     };
 
     const addNote = (task: Task & { id: string }, note: Partial<Omit<ProgressNote, 'date' | 'authorId' | 'authorName'>>) => {
@@ -302,7 +303,6 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             authorName: currentUser.nickname || currentUser.username,
         };
         
-        // Reset opened state for all users except sender
         setOpenedChats(prev => {
             const newSet = new Set(prev);
             newSet.delete(task.id);

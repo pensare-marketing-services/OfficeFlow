@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -106,7 +107,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
         return [...tasks].sort((a, b) => {
             const dateA = a.deadline ? new Date(a.deadline).getTime() : 0;
             const dateB = b.deadline ? new Date(b.deadline).getTime() : 0;
-            return dateB - dateA; // Newest first
+            return dateB - dateA;
         });
     }, [tasks]);
     
@@ -191,7 +192,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
 
     const addTask = () => {
         const deadline = new Date();
-        deadline.setHours(23, 59, 59, 999); // Set to end of today
+        deadline.setHours(23, 59, 59, 999);
 
         const newTask: Omit<Task, 'id' | 'createdAt'> = {
             title: '',
@@ -256,7 +257,6 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                 size="sm"
                                                 className={cn('w-full justify-start text-left font-normal h-7 text-[10px] px-2', !task.deadline && 'text-muted-foreground')}
                                             >
-                                                {/* <CalendarIcon className="mr-2 h-4 w-4" /> */}
                                                 {task.deadline && isValid(new Date(task.deadline)) ? format(new Date(task.deadline), 'MMM dd') : <span>Pick a date</span>}
                                             </Button>
                                         </PopoverTrigger>

@@ -146,10 +146,10 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     doc.setFont('helvetica', 'normal');
     doc.text(`Rs. ${bill.billAmount.toFixed(2)}`, alignX, totalBankY + 5, { align: 'right' });
     
-  // ADD SEPARATOR LINE HERE
-doc.setDrawColor(255, 255, 255); // White line for contrast on blue
-doc.setLineWidth(0.2);
-doc.line(totalX, totalBankY + 8, totalX + totalWidth, totalBankY + 8); // Line between Total and Balance
+    // ADD SEPARATOR LINE HERE
+    doc.setDrawColor(112, 109, 109);
+    doc.setLineWidth(0.2);
+    doc.line(totalX, totalBankY + 8, totalX + totalWidth, totalBankY + 8); // Line between Total and Balance
 
     // Balance text
     doc.setFontSize(9).setFont('helvetica', 'bold');

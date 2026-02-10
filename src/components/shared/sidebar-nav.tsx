@@ -11,7 +11,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Building, ChevronDown, User } from 'lucide-react';
+import { LayoutDashboard, Settings, Building, ChevronDown, User, StickyNote } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useClients } from '@/hooks/use-clients';
@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
+  { href: '/notes', label: 'Notes', icon: StickyNote, adminOnly: false },
 ];
 
 const accountNavItem = { href: '/account', label: 'Accounts', icon: User, adminOnly: true };

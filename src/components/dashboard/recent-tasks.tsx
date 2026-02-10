@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Task, UserProfile as User, ProgressNote, Client, TaskStatus, ContentType } from '@/lib/data';
@@ -106,7 +107,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
   
   const sortedTasks = useMemo(() => {
     return [...tasks].sort((a,b) => {
-        // Sort by creation date descending (newest first)
         const aDate = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
         const bDate = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
         return bDate - aDate;
@@ -287,7 +287,6 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                 let currentStatus: string = isOverdue ? 'Overdue' : task.status;
                 if (!statusOptions.includes(currentStatus)) {
                     if (currentStatus === 'On Work' && isPromotionTask && isEmployeeView) {
-                       // Don't add 'On Work' if 'Started' is the option
                     } else {
                          statusOptions.unshift(currentStatus);
                     }

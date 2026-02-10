@@ -131,3 +131,13 @@ export type Bill = {
   issuedDate: string;
   items?: BillItem[];
 };
+
+export type InternalNote = {
+  id: string;
+  title: string;
+  content: string;
+  authorId: string;
+  authorName: string;
+  createdAt: any;
+  color?: string;
+};
