@@ -18,7 +18,6 @@ import {
     AlertDialogFooter, 
     AlertDialogHeader, 
     AlertDialogTitle, 
-    AlertDialogTrigger 
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -27,14 +26,6 @@ import { format } from 'date-fns';
 import { capitalizeSentences } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import type { InternalNote } from '@/lib/data';
-
-const COLORS = [
-    { name: 'Default', value: 'bg-card' },
-    { name: 'Yellow', value: 'bg-yellow-100 dark:bg-yellow-900/30' },
-    { name: 'Blue', value: 'bg-blue-100 dark:bg-blue-900/30' },
-    { name: 'Green', value: 'bg-green-100 dark:bg-green-900/30' },
-    { name: 'Red', value: 'bg-red-100 dark:bg-red-900/30' },
-];
 
 export default function NotesPage() {
     const { notes, loading, addNote, updateNote, deleteNote } = useNotes();
@@ -48,7 +39,6 @@ export default function NotesPage() {
     // Form state for creating/editing
     const [noteTitle, setNoteTitle] = useState('');
     const [noteContent, setNoteContent] = useState('');
-    const [noteColor, setNoteColor] = useState('bg-card');
     const [noteClientId, setNoteClientId] = useState('none');
     
     const { toast } = useToast();
@@ -64,7 +54,6 @@ export default function NotesPage() {
     const resetForm = () => {
         setNoteTitle('');
         setNoteContent('');
-        setNoteColor('bg-card');
         setNoteClientId('none');
     };
 
@@ -75,7 +64,7 @@ export default function NotesPage() {
             await addNote(
                 capitalizeSentences(noteTitle), 
                 capitalizeSentences(noteContent), 
-                noteColor,
+                'bg-card',
                 noteClientId === 'none' ? undefined : noteClientId,
                 client?.name
             );
@@ -91,7 +80,6 @@ export default function NotesPage() {
         setSelectedNote(note);
         setNoteTitle(note.title);
         setNoteContent(note.content);
-        setNoteColor(note.color || 'bg-card');
         setNoteClientId(note.clientId || 'none');
         setIsEditOpen(true);
     };
@@ -103,7 +91,7 @@ export default function NotesPage() {
             await updateNote(selectedNote.id, {
                 title: capitalizeSentences(noteTitle),
                 content: capitalizeSentences(noteContent),
-                color: noteColor,
+                color: 'bg-card',
                 clientId: noteClientId === 'none' ? null : noteClientId,
                 clientName: noteClientId === 'none' ? null : client?.name
             } as any);
@@ -176,19 +164,6 @@ export default function NotesPage() {
                                     className="min-h-[150px]"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Category Color</label>
-                                <div className="flex gap-2">
-                                    {COLORS.map(c => (
-                                        <button
-                                            key={c.value}
-                                            onClick={() => setNoteColor(c.value)}
-                                            className={`h-8 w-8 rounded-full border-2 ${c.value} ${noteColor === c.value ? 'border-primary' : 'border-transparent'}`}
-                                            title={c.name}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
                         </div>
                         <DialogFooter>
                             <Button variant="ghost" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
@@ -205,13 +180,13 @@ export default function NotesPage() {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                     {filteredNotes.map(note => (
-                        <Card key={note.id} className={`${note.color || 'bg-card'} shadow-sm border transition-shadow hover:shadow-md flex flex-col min-h-[180px]`}>
+                        <Card key={note.id} className="bg-card shadow-sm border transition-shadow hover:shadow-md flex flex-col min-h-[180px]">
                             <CardHeader className="p-3 pb-1">
                                 <div className="flex justify-between items-start gap-1">
                                     <div className="space-y-1 min-w-0">
                                         <CardTitle className="text-xs font-bold truncate" title={note.title}>{note.title}</CardTitle>
                                         {note.clientName && (
-                                            <Badge variant="secondary" className="text-[8px] px-1 py-0 h-4 font-normal flex items-center gap-1 w-fit bg-white/50 dark:bg-black/20 truncate max-w-full">
+                                            <Badge variant="secondary" className="text-[8px] px-1 py-0 h-4 font-normal flex items-center gap-1 w-fit bg-muted truncate max-w-full">
                                                 <Building className="h-2 w-2" />
                                                 {note.clientName}
                                             </Badge>
@@ -279,12 +254,12 @@ export default function NotesPage() {
 
             {/* View Note Dialog */}
             <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-                <DialogContent className={selectedNote?.color || 'bg-card'}>
+                <DialogContent className="bg-card">
                     <DialogHeader>
                         <div className="flex flex-col gap-2">
                             <DialogTitle className="text-xl font-bold">{selectedNote?.title}</DialogTitle>
                             {selectedNote?.clientName && (
-                                <Badge variant="secondary" className="w-fit flex items-center gap-1 bg-white/50 dark:bg-black/20">
+                                <Badge variant="secondary" className="w-fit flex items-center gap-1">
                                     <Building className="h-3 w-3" />
                                     {selectedNote?.clientName}
                                 </Badge>
@@ -340,19 +315,6 @@ export default function NotesPage() {
                                 onChange={(e) => setNoteContent(e.target.value)}
                                 className="min-h-[150px]"
                             />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Category Color</label>
-                            <div className="flex gap-2">
-                                {COLORS.map(c => (
-                                    <button
-                                        key={c.value}
-                                        onClick={() => setNoteColor(c.value)}
-                                        className={`h-8 w-8 rounded-full border-2 ${c.value} ${noteColor === c.value ? 'border-primary' : 'border-transparent'}`}
-                                        title={c.name}
-                                    />
-                                ))}
-                            </div>
                         </div>
                     </div>
                     <DialogFooter>
