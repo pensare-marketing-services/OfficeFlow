@@ -140,4 +140,6 @@ export type InternalNote = {
   authorName: string;
   createdAt: any;
   color?: string;
+  clientId?: string;
+  clientName?: string;
 };

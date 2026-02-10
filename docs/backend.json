@@ -157,6 +157,22 @@
         "deadline"
       ]
     },
+    "InternalNote": {
+      "title": "Internal Note",
+      "description": "A global agency note not tied to a specific client.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "color": { "type": "string" },
+        "clientId": { "type": "string" },
+        "clientName": { "type": "string" }
+      },
+      "required": ["title", "content", "authorId", "authorName", "createdAt"]
+    },
     "ClientNote": {
       "title": "Client Note",
       "description": "A single note or remark for a client.",
@@ -271,14 +287,6 @@
             }
           },
           "description": "A list of monthly tabs for the client page, each with its own plan details and notes."
-        },
-        "paidPromotionsMainBudget": {
-            "type": "number",
-            "description": "[DEPRECATED] The main budget manually entered for Paid Promotions."
-        },
-        "planPromotionsMainBudget": {
-            "type": "number",
-            "description": "[DEPRECATED] The main budget manually entered for Plan Promotions."
         },
         "paidPromotionsOldBalance": {
             "type": "number",
@@ -576,6 +584,12 @@
         "$ref": "#/entities/Client"
       },
       "description": "Stores all clients for the organization."
+    },
+    "/internalNotes/{noteId}": {
+      "schema": {
+        "$ref": "#/entities/InternalNote"
+      },
+      "description": "Stores agency-wide internal notes."
     },
      "/clients/{clientId}/promotions/{promotionId}": {
       "schema": {

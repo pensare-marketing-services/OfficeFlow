@@ -11,7 +11,7 @@ interface NoteContextType {
     notes: InternalNote[];
     loading: boolean;
     error: Error | null;
-    addNote: (title: string, content: string, color?: string) => Promise<void>;
+    addNote: (title: string, content: string, color?: string, clientId?: string, clientName?: string) => Promise<void>;
     deleteNote: (noteId: string) => Promise<void>;
 }
 
@@ -46,13 +46,15 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return () => unsub();
     }, [currentUser?.uid]);
 
-    const addNote = useCallback(async (title: string, content: string, color: string = 'bg-card') => {
+    const addNote = useCallback(async (title: string, content: string, color: string = 'bg-card', clientId?: string, clientName?: string) => {
         if (!currentUser) return;
         try {
             await addDoc(collection(db, 'internalNotes'), {
                 title,
                 content,
                 color,
+                clientId: clientId || null,
+                clientName: clientName || null,
                 authorId: currentUser.uid,
                 authorName: currentUser.nickname || currentUser.username,
                 createdAt: serverTimestamp(),

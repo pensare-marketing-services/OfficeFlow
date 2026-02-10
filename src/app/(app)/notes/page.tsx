@@ -3,16 +3,30 @@
 
 import React, { useState, useMemo } from 'react';
 import { useNotes } from '@/hooks/use-notes';
+import { useClients } from '@/hooks/use-clients';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Search, Calendar, User, StickyNote } from 'lucide-react';
+import { Plus, Trash2, Search, Calendar, User, StickyNote, Building } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { 
+    AlertDialog, 
+    AlertDialogAction, 
+    AlertDialogCancel, 
+    AlertDialogContent, 
+    AlertDialogDescription, 
+    AlertDialogFooter, 
+    AlertDialogHeader, 
+    AlertDialogTitle, 
+    AlertDialogTrigger 
+} from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { capitalizeSentences } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 const COLORS = [
     { name: 'Default', value: 'bg-card' },
@@ -24,26 +38,37 @@ const COLORS = [
 
 export default function NotesPage() {
     const { notes, loading, addNote, deleteNote } = useNotes();
+    const { clients } = useClients();
     const [search, setSearch] = useState('');
     const [newTitle, setNewTitle] = useState('');
     const [newContent, setNewContent] = useState('');
     const [newColor, setNewColor] = useState('bg-card');
+    const [newClientId, setNewClientId] = useState('none');
     const [isDialogOpen, setIsOpen] = useState(false);
     const { toast } = useToast();
 
     const filteredNotes = useMemo(() => {
         return notes.filter(n => 
             n.title.toLowerCase().includes(search.toLowerCase()) || 
-            n.content.toLowerCase().includes(search.toLowerCase())
+            n.content.toLowerCase().includes(search.toLowerCase()) ||
+            (n.clientName && n.clientName.toLowerCase().includes(search.toLowerCase()))
         );
     }, [notes, search]);
 
     const handleAddNote = async () => {
         if (!newTitle.trim() || !newContent.trim()) return;
         try {
-            await addNote(capitalizeSentences(newTitle), capitalizeSentences(newContent), newColor);
+            const client = clients.find(c => c.id === newClientId);
+            await addNote(
+                capitalizeSentences(newTitle), 
+                capitalizeSentences(newContent), 
+                newColor,
+                newClientId === 'none' ? undefined : newClientId,
+                client?.name
+            );
             setNewTitle('');
             setNewContent('');
+            setNewClientId('none');
             setIsOpen(false);
             toast({ title: 'Note added successfully' });
         } catch (e) {
@@ -82,6 +107,20 @@ export default function NotesPage() {
                                     value={newTitle}
                                     onChange={(e) => setNewTitle(e.target.value)}
                                 />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Link to Client (Optional)</label>
+                                <Select value={newClientId} onValueChange={setNewClientId}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a client..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">No Client (General)</SelectItem>
+                                        {clients.filter(c => c.active !== false).map(client => (
+                                            <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Content</label>
@@ -124,15 +163,43 @@ export default function NotesPage() {
                         <Card key={note.id} className={`${note.color || 'bg-card'} shadow-sm border transition-shadow hover:shadow-md flex flex-col`}>
                             <CardHeader className="p-4 pb-2">
                                 <div className="flex justify-between items-start">
-                                    <CardTitle className="text-lg font-semibold">{note.title}</CardTitle>
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                        onClick={() => deleteNote(note.id)}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
+                                    <div className="space-y-1">
+                                        <CardTitle className="text-lg font-semibold">{note.title}</CardTitle>
+                                        {note.clientName && (
+                                            <Badge variant="secondary" className="text-[10px] py-0 h-5 font-normal flex items-center gap-1 w-fit bg-white/50 dark:bg-black/20">
+                                                <Building className="h-3 w-3" />
+                                                {note.clientName}
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete Note?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. This will permanently delete the note "{note.title}".
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction 
+                                                    onClick={() => deleteNote(note.id)}
+                                                    className="bg-destructive hover:bg-destructive/90"
+                                                >
+                                                    Delete Note
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </div>
                             </CardHeader>
                             <CardContent className="p-4 pt-0 flex-1">
