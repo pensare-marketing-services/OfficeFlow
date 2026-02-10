@@ -53,11 +53,20 @@ interface IssueBillDialogProps {
 }
 
 const billableServices = [
-    "graphic design",
-    "posted",
-    "trade mark",
-    "seo",
-    "web",
+    "Graphic Design",
+    "Poster",
+    "Trademark Registration",
+    "Search Engine Optimization",
+    "Social Media Marketing",
+    "Content Writing",
+    "Website Development",
+    "Digital Marketing",
+    "Video Editing",
+    "Videography",
+    "Paid Ad Budget",
+    "LLP Registration",
+    "Logo/Branding"
+
 ];
 
 export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsOpen, client, existingBill, billCount, activeMonthName }) => {
@@ -204,7 +213,7 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                    <div className="flex items-start gap-4">
                         <FormField control={form.control} name="duration" render={({ field }) => (
                           <FormItem className="flex flex-col items-start gap-1">
-                            <FormLabel className='text-[10px]'>Duration</FormLabel>
+                            <FormLabel className='text-[10px]'>Bill Duration</FormLabel>
                             <FormControl><Input placeholder="e.g., Aug 2024" {...field} className='w-[140px] h-8 text-[10px]' /></FormControl>
                             <FormMessage />
                           </FormItem>

@@ -1,4 +1,4 @@
-import jsPDF from 'jsPDF';
+import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import type { Client, Bill } from '@/lib/data';
@@ -8,7 +8,6 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     let finalY = 20;
     const pageMargin = 14;
     const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
 
     // --- HEADER ---
     try {
@@ -161,34 +160,21 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     
     finalY += 8;
 
+    // --- SEPARATOR LINE ---
+    doc.setDrawColor(220, 220, 220);
+    doc.line(pageMargin, finalY, pageWidth - pageMargin, finalY);
+    
+    finalY += 8;
+
     // --- CONTACT FOOTER ---
-    const footerHeight = 12;
-    const footerY = pageHeight - footerHeight;
-    
-    // Footer Background Block
-    doc.setFillColor(144, 170, 212);
-    doc.rect(0, footerY, pageWidth, footerHeight, 'F');
-    
-    // Footer Text
     doc.setFontSize(8).setFont('helvetica', 'normal');
-    doc.setTextColor(255, 255, 255); // White text for better contrast
+    doc.setTextColor(100, 100, 100);
     
-    const footerTextY = footerY + 7.5;
+    doc.text('www.pensare.in', pageMargin, finalY, { align: 'left' });
+    doc.text('+91 97452006353', pageWidth / 2, finalY, { align: 'center' });
+    doc.text('info@pensare.in', pageWidth - pageMargin, finalY, { align: 'right' });
     
-    // Website
-    doc.text('www.pensare.in', pageMargin, footerTextY, { align: 'left' });
-    
-    // Phone with clickable link
-    const phoneText = '+91 97452006353';
-    const phoneWidth = doc.getTextWidth(phoneText);
-    doc.text(phoneText, pageWidth / 2, footerTextY, { align: 'center' });
-    // Add the clickable tel: link over the phone number
-    doc.link(pageWidth / 2 - (phoneWidth / 2), footerTextY - 4, phoneWidth, 6, { url: 'tel:+9197452006353' });
-    
-    // Email
-    doc.text('info@pensare.in', pageWidth - pageMargin, footerTextY, { align: 'right' });
-    
-    doc.setTextColor(0, 0, 0); // Reset color for future operations
+    doc.setTextColor(0, 0, 0);
 
     return doc.output('blob');
 };
