@@ -1,4 +1,3 @@
-
 export type UserProfile = {
   uid?: string;
   name?: string;
@@ -142,4 +141,5 @@ export type InternalNote = {
   color?: string;
   clientId?: string;
   clientName?: string;
+  order?: number;
 };

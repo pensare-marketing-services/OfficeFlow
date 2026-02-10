@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Search, Calendar, StickyNote, Building, Eye, Pen } from 'lucide-react';
+import { Plus, Trash2, Search, Calendar, StickyNote, Building, Eye, Pen, GripVertical } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { 
     AlertDialog, 
@@ -28,8 +28,130 @@ import { capitalizeSentences } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import type { InternalNote } from '@/lib/data';
 
+// DND Imports
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+interface SortableNoteCardProps {
+    note: InternalNote;
+    onView: (note: InternalNote) => void;
+    onEdit: (note: InternalNote) => void;
+    onDelete: (id: string) => void;
+}
+
+function SortableNoteCard({ note, onView, onEdit, onDelete }: SortableNoteCardProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: note.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 50 : undefined,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <Card 
+            ref={setNodeRef}
+            style={style}
+            className="bg-card shadow-sm border transition-shadow hover:shadow-md flex flex-col min-h-[130px] group"
+        >
+            <CardHeader className="p-2 pb-1">
+                <div className="flex justify-between items-start gap-1">
+                    <div className="flex items-start gap-1 flex-1 min-w-0">
+                        <div 
+                            {...attributes} 
+                            {...listeners} 
+                            className="mt-0.5 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+                        >
+                            <GripVertical className="h-3 w-3" />
+                        </div>
+                        <div className="space-y-1 min-w-0 flex-1">
+                            <CardTitle className="text-[11px] font-bold truncate" title={note.title}>{note.title}</CardTitle>
+                            {note.clientName && (
+                                <Badge variant="secondary" className="text-[8px] px-1 py-0 h-3.5 font-normal flex items-center gap-1 w-fit bg-muted truncate max-w-full">
+                                    <Building className="h-2 w-2" />
+                                    {note.clientName}
+                                </Badge>
+                            )}
+                        </div>
+                    </div>
+                    <div className="flex items-center -mt-0.5 shrink-0">
+                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => onView(note)}>
+                            <Eye className="h-3 w-3" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => onEdit(note)}>
+                            <Pen className="h-3 w-3" />
+                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-5 w-5 text-destructive hover:bg-destructive/10"
+                                >
+                                    <Trash2 className="h-3 w-3" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Note?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the note "{note.title}".
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                        onClick={() => onDelete(note.id)}
+                                        className="bg-destructive hover:bg-destructive/90"
+                                    >
+                                        Delete Note
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="p-2 pt-0 flex-1 overflow-hidden">
+                <p className="text-[10px] text-muted-foreground line-clamp-3 whitespace-pre-wrap leading-tight">
+                    {note.content}
+                </p>
+            </CardContent>
+            <CardFooter className="p-2 pt-1 border-t bg-muted/5 flex items-center justify-end text-[8px] text-muted-foreground">
+                <div className="flex items-center gap-1">
+                    <Calendar className="h-2 w-2" />
+                    {note.createdAt?.seconds ? format(new Date(note.createdAt.seconds * 1000), 'MMM dd, yy') : 'Recently'}
+                </div>
+            </CardFooter>
+        </Card>
+    );
+}
+
 export default function NotesPage() {
-    const { notes, loading, addNote, updateNote, deleteNote } = useNotes();
+    const { notes, loading, addNote, updateNote, deleteNote, reorderNotes } = useNotes();
     const { clients } = useClients();
     const [search, setSearch] = useState('');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -43,6 +165,18 @@ export default function NotesPage() {
     const [noteClientId, setNoteClientId] = useState('none');
     
     const { toast } = useToast();
+
+    // Sensors for DND
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     const filteredNotes = useMemo(() => {
         return notes.filter(n => 
@@ -108,6 +242,18 @@ export default function NotesPage() {
     const handleViewNote = (note: InternalNote) => {
         setSelectedNote(note);
         setIsViewOpen(true);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = notes.findIndex((n) => n.id === active.id);
+            const newIndex = notes.findIndex((n) => n.id === over.id);
+
+            const newOrderedNotes = arrayMove(notes, oldIndex, newIndex);
+            reorderNotes(newOrderedNotes);
+        }
     };
 
     return (
@@ -179,78 +325,34 @@ export default function NotesPage() {
                     {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-28 w-full" />)}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                    {filteredNotes.map(note => (
-                        <Card key={note.id} className="bg-card shadow-sm border transition-shadow hover:shadow-md flex flex-col min-h-[130px]">
-                            <CardHeader className="p-2 pb-1">
-                                <div className="flex justify-between items-start gap-1">
-                                    <div className="space-y-1 min-w-0">
-                                        <CardTitle className="text-[11px] font-bold truncate" title={note.title}>{note.title}</CardTitle>
-                                        {note.clientName && (
-                                            <Badge variant="secondary" className="text-[8px] px-1 py-0 h-3.5 font-normal flex items-center gap-1 w-fit bg-muted truncate max-w-full">
-                                                <Building className="h-2 w-2" />
-                                                {note.clientName}
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center -mt-0.5">
-                                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => handleViewNote(note)}>
-                                            <Eye className="h-3 w-3" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => handleEditNote(note)}>
-                                            <Pen className="h-3 w-3" />
-                                        </Button>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
-                                                    className="h-5 w-5 text-destructive hover:bg-destructive/10"
-                                                >
-                                                    <Trash2 className="h-3 w-3" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Delete Note?</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        This action cannot be undone. This will permanently delete the note "{note.title}".
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction 
-                                                        onClick={() => deleteNote(note.id)}
-                                                        className="bg-destructive hover:bg-destructive/90"
-                                                    >
-                                                        Delete Note
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
+                <DndContext 
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext 
+                        items={filteredNotes.map(n => n.id)}
+                        strategy={rectSortingStrategy}
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                            {filteredNotes.map(note => (
+                                <SortableNoteCard 
+                                    key={note.id} 
+                                    note={note} 
+                                    onView={handleViewNote}
+                                    onEdit={handleEditNote}
+                                    onDelete={deleteNote}
+                                />
+                            ))}
+                            {filteredNotes.length === 0 && (
+                                <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed rounded-lg">
+                                    <StickyNote className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                                    <p>No notes found. Create one to share agency information.</p>
                                 </div>
-                            </CardHeader>
-                            <CardContent className="p-2 pt-0 flex-1 overflow-hidden">
-                                <p className="text-[10px] text-muted-foreground line-clamp-3 whitespace-pre-wrap leading-tight">
-                                    {note.content}
-                                </p>
-                            </CardContent>
-                            <CardFooter className="p-2 pt-1 border-t bg-muted/5 flex items-center justify-end text-[8px] text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                    <Calendar className="h-2 w-2" />
-                                    {note.createdAt?.seconds ? format(new Date(note.createdAt.seconds * 1000), 'MMM dd, yy') : 'Recently'}
-                                </div>
-                            </CardFooter>
-                        </Card>
-                    ))}
-                    {filteredNotes.length === 0 && (
-                        <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                            <StickyNote className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                            <p>No notes found. Create one to share agency information.</p>
+                            )}
                         </div>
-                    )}
-                </div>
+                    </SortableContext>
+                </DndContext>
             )}
 
             {/* View Note Dialog */}

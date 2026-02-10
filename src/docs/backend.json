@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "UserProfile": {
@@ -167,7 +166,10 @@
         "authorId": { "type": "string" },
         "authorName": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
-        "color": { "type": "string" }
+        "color": { "type": "string" },
+        "clientId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "order": { "type": "number" }
       },
       "required": ["title", "content", "authorId", "authorName", "createdAt"]
     },
