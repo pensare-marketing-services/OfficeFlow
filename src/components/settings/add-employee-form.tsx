@@ -44,7 +44,7 @@ export default function AddEmployeeForm() {
         toast({
             title: "User Created Successfully",
             description: `User account for ${data.username} has been created. They can now log in.`,
-            duration: 7000,
+            duration: 5000,
         });
         form.reset();
 

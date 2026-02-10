@@ -12,7 +12,7 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     // --- HEADER ---
     try {
         // logo path must be relative to the public folder or a base64 string
-        doc.addImage('/avatars/app-logo-black.png', 'PNG', pageMargin, 15, 40, 15);
+        doc.addImage('/avatars/app-logo-black.png', 'PNG', pageMargin, 15, 40, 10);
     } catch(e) {
         console.error("Error adding logo to PDF.", e);
         doc.setFontSize(14).setFont('helvetica', 'bold');
@@ -38,7 +38,7 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     
     // Left side: Client Address
     doc.setFontSize(10).setFont('helvetica', 'bold');
-    doc.text(client.name, pageMargin, blockStartY);
+    doc.text(`To: ${client.name}`, pageMargin, blockStartY);
     
     // Add INVOICE heading in parallel (right aligned) - Size 10 as requested
     doc.setFontSize(10).setFont('helvetica', 'bold');
@@ -98,7 +98,7 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
             lineColor: [200, 200, 200]
         },
         columnStyles: {
-            0: { cellWidth: 20, halign: 'center' }, // SI No.
+            0: { cellWidth: 15, halign: 'center' }, // SI No.
             1: { halign: 'left' }, // Description
             2: { halign: 'right' } // Amount
         },
@@ -146,6 +146,11 @@ export const generateBillPDF = (bill: Bill, client: Client): Blob => {
     doc.setFont('helvetica', 'normal');
     doc.text(`Rs. ${bill.billAmount.toFixed(2)}`, alignX, totalBankY + 5, { align: 'right' });
     
+  // ADD SEPARATOR LINE HERE
+doc.setDrawColor(255, 255, 255); // White line for contrast on blue
+doc.setLineWidth(0.2);
+doc.line(totalX, totalBankY + 8, totalX + totalWidth, totalBankY + 8); // Line between Total and Balance
+
     // Balance text
     doc.setFontSize(9).setFont('helvetica', 'bold');
     doc.text('Balance:', totalX, totalBankY + 11);

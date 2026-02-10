@@ -53,20 +53,19 @@ interface IssueBillDialogProps {
 }
 
 const billableServices = [
-    "Graphic Design",
-    "Poster",
-    "Trademark Registration",
-    "Search Engine Optimization",
-    "Social Media Marketing",
-    "Content Writing",
-    "Website Development",
-    "Digital Marketing",
-    "Video Editing",
-    "Videography",
-    "Paid Ad Budget",
-    "LLP Registration",
-    "Logo/Branding"
-
+  "Graphic Design",
+  "Poster",
+  "Trademark Registration",
+  "Search Engine Optimization",
+  "Social Media Marketing",
+  "Content Writing",
+  "Website Development",
+  "Digital Marketing",
+  "Video Editing",
+  "Videography",
+  "Paid Ad Budget",
+  "LLP Registration",
+  "Logo/Branding"
 ];
 
 export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsOpen, client, existingBill, billCount, activeMonthName }) => {
@@ -93,6 +92,29 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
     control: form.control,
     name: "items",
   });
+
+  // Get currently selected descriptions
+  const selectedServices = useMemo(() => {
+    if (!watchedItems || !Array.isArray(watchedItems)) return [];
+    return watchedItems.map(item => item.description).filter(Boolean);
+  }, [watchedItems]);
+
+  // Filter billableServices to exclude already selected ones
+  const availableServices = useMemo(() => {
+    return billableServices.filter(service => !selectedServices.includes(service));
+  }, [selectedServices]);
+
+  // Also include the service that's already selected in the current row
+  const getAvailableServicesForRow = (currentIndex: number) => {
+    const currentDescription = watchedItems?.[currentIndex]?.description || '';
+    const otherSelectedServices = selectedServices.filter((service, index) => 
+      index !== currentIndex && service !== currentDescription
+    );
+    
+    return billableServices.filter(service => 
+      !otherSelectedServices.includes(service) || service === currentDescription
+    );
+  };
 
   const totalAmount = useMemo(() => {
     if (!watchedItems || !Array.isArray(watchedItems)) return 0;
@@ -180,10 +202,10 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-3xl p-0">
+      <DialogContent className="sm:max-w-3xl p-0 overflow-hidden">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="p-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col max-h-[90vh]">
+            <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
               <DialogHeader>
                 <div className="flex justify-between items-start">
                     <div className='pt-2'>
@@ -272,25 +294,38 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                           <FormField
                             control={form.control}
                             name={`items.${index}.description`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select a service" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {billableServices.map(service => (
-                                      <SelectItem key={service} value={service} className="capitalize">
-                                        {service}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
+                            render={({ field }) => {
+                              const rowServices = getAvailableServicesForRow(index);
+                              
+                              return (
+                                <FormItem>
+                                  <Select 
+                                    onValueChange={field.onChange} 
+                                    value={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select a service" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {rowServices.length === 0 ? (
+                                        <SelectItem value="" disabled>
+                                          No more services available
+                                        </SelectItem>
+                                      ) : (
+                                        rowServices.map(service => (
+                                          <SelectItem key={service} value={service} className="capitalize">
+                                            {service}
+                                          </SelectItem>
+                                        ))
+                                      )}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              );
+                            }}
                           />
                         </TableCell>
                         <TableCell className="p-1">
@@ -364,13 +399,14 @@ export const IssueBillDialog: React.FC<IssueBillDialogProps> = ({ isOpen, setIsO
                 size="sm"
                 className="mt-2"
                 onClick={() => append({ description: "", amount: "" })}
+                disabled={availableServices.length === 0}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Add Item
+                Add Item {availableServices.length === 0 && "(No more services)"}
               </Button>
             </div>
             
-            <DialogFooter className='bg-muted p-6 pt-4 sm:justify-between sm:items-end'>
+            <DialogFooter className='bg-muted p-6 pt-4 sm:justify-between sm:items-end flex-shrink-0'>
               <div className='text-left'>
                 <h4 className="text-xs font-bold mb-1">Bank Details:</h4>
                 <p className='text-[10px] text-muted-foreground'>PENSARE MARKETING</p>
