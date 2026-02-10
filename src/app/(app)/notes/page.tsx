@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Search, Calendar, StickyNote, Building, Eye, Pen, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Search, Calendar, StickyNote, Building, Eye, Pen, GripVertical, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { 
     AlertDialog, 
@@ -140,8 +140,12 @@ function SortableNoteCard({ note, onView, onEdit, onDelete }: SortableNoteCardPr
                     {note.content}
                 </p>
             </CardContent>
-            <CardFooter className="p-2 pt-1 border-t bg-muted/5 flex items-center justify-end text-[8px] text-muted-foreground">
-                <div className="flex items-center gap-1">
+            <CardFooter className="p-2 pt-1 border-t bg-muted/5 flex items-center justify-between text-[8px] text-muted-foreground">
+                <div className="truncate flex-1 mr-2 flex items-center gap-1">
+                    <User className="h-2 w-2 shrink-0" />
+                    <span className="truncate">{note.authorName}</span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
                     <Calendar className="h-2 w-2" />
                     {note.createdAt?.seconds ? format(new Date(note.createdAt.seconds * 1000), 'MMM dd, yy') : 'Recently'}
                 </div>
@@ -375,7 +379,10 @@ export default function NotesPage() {
                         </p>
                     </div>
                     <DialogFooter className="text-xs text-muted-foreground items-center justify-between border-t pt-4">
-                        <span>Created on: {selectedNote?.createdAt?.seconds ? format(new Date(selectedNote.createdAt.seconds * 1000), 'MMMM dd, yyyy') : 'Recently'}</span>
+                        <div className="flex flex-col items-start">
+                            <span>Author: {selectedNote?.authorName}</span>
+                            <span>Created on: {selectedNote?.createdAt?.seconds ? format(new Date(selectedNote.createdAt.seconds * 1000), 'MMMM dd, yyyy') : 'Recently'}</span>
+                        </div>
                         <Button onClick={() => setIsViewOpen(false)}>Close</Button>
                     </DialogFooter>
                 </DialogContent>
