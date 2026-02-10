@@ -25,7 +25,6 @@ import { cn } from '@/lib/utils';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { href: '/notes', label: 'Notes', icon: StickyNote, adminOnly: false },
 ];
 
 const accountNavItem = { href: '/account', label: 'Accounts', icon: User, adminOnly: true };
@@ -173,6 +172,23 @@ export function SidebarNav() {
               </Link>
             </SidebarMenuItem>
           )}
+
+          <SidebarMenuItem>
+            <Link href="/notes">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith("/notes")}
+                  tooltip={{
+                    children: "Notes",
+                  }}
+                >
+                    <span>
+                      <StickyNote />
+                      <span>Notes</span>
+                    </span>
+                </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
 
            {user?.role === 'admin' && (
              <SidebarMenuItem>
