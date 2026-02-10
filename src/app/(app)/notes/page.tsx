@@ -176,28 +176,28 @@ export default function NotesPage() {
 
             {loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                    {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-48 w-full" />)}
+                    {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-28 w-full" />)}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                     {filteredNotes.map(note => (
-                        <Card key={note.id} className="bg-card shadow-sm border transition-shadow hover:shadow-md flex flex-col min-h-[180px]">
-                            <CardHeader className="p-3 pb-1">
+                        <Card key={note.id} className="bg-card shadow-sm border transition-shadow hover:shadow-md flex flex-col min-h-[130px]">
+                            <CardHeader className="p-2 pb-1">
                                 <div className="flex justify-between items-start gap-1">
                                     <div className="space-y-1 min-w-0">
-                                        <CardTitle className="text-xs font-bold truncate" title={note.title}>{note.title}</CardTitle>
+                                        <CardTitle className="text-[11px] font-bold truncate" title={note.title}>{note.title}</CardTitle>
                                         {note.clientName && (
-                                            <Badge variant="secondary" className="text-[8px] px-1 py-0 h-4 font-normal flex items-center gap-1 w-fit bg-muted truncate max-w-full">
+                                            <Badge variant="secondary" className="text-[8px] px-1 py-0 h-3.5 font-normal flex items-center gap-1 w-fit bg-muted truncate max-w-full">
                                                 <Building className="h-2 w-2" />
                                                 {note.clientName}
                                             </Badge>
                                         )}
                                     </div>
-                                    <div className="flex items-center -mt-1">
-                                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => handleViewNote(note)}>
+                                    <div className="flex items-center -mt-0.5">
+                                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => handleViewNote(note)}>
                                             <Eye className="h-3 w-3" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => handleEditNote(note)}>
+                                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => handleEditNote(note)}>
                                             <Pen className="h-3 w-3" />
                                         </Button>
                                         <AlertDialog>
@@ -205,7 +205,7 @@ export default function NotesPage() {
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon" 
-                                                    className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                                                    className="h-5 w-5 text-destructive hover:bg-destructive/10"
                                                 >
                                                     <Trash2 className="h-3 w-3" />
                                                 </Button>
@@ -231,12 +231,12 @@ export default function NotesPage() {
                                     </div>
                                 </div>
                             </CardHeader>
-                            <CardContent className="p-3 pt-1 flex-1 overflow-hidden">
-                                <p className="text-[10px] text-muted-foreground line-clamp-5 whitespace-pre-wrap leading-tight">
+                            <CardContent className="p-2 pt-0 flex-1 overflow-hidden">
+                                <p className="text-[10px] text-muted-foreground line-clamp-3 whitespace-pre-wrap leading-tight">
                                     {note.content}
                                 </p>
                             </CardContent>
-                            <CardFooter className="p-3 pt-1 border-t bg-muted/10 flex items-center justify-end text-[8px] text-muted-foreground">
+                            <CardFooter className="p-2 pt-1 border-t bg-muted/5 flex items-center justify-end text-[8px] text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                     <Calendar className="h-2 w-2" />
                                     {note.createdAt?.seconds ? format(new Date(note.createdAt.seconds * 1000), 'MMM dd, yy') : 'Recently'}
