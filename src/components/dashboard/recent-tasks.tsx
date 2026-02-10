@@ -509,7 +509,7 @@ export default function RecentTasks({ tasks, users, title, onTaskDelete }: Recen
                                                 </div>
                                                 <div className="relative">
                                                     <Textarea 
-                                                        placeholder="Add a remark or paste an image..."
+                                                        placeholder="Add a remark..."
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
                                                         onKeyDown={(e) => handleNewNote(e, task)}
