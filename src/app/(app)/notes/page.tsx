@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -8,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Search, Calendar, User, StickyNote, Building } from 'lucide-react';
+import { Plus, Trash2, Search, Calendar, StickyNote, Building, Eye, Pen } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { 
     AlertDialog, 
@@ -27,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { capitalizeSentences } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import type { InternalNote } from '@/lib/data';
 
 const COLORS = [
     { name: 'Default', value: 'bg-card' },
@@ -37,14 +37,20 @@ const COLORS = [
 ];
 
 export default function NotesPage() {
-    const { notes, loading, addNote, deleteNote } = useNotes();
+    const { notes, loading, addNote, updateNote, deleteNote } = useNotes();
     const { clients } = useClients();
     const [search, setSearch] = useState('');
-    const [newTitle, setNewTitle] = useState('');
-    const [newContent, setNewContent] = useState('');
-    const [newColor, setNewColor] = useState('bg-card');
-    const [newClientId, setNewClientId] = useState('none');
-    const [isDialogOpen, setIsOpen] = useState(false);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [isViewOpen, setIsViewOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [selectedNote, setSelectedNote] = useState<InternalNote | null>(null);
+    
+    // Form state for creating/editing
+    const [noteTitle, setNoteTitle] = useState('');
+    const [noteContent, setNoteContent] = useState('');
+    const [noteColor, setNoteColor] = useState('bg-card');
+    const [noteClientId, setNoteClientId] = useState('none');
+    
     const { toast } = useToast();
 
     const filteredNotes = useMemo(() => {
@@ -55,25 +61,64 @@ export default function NotesPage() {
         );
     }, [notes, search]);
 
+    const resetForm = () => {
+        setNoteTitle('');
+        setNoteContent('');
+        setNoteColor('bg-card');
+        setNoteClientId('none');
+    };
+
     const handleAddNote = async () => {
-        if (!newTitle.trim() || !newContent.trim()) return;
+        if (!noteTitle.trim() || !noteContent.trim()) return;
         try {
-            const client = clients.find(c => c.id === newClientId);
+            const client = clients.find(c => c.id === noteClientId);
             await addNote(
-                capitalizeSentences(newTitle), 
-                capitalizeSentences(newContent), 
-                newColor,
-                newClientId === 'none' ? undefined : newClientId,
+                capitalizeSentences(noteTitle), 
+                capitalizeSentences(noteContent), 
+                noteColor,
+                noteClientId === 'none' ? undefined : noteClientId,
                 client?.name
             );
-            setNewTitle('');
-            setNewContent('');
-            setNewClientId('none');
-            setIsOpen(false);
+            resetForm();
+            setIsCreateOpen(false);
             toast({ title: 'Note added successfully' });
         } catch (e) {
             toast({ variant: 'destructive', title: 'Error adding note' });
         }
+    };
+
+    const handleEditNote = (note: InternalNote) => {
+        setSelectedNote(note);
+        setNoteTitle(note.title);
+        setNoteContent(note.content);
+        setNoteColor(note.color || 'bg-card');
+        setNoteClientId(note.clientId || 'none');
+        setIsEditOpen(true);
+    };
+
+    const handleUpdateNote = async () => {
+        if (!selectedNote || !noteTitle.trim() || !noteContent.trim()) return;
+        try {
+            const client = clients.find(c => c.id === noteClientId);
+            await updateNote(selectedNote.id, {
+                title: capitalizeSentences(noteTitle),
+                content: capitalizeSentences(noteContent),
+                color: noteColor,
+                clientId: noteClientId === 'none' ? null : noteClientId,
+                clientName: noteClientId === 'none' ? null : client?.name
+            } as any);
+            setIsEditOpen(false);
+            setSelectedNote(null);
+            resetForm();
+            toast({ title: 'Note updated successfully' });
+        } catch (e) {
+            toast({ variant: 'destructive', title: 'Error updating note' });
+        }
+    };
+
+    const handleViewNote = (note: InternalNote) => {
+        setSelectedNote(note);
+        setIsViewOpen(true);
     };
 
     return (
@@ -88,7 +133,7 @@ export default function NotesPage() {
                         className="pl-10"
                     />
                 </div>
-                <Dialog open={isDialogOpen} onOpenChange={setIsOpen}>
+                <Dialog open={isCreateOpen} onOpenChange={(open) => { setIsCreateOpen(open); if (!open) resetForm(); }}>
                     <DialogTrigger asChild>
                         <Button className="w-full sm:w-auto">
                             <Plus className="mr-2 h-4 w-4" />
@@ -104,13 +149,13 @@ export default function NotesPage() {
                                 <label className="text-sm font-medium">Title</label>
                                 <Input 
                                     placeholder="Note title..." 
-                                    value={newTitle}
-                                    onChange={(e) => setNewTitle(e.target.value)}
+                                    value={noteTitle}
+                                    onChange={(e) => setNoteTitle(e.target.value)}
                                 />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Link to Client (Optional)</label>
-                                <Select value={newClientId} onValueChange={setNewClientId}>
+                                <Select value={noteClientId} onValueChange={setNoteClientId}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select a client..." />
                                     </SelectTrigger>
@@ -126,8 +171,8 @@ export default function NotesPage() {
                                 <label className="text-sm font-medium">Content</label>
                                 <Textarea 
                                     placeholder="Write your note here..." 
-                                    value={newContent}
-                                    onChange={(e) => setNewContent(e.target.value)}
+                                    value={noteContent}
+                                    onChange={(e) => setNoteContent(e.target.value)}
                                     className="min-h-[150px]"
                                 />
                             </div>
@@ -137,8 +182,8 @@ export default function NotesPage() {
                                     {COLORS.map(c => (
                                         <button
                                             key={c.value}
-                                            onClick={() => setNewColor(c.value)}
-                                            className={`h-8 w-8 rounded-full border-2 ${c.value} ${newColor === c.value ? 'border-primary' : 'border-transparent'}`}
+                                            onClick={() => setNoteColor(c.value)}
+                                            className={`h-8 w-8 rounded-full border-2 ${c.value} ${noteColor === c.value ? 'border-primary' : 'border-transparent'}`}
                                             title={c.name}
                                         />
                                     ))}
@@ -146,75 +191,79 @@ export default function NotesPage() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
-                            <Button onClick={handleAddNote} disabled={!newTitle.trim() || !newContent.trim()}>Add Note</Button>
+                            <Button variant="ghost" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+                            <Button onClick={handleAddNote} disabled={!noteTitle.trim() || !noteContent.trim()}>Add Note</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[1, 2, 3].map(i => <Skeleton key={i} className="h-48 w-full" />)}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-48 w-full" />)}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                     {filteredNotes.map(note => (
-                        <Card key={note.id} className={`${note.color || 'bg-card'} shadow-sm border transition-shadow hover:shadow-md flex flex-col`}>
-                            <CardHeader className="p-4 pb-2">
-                                <div className="flex justify-between items-start">
-                                    <div className="space-y-1">
-                                        <CardTitle className="text-lg font-semibold">{note.title}</CardTitle>
+                        <Card key={note.id} className={`${note.color || 'bg-card'} shadow-sm border transition-shadow hover:shadow-md flex flex-col min-h-[180px]`}>
+                            <CardHeader className="p-3 pb-1">
+                                <div className="flex justify-between items-start gap-1">
+                                    <div className="space-y-1 min-w-0">
+                                        <CardTitle className="text-xs font-bold truncate" title={note.title}>{note.title}</CardTitle>
                                         {note.clientName && (
-                                            <Badge variant="secondary" className="text-[10px] py-0 h-5 font-normal flex items-center gap-1 w-fit bg-white/50 dark:bg-black/20">
-                                                <Building className="h-3 w-3" />
+                                            <Badge variant="secondary" className="text-[8px] px-1 py-0 h-4 font-normal flex items-center gap-1 w-fit bg-white/50 dark:bg-black/20 truncate max-w-full">
+                                                <Building className="h-2 w-2" />
                                                 {note.clientName}
                                             </Badge>
                                         )}
                                     </div>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
-                                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Delete Note?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This action cannot be undone. This will permanently delete the note "{note.title}".
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction 
-                                                    onClick={() => deleteNote(note.id)}
-                                                    className="bg-destructive hover:bg-destructive/90"
+                                    <div className="flex items-center -mt-1">
+                                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => handleViewNote(note)}>
+                                            <Eye className="h-3 w-3" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => handleEditNote(note)}>
+                                            <Pen className="h-3 w-3" />
+                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon" 
+                                                    className="h-6 w-6 text-destructive hover:bg-destructive/10"
                                                 >
-                                                    Delete Note
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
+                                                    <Trash2 className="h-3 w-3" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Delete Note?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be undone. This will permanently delete the note "{note.title}".
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction 
+                                                        onClick={() => deleteNote(note.id)}
+                                                        className="bg-destructive hover:bg-destructive/90"
+                                                    >
+                                                        Delete Note
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
                                 </div>
                             </CardHeader>
-                            <CardContent className="p-4 pt-0 flex-1">
-                                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                            <CardContent className="p-3 pt-1 flex-1 overflow-hidden">
+                                <p className="text-[10px] text-muted-foreground line-clamp-5 whitespace-pre-wrap leading-tight">
                                     {note.content}
                                 </p>
                             </CardContent>
-                            <CardFooter className="p-4 pt-2 border-t bg-muted/20 flex items-center justify-between text-[10px] text-muted-foreground">
+                            <CardFooter className="p-3 pt-1 border-t bg-muted/10 flex items-center justify-end text-[8px] text-muted-foreground">
                                 <div className="flex items-center gap-1">
-                                    <User className="h-3 w-3" />
-                                    {note.authorName}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <Calendar className="h-3 w-3" />
-                                    {note.createdAt?.seconds ? format(new Date(note.createdAt.seconds * 1000), 'MMM dd, yyyy') : 'Recently'}
+                                    <Calendar className="h-2 w-2" />
+                                    {note.createdAt?.seconds ? format(new Date(note.createdAt.seconds * 1000), 'MMM dd, yy') : 'Recently'}
                                 </div>
                             </CardFooter>
                         </Card>
@@ -227,6 +276,91 @@ export default function NotesPage() {
                     )}
                 </div>
             )}
+
+            {/* View Note Dialog */}
+            <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+                <DialogContent className={selectedNote?.color || 'bg-card'}>
+                    <DialogHeader>
+                        <div className="flex flex-col gap-2">
+                            <DialogTitle className="text-xl font-bold">{selectedNote?.title}</DialogTitle>
+                            {selectedNote?.clientName && (
+                                <Badge variant="secondary" className="w-fit flex items-center gap-1 bg-white/50 dark:bg-black/20">
+                                    <Building className="h-3 w-3" />
+                                    {selectedNote?.clientName}
+                                </Badge>
+                            )}
+                        </div>
+                    </DialogHeader>
+                    <div className="py-4 max-h-[60vh] overflow-y-auto">
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                            {selectedNote?.content}
+                        </p>
+                    </div>
+                    <DialogFooter className="text-xs text-muted-foreground items-center justify-between border-t pt-4">
+                        <span>Created on: {selectedNote?.createdAt?.seconds ? format(new Date(selectedNote.createdAt.seconds * 1000), 'MMMM dd, yyyy') : 'Recently'}</span>
+                        <Button onClick={() => setIsViewOpen(false)}>Close</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Note Dialog */}
+            <Dialog open={isEditOpen} onOpenChange={(open) => { setIsEditOpen(open); if (!open) resetForm(); }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Internal Note</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Title</label>
+                            <Input 
+                                placeholder="Note title..." 
+                                value={noteTitle}
+                                onChange={(e) => setNoteTitle(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Link to Client (Optional)</label>
+                            <Select value={noteClientId} onValueChange={setNoteClientId}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a client..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">No Client (General)</SelectItem>
+                                    {clients.filter(c => c.active !== false).map(client => (
+                                        <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Content</label>
+                            <Textarea 
+                                placeholder="Write your note here..." 
+                                value={noteContent}
+                                onChange={(e) => setNoteContent(e.target.value)}
+                                className="min-h-[150px]"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Category Color</label>
+                            <div className="flex gap-2">
+                                {COLORS.map(c => (
+                                    <button
+                                        key={c.value}
+                                        onClick={() => setNoteColor(c.value)}
+                                        className={`h-8 w-8 rounded-full border-2 ${c.value} ${noteColor === c.value ? 'border-primary' : 'border-transparent'}`}
+                                        title={c.name}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => { setIsEditOpen(false); resetForm(); }}>Cancel</Button>
+                        <Button onClick={handleUpdateNote} disabled={!noteTitle.trim() || !noteContent.trim()}>Save Changes</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

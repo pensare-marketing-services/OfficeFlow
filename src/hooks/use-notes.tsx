@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import type { InternalNote } from '@/lib/data';
-import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
 
@@ -12,6 +11,7 @@ interface NoteContextType {
     loading: boolean;
     error: Error | null;
     addNote: (title: string, content: string, color?: string, clientId?: string, clientName?: string) => Promise<void>;
+    updateNote: (noteId: string, data: Partial<InternalNote>) => Promise<void>;
     deleteNote: (noteId: string) => Promise<void>;
 }
 
@@ -65,6 +65,16 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, [currentUser]);
 
+    const updateNote = useCallback(async (noteId: string, data: Partial<InternalNote>) => {
+        try {
+            const noteRef = doc(db, 'internalNotes', noteId);
+            await updateDoc(noteRef, data);
+        } catch (e) {
+            console.error("Error updating note:", e);
+            throw new Error('Failed to update note.');
+        }
+    }, []);
+
     const deleteNote = useCallback(async (noteId: string) => {
         try {
             await deleteDoc(doc(db, 'internalNotes', noteId));
@@ -75,7 +85,7 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     return (
-        <NoteContext.Provider value={{ notes, loading, error, addNote, deleteNote }}>
+        <NoteContext.Provider value={{ notes, loading, error, addNote, updateNote, deleteNote }}>
             {children}
         </NoteContext.Provider>
     );
