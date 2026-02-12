@@ -142,10 +142,10 @@ function SortableNoteCard({ note, onView, onEdit, onDelete }: SortableNoteCardPr
             </CardContent>
             <CardFooter className="p-2 pt-1 border-t bg-muted/5 flex items-center justify-between text-[8px] text-muted-foreground">
                 <div className="truncate flex-1 mr-2 flex items-center gap-1">
-                    <User className="h-2 w-2 shrink-0" />
-                    <span className="truncate">{note.authorName}</span>
+                    <User className="h-2.5 w-2.5 shrink-0" />
+                    <span className="truncate font-medium">{note.authorName}</span>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0 opacity-70">
                     <Calendar className="h-2 w-2" />
                     {note.createdAt?.seconds ? format(new Date(note.createdAt.seconds * 1000), 'MMM dd, yy') : 'Recently'}
                 </div>

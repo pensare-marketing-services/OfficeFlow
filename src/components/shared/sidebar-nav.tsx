@@ -35,6 +35,7 @@ type CategoryFilter = "all" | "digital marketing" | "seo" | "website" | "gd" | "
 
 export function SidebarNav() {
   const pathname = usePathname();
+  
   const { user } = useAuth();
   const { clients, loading: clientsLoading } = useClients();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');

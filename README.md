@@ -33,12 +33,19 @@ OfficeFlow is a specialized CRM and office management platform designed for mark
   - `recharts`: For visualizing data through beautiful, responsive charts.
   - `JSZip` & `file-saver`: For bundling multiple reports into a single downloadable ZIP file.
 
-## 🛠 Features
-- **Client Management**: Organize clients by service categories (DM, SEO, Web, etc.).
-- **Task Scheduling**: Multi-assignee task tracking with custom statuses and priority levels.
-- **Billing Center**: Issue professional invoices, track payment status, and manage client balances.
-- **Comprehensive Reporting**: Generate detailed PDF and PNG report bundles for client progress updates.
-- **Master Views**: High-level grid views for administrators to monitor employee workloads and task deadlines.
+## 🛡 Disaster Recovery & Backups
+
+Hostinger backups **only** cover the website code. To protect your enterprise data (Clients, Tasks, Users), follow this Firebase-specific strategy:
+
+### 1. Point-in-Time Recovery (PITR)
+Enable PITR in the Google Cloud Console for Firestore. This allows you to roll back any collection to a specific second within the last 7 days.
+`gcloud firestore databases update --pitr-retention-period=7d`
+
+### 2. Automated GCS Exports
+Use a Cloud Function to run a scheduled `exportDocuments` command daily. This saves your entire database as a snapshot in a Google Cloud Storage bucket.
+
+### 3. Auth Backups
+Firebase Auth users are not exported by default. Use the Firebase CLI or a script using `firebase-admin` to run `auth:export` weekly.
 
 ## 🏗 Project Structure
 - `src/app`: Next.js App Router pages and layouts.
