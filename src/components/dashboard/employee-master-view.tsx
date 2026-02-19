@@ -42,7 +42,7 @@ const statusBackgroundColors: Record<string, string> = {
   'To Do': 'bg-gray-400/40',
   'Ready for Next': 'bg-teal-500/40',
   'Reschedule': 'bg-rose-500/40',
-  'Overdue': 'bg-[#ef4444]',
+  'Overdue': 'bg-[#ef4444] text-white',
   'Running': 'bg-blue-500/40',
   'Active': 'bg-blue-500/40',
   'Stopped': 'bg-red-500/40',
