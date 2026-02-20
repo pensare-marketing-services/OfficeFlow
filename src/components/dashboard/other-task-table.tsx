@@ -25,13 +25,13 @@ type UserWithId = User & { id: string };
 type TaskWithId = Task & { id: string };
 
 interface OtherTaskTableProps {
-  clientId: string;
-  users: UserWithId[];
-  tasks: TaskWithId[];
-  onTaskAdd: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
-  onTaskUpdate: (taskId: string, task: Partial<Task>) => void;
-  onTaskDelete: (taskId: string) => void;
-  activeMonth: string;
+    clientId: string;
+    users: UserWithId[];
+    tasks: TaskWithId[];
+    onTaskAdd: (task: Omit<Task, 'id' | 'createdAt' | 'activeAssigneeIndex'>) => void;
+    onTaskUpdate: (taskId: string, task: Partial<Task>) => void;
+    onTaskDelete: (taskId: string) => void;
+    activeMonth: string;
 }
 
 const allStatuses: Task['status'][] = ['To Do', 'Scheduled', 'On Work', 'For Approval', 'Approved', 'Posted', 'Hold', 'Ready for Next'];
@@ -110,12 +110,12 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
             return dateB - dateA;
         });
     }, [tasks]);
-    
+
     const handleTaskChange = (id: string, field: keyof Task, value: any) => {
         onTaskUpdate(id, { [field]: value });
     };
-    
-     const addNote = (task: TaskWithId, note: Partial<ProgressNote>) => {
+
+    const addNote = (task: TaskWithId, note: Partial<ProgressNote>) => {
         if (!currentUser) return;
         if (!note.note?.trim() && !note.imageUrl) return;
 
@@ -160,8 +160,8 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
 
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    if(event.target && typeof event.target.result === 'string') {
-                       addNote(task, { imageUrl: event.target.result });
+                    if (event.target && typeof event.target.result === 'string') {
+                        addNote(task, { imageUrl: event.target.result });
                     }
                 };
                 reader.readAsDataURL(file);
@@ -172,20 +172,20 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
     };
 
     const handleEditRemark = (task: Task & { id: string }, remarkIndex: number) => {
-      const remark = task.progressNotes?.[remarkIndex];
-      if (!remark) return;
-      setEditingRemark({ taskId: task.id, remarkIndex });
-      setEditingText(remark.note || '');
+        const remark = task.progressNotes?.[remarkIndex];
+        if (!remark) return;
+        setEditingRemark({ taskId: task.id, remarkIndex });
+        setEditingText(remark.note || '');
     };
-  
+
     const handleSaveRemark = (task: Task & { id: string }, remarkIndex: number) => {
         if (!editingRemark) return;
-    
+
         const updatedNotes = [...(task.progressNotes || [])];
         updatedNotes[remarkIndex] = { ...updatedNotes[remarkIndex], note: editingText };
-    
+
         handleTaskChange(task.id, 'progressNotes', updatedNotes);
-    
+
         setEditingRemark(null);
         setEditingText('');
     };
@@ -200,6 +200,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
             status: 'To Do',
             priority: 9,
             deadline: deadline.toISOString(),
+            time:'',
             assigneeIds: [],
             progressNotes: [],
             clientId,
@@ -218,7 +219,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
         }
         newAssigneeIds[index] = newId;
         const finalAssignees = [...new Set(newAssigneeIds.filter(id => id && id !== 'unassigned'))];
-        onTaskUpdate(taskId, { assigneeIds: finalAssignees, activeAssigneeIndex: 0 }); 
+        onTaskUpdate(taskId, { assigneeIds: finalAssignees, activeAssigneeIndex: 0 });
     };
 
     const employeeUsers = useMemo(() => users.filter(u => u.role === 'employee'), [users]);
@@ -239,7 +240,8 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                             <TableHead className="w-[10px] px-2 text-[10px]">No</TableHead>
                             <TableHead className="w-[50px] text-[10px]">Date</TableHead>
                             <TableHead className=" text-[10px]">Task</TableHead>
-                            <TableHead className='w-[250px] text-[10px] '>Assigned</TableHead>
+                            <TableHead className="text-[10px] w-[50px]">Time</TableHead>
+                            <TableHead className='w-[200px] text-[10px] '>Assigned</TableHead>
                             <TableHead className='w-[100px] text-[10px]'>Status</TableHead>
                             <TableHead className="w-[20px] text-[10px]">Note</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
@@ -250,7 +252,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                             <TableRow key={task.id}>
                                 <TableCell className="px-2 py-1 text-[10px] text-center">{index + 1}</TableCell>
                                 <TableCell className="p-0">
-                                     <Popover open={openPopoverId === task.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? task.id : null)}>
+                                    <Popover open={openPopoverId === task.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? task.id : null)}>
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant={'ghost'}
@@ -273,25 +275,33 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                         </PopoverContent>
                                     </Popover>
                                 </TableCell>
-                                <TableCell className="p-0"><EditableCell value={task.title} onSave={(v) => handleTaskChange(task.id, 'title', v)} placeholder="New Task"/></TableCell>
+                                <TableCell className="p-0"><EditableCell value={task.title} onSave={(v) => handleTaskChange(task.id, 'title', v)} placeholder="New Task" /></TableCell>
+                                <TableCell className="p-0">
+                                    <Input
+                                        type="time"
+                                        value={task.time || ''}
+                                        onChange={(e) => handleTaskChange(task.id, 'time', e.target.value)}
+                                        className="h-7 text-[10px] p-1 border-transparent hover:border-border focus:border-ring bg-transparent"
+                                    />
+                                </TableCell>
                                 <TableCell className="p-1">
                                     <div className="flex items-center gap-1">
                                         {[0, 1].map(i => (
-                                            <Select 
+                                            <Select
                                                 key={i}
-                                                value={task.assigneeIds?.[i] || 'unassigned'} 
+                                                value={task.assigneeIds?.[i] || 'unassigned'}
                                                 onValueChange={(v) => handleAssigneeChange(task.id, i, v)}
                                             >
                                                 <SelectTrigger className="h-7 text-[10px]"><SelectValue placeholder="Assign" /></SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="unassigned">Unassigned</SelectItem>
-                                                    {employeeUsers.filter(u => u.id !== task.assigneeIds?.[1-i]).map(user => <SelectItem key={user.id} value={user.id}>{user.nickname || user.username}</SelectItem>)}
+                                                    {employeeUsers.filter(u => u.id !== task.assigneeIds?.[1 - i]).map(user => <SelectItem key={user.id} value={user.id}>{user.nickname || user.username}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         ))}
                                     </div>
                                 </TableCell>
-                                 <TableCell className="p-1">
+                                <TableCell className="p-1">
                                     <Select value={task.status} onValueChange={(v: Task['status']) => handleTaskChange(task.id, 'status', v)}>
                                         <SelectTrigger className={cn("h-7 text-[10px]", statusColors[task.status] || 'bg-gray-500 text-white')}><SelectValue /></SelectTrigger>
                                         <SelectContent>
@@ -327,22 +337,22 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                                         </Button>
                                                                     )}
                                                                     <p className="font-bold text-[10px] mb-1">{note.authorId === currentUser?.uid ? 'You' : authorName}</p>
-                                                                    
+
                                                                     {isEditing ? (
                                                                         <Textarea
-                                                                          value={editingText}
-                                                                          onChange={(e) => setEditingText(e.target.value)}
-                                                                          onBlur={() => handleSaveRemark(task, remarkIndex)}
-                                                                          onKeyDown={(e) => {
-                                                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                                                              e.preventDefault();
-                                                                              handleSaveRemark(task, remarkIndex);
-                                                                            } else if (e.key === 'Escape') {
-                                                                              setEditingRemark(null);
-                                                                            }
-                                                                          }}
-                                                                          autoFocus
-                                                                          className="text-[10px] h-auto bg-background/80 text-foreground"
+                                                                            value={editingText}
+                                                                            onChange={(e) => setEditingText(e.target.value)}
+                                                                            onBlur={() => handleSaveRemark(task, remarkIndex)}
+                                                                            onKeyDown={(e) => {
+                                                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                                                    e.preventDefault();
+                                                                                    handleSaveRemark(task, remarkIndex);
+                                                                                } else if (e.key === 'Escape') {
+                                                                                    setEditingRemark(null);
+                                                                                }
+                                                                            }}
+                                                                            autoFocus
+                                                                            className="text-[10px] h-auto bg-background/80 text-foreground"
                                                                         />
                                                                     ) : (
                                                                         <>
@@ -361,7 +371,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                     })}
                                                 </div>
                                                 <div className="relative">
-                                                    <Textarea 
+                                                    <Textarea
                                                         placeholder="Add a remark..."
                                                         value={noteInput}
                                                         onChange={(e) => setNoteInput(e.target.value)}
@@ -370,10 +380,10 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                                         className="pr-8 text-[10px]"
                                                     />
                                                     <div className="absolute bottom-1 right-1">
-                                                        <InsertLinkPopover 
+                                                        <InsertLinkPopover
                                                             textareaRef={{ current: null } as any}
-                                                            onValueChange={setNoteInput} 
-                                                            onSend={(message) => addNote(task, {note: message})}
+                                                            onValueChange={setNoteInput}
+                                                            onSend={(message) => addNote(task, { note: message })}
                                                         />
                                                     </div>
                                                 </div>
@@ -388,7 +398,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                 </TableCell>
                             </TableRow>
                         ))}
-                         {tasks.length === 0 && (
+                        {tasks.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                                     No other tasks added yet.

@@ -239,7 +239,7 @@ export default function WebsiteListingPage() {
                     <TableCell className="p-0 border-r relative group">
                       <div className="flex items-center">
                         <EditableCell 
-                          value={site.domainName} 
+                          value={site.domainName}
                           onSave={(v) => handleUpdate(site.id, 'domainName', v)} 
                           placeholder="domain.com"
                           className="flex-1"

@@ -30,6 +30,7 @@ export type Task = {
   status: TaskStatus;
   priority: number;
   deadline: string; 
+  time?: string;
   assigneeIds: string[]; 
   progressNotes: ProgressNote[];
   clientId?: string;

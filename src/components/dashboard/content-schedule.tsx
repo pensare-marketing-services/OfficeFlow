@@ -139,7 +139,7 @@ const EditableTableCell: React.FC<{ value: string; onSave: (value: string) => vo
         }
     };
     
-    const commonClasses = "bg-transparent border-0 focus-visible:ring-1 text-[10px] p-1 h-auto placeholder:text-muted-foreground/70 w-full";
+    const commonClasses = "bg-transparent border-0 focus-visible:ring-1 text-[10px] p-1 h-7 placeholder:text-muted-foreground/70 w-full";
 
     if (type === 'textarea') {
          return <Textarea value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} className={cn(commonClasses, "h-auto", className)} placeholder={placeholder} />;
@@ -532,8 +532,29 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                         </Popover>
                                     </TableCell>
                                     {showOrder && (
-                                        <TableCell className="p-1 border-r text-center font-bold text-[10px]">
-                                            {task.priority || 9}
+                                        <TableCell className="p-0 border-r text-center font-bold text-[10px]">
+                                            {isAdmin ? (
+                                                <Input
+                                                    type="number"
+                                                    defaultValue={task.priority ?? 9}
+                                                    min={1}
+                                                    max={9}
+                                                    onBlur={(e) => {
+                                                        const val = Number(e.target.value);
+                                                        if (val !== task.priority) {
+                                                            handleFieldChange(task.id, 'priority', val);
+                                                        }
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.currentTarget.blur();
+                                                        }
+                                                    }}
+                                                    className="h-7 w-full text-[10px] text-center p-1 bg-transparent border-0 focus-visible:ring-1"
+                                                />
+                                            ) : (
+                                                <div className="p-1">{task.priority || 9}</div>
+                                            )}
                                         </TableCell>
                                     )}
                                     {showClient && <TableCell className="p-1 border-r font-medium text-[10px]">{client?.name || '-'}</TableCell>}
