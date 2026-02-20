@@ -164,5 +164,12 @@ export type WebsiteEntry = {
   adminPanelName: string;
   panelPassword: string;
   workDoneBy: string;
+  dbName: string;
+  dbUser: string;
+  dbPassword: string;
+  wpUser: string;
+  wpPassword: string;
+  webmailUser: string;
+  webmailPassword: string;
   createdAt: any;
 };

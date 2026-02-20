@@ -88,6 +88,13 @@ export default function WebsiteListingPage() {
         adminPanelName: '',
         panelPassword: '',
         workDoneBy: '',
+        dbName: '',
+        dbUser: '',
+        dbPassword: '',
+        wpUser: '',
+        wpPassword: '',
+        webmailUser: '',
+        webmailPassword: '',
         createdAt: serverTimestamp(),
       });
     } catch (e) {
@@ -159,35 +166,52 @@ export default function WebsiteListingPage() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-auto max-h-[calc(100vh-12rem)] border-t">
-            <Table className="w-max min-w-full text-[10px]">
+            <Table className="w-max min-w-full text-[10px] border-collapse">
               <TableHeader className="sticky top-0 bg-muted/50 z-10">
                 <TableRow>
-                  <TableHead className="w-[40px] text-center border-r">Sl.</TableHead>
-                  <TableHead className="w-[150px] border-r">Client</TableHead>
-                  <TableHead className="w-[200px] border-r">Address</TableHead>
-                  <TableHead className="w-[120px] border-r">Contact Person</TableHead>
-                  <TableHead className="w-[120px] border-r">Contact No</TableHead>
-                  <TableHead className="w-[180px] border-r">Domain Name</TableHead>
-                  <TableHead className="w-[120px] border-r">Domain A/c</TableHead>
-                  <TableHead className="w-[150px] border-r">Domain E-mail</TableHead>
-                  <TableHead className="w-[100px] border-r">Purchased By</TableHead>
-                  <TableHead className="w-[100px] border-r">Domain Expiry</TableHead>
-                  <TableHead className="w-[100px] border-r">Hosting Expiry</TableHead>
-                  <TableHead className="w-[120px] border-r">Hosting Co</TableHead>
-                  <TableHead className="w-[200px] border-r">Host Remarks</TableHead>
-                  <TableHead className="w-[100px] border-r">Platform</TableHead>
-                  <TableHead className="w-[150px] border-r">Theme Link</TableHead>
-                  <TableHead className="w-[150px] border-r">Admin panel link</TableHead>
-                  <TableHead className="w-[120px] border-r">Admin Panel Name</TableHead>
-                  <TableHead className="w-[120px] border-r">Panel Password</TableHead>
-                  <TableHead className="w-[120px] border-r">Work Done By</TableHead>
-                  <TableHead className="w-[40px] text-center">Actions</TableHead>
+                  <TableHead rowSpan={2} className="w-[40px] text-center border-r">Sl.</TableHead>
+                  <TableHead rowSpan={2} className="w-[150px] border-r">Client</TableHead>
+                  <TableHead rowSpan={2} className="w-[200px] border-r">Address</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r">Contact Person</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r">Contact No</TableHead>
+                  <TableHead rowSpan={2} className="w-[180px] border-r">Domain Name</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r">Domain A/c</TableHead>
+                  <TableHead rowSpan={2} className="w-[150px] border-r">Domain E-mail</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r">Purchased By</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r">Domain Expiry</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r">Hosting Expiry</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r">Hosting Co</TableHead>
+                  <TableHead rowSpan={2} className="w-[200px] border-r">Host Remarks</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r">Platform</TableHead>
+                  <TableHead rowSpan={2} className="w-[150px] border-r">Theme Link</TableHead>
+                  <TableHead rowSpan={2} className="w-[150px] border-r">Admin panel link</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r">Admin Panel Name</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r">Panel Password</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r">Work Done By</TableHead>
+                  
+                  <TableHead colSpan={3} className="text-center border-r bg-yellow-100/50">DB Credentials</TableHead>
+                  <TableHead colSpan={2} className="text-center border-r bg-blue-100/50">WordPress</TableHead>
+                  <TableHead colSpan={2} className="text-center border-r bg-green-100/50">Webmail</TableHead>
+                  
+                  <TableHead rowSpan={2} className="w-[40px] text-center">Actions</TableHead>
+                </TableRow>
+                <TableRow>
+                  {/* DB Headers */}
+                  <TableHead className="w-[120px] border-r bg-yellow-50/50">DB Name</TableHead>
+                  <TableHead className="w-[120px] border-r bg-yellow-50/50">DB User</TableHead>
+                  <TableHead className="w-[120px] border-r bg-yellow-50/50">Password</TableHead>
+                  {/* WP Headers */}
+                  <TableHead className="w-[120px] border-r bg-blue-50/50">Username</TableHead>
+                  <TableHead className="w-[120px] border-r bg-blue-50/50">Password</TableHead>
+                  {/* Webmail Headers */}
+                  <TableHead className="w-[120px] border-r bg-green-50/50">Mail</TableHead>
+                  <TableHead className="w-[120px] border-r bg-green-50/50">Password</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={20} className="h-32 text-center">
+                    <TableCell colSpan={27} className="h-32 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" />
                         <span>Loading directory...</span>
@@ -284,6 +308,34 @@ export default function WebsiteListingPage() {
                     <TableCell className="p-0 border-r">
                       <EditableCell value={site.workDoneBy} onSave={(v) => handleUpdate(site.id, 'workDoneBy', v)} placeholder="Assignee..." />
                     </TableCell>
+                    
+                    {/* DB Cells */}
+                    <TableCell className="p-0 border-r">
+                      <EditableCell value={site.dbName} onSave={(v) => handleUpdate(site.id, 'dbName', v)} placeholder="db_name" />
+                    </TableCell>
+                    <TableCell className="p-0 border-r">
+                      <EditableCell value={site.dbUser} onSave={(v) => handleUpdate(site.id, 'dbUser', v)} placeholder="db_user" />
+                    </TableCell>
+                    <TableCell className="p-0 border-r">
+                      <EditableCell value={site.dbPassword} onSave={(v) => handleUpdate(site.id, 'dbPassword', v)} placeholder="db_pass" />
+                    </TableCell>
+                    
+                    {/* WP Cells */}
+                    <TableCell className="p-0 border-r">
+                      <EditableCell value={site.wpUser} onSave={(v) => handleUpdate(site.id, 'wpUser', v)} placeholder="wp_user" />
+                    </TableCell>
+                    <TableCell className="p-0 border-r">
+                      <EditableCell value={site.wpPassword} onSave={(v) => handleUpdate(site.id, 'wpPassword', v)} placeholder="wp_pass" />
+                    </TableCell>
+                    
+                    {/* Webmail Cells */}
+                    <TableCell className="p-0 border-r">
+                      <EditableCell value={site.webmailUser} onSave={(v) => handleUpdate(site.id, 'webmailUser', v)} placeholder="mail_user" />
+                    </TableCell>
+                    <TableCell className="p-0 border-r">
+                      <EditableCell value={site.webmailPassword} onSave={(v) => handleUpdate(site.id, 'webmailPassword', v)} placeholder="mail_pass" />
+                    </TableCell>
+
                     <TableCell className="p-0 text-center">
                       <Button 
                         variant="ghost" 
@@ -298,7 +350,7 @@ export default function WebsiteListingPage() {
                 ))}
                 {!loading && filteredWebsites.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={20} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={27} className="h-24 text-center text-muted-foreground">
                       No matching records found.
                     </TableCell>
                   </TableRow>
