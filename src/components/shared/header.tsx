@@ -14,7 +14,10 @@ import { useEffect, useState } from 'react';
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/dashboard')) return 'Dashboard';
   if (pathname.startsWith('/clients')) return 'Clients';
+  if (pathname.startsWith('/website-listing')) return 'Website List';
   if (pathname.startsWith('/settings')) return 'Settings';
+  if (pathname.startsWith('/account')) return 'Accounts';
+  if (pathname.startsWith('/notes')) return 'Notes';
   return 'OfficeFlow';
 }
 
@@ -34,5 +37,4 @@ export function Header() {
         <UserNav />
       </div>
     </header>
-  );
-}
+  

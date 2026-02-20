@@ -26,10 +26,6 @@ interface TaskContextType {
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 
-const createNotification = async (userId: string, message: string) => {
-    // This function is now a no-op since notifications are removed.
-};
-
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { user: currentUser } = useAuth();
     const { users: allUsers } = useUsers();

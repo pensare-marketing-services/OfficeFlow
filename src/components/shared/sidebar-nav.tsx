@@ -63,6 +63,10 @@ export function SidebarNav() {
       setClientCollapsibleOpen(true);
     }
   };
+
+  const isWebOrSeoEmployee = user?.department === 'web' || user?.department === 'seo';
+  const canSeeHub = user?.role === 'admin' || isWebOrSeoEmployee;
+
   
   return (
     <>
@@ -173,6 +177,22 @@ export function SidebarNav() {
               </Link>
             </SidebarMenuItem>
           )}
+
+{canSeeHub && (
+  <SidebarMenuItem>
+    <Link href="/website-listing">
+      <SidebarMenuButton 
+        isActive={pathname === '/website-listing'}
+        tooltip="Website-List"
+      >
+        <div className="flex items-center gap-2">
+          <Building className="h-4 w-4" /> {/* You can pick any icon */}
+          <span>Websites</span>
+        </div>
+      </SidebarMenuButton>
+    </Link>
+  </SidebarMenuItem>
+)}
 
           <SidebarMenuItem>
             <Link href="/notes">
