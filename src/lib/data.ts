@@ -143,3 +143,26 @@ export type InternalNote = {
   clientName?: string;
   order?: number;
 };
+
+export type WebsiteEntry = {
+  id: string;
+  clientName: string;
+  address: string;
+  contactPerson: string;
+  contactNo: string;
+  domainName: string;
+  domainAccount: string;
+  domainEmail: string;
+  purchasedBy: string;
+  domainExpiry: string;
+  hostingExpiry: string;
+  hostingCompany: string;
+  hostRemarks: string;
+  platform: string;
+  themeLink: string;
+  adminPanelLink: string;
+  adminPanelName: string;
+  panelPassword: string;
+  workDoneBy: string;
+  createdAt: any;
+};
