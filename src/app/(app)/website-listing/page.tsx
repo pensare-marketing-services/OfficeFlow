@@ -58,7 +58,8 @@ export default function WebsiteListingPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const q = query(collection(db, 'websiteDirectory'), orderBy('createdAt', 'desc'));
+    // Sort by createdAt in ASCENDING order so newest items appear at the bottom
+    const q = query(collection(db, 'websiteDirectory'), orderBy('createdAt', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as WebsiteEntry));
       setWebsites(data);
@@ -136,7 +137,7 @@ export default function WebsiteListingPage() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader className="p-4">
+        <CardHeader className="p-2">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -170,12 +171,12 @@ export default function WebsiteListingPage() {
               <TableHeader className="sticky top-0 bg-muted/50 z-10">
                 <TableRow>
                   <TableHead rowSpan={2} className="w-[40px] text-center border-r">Sl.</TableHead>
-                  <TableHead rowSpan={2} className="w-[150px] border-r">Client</TableHead>
-                  <TableHead rowSpan={2} className="w-[200px] border-r">Address</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r">Contact Person</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r">Contact No</TableHead>
-                  <TableHead rowSpan={2} className="w-[180px] border-r">Domain Name</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r">Domain A/c</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r">Client</TableHead>
+                  <TableHead rowSpan={2} className="w-[150px] border-r">Address</TableHead>
+                  <TableHead rowSpan={2} className="w-[8px] border-r">Contact Person</TableHead>
+                  <TableHead rowSpan={2} className="w-[80px] border-r">Contact No</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r">Domain Name</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r">Domain A/c</TableHead>
                   <TableHead rowSpan={2} className="w-[150px] border-r">Domain E-mail</TableHead>
                   <TableHead rowSpan={2} className="w-[100px] border-r">Purchased By</TableHead>
                   <TableHead rowSpan={2} className="w-[100px] border-r">Domain Expiry</TableHead>
@@ -221,7 +222,7 @@ export default function WebsiteListingPage() {
                 ) : filteredWebsites.map((site, index) => (
                   <TableRow key={site.id} className="hover:bg-muted/30">
                     <TableCell className="text-center font-medium text-muted-foreground border-r">
-                      {websites.length - index}
+                      {index + 1}
                     </TableCell>
                     <TableCell className="p-0 border-r">
                       <EditableCell value={site.clientName} onSave={(v) => handleUpdate(site.id, 'clientName', v)} placeholder="Client..." />
