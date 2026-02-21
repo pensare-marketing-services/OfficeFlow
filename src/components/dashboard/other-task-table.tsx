@@ -60,7 +60,8 @@ const EditableCell: React.FC<{
     value: string;
     onSave: (value: string) => void;
     className?: string;
-}> = ({ value, onSave, className }) => {
+    placeholder?: string;
+}> = ({ value, onSave, className, placeholder }) => {
     const [currentValue, setCurrentValue] = useState(value);
 
     useEffect(() => {
@@ -90,6 +91,7 @@ const EditableCell: React.FC<{
             onChange={(e) => setCurrentValue(e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
+            placeholder={placeholder}
             className={cn("h-7 text-[10px] p-1 border-transparent hover:border-border focus:border-ring focus:bg-background", className)}
         />
     );
@@ -278,7 +280,7 @@ export default function OtherTaskTable({ clientId, users, tasks, onTaskAdd, onTa
                                 <TableCell className="p-0"><EditableCell value={task.title} onSave={(v) => handleTaskChange(task.id, 'title', v)} placeholder="New Task" /></TableCell>
                                 <TableCell className="p-0">
                                     <Input
-                                        type="time"
+                                        type="text"
                                         value={task.time || ''}
                                         onChange={(e) => handleTaskChange(task.id, 'time', e.target.value)}
                                         className="h-7 text-[10px] p-1 border-transparent hover:border-border focus:border-ring bg-transparent"
