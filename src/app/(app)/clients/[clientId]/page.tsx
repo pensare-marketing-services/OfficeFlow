@@ -376,17 +376,12 @@ export default function ClientIdPage() {
 
     const [monthlyTabs, setMonthlyTabs] = useState<MonthData[]>([{ name: "Month 1", notes: [] }]);
     
-    const [activeMonth, setActiveMonth] = useState(() => {
-        if (typeof window !== 'undefined' && clientId) {
-            return sessionStorage.getItem(`activeMonth_${clientId}`) || "Month 1";
-        }
-        return "Month 1";
-    });
+    const [activeMonth, setActiveMonth] = useState("");
 
     const [isDownloading, setIsDownloading] = useState(false);
     
     useEffect(() => {
-        if (clientId) {
+        if (clientId && activeMonth) {
             sessionStorage.setItem(`activeMonth_${clientId}`, activeMonth);
         }
     }, [activeMonth, clientId]);
@@ -525,7 +520,7 @@ export default function ClientIdPage() {
             await batch.commit();
 
             if (activeMonth === monthName) {
-                const newActiveMonth = newTabs.length > 0 ? newTabs[0].name : "Month 1";
+                const newActiveMonth = newTabs.length > 0 ? newTabs[newTabs.length - 1].name : "Month 1";
                 setActiveMonth(newActiveMonth);
             }
             toast({ title: "Month Deleted", description: `"${monthName}" has been successfully deleted.` });
@@ -558,11 +553,14 @@ export default function ClientIdPage() {
                 setClient(clientData);
                 if (clientData.months && clientData.months.length > 0) {
                     setMonthlyTabs(clientData.months);
-                     const savedMonth = sessionStorage.getItem(`activeMonth_${clientId}`);
+                    const savedMonth = sessionStorage.getItem(`activeMonth_${clientId}`);
+                    
                     if (savedMonth && clientData.months.some(m => m.name === savedMonth)) {
                         setActiveMonth(savedMonth);
-                    } else if (!clientData.months.some(m => m.name === activeMonth)) {
-                        setActiveMonth(clientData.months[0].name);
+                    } else {
+                        // Default to the LAST month in the array if no valid saved month
+                        const lastMonthName = clientData.months[clientData.months.length - 1].name;
+                        setActiveMonth(lastMonthName);
                     }
                 } else {
                      const initialMonth: MonthData = {
@@ -588,7 +586,7 @@ export default function ClientIdPage() {
         });
 
         return () => unsubscribe();
-    }, [clientId, activeMonth]); 
+    }, [clientId]); // Removed activeMonth dependency to prevent reset loops
     
     useEffect(() => {
         if (!clientId || !activeMonth) return;
