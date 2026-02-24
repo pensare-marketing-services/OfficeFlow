@@ -593,14 +593,16 @@ export default function ClientIdPage() {
     useEffect(() => {
         if (!clientId || !activeMonth) return;
         setCashInLoading(true);
+        // Removed orderBy("date") to prevent index errors. Sorting is done client-side in the callback.
         const cashInQuery = query(
             collection(db, `clients/${clientId}/cashInTransactions`), 
-            where("month", "==", activeMonth),
-            orderBy("date")
+            where("month", "==", activeMonth)
         );
         const unsubscribe = onSnapshot(cashInQuery, (snapshot) => {
             const transationsData = snapshot.docs.map(doc => ({ ...doc.data() as CashInTransaction, id: doc.id }));
-            setCashInTransactions(transationsData);
+            // Client-side sort to avoid requiring composite indexes
+            const sortedData = transationsData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            setCashInTransactions(sortedData);
             setCashInLoading(false);
         }, (error) => {
             console.error("Error fetching cash-in transactions:", error);

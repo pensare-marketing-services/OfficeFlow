@@ -300,7 +300,8 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
     const gst = totalSpent * 0.18;
     const grandTotal = totalSpent + gst;
 
-    const balance = (totalCashIn + (Number(oldBalance) || 0)) - grandTotal;
+    // Decoupled from totalCashIn as requested. Uses strictly monthly isolation logic.
+    const balance = (Number(oldBalance) || 0) - grandTotal;
 
 
     return (
