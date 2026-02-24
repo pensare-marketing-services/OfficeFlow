@@ -58,6 +58,8 @@ export type MonthData = {
     monthlyReach?: string;
     paidPromotionsMainBudget?: number;
     planPromotionsMainBudget?: number;
+    paidPromotionsOldBalance?: number;
+    planPromotionsOldBalance?: number;
     notes?: ClientNote[];
     billingStatus?: 'Issued' | 'Not Issued';
 };
@@ -77,8 +79,8 @@ export type Client = {
   months?: MonthData[];
   paidPromotionsMainBudget?: number; // Deprecated
   planPromotionsMainBudget?: number; // Deprecated
-  paidPromotionsOldBalance?: number;
-  planPromotionsOldBalance?: number;
+  paidPromotionsOldBalance?: number; // Deprecated
+  planPromotionsOldBalance?: number; // Deprecated
   active?: boolean;
   deactivationReason?: string;
 };
@@ -109,6 +111,7 @@ export type CashInTransaction = {
     date: string;
     amount: number;
     status: CashInTransactionStatus;
+    month?: string;
 }
 
 export type BillStatus = "Issued" | "Paid" | "Partially" | "Overdue" | "Cancelled";

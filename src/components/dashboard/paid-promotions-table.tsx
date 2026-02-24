@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -13,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format, isValid } from 'date-fns';
 import { cn, capitalizeSentences } from '@/lib/utils';
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where, getDocs, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Separator } from '../ui/separator';
 import { useTasks } from '@/hooks/use-tasks';
@@ -111,12 +110,12 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
     const [editingText, setEditingText] = useState('');
     const isAdmin = currentUser?.role === 'admin';
     const [mainBudget, setMainBudget] = useState<number | ''>(monthData?.paidPromotionsMainBudget || 0);
-    const [oldBalance, setOldBalance] = useState<number>(client.paidPromotionsOldBalance || 0);
+    const [oldBalance, setOldBalance] = useState<number | ''>(monthData?.paidPromotionsOldBalance || 0);
 
     useEffect(() => {
         setMainBudget(monthData?.paidPromotionsMainBudget || 0);
-        setOldBalance(client.paidPromotionsOldBalance || 0);
-    }, [monthData, client.paidPromotionsOldBalance]);
+        setOldBalance(monthData?.paidPromotionsOldBalance || 0);
+    }, [monthData]);
 
     const handleMainBudgetChange = (newBudgetValue: number | '') => {
         const budget = Number(newBudgetValue) || 0;
@@ -129,39 +128,45 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
         onClientUpdate({ months: updatedMonths });
     };
 
-    const handleOldBalanceChange = () => {
-        onClientUpdate({ paidPromotionsOldBalance: Number(oldBalance) || 0 });
+    const handleOldBalanceChange = (newVal: number | '') => {
+        const val = Number(newVal) || 0;
+        setOldBalance(val);
+        const updatedMonths = client.months?.map(m => 
+            m.name === activeMonth ? { ...m, paidPromotionsOldBalance: val } : m
+        ) || [];
+        onClientUpdate({ months: updatedMonths });
     };
 
     const handlePromotionChange = async (id: string, field: keyof PaidPromotion, value: any) => {
         const promotionRef = doc(db, `clients/${client.id}/promotions`, id);
         await updateDoc(promotionRef, { [field]: value });
 
-        const promoObj = promotions.find(p => p.id === id);
-        if (!promoObj) return;
-        
-        const updatedPromotion = { ...promoObj, [field]: value } as PaidPromotion & { id: string };
-        const linkedTask = tasks.find(t => t.id === updatedPromotion.linkedTaskId);
-
-        if (field === 'assignedTo') {
-            const employee = users.find(u => u.username === value);
-            if (employee && updatedPromotion.campaign) {
-                if (linkedTask) {
-                    updateTask(linkedTask.id, { 
-                        assigneeIds: [employee.id]
-                        // Status is NOT reset to To Do for existing tasks
-                    });
-                } else {
+        if (field === 'assignedTo' || field === 'campaign' || field === 'adType' || field === 'date') {
+            const promoObj = promotions.find(p => p.id === id);
+            if (promoObj && promoObj.linkedTaskId) {
+                const updatePayload: any = {};
+                if (field === 'campaign') updatePayload.title = value;
+                if (field === 'adType') updatePayload.contentType = value;
+                if (field === 'date') updatePayload.deadline = value;
+                if (field === 'assignedTo') {
+                    const employee = users.find(u => u.username === value);
+                    updatePayload.assigneeIds = employee ? [employee.id] : [];
+                }
+                updateTask(promoObj.linkedTaskId, updatePayload);
+            } else if (field === 'assignedTo' && value !== 'unassigned') {
+                const promo = promotions.find(p => p.id === id);
+                const employee = users.find(u => u.username === value);
+                if (promo && employee) {
                     const newTask: Omit<Task, 'id' | 'createdAt'> = {
-                        title: updatedPromotion.campaign,
+                        title: promo.campaign || 'Paid Promotion',
                         description: 'Paid Promotion',
                         status: 'To Do',
                         priority: 2,
-                        deadline: updatedPromotion.date,
+                        deadline: promo.date,
                         assigneeIds: [employee.id],
                         progressNotes: [],
                         clientId: client.id,
-                        contentType: updatedPromotion.adType as ContentType,
+                        contentType: promo.adType as ContentType,
                         month: activeMonth,
                     };
                     const newTaskId = await addTask(newTask);
@@ -169,28 +174,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                         await updateDoc(promotionRef, { linkedTaskId: newTaskId });
                     }
                 }
-            } else if (linkedTask && value === 'unassigned') {
-                updateTask(linkedTask.id, { assigneeIds: [] });
             }
-        }
-        
-        if (field === 'status' && linkedTask) {
-            let taskStatus: TaskStatus = 'Scheduled';
-            if (value === 'Active') taskStatus = 'On Work';
-            else if (value === 'Stopped') taskStatus = 'Completed';
-            else if (value === 'To Do') taskStatus = 'To Do';
-            else if (value === 'Scheduled') taskStatus = 'Scheduled';
-            updateTask(linkedTask.id, { status: taskStatus });
-        }
-
-        if (field === 'campaign' && linkedTask) {
-            updateTask(linkedTask.id, { title: value });
-        }
-        if (field === 'adType' && linkedTask) {
-            updateTask(linkedTask.id, { contentType: value as ContentType });
-        }
-        if (field === 'date' && linkedTask) {
-            updateTask(linkedTask.id, { deadline: value });
         }
     };
 
@@ -316,21 +300,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
     const gst = totalSpent * 0.18;
     const grandTotal = totalSpent + gst;
 
-    const balance = (totalCashIn + oldBalance) - grandTotal;
-
-
-    const getPromotionDisplayStatus = (promo: PaidPromotion & { id: string }): PaidPromotion['status'] => {
-        const linkedTask = tasks.find(t => t.id === promo.linkedTaskId);
-        if (!linkedTask) return promo.status;
-
-        // Source of truth is the linked task status mapped back to promotion status
-        if (['Completed', 'Posted', 'Approved'].includes(linkedTask.status)) return 'Stopped';
-        if (['On Work', 'For Approval', 'Ready for Next'].includes(linkedTask.status)) return 'Active';
-        if (linkedTask.status === 'To Do') return 'To Do';
-        if (linkedTask.status === 'Scheduled') return 'Scheduled';
-
-        return promo.status;
-    };
+    const balance = (totalCashIn + (Number(oldBalance) || 0)) - grandTotal;
 
 
     return (
@@ -362,8 +332,8 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                             <TableHead className="w-[120px] text-[10px]">Campaign</TableHead>
                             <TableHead className="w-[110px] text-[10px]">Type</TableHead>
                             <TableHead className="w-[40px] text-right text-[10px]">Budget</TableHead>
-                            <TableHead className="w-[90px] text-[10px]">Status</TableHead>
                             <TableHead className="w-[90px] text-[10px]">Assign</TableHead>
+                            <TableHead className="w-[90px] text-[10px]">Status</TableHead>
                             <TableHead className="w-[70px] text-right text-[10px]">Spent</TableHead>
                             <TableHead className="w-[40px] text-[10px]">Note</TableHead>
                             <TableHead className="w-[40px] text-[10px]"></TableHead>
@@ -371,9 +341,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                     </TableHeader>
                     <TableBody>
                         {loading && <TableRow><TableCell colSpan={10} className="h-24 text-center">Loading...</TableCell></TableRow>}
-                        {!loading && promotions.map((promo, index) => {
-                            const displayStatus = getPromotionDisplayStatus(promo);
-                            return (
+                        {!loading && promotions.map((promo, index) => (
                             <TableRow key={promo.id}>
                                 <TableCell className="px-2 py-1 text-[10px] text-center">{index + 1}</TableCell>
                                 <TableCell className="p-0">
@@ -419,19 +387,6 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                                 </TableCell>
                                 <TableCell className="p-0 text-[10px]"><EditableCell value={promo.budget} onSave={(v) => handlePromotionChange(promo.id, 'budget', v)} type="number" className="text-right" /></TableCell>
                                 <TableCell className="p-1">
-                                    <Select value={displayStatus} onValueChange={(v: PaidPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
-                                        <SelectTrigger className={cn("h-7 text-[10px]", displayStatus === 'Stopped' ? 'bg-red-500 text-white' : displayStatus === 'Active' ? 'bg-green-500 text-white' : displayStatus === 'Scheduled' ? 'bg-gray-500 text-white' : 'bg-gray-400 text-white')}>
-                                            <SelectValue />
-                                            <SelectPrimitive.Icon asChild>
-                                                <span />
-                                            </SelectPrimitive.Icon>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                </TableCell>
-                                <TableCell className="p-1">
                                     <Select value={promo.assignedTo || 'unassigned'} onValueChange={(v) => handlePromotionChange(promo.id, 'assignedTo', v)}>
                                         <SelectTrigger className="h-7 text-[10px]">
                                             <SelectValue placeholder="Assign" />
@@ -442,6 +397,19 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                                         <SelectContent>
                                             <SelectItem value="unassigned">Unassigned</SelectItem>
                                             {employeeUsers.map(user => <SelectItem key={user.id} value={user.username!}>{user.nickname || user.username!}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </TableCell>
+                                <TableCell className="p-1">
+                                    <Select value={promo.status} onValueChange={(v: PaidPromotion['status']) => handlePromotionChange(promo.id, 'status', v)}>
+                                        <SelectTrigger className={cn("h-7 text-[10px]", promo.status === 'Stopped' ? 'bg-red-500 text-white' : promo.status === 'Active' ? 'bg-green-500 text-white' : promo.status === 'Scheduled' ? 'bg-gray-500 text-white' : 'bg-gray-400 text-white')}>
+                                            <SelectValue />
+                                            <SelectPrimitive.Icon asChild>
+                                                <span />
+                                            </SelectPrimitive.Icon>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
@@ -538,7 +506,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                                     </Button>
                                 </TableCell>
                             </TableRow>
-                        )})}
+                        ))}
                         {!loading && promotions.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
@@ -563,8 +531,8 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                                 <Input
                                     type="number"
                                     value={oldBalance}
-                                    onChange={(e) => setOldBalance(Number(e.target.value))}
-                                    onBlur={handleOldBalanceChange}
+                                    onChange={(e) => setOldBalance(e.target.value === '' ? '' : Number(e.target.value))}
+                                    onBlur={(e) => handleOldBalanceChange(e.target.value === '' ? '' : Number(e.target.value))}
                                     className="h-7 text-[11px] p-0 bg-yellow-100 font-bold border-0 text-right w-full"
                                     placeholder="Old Balance"
                                 />

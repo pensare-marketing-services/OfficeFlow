@@ -20,11 +20,12 @@ interface CashInLogProps {
     clientId: string;
     transactions: (CashInTransaction & { id: string })[];
     totalCashIn: number;
+    activeMonth: string;
 }
 
 const statuses: CashInTransactionStatus[] = ['Received', 'Not Received'];
 
-export default function CashInLog({ clientId, transactions, totalCashIn }: CashInLogProps) {
+export default function CashInLog({ clientId, transactions, totalCashIn, activeMonth }: CashInLogProps) {
     const [newDate, setNewDate] = React.useState<Date | undefined>(new Date());
     const [newAmount, setNewAmount] = React.useState<number | ''>('');
     const [openPopover, setOpenPopover] = React.useState(false);
@@ -37,6 +38,7 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
             date: newDate.toISOString(),
             amount: Number(newAmount),
             status: 'Not Received',
+            month: activeMonth,
         };
         await addDoc(collection(db, `clients/${clientId}/cashInTransactions`), newTransaction);
         setNewDate(new Date());
@@ -92,7 +94,7 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                         {transactions.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                                    No cash-in transactions yet.
+                                    No cash-in for this month.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -138,7 +140,7 @@ export default function CashInLog({ clientId, transactions, totalCashIn }: CashI
                 </div>
                 <Separator className="my-1" />
                  <div className="flex justify-between items-center p-2 bg-muted rounded-md">
-                    <span className="font-bold text-[10px]">Total Cash In</span>
+                    <span className="font-bold text-[10px]">Monthly Total Cash In</span>
                     <span className="font-bold text-[10px]">{totalCashIn.toFixed(2)}</span>
                 </div>
             </CardFooter>

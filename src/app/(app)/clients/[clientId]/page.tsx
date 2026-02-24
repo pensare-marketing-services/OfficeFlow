@@ -407,6 +407,8 @@ export default function ClientIdPage() {
             monthlyReach: '',
             paidPromotionsMainBudget: 0,
             planPromotionsMainBudget: 0,
+            paidPromotionsOldBalance: 0,
+            planPromotionsOldBalance: 0,
             notes: []
         }];
         handleClientUpdate({ months: newTabs }).then(() => {
@@ -465,6 +467,16 @@ export default function ClientIdPage() {
           planPromoSnap.forEach(docSnap => {
             batch.update(docSnap.ref, { month: newName });
           });
+
+          // 5. Update associated CASH IN transactions
+          const cashInQuery = query(
+            collection(db, `clients/${clientId}/cashInTransactions`),
+            where('month', '==', oldName)
+          );
+          const cashInSnap = await getDocs(cashInQuery);
+          cashInSnap.forEach(docSnap => {
+            batch.update(docSnap.ref, { month: newName });
+          });
       
           await batch.commit();
       
@@ -501,6 +513,10 @@ export default function ClientIdPage() {
             const planPromosQuery = query(collection(db, `clients/${clientId}/planPromotions`), where('month', '==', monthName));
             const planPromosSnapshot = await getDocs(planPromosQuery);
             planPromosSnapshot.forEach(doc => batch.delete(doc.ref));
+
+            const cashInQuery = query(collection(db, `clients/${clientId}/cashInTransactions`), where('month', '==', monthName));
+            const cashInSnapshot = await getDocs(cashInQuery);
+            cashInSnapshot.forEach(doc => batch.delete(doc.ref));
 
             const newTabs = monthlyTabs.filter(month => month.name !== monthName);
             
@@ -557,6 +573,8 @@ export default function ClientIdPage() {
                         monthlyReach: clientData.monthlyReach || '',
                         paidPromotionsMainBudget: clientData.paidPromotionsMainBudget || 0,
                         planPromotionsMainBudget: clientData.planPromotionsMainBudget || 0,
+                        paidPromotionsOldBalance: clientData.paidPromotionsOldBalance || 0,
+                        planPromotionsOldBalance: clientData.planPromotionsOldBalance || 0,
                         notes: clientData.notes || [] // Migrate old global notes
                     };
                     setMonthlyTabs([initialMonth]);
@@ -573,9 +591,13 @@ export default function ClientIdPage() {
     }, [clientId, activeMonth]); 
     
     useEffect(() => {
-        if (!clientId) return;
+        if (!clientId || !activeMonth) return;
         setCashInLoading(true);
-        const cashInQuery = query(collection(db, `clients/${clientId}/cashInTransactions`), orderBy("date"));
+        const cashInQuery = query(
+            collection(db, `clients/${clientId}/cashInTransactions`), 
+            where("month", "==", activeMonth),
+            orderBy("date")
+        );
         const unsubscribe = onSnapshot(cashInQuery, (snapshot) => {
             const transationsData = snapshot.docs.map(doc => ({ ...doc.data() as CashInTransaction, id: doc.id }));
             setCashInTransactions(transationsData);
@@ -586,7 +608,7 @@ export default function ClientIdPage() {
         });
 
         return () => unsubscribe();
-    }, [clientId]);
+    }, [clientId, activeMonth]);
 
     useEffect(() => {
         if (!clientId || !activeMonth) return;
@@ -778,7 +800,7 @@ export default function ClientIdPage() {
             const totalSpent = paidPromotions.reduce((acc, p) => acc + Number(p.spent || 0), 0);
             const gst = totalSpent * 0.18;
             const grandTotal = totalSpent + gst;
-            const oldBalanceVal = client.paidPromotionsOldBalance || 0;
+            const oldBalanceVal = activeMonthData.paidPromotionsOldBalance || 0;
             const balance = (totalCashIn + oldBalanceVal) - grandTotal;
             const cashInBlob = await createReportImage(
                 'Paid Ads - Budget',
@@ -980,6 +1002,7 @@ export default function ClientIdPage() {
                             clientId={client.id}
                             transactions={cashInTransactions}
                             totalCashIn={totalCashIn}
+                            activeMonth={activeMonth}
                         />
                     )}
                     </div>
