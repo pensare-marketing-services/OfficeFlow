@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import type { PaidPromotion, UserProfile as User, Task, ProgressNote, ContentType, Client, MonthData } from '@/lib/data';
+import type { PaidPromotion, UserProfile as User, Task, ProgressNote, ContentType, Client, MonthData, TaskStatus } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -137,9 +137,10 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
         const promotionRef = doc(db, `clients/${client.id}/promotions`, id);
         await updateDoc(promotionRef, { [field]: value });
 
-        const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PaidPromotion & { id: string };
-        if (!updatedPromotion) return;
+        const promoObj = promotions.find(p => p.id === id);
+        if (!promoObj) return;
         
+        const updatedPromotion = { ...promoObj, [field]: value } as PaidPromotion & { id: string };
         const linkedTask = tasks.find(t => t.id === updatedPromotion.linkedTaskId);
 
         if (field === 'assignedTo') {
@@ -147,14 +148,14 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
             if (employee && updatedPromotion.campaign) {
                 if (linkedTask) {
                     updateTask(linkedTask.id, { 
-                        assigneeIds: [employee.id],
-                        status: 'To Do'
+                        assigneeIds: [employee.id]
+                        // Status is NOT reset to To Do for existing tasks
                     });
                 } else {
                     const newTask: Omit<Task, 'id' | 'createdAt'> = {
                         title: updatedPromotion.campaign,
                         description: 'Paid Promotion',
-                        status: 'To Do', // Always start as To Do
+                        status: 'To Do',
                         priority: 2,
                         deadline: updatedPromotion.date,
                         assigneeIds: [employee.id],
@@ -172,6 +173,16 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
                 updateTask(linkedTask.id, { assigneeIds: [] });
             }
         }
+        
+        if (field === 'status' && linkedTask) {
+            let taskStatus: TaskStatus = 'Scheduled';
+            if (value === 'Active') taskStatus = 'On Work';
+            else if (value === 'Stopped') taskStatus = 'Completed';
+            else if (value === 'To Do') taskStatus = 'To Do';
+            else if (value === 'Scheduled') taskStatus = 'Scheduled';
+            updateTask(linkedTask.id, { status: taskStatus });
+        }
+
         if (field === 'campaign' && linkedTask) {
             updateTask(linkedTask.id, { title: value });
         }
@@ -211,7 +222,7 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
 
     const handleNewNote = (e: React.KeyboardEvent<HTMLTextAreaElement>, promoId: string) => {
         if (e.key === 'Enter' && !e.shiftKey) {
-            setNoteInput(''); // Optimization: clear immediately if paste logic handled elsewhere
+            setNoteInput('');
             e.preventDefault();
             const noteText = noteInput.trim();
             if (noteText) {
@@ -309,16 +320,14 @@ export default function PaidPromotionsTable({ client, users, promotions, loading
 
 
     const getPromotionDisplayStatus = (promo: PaidPromotion & { id: string }): PaidPromotion['status'] => {
-        if (promo.status === 'Stopped') {
-            return 'Stopped';
-        }
-        
         const linkedTask = tasks.find(t => t.id === promo.linkedTaskId);
-        if (linkedTask?.status === 'Completed') {
-            return 'Active';
-        }
+        if (!linkedTask) return promo.status;
 
-        if(linkedTask?.status === 'To Do') return 'To Do';
+        // Source of truth is the linked task status mapped back to promotion status
+        if (['Completed', 'Posted', 'Approved'].includes(linkedTask.status)) return 'Stopped';
+        if (['On Work', 'For Approval', 'Ready for Next'].includes(linkedTask.status)) return 'Active';
+        if (linkedTask.status === 'To Do') return 'To Do';
+        if (linkedTask.status === 'Scheduled') return 'Scheduled';
 
         return promo.status;
     };

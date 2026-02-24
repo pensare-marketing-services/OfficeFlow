@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import type { PlanPromotion, UserProfile as User, Task, ProgressNote, ContentType, Client, MonthData } from '@/lib/data';
+import type { PlanPromotion, UserProfile as User, Task, ProgressNote, ContentType, Client, MonthData, TaskStatus } from '@/lib/data';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -137,9 +137,10 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
         const promotionRef = doc(db, `clients/${client.id}/planPromotions`, id);
         await updateDoc(promotionRef, { [field]: value });
 
-        const updatedPromotion = { ...promotions.find(p => p.id === id), [field]: value } as PlanPromotion & { id: string };
-        if (!updatedPromotion) return;
+        const promoObj = promotions.find(p => p.id === id);
+        if (!promoObj) return;
 
+        const updatedPromotion = { ...promoObj, [field]: value } as PlanPromotion & { id: string };
         const linkedTask = tasks.find(t => t.id === updatedPromotion.linkedTaskId);
         
         if (field === 'assignedTo') {
@@ -147,8 +148,8 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
             if (employee && updatedPromotion.campaign) {
                 if (linkedTask) {
                     updateTask(linkedTask.id, { 
-                        assigneeIds: [employee.id],
-                        status: 'To Do'
+                        assigneeIds: [employee.id]
+                        // Status is NOT reset to To Do for existing tasks
                     });
                 } else {
                     const newTask: Omit<Task, 'id' | 'createdAt'> = {
@@ -172,6 +173,16 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
                 updateTask(linkedTask.id, { assigneeIds: [] });
             }
         }
+
+        if (field === 'status' && linkedTask) {
+            let taskStatus: TaskStatus = 'Scheduled';
+            if (value === 'Active') taskStatus = 'On Work';
+            else if (value === 'Stopped') taskStatus = 'Completed';
+            else if (value === 'To Do') taskStatus = 'To Do';
+            else if (value === 'Scheduled') taskStatus = 'Scheduled';
+            updateTask(linkedTask.id, { status: taskStatus });
+        }
+
         if (field === 'campaign' && linkedTask) {
             updateTask(linkedTask.id, { title: value });
         }
@@ -211,6 +222,7 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
 
     const handleNewNote = (e: React.KeyboardEvent<HTMLTextAreaElement>, promoId: string) => {
         if (e.key === 'Enter' && !e.shiftKey) {
+            setNoteInput('');
             e.preventDefault();
             const noteText = noteInput.trim();
             if (noteText) {
@@ -307,15 +319,14 @@ export default function PlanPromotionsTable({ client, users, promotions, loading
     const balance = (totalCashIn + oldBalance) - grandTotal;
 
     const getPromotionDisplayStatus = (promo: PlanPromotion & { id: string }): PlanPromotion['status'] => {
-        if (promo.status === 'Stopped') {
-            return 'Stopped';
-        }
-        
         const linkedTask = tasks.find(t => t.id === promo.linkedTaskId);
-        if (linkedTask?.status === 'Completed') {
-            return 'Active';
-        }
-        if(linkedTask?.status === 'To Do') return 'To Do';
+        if (!linkedTask) return promo.status;
+
+        // Source of truth is the linked task status mapped back to promotion status
+        if (['Completed', 'Posted', 'Approved'].includes(linkedTask.status)) return 'Stopped';
+        if (['On Work', 'For Approval', 'Ready for Next'].includes(linkedTask.status)) return 'Active';
+        if (linkedTask.status === 'To Do') return 'To Do';
+        if (linkedTask.status === 'Scheduled') return 'Scheduled';
 
         return promo.status;
     };
