@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -24,7 +23,7 @@ import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '../ui/
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
-const noteStatuses: ClientNoteStatus[] = ["Pending", "On Work", "For Approval", "Done", "Scheduled"];
+const noteStatuses: ClientNoteStatus[] = ["Pending", "On Work", "For Approval", "Done", "Scheduled", "Hold"];
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
 const statusColors: Record<ClientNoteStatus, string> = {
@@ -33,6 +32,7 @@ const statusColors: Record<ClientNoteStatus, string> = {
     "On Work": "bg-orange-500",
     "For Approval": "bg-green-500",
     "Done": "bg-red-500",
+    "Hold": 'bg-blue-500',
 };
 
 const statusCycle: ClientNoteStatus[] = ["Pending", "Scheduled", "On Work", "Done"];
@@ -203,6 +203,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
         { value: "Scheduled", label: "On Work", color: "bg-gray-500" },
         { value: "Done", label: "Urgent", color: "bg-red-500" },
         { value: "For Approval", label: "Approved", color: "bg-green-500" },
+        { value: "Hold", label: "Hold", color: "bg-blue-500" },
     ];
 
 
@@ -222,8 +223,8 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
             <TableRow>
               <TableHead className="w-[10px] p-1 text-[10px]">No</TableHead>
               <TableHead className="p-1 h-8 text-[10px]">Note</TableHead>
-              <TableHead className="p-1 h-8 text-[10px] w-[80px]">Status</TableHead>
-              <TableHead className="p-1 h-8 text-[10px] w-[80px]">Note</TableHead>
+              <TableHead className="p-1 h-8 text-[10px] w-[120px]">Status</TableHead>
+              <TableHead className="p-1 h-8 text-[10px] w-[40px]">Note</TableHead>
               <TableHead className="w-[40px] p-1"></TableHead>
             </TableRow>
           </TableHeader>
@@ -253,8 +254,9 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                         >
                             <SelectTrigger className="h-7 w-full focus:ring-0 border-0">
                                 <SelectValue asChild>
-                                    <div className="flex items-center justify-center">
-                                        <div className={cn("h-3 w-5", dotColor)} />
+                                    <div className="flex items-center gap-2 px-1">
+                                        <div className={cn("h-3 w-3 rounded-full", dotColor)} />
+                                        <span className="truncate text-[10px] font-medium">{noteStatus}</span>
                                     </div>
                                 </SelectValue>
                             </SelectTrigger>
@@ -272,8 +274,9 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                     ) : (
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <div className="flex items-center justify-center h-7 w-full">
-                                    <div className={cn("h-3 w-5 ", dotColor)} />
+                                <div className="flex items-center gap-2 h-7 w-full px-2">
+                                    <div className={cn("h-3 w-3 rounded-full", dotColor)} />
+                                    <span className="text-[10px] font-medium">{noteStatus}</span>
                                 </div>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -374,7 +377,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                         placeholder="Add a remark or paste an image..."
                                         value={noteInput}
                                         onChange={(e) => setNoteInput(e.target.value)}
-                                        onKeyDown={(e) => handleNewRemark(e, index)}
+                                        onKeyDown={(e) => handleNewNote(e, index)}
                                         onPaste={(e) => handlePaste(e, index)}
                                         className="pr-2 text-[10px]"
                                     />

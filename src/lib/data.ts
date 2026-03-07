@@ -41,7 +41,7 @@ export type Task = {
   month?: string;
 };
 
-export type ClientNoteStatus = "Done" | "On Work" | "Pending" | "Scheduled" | "For Approval";
+export type ClientNoteStatus = "Done" | "On Work" | "Pending" | "Scheduled" | "For Approval" | "Hold";
 
 export type ClientNote = {
   id: string;
