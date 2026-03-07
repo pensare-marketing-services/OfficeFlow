@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -23,19 +22,21 @@ import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '../ui/
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
-const noteStatuses: ClientNoteStatus[] = ["Pending", "On Work", "For Approval", "Done", "Scheduled", "Hold"];
+const noteStatuses: ClientNoteStatus[] = ["Schedule", "On Work", "Urgent", "Approved", "Hold"];
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
-const statusColors: Record<ClientNoteStatus, string> = {
-    "Pending": "bg-transparent",
-    "Scheduled": "bg-gray-500",
+const statusColors: Record<string, string> = {
+    "Schedule": "bg-transparent border",
     "On Work": "bg-orange-500",
-    "For Approval": "bg-green-500",
+    "Urgent": "bg-red-500",
+    "Approved": "bg-green-500",
+    "Hold": "bg-blue-500",
+    // Compatibility for legacy values
+    "Pending": "bg-transparent border",
     "Done": "bg-red-500",
-    "Hold": 'bg-blue-500',
+    "For Approval": "bg-green-500",
+    "Scheduled": "bg-orange-500",
 };
-
-const statusCycle: ClientNoteStatus[] = ["Pending", "Scheduled", "On Work", "Done"];
 
 interface ClientNotesTableProps {
   notes: ClientNote[];
@@ -97,7 +98,6 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
   const handleNoteChange = (index: number, field: keyof ClientNote, value: any) => {
     const updatedNotes = [...localNotes];
     updatedNotes[index] = { ...updatedNotes[index], [field]: value };
-    // Firestore does not support `undefined` values.
     const cleanNotes = JSON.parse(JSON.stringify(updatedNotes));
     onUpdate(cleanNotes);
   };
@@ -133,7 +133,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
     const newNote: ClientNote = {
       id: Date.now().toString(),
       note: '',
-      update: 'Pending',
+      update: 'Schedule',
       remarks: [],
     };
     onUpdate([...localNotes, newNote]);
@@ -199,10 +199,10 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
     };
     
     const dropdownStatuses: { value: ClientNoteStatus; label: string; color: string }[] = [
-        { value: "Pending", label: "Schedule", color: "bg-transparent border" },
-        { value: "Scheduled", label: "On Work", color: "bg-gray-500" },
-        { value: "Done", label: "Urgent", color: "bg-red-500" },
-        { value: "For Approval", label: "Approved", color: "bg-green-500" },
+        { value: "Schedule", label: "Schedule", color: "bg-transparent border" },
+        { value: "On Work", label: "On Work", color: "bg-orange-500" },
+        { value: "Urgent", label: "Urgent", color: "bg-red-500" },
+        { value: "Approved", label: "Approved", color: "bg-green-500" },
         { value: "Hold", label: "Hold", color: "bg-blue-500" },
     ];
 
@@ -255,7 +255,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                             <SelectTrigger className="h-7 w-full focus:ring-0 border-0">
                                 <SelectValue asChild>
                                     <div className="flex items-center gap-2 px-1">
-                                        <div className={cn("h-3 w-3 rounded-full", dotColor)} />
+                                        <div className={cn("h-3 w-3 rounded-full shrink-0", dotColor)} />
                                         <span className="truncate text-[10px] font-medium">{noteStatus}</span>
                                     </div>
                                 </SelectValue>
@@ -264,7 +264,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                 {dropdownStatuses.map(({ value, label, color }) => (
                                     <SelectItem key={value} value={value}>
                                         <div className="flex items-center gap-2">
-                                            <div className={cn("h-3 w-5 rounded-sm", color)} />
+                                            <div className={cn("h-3 w-3 rounded-full shrink-0", color)} />
                                             <span>{label}</span>
                                         </div>
                                     </SelectItem>
@@ -275,7 +275,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <div className="flex items-center gap-2 h-7 w-full px-2">
-                                    <div className={cn("h-3 w-3 rounded-full", dotColor)} />
+                                    <div className={cn("h-3 w-3 rounded-full shrink-0", dotColor)} />
                                     <span className="text-[10px] font-medium">{noteStatus}</span>
                                 </div>
                             </TooltipTrigger>
@@ -377,7 +377,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                         placeholder="Add a remark or paste an image..."
                                         value={noteInput}
                                         onChange={(e) => setNoteInput(e.target.value)}
-                                        onKeyDown={(e) => handleNewNote(e, index)}
+                                        onKeyDown={(e) => handleNewRemark(e, index)}
                                         onPaste={(e) => handlePaste(e, index)}
                                         className="pr-2 text-[10px]"
                                     />
