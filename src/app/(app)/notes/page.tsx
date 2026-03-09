@@ -9,15 +9,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Trash2, Search, Calendar, StickyNote, Building, Eye, Pen, GripVertical, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { 
-    AlertDialog, 
-    AlertDialogAction, 
-    AlertDialogCancel, 
-    AlertDialogContent, 
-    AlertDialogDescription, 
-    AlertDialogFooter, 
-    AlertDialogHeader, 
-    AlertDialogTitle, 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -30,20 +30,20 @@ import type { InternalNote } from '@/lib/data';
 
 // DND Imports
 import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  rectSortingStrategy,
-  useSortable,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    rectSortingStrategy,
+    useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -72,20 +72,25 @@ function SortableNoteCard({ note, onView, onEdit, onDelete }: SortableNoteCardPr
     };
 
     return (
-        <Card 
+        <Card
             ref={setNodeRef}
             style={style}
-            className="bg-card shadow-sm border transition-shadow hover:shadow-md flex flex-col min-h-[130px] group"
+            onClick={() => onView(note)}
+            className="bg-card shadow-sm border transition-all hover:shadow-md hover:border-primary/20 flex flex-col min-h-[130px] group cursor-pointer"
         >
             <CardHeader className="p-2 pb-1">
                 <div className="flex justify-between items-start gap-1">
                     <div className="flex items-start gap-1 flex-1 min-w-0">
-                        <div 
-                            {...attributes} 
-                            {...listeners} 
+                        <div
+                            {...attributes}
+                            {...listeners}
+                            onClick={(e) => e.stopPropagation()}
                             className="mt-0.5 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
                         >
                             <GripVertical className="h-3 w-3" />
+                        </div>
+                        <div className="text-[12px] text-black flex items-center gap-1 shrink-0 opacity-70">                           
+                            {note.createdAt?.seconds ? format(new Date(note.createdAt.seconds * 1000), 'MMM dd, yy') : 'Recently'}
                         </div>
                         <div className="space-y-1 min-w-0 flex-1">
                             <CardTitle className="text-[11px] font-bold truncate" title={note.title}>{note.title}</CardTitle>
@@ -97,24 +102,30 @@ function SortableNoteCard({ note, onView, onEdit, onDelete }: SortableNoteCardPr
                             )}
                         </div>
                     </div>
-                    <div className="flex items-center -mt-0.5 shrink-0">
-                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => onView(note)}>
-                            <Eye className="h-3 w-3" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => onEdit(note)}>
+                    <div className="flex items-center -mt-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-5 w-5 text-muted-foreground hover:text-foreground" 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(note);
+                            }}
+                        >
                             <Pen className="h-3 w-3" />
                         </Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button 
-                                    variant="ghost" 
-                                    size="icon" 
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
                                     className="h-5 w-5 text-destructive hover:bg-destructive/10"
+                                    onClick={(e) => e.stopPropagation()}
                                 >
                                     <Trash2 className="h-3 w-3" />
                                 </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
+                            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Delete Note?</AlertDialogTitle>
                                     <AlertDialogDescription>
@@ -123,7 +134,7 @@ function SortableNoteCard({ note, onView, onEdit, onDelete }: SortableNoteCardPr
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction 
+                                    <AlertDialogAction
                                         onClick={() => onDelete(note.id)}
                                         className="bg-destructive hover:bg-destructive/90"
                                     >
@@ -145,10 +156,6 @@ function SortableNoteCard({ note, onView, onEdit, onDelete }: SortableNoteCardPr
                     <User className="h-2.5 w-2.5 shrink-0" />
                     <span className="truncate font-medium">{note.authorName}</span>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 opacity-70">
-                    <Calendar className="h-2 w-2" />
-                    {note.createdAt?.seconds ? format(new Date(note.createdAt.seconds * 1000), 'MMM dd, yy') : 'Recently'}
-                </div>
             </CardFooter>
         </Card>
     );
@@ -162,12 +169,12 @@ export default function NotesPage() {
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedNote, setSelectedNote] = useState<InternalNote | null>(null);
-    
+
     // Form state for creating/editing
     const [noteTitle, setNoteTitle] = useState('');
     const [noteContent, setNoteContent] = useState('');
     const [noteClientId, setNoteClientId] = useState('none');
-    
+
     const { toast } = useToast();
 
     // Sensors for DND
@@ -183,8 +190,8 @@ export default function NotesPage() {
     );
 
     const filteredNotes = useMemo(() => {
-        return notes.filter(n => 
-            n.title.toLowerCase().includes(search.toLowerCase()) || 
+        return notes.filter(n =>
+            n.title.toLowerCase().includes(search.toLowerCase()) ||
             n.content.toLowerCase().includes(search.toLowerCase()) ||
             (n.clientName && n.clientName.toLowerCase().includes(search.toLowerCase()))
         );
@@ -201,8 +208,8 @@ export default function NotesPage() {
         try {
             const client = clients.find(c => c.id === noteClientId);
             await addNote(
-                capitalizeSentences(noteTitle), 
-                capitalizeSentences(noteContent), 
+                capitalizeSentences(noteTitle),
+                capitalizeSentences(noteContent),
                 'bg-card',
                 noteClientId === 'none' ? undefined : noteClientId,
                 client?.name
@@ -265,8 +272,8 @@ export default function NotesPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="relative w-full sm:w-96">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                        placeholder="Search agency notes..." 
+                    <Input
+                        placeholder="Search agency notes..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="pl-10"
@@ -286,14 +293,14 @@ export default function NotesPage() {
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Title</label>
-                                <Input 
-                                    placeholder="Note title..." 
+                                <Input
+                                    placeholder="Note title..."
                                     value={noteTitle}
                                     onChange={(e) => setNoteTitle(e.target.value)}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Link to Client (Optional)</label>
+                                <label className="text-sm font-medium">Client (Optional)</label>
                                 <Select value={noteClientId} onValueChange={setNoteClientId}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select a client..." />
@@ -308,8 +315,8 @@ export default function NotesPage() {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Content</label>
-                                <Textarea 
-                                    placeholder="Write your note here..." 
+                                <Textarea
+                                    placeholder="Write your note here..."
                                     value={noteContent}
                                     onChange={(e) => setNoteContent(e.target.value)}
                                     className="min-h-[150px]"
@@ -329,20 +336,20 @@ export default function NotesPage() {
                     {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-28 w-full" />)}
                 </div>
             ) : (
-                <DndContext 
+                <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
                 >
-                    <SortableContext 
+                    <SortableContext
                         items={filteredNotes.map(n => n.id)}
                         strategy={rectSortingStrategy}
                     >
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                             {filteredNotes.map(note => (
-                                <SortableNoteCard 
-                                    key={note.id} 
-                                    note={note} 
+                                <SortableNoteCard
+                                    key={note.id}
+                                    note={note}
                                     onView={handleViewNote}
                                     onEdit={handleEditNote}
                                     onDelete={deleteNote}
@@ -397,8 +404,8 @@ export default function NotesPage() {
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Title</label>
-                            <Input 
-                                placeholder="Note title..." 
+                            <Input
+                                placeholder="Note title..."
                                 value={noteTitle}
                                 onChange={(e) => setNoteTitle(e.target.value)}
                             />
@@ -419,8 +426,8 @@ export default function NotesPage() {
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Content</label>
-                            <Textarea 
-                                placeholder="Write your note here..." 
+                            <Textarea
+                                placeholder="Write your note here..."
                                 value={noteContent}
                                 onChange={(e) => setNoteContent(e.target.value)}
                                 className="min-h-[150px]"
