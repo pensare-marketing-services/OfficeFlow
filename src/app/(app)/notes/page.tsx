@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Search, Calendar, StickyNote, Building, Eye, Pen, GripVertical, User } from 'lucide-react';
+import { Plus, Trash2, Search, StickyNote, Building, Pen, GripVertical, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import {
     AlertDialog,
@@ -190,10 +190,12 @@ export default function NotesPage() {
     );
 
     const filteredNotes = useMemo(() => {
+        const query = search.toLowerCase();
         return notes.filter(n =>
-            n.title.toLowerCase().includes(search.toLowerCase()) ||
-            n.content.toLowerCase().includes(search.toLowerCase()) ||
-            (n.clientName && n.clientName.toLowerCase().includes(search.toLowerCase()))
+            n.title.toLowerCase().includes(query) ||
+            n.content.toLowerCase().includes(query) ||
+            (n.clientName && n.clientName.toLowerCase().includes(query)) ||
+            (n.authorName && n.authorName.toLowerCase().includes(query))
         );
     }, [notes, search]);
 
@@ -273,7 +275,7 @@ export default function NotesPage() {
                 <div className="relative w-full sm:w-96">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search agency notes..."
+                        placeholder="Search notes by title, content, client or author..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="pl-10"
