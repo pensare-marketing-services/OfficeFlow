@@ -15,9 +15,8 @@ import type { WebsiteEntry } from '@/lib/data';
 const EditableCell: React.FC<{
   value: string;
   onSave: (value: string) => void;
-  placeholder?: string;
   className?: string;
-}> = ({ value, onSave, placeholder, className }) => {
+}> = ({ value, onSave, className }) => {
   const [val, setVal] = useState(value || '');
 
   useEffect(() => {
@@ -46,7 +45,6 @@ const EditableCell: React.FC<{
       onChange={(e) => setVal(e.target.value)}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
-      placeholder={placeholder}
     />
   );
 };
@@ -152,7 +150,7 @@ export default function WebsiteListingPage() {
               <div className="relative flex-1 sm:w-64">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
                 <Input 
-                  placeholder="Search client or domain..." 
+                 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-8 h-8 text-[10px]"
@@ -173,7 +171,7 @@ export default function WebsiteListingPage() {
                   <TableHead rowSpan={2} className="w-[40px] text-center border-r">Sl.</TableHead>
                   <TableHead rowSpan={2} className="w-[100px] border-r">Client</TableHead>
                   <TableHead rowSpan={2} className="w-[150px] border-r">Address</TableHead>
-                  <TableHead rowSpan={2} className="w-[8px] border-r">Contact Person</TableHead>
+                  <TableHead rowSpan={2} className="w-[8px] border-r">Contact</TableHead>
                   <TableHead rowSpan={2} className="w-[80px] border-r">Contact No</TableHead>
                   <TableHead rowSpan={2} className="w-[120px] border-r">Domain Name</TableHead>
                   <TableHead rowSpan={2} className="w-[100px] border-r">Domain A/c</TableHead>
@@ -225,23 +223,23 @@ export default function WebsiteListingPage() {
                       {index + 1}
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.clientName} onSave={(v) => handleUpdate(site.id, 'clientName', v)} placeholder="Client..." />
+                      <EditableCell value={site.clientName} onSave={(v) => handleUpdate(site.id, 'clientName', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.address} onSave={(v) => handleUpdate(site.id, 'address', v)} placeholder="Address..." />
+                      <EditableCell value={site.address} onSave={(v) => handleUpdate(site.id, 'address', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.contactPerson} onSave={(v) => handleUpdate(site.id, 'contactPerson', v)} placeholder="Person..." />
+                      <EditableCell value={site.contactPerson} onSave={(v) => handleUpdate(site.id, 'contactPerson', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.contactNo} onSave={(v) => handleUpdate(site.id, 'contactNo', v)} placeholder="Number..." />
+                      <EditableCell value={site.contactNo} onSave={(v) => handleUpdate(site.id, 'contactNo', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r relative group">
                       <div className="flex items-center">
                         <EditableCell 
                           value={site.domainName}
                           onSave={(v) => handleUpdate(site.id, 'domainName', v)} 
-                          placeholder="domain.com"
+                          
                           className="flex-1"
                         />
                         {site.domainName && (
@@ -257,32 +255,32 @@ export default function WebsiteListingPage() {
                       </div>
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.domainAccount} onSave={(v) => handleUpdate(site.id, 'domainAccount', v)} placeholder="A/c..." />
+                      <EditableCell value={site.domainAccount} onSave={(v) => handleUpdate(site.id, 'domainAccount', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.domainEmail} onSave={(v) => handleUpdate(site.id, 'domainEmail', v)} placeholder="Email..." />
+                      <EditableCell value={site.domainEmail} onSave={(v) => handleUpdate(site.id, 'domainEmail', v)} />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.purchasedBy} onSave={(v) => handleUpdate(site.id, 'purchasedBy', v)} placeholder="Who..." />
+                      <EditableCell value={site.purchasedBy} onSave={(v) => handleUpdate(site.id, 'purchasedBy', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.domainExpiry} onSave={(v) => handleUpdate(site.id, 'domainExpiry', v)} placeholder="Expiry..." />
+                      <EditableCell value={site.domainExpiry} onSave={(v) => handleUpdate(site.id, 'domainExpiry', v)} />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.hostingExpiry} onSave={(v) => handleUpdate(site.id, 'hostingExpiry', v)} placeholder="Expiry..." />
+                      <EditableCell value={site.hostingExpiry} onSave={(v) => handleUpdate(site.id, 'hostingExpiry', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.hostingCompany} onSave={(v) => handleUpdate(site.id, 'hostingCompany', v)} placeholder="Co..." />
+                      <EditableCell value={site.hostingCompany} onSave={(v) => handleUpdate(site.id, 'hostingCompany', v)} />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.hostRemarks} onSave={(v) => handleUpdate(site.id, 'hostRemarks', v)} placeholder="Remarks..." />
+                      <EditableCell value={site.hostRemarks} onSave={(v) => handleUpdate(site.id, 'hostRemarks', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.platform} onSave={(v) => handleUpdate(site.id, 'platform', v)} placeholder="Platform..." />
+                      <EditableCell value={site.platform} onSave={(v) => handleUpdate(site.id, 'platform', v)} />
                     </TableCell>
                     <TableCell className="p-0 border-r relative group">
                       <div className="flex items-center">
-                        <EditableCell value={site.themeLink} onSave={(v) => handleUpdate(site.id, 'themeLink', v)} placeholder="Link..." className="flex-1" />
+                        <EditableCell value={site.themeLink} onSave={(v) => handleUpdate(site.id, 'themeLink', v)} className="flex-1" />
                         {site.themeLink && (
                           <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => openLink(site.themeLink)}>
                             <ExternalLink className="h-3 w-3" />
@@ -292,7 +290,7 @@ export default function WebsiteListingPage() {
                     </TableCell>
                     <TableCell className="p-0 border-r relative group">
                       <div className="flex items-center">
-                        <EditableCell value={site.adminPanelLink} onSave={(v) => handleUpdate(site.id, 'adminPanelLink', v)} placeholder="Link..." className="flex-1" />
+                        <EditableCell value={site.adminPanelLink} onSave={(v) => handleUpdate(site.id, 'adminPanelLink', v)} className="flex-1" />
                         {site.adminPanelLink && (
                           <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => openLink(site.adminPanelLink)}>
                             <ExternalLink className="h-3 w-3" />
@@ -301,40 +299,40 @@ export default function WebsiteListingPage() {
                       </div>
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.adminPanelName} onSave={(v) => handleUpdate(site.id, 'adminPanelName', v)} placeholder="User..." />
+                      <EditableCell value={site.adminPanelName} onSave={(v) => handleUpdate(site.id, 'adminPanelName', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.panelPassword} onSave={(v) => handleUpdate(site.id, 'panelPassword', v)} placeholder="Pass..." />
+                      <EditableCell value={site.panelPassword} onSave={(v) => handleUpdate(site.id, 'panelPassword', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.workDoneBy} onSave={(v) => handleUpdate(site.id, 'workDoneBy', v)} placeholder="Assignee..." />
+                      <EditableCell value={site.workDoneBy} onSave={(v) => handleUpdate(site.id, 'workDoneBy', v)}  />
                     </TableCell>
                     
                     {/* DB Cells */}
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.dbName} onSave={(v) => handleUpdate(site.id, 'dbName', v)} placeholder="db_name" />
+                      <EditableCell value={site.dbName} onSave={(v) => handleUpdate(site.id, 'dbName', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.dbUser} onSave={(v) => handleUpdate(site.id, 'dbUser', v)} placeholder="db_user" />
+                      <EditableCell value={site.dbUser} onSave={(v) => handleUpdate(site.id, 'dbUser', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.dbPassword} onSave={(v) => handleUpdate(site.id, 'dbPassword', v)} placeholder="db_pass" />
+                      <EditableCell value={site.dbPassword} onSave={(v) => handleUpdate(site.id, 'dbPassword', v)} />
                     </TableCell>
                     
                     {/* WP Cells */}
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.wpUser} onSave={(v) => handleUpdate(site.id, 'wpUser', v)} placeholder="wp_user" />
+                      <EditableCell value={site.wpUser} onSave={(v) => handleUpdate(site.id, 'wpUser', v)} />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.wpPassword} onSave={(v) => handleUpdate(site.id, 'wpPassword', v)} placeholder="wp_pass" />
+                      <EditableCell value={site.wpPassword} onSave={(v) => handleUpdate(site.id, 'wpPassword', v)}  />
                     </TableCell>
                     
                     {/* Webmail Cells */}
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.webmailUser} onSave={(v) => handleUpdate(site.id, 'webmailUser', v)} placeholder="mail_user" />
+                      <EditableCell value={site.webmailUser} onSave={(v) => handleUpdate(site.id, 'webmailUser', v)}  />
                     </TableCell>
                     <TableCell className="p-0 border-r">
-                      <EditableCell value={site.webmailPassword} onSave={(v) => handleUpdate(site.id, 'webmailPassword', v)} placeholder="mail_pass" />
+                      <EditableCell value={site.webmailPassword} onSave={(v) => handleUpdate(site.id, 'webmailPassword', v)}  />
                     </TableCell>
 
                     <TableCell className="p-0 text-center">

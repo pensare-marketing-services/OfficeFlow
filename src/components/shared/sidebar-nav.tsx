@@ -1,4 +1,3 @@
-
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -11,7 +10,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Building, ChevronDown, User, StickyNote } from 'lucide-react';
+import { LayoutDashboard, Settings, Briefcase, ChevronDown, CreditCard, StickyNote, Globe } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useClients } from '@/hooks/use-clients';
@@ -27,7 +26,7 @@ const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
 ];
 
-const accountNavItem = { href: '/account', label: 'Accounts', icon: User, adminOnly: true };
+const accountNavItem = { href: '/account', label: 'Accounts', icon: CreditCard, adminOnly: true };
 
 const settingsNavItem = { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true };
 
@@ -107,7 +106,7 @@ export function SidebarNav() {
                   <SidebarMenuButton asChild isActive={pathname.startsWith('/clients')} className="group justify-between">
                     <div className="flex w-full items-center justify-between">
                       <span className='flex items-center gap-2'>
-                        <Building className="h-4 w-4" />
+                        <Briefcase className="h-4 w-4" />
                         <span>Clients</span>
                       </span>
                       <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
@@ -178,7 +177,7 @@ export function SidebarNav() {
             </SidebarMenuItem>
           )}
 
-          {/* {canSeeHub && (
+          {canSeeHub && (
             <SidebarMenuItem>
               <Link href="/website-listing">
                 <SidebarMenuButton
@@ -186,14 +185,14 @@ export function SidebarNav() {
                   tooltip="Website-List"
                 >
                   <div className="flex items-center gap-2">
-                    <Building className="h-4 w-4" /> 
+                    <Globe className="h-4 w-4" /> 
                     <span>Websites</span>
                   </div>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
           )
-          } */}
+          }
 
           <SidebarMenuItem>
             <Link href="/notes">
