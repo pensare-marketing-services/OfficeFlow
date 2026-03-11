@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -78,7 +79,7 @@ const PriorityDisplayItem = ({ task }: { task: TaskWithId }) => {
             <Input
                 type="number"
                 value={priority}
-                min={1}
+                min={0}
                 max={9}
                 onChange={(e) => setPriority(Number(e.target.value))}
                 onBlur={handleBlur}
@@ -179,6 +180,7 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients, onView
     return users
       .filter((u) => u.role === 'employee' && u.department && departmentOrder.includes(u.department))
       .sort((a, b) => {
+        // Use ?? to allow priority 0
         const priorityA = a.priority ?? 99;
         const priorityB = b.priority ?? 99;
         if (priorityA !== priorityB) {
@@ -477,7 +479,7 @@ const DailyTaskTable: React.FC<{
                             const isHighlighted = highlightedClientIds.has(client.id);
 
                             const tasksByEmployee = employees.map(employee => 
-                                clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority || 99) - (b.priority || 99)) || []
+                                clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99)) || []
                             );
 
                             const maxTasks = Math.max(1, ...tasksByEmployee.map(tasks => tasks.length));

@@ -14,7 +14,7 @@ import { CalendarIcon, MessageSquare, Trash2, ArrowUpDown, MoreVertical, Pen } f
 import { format } from 'date-fns';
 import { cn, capitalizeSentences } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/use-auth';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -180,6 +180,8 @@ const AssigneeSelect = ({
 
     return (
         <Select
+            // Use ?? instead of || to correctly handle priority 0 if needed in logic, 
+            // though here we are handling IDs.
             value={assigneeId || 'unassigned'}
             onValueChange={(value) => onAssigneeChange(value === 'unassigned' ? '' : value)}
         >
@@ -226,8 +228,9 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             if (dateA !== dateB) {
                 return dateB - dateA;
             }
-            const priorityA = a.priority || 99;
-            const priorityB = b.priority || 99;
+            // Use ?? to allow 0 priority to be treated as a valid number during sort
+            const priorityA = a.priority ?? 99;
+            const priorityB = b.priority ?? 99;
             return priorityA - priorityB; 
         });
         return sortableTasks;
@@ -537,7 +540,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                 <Input
                                                     type="number"
                                                     defaultValue={task.priority ?? 9}
-                                                    min={1}
+                                                    min={0}
                                                     max={9}
                                                     onBlur={(e) => {
                                                         const val = Number(e.target.value);
@@ -553,7 +556,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     className="h-7 w-full text-[10px] text-center p-1 bg-transparent border-0 focus-visible:ring-1"
                                                 />
                                             ) : (
-                                                <div className="p-1">{task.priority || 9}</div>
+                                                // Using ?? instead of || to correctly handle priority 0
+                                                <div className="p-1">{task.priority ?? 9}</div>
                                             )}
                                         </TableCell>
                                     )}
