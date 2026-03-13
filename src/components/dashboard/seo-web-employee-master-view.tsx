@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -396,7 +395,7 @@ const DailyTaskTable: React.FC<{
                           c.categories?.includes('seo') ||
                           c.categories?.includes('website')
                   )
-                  .sort((a, b) => (a.priority || 0) - (b.priority || 0)),
+                  .sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99)),
           [clients]
       );
     

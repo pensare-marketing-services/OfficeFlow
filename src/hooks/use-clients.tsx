@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import type { Client } from '@/lib/data';
-import { collection, onSnapshot, query, orderBy, getDocs, where, writeBatch, doc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, getDocs, where, writeBatch, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
 
@@ -86,43 +86,14 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }, []);
     
     const updateClientPriority = useCallback(async (clientId: string, newPriority: number) => {
-        const sortedClients = [...clients].sort((a, b) => (a.priority || 0) - (b.priority || 0));
-        const targetClient = sortedClients.find(c => c.id === clientId);
-
-        if (!targetClient) return;
-
-        const oldPriority = targetClient.priority || 0;
-        if (newPriority === oldPriority) return;
-
-        // Clamp newPriority to be within the valid range
-        newPriority = Math.max(1, Math.min(newPriority, sortedClients.length));
-
-        const batch = writeBatch(db);
-
-        if (newPriority < oldPriority) {
-            // Moving up the list (e.g., from 5 to 3)
-            for (let i = newPriority - 1; i < oldPriority - 1; i++) {
-                const clientToUpdate = sortedClients[i];
-                batch.update(doc(db, 'clients', clientToUpdate.id), { priority: clientToUpdate.priority! + 1 });
-            }
-        } else { // newPriority > oldPriority
-            // Moving down the list (e.g., from 3 to 5)
-            for (let i = oldPriority; i < newPriority; i++) {
-                const clientToUpdate = sortedClients[i];
-                batch.update(doc(db, 'clients', clientToUpdate.id), { priority: clientToUpdate.priority! - 1 });
-            }
-        }
-
-        batch.update(doc(db, 'clients', clientId), { priority: newPriority });
-
         try {
-            await batch.commit();
+            const clientRef = doc(db, 'clients', clientId);
+            await updateDoc(clientRef, { priority: newPriority });
         } catch (e: any) {
-            console.error("Error updating client priorities:", e);
-            throw new Error("Failed to reorder clients.");
+            console.error("Error updating client priority:", e);
+            throw new Error("Failed to update client priority.");
         }
-
-    }, [clients]);
+    }, []);
 
     const value = {
         clients,

@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
@@ -489,7 +489,45 @@ const EditablePriorityCell = ({ userId, initialPriority }: { userId: string, ini
         <Input
             type="number"
             value={priority}
-            onChange={(e) => setPriority(Number(e.target.value) || 99)}
+            onChange={(e) => setPriority(Number(e.target.value) || 0)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            className="h-7 text-[10px] w-10 text-center mx-auto p-0"
+        />
+    );
+};
+
+const EditableClientPriorityCell = ({ clientId, initialPriority }: { clientId: string, initialPriority?: number }) => {
+    const { updateClientPriority } = useClients();
+    const [priority, setPriority] = useState(initialPriority ?? 99);
+    const { toast } = useToast();
+
+    const handleSave = async () => {
+        const newPriority = Number(priority);
+        if (newPriority !== (initialPriority ?? 99)) {
+            try {
+                await updateClientPriority(clientId, newPriority);
+                toast({ title: "Order Updated", description: "The client order has been saved." });
+            } catch (error: any) {
+                toast({ variant: "destructive", title: "Update Failed", description: error.message });
+            }
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.currentTarget.blur();
+        } else if (e.key === 'Escape') {
+            setPriority(initialPriority ?? 99);
+            (e.target as HTMLInputElement).blur();
+        }
+    };
+
+    return (
+        <Input
+            type="number"
+            value={priority}
+            onChange={(e) => setPriority(Number(e.target.value) || 0)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
             className="h-7 text-[10px] w-10 text-center mx-auto p-0"
@@ -520,6 +558,7 @@ const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { cl
             <TableHeader>
                 <TableRow>
                     <TableHead className="px-2 text-[10px] h-8 w-[40px]">No</TableHead>
+                    <TableHead className="px-2 text-[10px] h-8 w-[40px] text-center">O</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Client Name</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Assigned Employees</TableHead>
                     <TableHead className="text-right px-2 text-[10px] h-8">Actions</TableHead>
@@ -528,12 +567,15 @@ const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { cl
             <TableBody>
                 {loading && Array.from({length: 8}).map((_, i) => (
                     <TableRow key={i}>
-                        <TableCell colSpan={4} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
+                        <TableCell colSpan={5} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                     </TableRow>
                 ))}
                 {!loading && clients.map((client, index) => (
                     <TableRow key={client.id} className={cn(client.active === false && "bg-muted/30 opacity-50")}>
                         <TableCell className="font-medium text-[10px] py-1 px-2 text-center">{startIndex + index + 1}</TableCell>
+                        <TableCell className="p-0">
+                            <EditableClientPriorityCell clientId={client.id} initialPriority={client.priority} />
+                        </TableCell>
                         <TableCell className="font-medium text-[10px] py-1 px-2">{client.name}</TableCell>
                         <AssignedEmployeesCell employeeIds={client.employeeIds} allUsers={users} />
                          <TableCell className="text-right px-2 py-1">
@@ -546,7 +588,7 @@ const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { cl
                     </TableRow>
                 ))}
                 {!loading && clients.length === 0 && (
-                    <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground p-4">No clients in this column.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground p-4">No clients in this column.</TableCell></TableRow>
                 )}
             </TableBody>
         </Table>
@@ -568,7 +610,7 @@ export default function SettingsPage() {
             if (a.active !== b.active) {
                 return (a.active === false ? 1 : -1) - (b.active === false ? 1 : -1);
             }
-            return (a.priority || 0) - (b.priority || 0);
+            return (a.priority ?? 99) - (b.priority ?? 99);
         });
     }, [clients]);
 
