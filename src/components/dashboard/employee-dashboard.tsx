@@ -75,8 +75,8 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
             }
 
             // If deadlines are the same, sort by priority ascending (lower is higher priority)
-            const priorityA = a.priority || 99;
-            const priorityB = b.priority || 99;
+            const priorityA = a.priority ?? 99;
+            const priorityB = b.priority ?? 99;
             return priorityA - priorityB;
         });
     }

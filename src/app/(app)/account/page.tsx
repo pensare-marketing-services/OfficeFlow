@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -197,7 +196,7 @@ export default function AccountPage() {
                 }
                 if (a.endDate && !b.endDate) return -1;
                 if (!a.endDate && b.endDate) return 1;
-                return (a.priority || 0) - (b.priority || 0);
+                return (a.priority ?? 999) - (b.priority ?? 999);
             });
     }, [clients, monthFilter, allBills, billingStatusFilter]);
 

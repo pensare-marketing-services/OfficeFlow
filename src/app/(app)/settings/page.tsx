@@ -605,8 +605,10 @@ export default function SettingsPage() {
         const clientRef = doc(db, 'clients', clientId);
         const oldClient = clients.find(c => c.id === clientId);
         
+        if (!oldClient) return;
+
         // Check if status is changing from Active to Inactive
-        if (oldClient?.active !== false && data.active === false) {
+        if (oldClient.active !== false && data.active === false) {
             const batch = writeBatch(db);
             const oldPriority = oldClient.priority ?? 999;
             
