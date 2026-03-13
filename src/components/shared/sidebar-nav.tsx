@@ -201,20 +201,36 @@ export function SidebarNav() {
           }
 
           <SidebarMenuItem>
-            <Link href="/notes">
-              <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith("/notes")}
-                tooltip={{
-                  children: "Notes",
-                }}
-              >
-                <span>
-                  <StickyNote />
-                  <span>Notes</span>
-                </span>
-              </SidebarMenuButton>
-            </Link>
+            <Collapsible className="w-full" defaultOpen={pathname.startsWith('/notes')}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton isActive={pathname.startsWith('/notes')} className="group justify-between">
+                  <div className="flex items-center gap-2">
+                    <StickyNote className="h-4 w-4" />
+                    <span>Notes</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  <SidebarMenuItem>
+                    <Link href="/notes/dm">
+                      <SidebarMenuSubButton isActive={pathname === '/notes/dm'}>DM Notes</SidebarMenuSubButton>
+                    </Link>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <Link href="/notes/web">
+                      <SidebarMenuSubButton isActive={pathname === '/notes/web'}>Web Notes</SidebarMenuSubButton>
+                    </Link>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <Link href="/notes/seo">
+                      <SidebarMenuSubButton isActive={pathname === '/notes/seo'}>SEO Notes</SidebarMenuSubButton>
+                    </Link>
+                  </SidebarMenuItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
           </SidebarMenuItem>
 
           {user?.role === 'admin' && (

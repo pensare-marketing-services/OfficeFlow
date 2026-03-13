@@ -1,4 +1,3 @@
-
 'use client';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -17,6 +16,9 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/website-listing')) return 'Website List';
   if (pathname.startsWith('/settings')) return 'Settings';
   if (pathname.startsWith('/account')) return 'Accounts';
+  if (pathname === '/notes/dm') return 'DM Notes';
+  if (pathname === '/notes/web') return 'Web Notes';
+  if (pathname === '/notes/seo') return 'SEO Notes';
   if (pathname.startsWith('/notes')) return 'Notes';
   return 'OfficeFlow';
 }
