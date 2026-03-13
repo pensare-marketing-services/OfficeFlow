@@ -135,6 +135,8 @@ export type Bill = {
   items?: BillItem[];
 };
 
+export type NoteType = 'dm' | 'web' | 'seo';
+
 export type InternalNote = {
   id: string;
   title: string;
@@ -146,6 +148,7 @@ export type InternalNote = {
   clientId?: string;
   clientName?: string;
   order?: number;
+  type?: NoteType;
 };
 
 export type WebsiteEntry = {

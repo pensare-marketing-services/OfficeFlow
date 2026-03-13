@@ -26,7 +26,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { capitalizeSentences } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import type { InternalNote } from '@/lib/data';
+import type { InternalNote, NoteType } from '@/lib/data';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // DND Imports
 import {
@@ -165,6 +166,7 @@ export default function NotesPage() {
     const { notes, loading, addNote, updateNote, deleteNote, reorderNotes } = useNotes();
     const { clients } = useClients();
     const [search, setSearch] = useState('');
+    const [activeTab, setActiveTab] = useState<NoteType>('web');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -174,6 +176,7 @@ export default function NotesPage() {
     const [noteTitle, setNoteTitle] = useState('');
     const [noteContent, setNoteContent] = useState('');
     const [noteClientId, setNoteClientId] = useState('none');
+    const [noteType, setNoteType] = useState<NoteType>('web');
 
     const { toast } = useToast();
 
@@ -191,18 +194,23 @@ export default function NotesPage() {
 
     const filteredNotes = useMemo(() => {
         const query = search.toLowerCase();
-        return notes.filter(n =>
-            n.title.toLowerCase().includes(query) ||
-            n.content.toLowerCase().includes(query) ||
-            (n.clientName && n.clientName.toLowerCase().includes(query)) ||
-            (n.authorName && n.authorName.toLowerCase().includes(query))
-        );
-    }, [notes, search]);
+        return notes.filter(n => {
+            // Migration logic: missing type = web
+            const typeMatch = (n.type || 'web') === activeTab;
+            if (!typeMatch) return false;
+
+            return n.title.toLowerCase().includes(query) ||
+                n.content.toLowerCase().includes(query) ||
+                (n.clientName && n.clientName.toLowerCase().includes(query)) ||
+                (n.authorName && n.authorName.toLowerCase().includes(query))
+        });
+    }, [notes, search, activeTab]);
 
     const resetForm = () => {
         setNoteTitle('');
         setNoteContent('');
         setNoteClientId('none');
+        setNoteType(activeTab);
     };
 
     const handleAddNote = async () => {
@@ -212,6 +220,7 @@ export default function NotesPage() {
             await addNote(
                 capitalizeSentences(noteTitle),
                 capitalizeSentences(noteContent),
+                noteType,
                 'bg-card',
                 noteClientId === 'none' ? undefined : noteClientId,
                 client?.name
@@ -229,6 +238,7 @@ export default function NotesPage() {
         setNoteTitle(note.title);
         setNoteContent(note.content);
         setNoteClientId(note.clientId || 'none');
+        setNoteType(note.type || 'web');
         setIsEditOpen(true);
     };
 
@@ -239,6 +249,7 @@ export default function NotesPage() {
             await updateNote(selectedNote.id, {
                 title: capitalizeSentences(noteTitle),
                 content: capitalizeSentences(noteContent),
+                type: noteType,
                 color: 'bg-card',
                 clientId: noteClientId === 'none' ? null : noteClientId,
                 clientName: noteClientId === 'none' ? null : client?.name
@@ -261,10 +272,14 @@ export default function NotesPage() {
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            const oldIndex = notes.findIndex((n) => n.id === active.id);
-            const newIndex = notes.findIndex((n) => n.id === over.id);
+            const oldIndexInFiltered = filteredNotes.findIndex((n) => n.id === active.id);
+            const newIndexInFiltered = filteredNotes.findIndex((n) => n.id === over.id);
+            
+            // Map indexes back to the global notes array
+            const globalOldIndex = notes.findIndex(n => n.id === active.id);
+            const globalNewIndex = notes.findIndex(n => n.id === over.id);
 
-            const newOrderedNotes = arrayMove(notes, oldIndex, newIndex);
+            const newOrderedNotes = arrayMove(notes, globalOldIndex, globalNewIndex);
             reorderNotes(newOrderedNotes);
         }
     };
@@ -272,14 +287,23 @@ export default function NotesPage() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="relative w-full sm:w-96">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search notes by title, content, client or author..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="pl-10"
-                    />
+                <div className="flex items-center gap-4 flex-1 w-full sm:w-auto">
+                    <div className="relative w-full sm:w-96">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search notes..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="pl-10"
+                        />
+                    </div>
+                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as NoteType)} className="hidden md:block">
+                        <TabsList>
+                            <TabsTrigger value="dm">DM Notes</TabsTrigger>
+                            <TabsTrigger value="web">Web Notes</TabsTrigger>
+                            <TabsTrigger value="seo">SEO Notes</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
                 </div>
                 <Dialog open={isCreateOpen} onOpenChange={(open) => { setIsCreateOpen(open); if (!open) resetForm(); }}>
                     <DialogTrigger asChild>
@@ -301,19 +325,34 @@ export default function NotesPage() {
                                     onChange={(e) => setNoteTitle(e.target.value)}
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Client (Optional)</label>
-                                <Select value={noteClientId} onValueChange={setNoteClientId}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a client..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">No Client (General)</SelectItem>
-                                        {clients.filter(c => c.active !== false).map(client => (
-                                            <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Category</label>
+                                    <Select value={noteType} onValueChange={(v: NoteType) => setNoteType(v)}>
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="dm">Digital Marketing</SelectItem>
+                                            <SelectItem value="web">Web Development</SelectItem>
+                                            <SelectItem value="seo">SEO</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Client (Optional)</label>
+                                    <Select value={noteClientId} onValueChange={setNoteClientId}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a client..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">No Client (General)</SelectItem>
+                                            {clients.filter(c => c.active !== false).map(client => (
+                                                <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Content</label>
@@ -332,6 +371,14 @@ export default function NotesPage() {
                     </DialogContent>
                 </Dialog>
             </div>
+
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as NoteType)} className="md:hidden">
+                <TabsList className="w-full">
+                    <TabsTrigger value="dm" className="flex-1">DM</TabsTrigger>
+                    <TabsTrigger value="web" className="flex-1">Web</TabsTrigger>
+                    <TabsTrigger value="seo" className="flex-1">SEO</TabsTrigger>
+                </TabsList>
+            </Tabs>
 
             {loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
@@ -360,7 +407,7 @@ export default function NotesPage() {
                             {filteredNotes.length === 0 && (
                                 <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed rounded-lg">
                                     <StickyNote className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                                    <p>No notes found. Create one to share agency information.</p>
+                                    <p>No notes found in this category.</p>
                                 </div>
                             )}
                         </div>
@@ -374,12 +421,15 @@ export default function NotesPage() {
                     <DialogHeader>
                         <div className="flex flex-col gap-2">
                             <DialogTitle className="text-xl font-bold">{selectedNote?.title}</DialogTitle>
-                            {selectedNote?.clientName && (
-                                <Badge variant="secondary" className="w-fit flex items-center gap-1">
-                                    <Building className="h-3 w-3" />
-                                    {selectedNote?.clientName}
-                                </Badge>
-                            )}
+                            <div className="flex gap-2">
+                                <Badge variant="outline" className="capitalize">{selectedNote?.type || 'web'}</Badge>
+                                {selectedNote?.clientName && (
+                                    <Badge variant="secondary" className="w-fit flex items-center gap-1">
+                                        <Building className="h-3 w-3" />
+                                        {selectedNote?.clientName}
+                                    </Badge>
+                                )}
+                            </div>
                         </div>
                     </DialogHeader>
                     <div className="py-4 max-h-[60vh] overflow-y-auto">
@@ -412,19 +462,34 @@ export default function NotesPage() {
                                 onChange={(e) => setNoteTitle(e.target.value)}
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Link to Client (Optional)</label>
-                            <Select value={noteClientId} onValueChange={setNoteClientId}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a client..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">No Client (General)</SelectItem>
-                                    {clients.filter(c => c.active !== false).map(client => (
-                                        <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Category</label>
+                                <Select value={noteType} onValueChange={(v: NoteType) => setNoteType(v)}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="dm">Digital Marketing</SelectItem>
+                                        <SelectItem value="web">Web Development</SelectItem>
+                                        <SelectItem value="seo">SEO</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Link to Client (Optional)</label>
+                                <Select value={noteClientId} onValueChange={setNoteClientId}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a client..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">No Client (General)</SelectItem>
+                                        {clients.filter(c => c.active !== false).map(client => (
+                                            <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Content</label>

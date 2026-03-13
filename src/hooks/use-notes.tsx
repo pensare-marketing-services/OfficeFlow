@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
-import type { InternalNote } from '@/lib/data';
+import type { InternalNote, NoteType } from '@/lib/data';
 import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
@@ -10,7 +10,7 @@ interface NoteContextType {
     notes: InternalNote[];
     loading: boolean;
     error: Error | null;
-    addNote: (title: string, content: string, color?: string, clientId?: string, clientName?: string) => Promise<void>;
+    addNote: (title: string, content: string, type: NoteType, color?: string, clientId?: string, clientName?: string) => Promise<void>;
     updateNote: (noteId: string, data: Partial<InternalNote>) => Promise<void>;
     deleteNote: (noteId: string) => Promise<void>;
     reorderNotes: (newNotes: InternalNote[]) => Promise<void>;
@@ -60,13 +60,17 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return () => unsub();
     }, [currentUser?.uid]);
 
-    const addNote = useCallback(async (title: string, content: string, color: string = 'bg-card', clientId?: string, clientName?: string) => {
+    const addNote = useCallback(async (title: string, content: string, type: NoteType, color: string = 'bg-card', clientId?: string, clientName?: string) => {
         if (!currentUser) return;
         try {
-            const nextOrder = notes.length > 0 ? Math.max(...notes.map(n => n.order || 0)) + 1 : 0;
+            // Filter notes by the same type to find the max order within that category
+            const sameTypeNotes = notes.filter(n => (n.type || 'web') === type);
+            const nextOrder = sameTypeNotes.length > 0 ? Math.max(...sameTypeNotes.map(n => n.order || 0)) + 1 : 0;
+            
             await addDoc(collection(db, 'internalNotes'), {
                 title,
                 content,
+                type,
                 color,
                 clientId: clientId || null,
                 clientName: clientName || null,
@@ -100,10 +104,10 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, []);
 
-    const reorderNotes = useCallback(async (newNotes: InternalNote[]) => {
+    const reorderNotes = useCallback(async (newOrderedNotes: InternalNote[]) => {
         try {
             const batch = writeBatch(db);
-            newNotes.forEach((note, index) => {
+            newOrderedNotes.forEach((note, index) => {
                 const noteRef = doc(db, 'internalNotes', note.id);
                 batch.update(noteRef, { order: index });
             });
