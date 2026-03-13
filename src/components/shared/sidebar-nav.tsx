@@ -201,36 +201,30 @@ export function SidebarNav() {
           }
 
           <SidebarMenuItem>
-            <Collapsible className="w-full" defaultOpen={pathname.startsWith('/notes')}>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton isActive={pathname.startsWith('/notes')} className="group justify-between">
-                  <div className="flex items-center gap-2">
-                    <StickyNote className="h-4 w-4" />
-                    <span>Notes</span>
-                  </div>
-                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  <SidebarMenuItem>
-                    <Link href="/notes/dm">
-                      <SidebarMenuSubButton isActive={pathname === '/notes/dm'}>DM Notes</SidebarMenuSubButton>
-                    </Link>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Link href="/notes/web">
-                      <SidebarMenuSubButton isActive={pathname === '/notes/web'}>Web Notes</SidebarMenuSubButton>
-                    </Link>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Link href="/notes/seo">
-                      <SidebarMenuSubButton isActive={pathname === '/notes/seo'}>SEO Notes</SidebarMenuSubButton>
-                    </Link>
-                  </SidebarMenuItem>
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </Collapsible>
+            <Link href="/notes/dm">
+              <SidebarMenuButton isActive={pathname === '/notes/dm'} tooltip="DM Notes">
+                <StickyNote className="h-4 w-4" />
+                <span>DM Notes</span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <Link href="/notes/web">
+              <SidebarMenuButton isActive={pathname === '/notes/web'} tooltip="Web Notes">
+                <StickyNote className="h-4 w-4" />
+                <span>Web Notes</span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <Link href="/notes/seo">
+              <SidebarMenuButton isActive={pathname === '/notes/seo'} tooltip="SEO Notes">
+                <StickyNote className="h-4 w-4" />
+                <span>SEO Notes</span>
+              </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
 
           {user?.role === 'admin' && (
