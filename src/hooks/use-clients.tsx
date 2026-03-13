@@ -34,6 +34,7 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         setLoading(true);
         setError(null);
 
+        // Sort by priority first
         const clientsQuery = query(collection(db, 'clients'), orderBy('priority', 'asc'));
 
         const unsubClients = onSnapshot(clientsQuery, (snapshot) => {
@@ -59,18 +60,15 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         
         const batch = writeBatch(db);
 
-        // 1. Delete the client document itself
         const clientRef = doc(db, 'clients', clientId);
         batch.delete(clientRef);
 
-        // 2. Delete tasks associated with the client
         const tasksRef = collection(db, 'tasks');
         const tasksQuery = query(tasksRef, where('clientId', '==', clientId));
         const tasksSnapshot = await getDocs(tasksQuery);
         tasksSnapshot.forEach(doc => batch.delete(doc.ref));
 
-        // 3. Delete subcollections (promotions, cashIn, seoTasks)
-        const subcollections = ['promotions', 'cashInTransactions', 'seoTasks'];
+        const subcollections = ['promotions', 'planPromotions', 'cashInTransactions', 'seoTasks', 'bills'];
         for (const subcollectionName of subcollections) {
             const subcollectionRef = collection(db, 'clients', clientId, subcollectionName);
             const subcollectionSnapshot = await getDocs(subcollectionRef);
@@ -81,7 +79,7 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             await batch.commit();
         } catch (e: any) {
             console.error("Error deleting client and associated data:", e);
-            throw new Error("Failed to delete client data. Please check your Firestore security rules and network connection.");
+            throw new Error("Failed to delete client data.");
         }
     }, []);
     

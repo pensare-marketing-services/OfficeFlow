@@ -289,7 +289,7 @@ const EditClientDialog = ({ client, allUsers, onUpdate }: { client: ClientWithId
                                                     </AlertDialogTitle>
                                                     <AlertDialogDescription>
                                                         {field.value 
-                                                            ? `Deactivating this client will hide them from the sidebar and master views. No data will be deleted.` 
+                                                            ? `Deactivating this client will hide them from the sidebar and master views. All subsequent active client priority numbers will shift up to fill the gap.` 
                                                             : `Activating this client will make them visible in the sidebar and master views again.`
                                                         }
                                                     </AlertDialogDescription>
@@ -499,12 +499,12 @@ const EditablePriorityCell = ({ userId, initialPriority }: { userId: string, ini
 
 const EditableClientPriorityCell = ({ clientId, initialPriority }: { clientId: string, initialPriority?: number }) => {
     const { updateClientPriority } = useClients();
-    const [priority, setPriority] = useState(initialPriority ?? 99);
+    const [priority, setPriority] = useState(initialPriority ?? 999);
     const { toast } = useToast();
 
     const handleSave = async () => {
         const newPriority = Number(priority);
-        if (newPriority !== (initialPriority ?? 99)) {
+        if (newPriority !== (initialPriority ?? 999)) {
             try {
                 await updateClientPriority(clientId, newPriority);
                 toast({ title: "Order Updated", description: "The client order has been saved." });
@@ -518,7 +518,7 @@ const EditableClientPriorityCell = ({ clientId, initialPriority }: { clientId: s
         if (e.key === 'Enter') {
             e.currentTarget.blur();
         } else if (e.key === 'Escape') {
-            setPriority(initialPriority ?? 99);
+            setPriority(initialPriority ?? 999);
             (e.target as HTMLInputElement).blur();
         }
     };
@@ -600,9 +600,31 @@ export default function SettingsPage() {
     const { clients, loading: clientsLoading, updateClientPriority } = useClients();
     const { toast } = useToast();
 
+    // Re-ordering logic: If deactivating, shift others up.
     const handleUpdateClient = async (clientId: string, data: Partial<Client>) => {
         const clientRef = doc(db, 'clients', clientId);
-        await updateDoc(clientRef, data);
+        const oldClient = clients.find(c => c.id === clientId);
+        
+        // Check if status is changing from Active to Inactive
+        if (oldClient?.active !== false && data.active === false) {
+            const batch = writeBatch(db);
+            const oldPriority = oldClient.priority ?? 999;
+            
+            // 1. Reset priority for the deactivated client
+            batch.update(clientRef, { ...data, priority: 999 });
+            
+            // 2. Shift all active clients with higher priority up by 1
+            clients.forEach(c => {
+                if (c.id !== clientId && c.active !== false && (c.priority ?? 999) > oldPriority) {
+                    const otherRef = doc(db, 'clients', c.id);
+                    batch.update(otherRef, { priority: (c.priority ?? 999) - 1 });
+                }
+            });
+            
+            await batch.commit();
+        } else {
+            await updateDoc(clientRef, data);
+        }
     };
     
     const sortedClients = useMemo(() => {
@@ -610,7 +632,7 @@ export default function SettingsPage() {
             if (a.active !== b.active) {
                 return (a.active === false ? 1 : -1) - (b.active === false ? 1 : -1);
             }
-            return (a.priority ?? 99) - (b.priority ?? 99);
+            return (a.priority ?? 999) - (b.priority ?? 999);
         });
     }, [clients]);
 

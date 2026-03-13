@@ -185,20 +185,16 @@ export default function EmployeeMasterView({ tasks, users, clients, onViewEmploy
         const indexA = depA ? departmentOrder.indexOf(depA) : -1;
         const indexB = depB ? departmentOrder.indexOf(depB) : -1;
 
-        // Sort by department first
         if (indexA !== indexB) {
             return indexA - indexB;
         }
 
-        // Then sort by priority within the same department
-        // Use ?? to allow priority 0
         const priorityA = a.priority ?? 99;
         const priorityB = b.priority ?? 99;
         if (priorityA !== priorityB) {
             return priorityA - priorityB;
         }
 
-        // Finally, sort by username as a tie-breaker
         return (a.username || '').localeCompare(b.username || '');
     });
   }, [users]);
@@ -214,13 +210,11 @@ export default function EmployeeMasterView({ tasks, users, clients, onViewEmploy
         if (!task.deadline) return;
         const deadline = startOfDay(new Date(task.deadline));
 
-        // If task is incomplete and its deadline is in the past, group it under today's date.
         if (incompleteStatuses.includes(task.status) && deadline < today) {
             const dateKey = format(today, 'yyyy-MM-dd');
             if(!grouped.has(dateKey)) grouped.set(dateKey, []);
             grouped.get(dateKey)!.push(task);
         } else {
-            // Otherwise, group it under its actual deadline.
             const dateKey = format(deadline, 'yyyy-MM-dd');
             if(!grouped.has(dateKey)) grouped.set(dateKey, []);
             grouped.get(dateKey)!.push(task);
@@ -251,7 +245,6 @@ export default function EmployeeMasterView({ tasks, users, clients, onViewEmploy
             }
         }
     });
-    // Add days for rollover tasks if the current month is the current system month
     const today = new Date();
     if(currentMonthDate.getMonth() === today.getMonth() && currentMonthDate.getFullYear() === today.getFullYear()) {
        days.add(today.getDate());
@@ -264,14 +257,12 @@ export default function EmployeeMasterView({ tasks, users, clients, onViewEmploy
     const today = startOfDay(new Date());
     const incompleteStatuses: Task['status'][] = ['Scheduled', 'On Work', 'For Approval', 'Hold', 'Ready for Next', 'Approved'];
   
-    // 1. Get tasks whose deadline is today.
     let dailyTasks = activeTasks.filter(task => {
       if (!task.deadline) return false;
       const deadline = startOfDay(new Date(task.deadline));
       return isSameDay(deadline, selectedDate);
     });
   
-    // 2. If we are viewing today's date, also include incomplete tasks from the past.
     if (isSameDay(selectedDate, today)) {
       const rolloverTasks = activeTasks.filter(task => {
         if (!task.deadline) return false;
@@ -279,7 +270,6 @@ export default function EmployeeMasterView({ tasks, users, clients, onViewEmploy
         return deadline < today && incompleteStatuses.includes(task.status);
       });
   
-      // Combine and remove duplicates (a task could be in both lists if its deadline was today but it was a rollover)
       const allTasksForToday = [...dailyTasks, ...rolloverTasks];
       const uniqueTasks = Array.from(new Map(allTasksForToday.map(task => [task.id, task])).values());
       return uniqueTasks;
@@ -406,7 +396,7 @@ const DailyTaskTable: React.FC<{
                           c.categories?.includes('digital marketing') ||
                           c.categories?.includes('gd')
                   )
-                  .sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99)),
+                  .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999)),
           [clients]
       );
     
@@ -489,7 +479,7 @@ const DailyTaskTable: React.FC<{
                             const isHighlighted = highlightedClientIds.has(client.id);
 
                             const tasksByEmployee = employees.map(employee => 
-                                clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99)) || []
+                                clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority ?? 9) - (b.priority ?? 9)) || []
                             );
 
                             const maxTasks = Math.max(1, ...tasksByEmployee.map(tasks => tasks.length));

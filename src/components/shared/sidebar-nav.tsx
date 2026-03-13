@@ -45,7 +45,13 @@ export function SidebarNav() {
   }, [pathname]);
 
 
-  const activeClients = useMemo(() => clients.filter(c => c.active !== false).sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99)), [clients]);
+  // Sort strictly by priority, allowing 0
+  const activeClients = useMemo(() => 
+    clients
+      .filter(c => c.active !== false)
+      .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999)), 
+    [clients]
+  );
 
   const filteredClients = useMemo(() => {
     if (categoryFilter === 'all') {

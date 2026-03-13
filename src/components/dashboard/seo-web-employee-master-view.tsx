@@ -179,7 +179,6 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients, onView
     return users
       .filter((u) => u.role === 'employee' && u.department && departmentOrder.includes(u.department))
       .sort((a, b) => {
-        // Use ?? to allow priority 0
         const priorityA = a.priority ?? 99;
         const priorityB = b.priority ?? 99;
         if (priorityA !== priorityB) {
@@ -395,7 +394,7 @@ const DailyTaskTable: React.FC<{
                           c.categories?.includes('seo') ||
                           c.categories?.includes('website')
                   )
-                  .sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99)),
+                  .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999)),
           [clients]
       );
     
@@ -478,7 +477,7 @@ const DailyTaskTable: React.FC<{
                             const isHighlighted = highlightedClientIds.has(client.id);
 
                             const tasksByEmployee = employees.map(employee => 
-                                clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99)) || []
+                                clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority ?? 9) - (b.priority ?? 9)) || []
                             );
 
                             const maxTasks = Math.max(1, ...tasksByEmployee.map(tasks => tasks.length));
