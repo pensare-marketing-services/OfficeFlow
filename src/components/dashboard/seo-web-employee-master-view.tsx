@@ -1,3 +1,4 @@
+// ... (imports remain unchanged)
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -407,10 +408,8 @@ const DailyTaskTable: React.FC<{
           [clients, filterEmployeeId]
       );
 
-      const displayedEmployees = useMemo(() => {
-          if (filterEmployeeId === 'all') return employees;
-          return employees.filter(e => e.id === filterEmployeeId);
-      }, [employees, filterEmployeeId]);
+      // We always show all employees in the columns, regardless of filter
+      const displayedEmployees = employees;
     
       const clientTasks = useMemo(() => {
           const map = new Map<string, TaskWithId[]>();
