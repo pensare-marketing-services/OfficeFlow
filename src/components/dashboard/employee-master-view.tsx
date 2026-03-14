@@ -14,10 +14,17 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
 import { useTasks } from '@/hooks/use-tasks';
 import { Button } from '../ui/button';
-import { ChevronLeft, ChevronRight, Pen } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pen, ChevronDown } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 
 type UserWithId = UserProfile & { id: string };
@@ -336,6 +343,7 @@ const DailyTaskTable: React.FC<{
     onViewEmployee?: (employeeId: string) => void;
   }> = ({ tasks, users, clients, employees, selectedDate, onViewEmployee }) => {
       const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+      const [filterEmployeeId, setFilterEmployeeId] = useState<string>('all');
       const tableRef = useRef<HTMLDivElement>(null);
       const [highlightedClientIds, setHighlightedClientIds] = useState<Set<string>>(new Set());
       const now = new Date();
@@ -396,9 +404,15 @@ const DailyTaskTable: React.FC<{
                           c.categories?.includes('digital marketing') ||
                           c.categories?.includes('gd')
                   )
+                  .filter(c => filterEmployeeId === 'all' || c.employeeIds?.includes(filterEmployeeId))
                   .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999)),
-          [clients]
+          [clients, filterEmployeeId]
       );
+
+      const displayedEmployees = useMemo(() => {
+          if (filterEmployeeId === 'all') return employees;
+          return employees.filter(e => e.id === filterEmployeeId);
+      }, [employees, filterEmployeeId]);
     
       const clientTasks = useMemo(() => {
           const map = new Map<string, TaskWithId[]>();
@@ -435,8 +449,28 @@ const DailyTaskTable: React.FC<{
                         <TableRow className="h-6">
                             <TableHead className='border-r p-1 w-[40px] sticky left-0 bg-background z-40'>Sl.</TableHead>
                             <TableHead className='border-r p-1 w-[150px] sticky left-[40px] bg-background z-40'>Client</TableHead>
-                            <TableHead className='border-r p-1 w-[100px] sticky left-[190px] bg-background z-40'>Assigned</TableHead>
-                            {employees.map((employee) => (
+                            <TableHead className='border-r p-0 w-[100px] sticky left-[190px] bg-background z-40'>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="h-full w-full justify-between font-semibold text-[10px] p-1 hover:bg-muted/50 rounded-none border-0">
+                                            <span className="truncate">{filterEmployeeId === 'all' ? 'Assigned' : employees.find(e => e.id === filterEmployeeId)?.nickname || 'Assigned'}</span>
+                                            <ChevronDown className="h-3 w-3 opacity-50 ml-1 shrink-0" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="start" className="w-48">
+                                        <DropdownMenuItem onClick={() => setFilterEmployeeId('all')}>
+                                            All Employees
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        {employees.map(emp => (
+                                            <DropdownMenuItem key={emp.id} onClick={() => setFilterEmployeeId(emp.id)}>
+                                                {emp.nickname || emp.username}
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </TableHead>
+                            {displayedEmployees.map((employee) => (
                                 <React.Fragment key={employee.id}>
                                     <TableHead
                                         style={{ width: `${employeeColWidth}px` }}
@@ -478,7 +512,7 @@ const DailyTaskTable: React.FC<{
 
                             const isHighlighted = highlightedClientIds.has(client.id);
 
-                            const tasksByEmployee = employees.map(employee => 
+                            const tasksByEmployee = displayedEmployees.map(employee => 
                                 clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority ?? 9) - (b.priority ?? 9)) || []
                             );
 
@@ -510,7 +544,7 @@ const DailyTaskTable: React.FC<{
                                                 </>
                                             )}
                                             
-                                            {employees.map((employee, empIndex) => {
+                                            {displayedEmployees.map((employee, empIndex) => {
                                                 const task = tasksByEmployee[empIndex]?.[rowIndex];
                                                 const isOverdue = task ? (() => {
                                                     const deadline = new Date(task.deadline);
