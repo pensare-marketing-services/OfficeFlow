@@ -1,4 +1,3 @@
-// ... (imports remain unchanged)
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -394,7 +393,7 @@ const DailyTaskTable: React.FC<{
           };
       }, [tableRef]);
   
-      const seoWebClients = useMemo(
+      const seoWebClientsAll = useMemo(
           () =>
               clients
                   .filter(c => c.active !== false)
@@ -403,12 +402,28 @@ const DailyTaskTable: React.FC<{
                           c.categories?.includes('seo') ||
                           c.categories?.includes('website')
                   )
-                  .filter(c => filterEmployeeId === 'all' || c.employeeIds?.includes(filterEmployeeId))
                   .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999)),
-          [clients, filterEmployeeId]
+          [clients]
       );
 
-      // We always show all employees in the columns, regardless of filter
+      const assignedEmployeeIds = useMemo(() => {
+          const ids = new Set<string>();
+          seoWebClientsAll.forEach(c => {
+              c.employeeIds?.forEach(id => ids.add(id));
+          });
+          return ids;
+      }, [seoWebClientsAll]);
+
+      const dropdownEmployees = useMemo(() => {
+          return employees.filter(e => assignedEmployeeIds.has(e.id));
+      }, [employees, assignedEmployeeIds]);
+
+      const seoWebClients = useMemo(
+          () =>
+              seoWebClientsAll.filter(c => filterEmployeeId === 'all' || c.employeeIds?.includes(filterEmployeeId)),
+          [seoWebClientsAll, filterEmployeeId]
+      );
+
       const displayedEmployees = employees;
     
       const clientTasks = useMemo(() => {
@@ -459,7 +474,7 @@ const DailyTaskTable: React.FC<{
                                             All Employees
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
-                                        {employees.map(emp => (
+                                        {dropdownEmployees.map(emp => (
                                             <DropdownMenuItem key={emp.id} onClick={() => setFilterEmployeeId(emp.id)}>
                                                 {emp.nickname || emp.username}
                                             </DropdownMenuItem>

@@ -395,7 +395,7 @@ const DailyTaskTable: React.FC<{
           };
       }, [tableRef]);
   
-      const dmClients = useMemo(
+      const dmClientsAll = useMemo(
           () =>
               clients
                   .filter(c => c.active !== false)
@@ -404,12 +404,28 @@ const DailyTaskTable: React.FC<{
                           c.categories?.includes('digital marketing') ||
                           c.categories?.includes('gd')
                   )
-                  .filter(c => filterEmployeeId === 'all' || c.employeeIds?.includes(filterEmployeeId))
                   .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999)),
-          [clients, filterEmployeeId]
+          [clients]
       );
 
-      // We always show all employees in the columns, regardless of filter
+      const assignedEmployeeIds = useMemo(() => {
+          const ids = new Set<string>();
+          dmClientsAll.forEach(c => {
+              c.employeeIds?.forEach(id => ids.add(id));
+          });
+          return ids;
+      }, [dmClientsAll]);
+
+      const dropdownEmployees = useMemo(() => {
+          return employees.filter(e => assignedEmployeeIds.has(e.id));
+      }, [employees, assignedEmployeeIds]);
+
+      const dmClients = useMemo(
+          () =>
+              dmClientsAll.filter(c => filterEmployeeId === 'all' || c.employeeIds?.includes(filterEmployeeId)),
+          [dmClientsAll, filterEmployeeId]
+      );
+
       const displayedEmployees = employees;
     
       const clientTasks = useMemo(() => {
@@ -460,7 +476,7 @@ const DailyTaskTable: React.FC<{
                                             All Employees
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
-                                        {employees.map(emp => (
+                                        {dropdownEmployees.map(emp => (
                                             <DropdownMenuItem key={emp.id} onClick={() => setFilterEmployeeId(emp.id)}>
                                                 {emp.nickname || emp.username}
                                             </DropdownMenuItem>
