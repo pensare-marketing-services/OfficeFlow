@@ -464,7 +464,7 @@ const DailyTaskTable: React.FC<{
                             <TableHead className='border-r p-0 w-[100px] sticky left-[150px] bg-background z-40'>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="h-full w-full justify-between font-semibold text-[10px] p-1 hover:bg-muted/50 rounded-none border-0">
+                                        <Button variant="ghost" size="sm" className="h-full w-full justify-between font-semibold text-[10px] p-1 rounded-none border-0">
                                             <span className="truncate">{filterEmployeeId === 'all' ? 'Assigned' : employees.find(e => e.id === filterEmployeeId)?.nickname || 'Assigned'}</span>
                                             <ChevronDown className="h-3 w-3 opacity-50 ml-1 shrink-0" />
                                         </Button>

@@ -466,7 +466,7 @@ const DailyTaskTable: React.FC<{
                             <TableHead className='border-r p-0 w-[100px] sticky left-[190px] bg-background z-40'>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="h-full w-full justify-between font-semibold text-[10px] p-1 hover:bg-muted/50 rounded-none border-0">
+                                        <Button variant="ghost" size="sm" className="h-full w-full justify-between font-semibold text-[10px] p-1 rounded-none border-0">
                                             <span className="truncate">{filterEmployeeId === 'all' ? 'Assigned' : employees.find(e => e.id === filterEmployeeId)?.nickname || 'Assigned'}</span>
                                             <ChevronDown className="h-3 w-3 opacity-50 ml-1 shrink-0" />
                                         </Button>
@@ -494,7 +494,7 @@ const DailyTaskTable: React.FC<{
                                             {onViewEmployee ? (
                                                 <Button 
                                                     variant="link"
-                                                    className="text-foreground hover:text-primary h-auto p-0 text-[10px] font-semibold" 
+                                                    className="text-foreground h-auto p-0 text-[10px] font-semibold" 
                                                     onClick={() => onViewEmployee(employee.id)}
                                                 >
                                                     <span className="truncate">{employee.nickname || employee.username}</span>
