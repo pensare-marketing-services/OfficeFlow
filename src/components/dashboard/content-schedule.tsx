@@ -40,6 +40,7 @@ interface ContentScheduleProps {
     onTaskDelete?: (taskId: string) => void;
     showClient?: boolean;
     showOrder?: boolean;
+    viewerId?: string;
 }
 
 const adTypes: (ContentType)[] = [
@@ -204,7 +205,7 @@ const AssigneeSelect = ({
 };
 
 
-export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDelete, showClient = true, showOrder = false, clients: propClients }: ContentScheduleProps) {
+export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDelete, showClient = true, showOrder = false, clients: propClients, viewerId }: ContentScheduleProps) {
     const { user: currentUser } = useAuth();
     const [noteInput, setNoteInput] = useState('');
     const { toast } = useToast();
@@ -216,6 +217,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
     const [editingRemark, setEditingRemark] = useState<{ taskId: string; remarkIndex: number } | null>(null);
     const [editingText, setEditingText] = useState('');
 
+    const effectiveViewerId = viewerId || currentUser?.uid;
 
     const sortedTasks = useMemo(() => {
         let sortableTasks = [...tasks];
@@ -226,12 +228,12 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                 return dateB - dateA;
             }
             
-            const pA = currentUser?.role === 'employee' ? (a.userPriorities?.[currentUser.uid] ?? a.priority ?? 9) : (a.priority ?? 9);
-            const pB = currentUser?.role === 'employee' ? (b.userPriorities?.[currentUser.uid] ?? b.priority ?? 9) : (b.priority ?? 9);
+            const pA = effectiveViewerId ? (a.userPriorities?.[effectiveViewerId] ?? a.priority ?? 9) : (a.priority ?? 9);
+            const pB = effectiveViewerId ? (b.userPriorities?.[effectiveViewerId] ?? b.priority ?? 9) : (b.priority ?? 9);
             return pA - pB; 
         });
         return sortableTasks;
-    }, [tasks, currentUser]);
+    }, [tasks, effectiveViewerId]);
 
 
     useEffect(() => {
@@ -455,7 +457,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const currentWorkerId = assigneeIds[activeAssigneeIndex];
                                 
                                 const isMyTurn = currentWorkerId === currentUser?.uid;
-                                const isEmployee = currentUser?.role === 'employee';
+                                const isEmployee = currentUser?.role === 'employee' || !!viewerId;
                                 const isAdmin = currentUser?.role === 'admin';
                                 
                                 const isPromotionTask = task.description === 'Paid Promotion' || task.description === 'Plan Promotion';
@@ -479,14 +481,14 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const getDisplayedStatus = (): string => {
                                     if (isOverdue) return 'Overdue';
                                     if (isPromotionTask) {
-                                         if (isEmployee) {
+                                         if (currentUser?.role === 'employee') {
                                             return task.status;
                                         }
                                         if (isAdmin) {
                                             if (task.status === 'Completed') return 'Active';
                                         }
                                     }
-                                    if (isEmployee && !isMyTurn && !isCompleted && task.status !== 'For Approval') {
+                                    if (currentUser?.role === 'employee' && !isMyTurn && !isCompleted && task.status !== 'For Approval') {
                                        return 'On Work';
                                     }
                                     return task.status;
@@ -499,7 +501,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const lastNote = (task.progressNotes?.length ?? 0) > 0 ? task.progressNotes![task.progressNotes!.length - 1] : null;
                                 const hasUnreadMessage = lastNote && lastNote.authorId !== currentUser?.uid && !openedChats.has(task.id);
                                 
-                                const displayPriority = isEmployee ? (task.userPriorities?.[currentUser.uid] ?? task.priority ?? 9) : (task.priority ?? 9);
+                                const displayPriority = effectiveViewerId ? (task.userPriorities?.[effectiveViewerId] ?? task.priority ?? 9) : (task.priority ?? 9);
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
@@ -542,8 +544,8 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     max={9}
                                                     onChange={(e) => {
                                                         const val = Number(e.target.value);
-                                                        if (isEmployee) {
-                                                            const newUserPriorities = { ...(task.userPriorities || {}), [currentUser.uid]: val };
+                                                        if (effectiveViewerId) {
+                                                            const newUserPriorities = { ...(task.userPriorities || {}), [effectiveViewerId]: val };
                                                             handleFieldChange(task.id, 'userPriorities', newUserPriorities);
                                                         } else {
                                                             handleFieldChange(task.id, 'priority', val);
@@ -636,7 +638,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                        <Select
                                             value={finalDisplayedStatus}
                                             onValueChange={(value: string) => handleLocalStatusChange(task, value)}
-                                            disabled={isEmployee && !isMyTurn && !isCompleted && !isOverdue}
+                                            disabled={currentUser?.role === 'employee' && !isMyTurn && !isCompleted && !isOverdue}
                                         >
                                             <SelectTrigger className={cn("h-7 text-[10px] p-1 border-0 focus:ring-0", statusColors[finalDisplayedStatus])}>
                                                 <SelectValue>{finalDisplayedStatus}</SelectValue>
@@ -662,7 +664,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                             if(status === 'Completed') displayStatus = 'Stopped';
                                                         }
                                                         return (
-                                                        <SelectItem key={status} value={status} disabled={(isEmployee && !availableStatuses.includes(status as TaskStatus)) && status !== finalDisplayedStatus}>
+                                                        <SelectItem key={status} value={status} disabled={(currentUser?.role === 'employee' && !availableStatuses.includes(status as TaskStatus)) && status !== finalDisplayedStatus}>
                                                             <div className="flex items-center gap-2">
                                                                 <div className={cn("h-2 w-2 rounded-full", statusDotColors[status as TaskStatus])} />
                                                                 {displayStatus}

@@ -182,6 +182,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
             showClient={true}
             showOrder={true}
             clients={clients}
+            viewerId={user.id}
         />
       </div>
     </div>
