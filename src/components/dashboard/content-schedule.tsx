@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -180,8 +179,6 @@ const AssigneeSelect = ({
 
     return (
         <Select
-            // Use ?? instead of || to correctly handle priority 0 if needed in logic, 
-            // though here we are handling IDs.
             value={assigneeId || 'unassigned'}
             onValueChange={(value) => onAssigneeChange(value === 'unassigned' ? '' : value)}
         >
@@ -228,13 +225,13 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
             if (dateA !== dateB) {
                 return dateB - dateA;
             }
-            // Use ?? to allow 0 priority to be treated as a valid number during sort
-            const priorityA = a.priority ?? 99;
-            const priorityB = b.priority ?? 99;
-            return priorityA - priorityB; 
+            
+            const pA = currentUser?.role === 'employee' ? (a.userPriorities?.[currentUser.uid] ?? a.priority ?? 9) : (a.priority ?? 9);
+            const pB = currentUser?.role === 'employee' ? (b.userPriorities?.[currentUser.uid] ?? b.priority ?? 9) : (b.priority ?? 9);
+            return pA - pB; 
         });
         return sortableTasks;
-    }, [tasks]);
+    }, [tasks, currentUser]);
 
 
     useEffect(() => {
@@ -502,6 +499,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                 const lastNote = (task.progressNotes?.length ?? 0) > 0 ? task.progressNotes![task.progressNotes!.length - 1] : null;
                                 const hasUnreadMessage = lastNote && lastNote.authorId !== currentUser?.uid && !openedChats.has(task.id);
                                 
+                                const displayPriority = isEmployee ? (task.userPriorities?.[currentUser.uid] ?? task.priority ?? 9) : (task.priority ?? 9);
 
                                 return (
                                 <TableRow key={task.id} className="border-b">
@@ -536,15 +534,18 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                     </TableCell>
                                     {showOrder && (
                                         <TableCell className="p-0 border-r text-center font-bold text-[10px]">
-                                            {isAdmin ? (
+                                            {(isAdmin || isEmployee) ? (
                                                 <Input
                                                     type="number"
-                                                    defaultValue={task.priority ?? 9}
+                                                    value={displayPriority}
                                                     min={0}
                                                     max={9}
-                                                    onBlur={(e) => {
+                                                    onChange={(e) => {
                                                         const val = Number(e.target.value);
-                                                        if (val !== task.priority) {
+                                                        if (isEmployee) {
+                                                            const newUserPriorities = { ...(task.userPriorities || {}), [currentUser.uid]: val };
+                                                            handleFieldChange(task.id, 'userPriorities', newUserPriorities);
+                                                        } else {
                                                             handleFieldChange(task.id, 'priority', val);
                                                         }
                                                     }}
@@ -556,8 +557,7 @@ export default function ContentSchedule({ tasks, users, onTaskUpdate, onTaskDele
                                                     className="h-7 w-full text-[10px] text-center p-1 bg-transparent border-0 focus-visible:ring-1"
                                                 />
                                             ) : (
-                                                // Using ?? instead of || to correctly handle priority 0
-                                                <div className="p-1">{task.priority ?? 9}</div>
+                                                <div className="p-1">{displayPriority}</div>
                                             )}
                                         </TableCell>
                                     )}

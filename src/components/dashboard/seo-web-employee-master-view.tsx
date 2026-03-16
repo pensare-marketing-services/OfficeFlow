@@ -59,18 +59,20 @@ const statusBackgroundColors: Record<string, string> = {
 const getInitials = (name: string = '') =>
   name ? name.charAt(0).toUpperCase() : '';
 
-const PriorityDisplayItem = ({ task }: { task: TaskWithId }) => {
+const PriorityDisplayItem = ({ task, employeeId }: { task: TaskWithId; employeeId: string }) => {
     const { updateTask } = useTasks();
-    const [priority, setPriority] = useState(task.priority ?? 9);
+    const currentPriority = task.userPriorities?.[employeeId] ?? task.priority ?? 9;
+    const [priority, setPriority] = useState(currentPriority);
 
     useEffect(() => {
-        setPriority(task.priority ?? 9);
-    }, [task.priority]);
+        setPriority(task.userPriorities?.[employeeId] ?? task.priority ?? 9);
+    }, [task.priority, task.userPriorities, employeeId]);
 
     const handleBlur = () => {
         const newPriority = Number(priority);
-        if (newPriority !== (task.priority ?? 9)) {
-            updateTask(task.id, { priority: newPriority });
+        if (newPriority !== currentPriority) {
+            const newUserPriorities = { ...(task.userPriorities || {}), [employeeId]: newPriority };
+            updateTask(task.id, { userPriorities: newUserPriorities });
         }
     };
 
@@ -525,7 +527,11 @@ const DailyTaskTable: React.FC<{
                             const isHighlighted = highlightedClientIds.has(client.id);
 
                             const tasksByEmployee = displayedEmployees.map(employee => 
-                                clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => (a.priority ?? 9) - (b.priority ?? 9)) || []
+                                clientTasks.get(`${client.id}-${employee.id}`)?.sort((a, b) => {
+                                    const pA = a.userPriorities?.[employee.id] ?? a.priority ?? 9;
+                                    const pB = b.userPriorities?.[employee.id] ?? b.priority ?? 9;
+                                    return pA - pB;
+                                }) || []
                             );
 
                             const maxTasks = Math.max(1, ...tasksByEmployee.map(tasks => tasks.length));
@@ -571,7 +577,7 @@ const DailyTaskTable: React.FC<{
                                                             {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} isOverdue={isOverdue} /> : <div className='h-6 border-b'></div>}
                                                         </TableCell>
                                                         <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
-                                                            {task ? <PriorityDisplayItem task={task} /> : <div className='h-6 border-b'></div>}
+                                                            {task ? <PriorityDisplayItem task={task} employeeId={employee.id} /> : <div className='h-6 border-b'></div>}
                                                         </TableCell>
                                                     </React.Fragment>
                                                 );

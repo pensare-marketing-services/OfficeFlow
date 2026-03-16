@@ -29,6 +29,7 @@ export type Task = {
   description: string;
   status: TaskStatus;
   priority: number;
+  userPriorities?: Record<string, number>;
   deadline: string; 
   time?: string;
   assigneeIds: string[]; 

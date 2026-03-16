@@ -74,9 +74,9 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
                 return dateB - dateA;
             }
 
-            // If deadlines are the same, sort by priority ascending (lower is higher priority)
-            const priorityA = a.priority ?? 99;
-            const priorityB = b.priority ?? 99;
+            // If deadlines are the same, sort by employee-specific priority ascending
+            const priorityA = a.userPriorities?.[user.id] ?? a.priority ?? 9;
+            const priorityB = b.userPriorities?.[user.id] ?? b.priority ?? 9;
             return priorityA - priorityB;
         });
     }
@@ -98,7 +98,7 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
       default:
         return getSortedTasks(allNonCompletedTasks);
     }
-  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks, toDoTasks, approvedStatuses]);
+  }, [employeeTasks, taskFilter, overdueTasks, allNonCompletedTasks, toDoTasks, approvedStatuses, user.id]);
 
   const filterTitles: Record<TaskFilter, string> = {
     all: "All My Tasks",
