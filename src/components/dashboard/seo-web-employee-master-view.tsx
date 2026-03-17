@@ -461,9 +461,9 @@ const DailyTaskTable: React.FC<{
                 <Table className="text-[10px] border-collapse min-w-full table-fixed">
                     <TableHeader className="sticky top-0 bg-background z-30 shadow-sm">
                         <TableRow className="h-6">
-                            <TableHead className='border-r p-1 w-[30px] sticky left-0 bg-background z-40'>Sl.</TableHead>
-                            <TableHead className='border-r p-1 w-[120px] sticky left-[30px] bg-background z-40'>Client</TableHead>
-                            <TableHead className='border-r p-0 w-[100px] sticky left-[150px] bg-background z-40'>
+                            <TableHead className='border-r p-1 w-[10px] sticky left-0 bg-background z-40'>Sl.</TableHead>
+                            <TableHead className='border-r p-1 w-[80px] sticky left-[30px] bg-background z-40'>Client</TableHead>
+                            <TableHead className='border-r p-0 w-[80px] sticky left-[100px] bg-background z-40'>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" size="sm" className="h-full w-full justify-between font-semibold text-[10px] p-1 rounded-none border-0">
