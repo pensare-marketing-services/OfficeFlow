@@ -22,20 +22,21 @@ import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '../ui/
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
-const noteStatuses: ClientNoteStatus[] = ["Schedule", "On Work", "Urgent", "Approved", "Hold"];
+const noteStatuses: ClientNoteStatus[] = ["Scheduled", "To Do", "Urgent", "Approved", "Done", "On Hold"];
 const MAX_IMAGE_SIZE_BYTES = 1.5 * 1024 * 1024; // 1.5MB
 
 const statusColors: Record<string, string> = {
-    "Schedule": "bg-transparent border",
-    "On Work": "bg-orange-500",
+    "Scheduled": "bg-transparent border",
+    "To Do": "bg-gray-400",
     "Urgent": "bg-red-500",
     "Approved": "bg-green-500",
-    "Hold": "bg-blue-500",
+    "Done": "bg-cyan-500",
+    "On Hold": "bg-blue-500",
     // Compatibility for legacy values
+    "Schedule": "bg-transparent border",
+    "On Work": "bg-orange-500",
+    "Hold": "bg-blue-500",
     "Pending": "bg-transparent border",
-    "Done": "bg-red-500",
-    "For Approval": "bg-green-500",
-    "Scheduled": "bg-orange-500",
 };
 
 interface ClientNotesTableProps {
@@ -133,7 +134,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
     const newNote: ClientNote = {
       id: Date.now().toString(),
       note: '',
-      update: 'Schedule',
+      update: 'Scheduled',
       remarks: [],
     };
     onUpdate([...localNotes, newNote]);
@@ -199,11 +200,12 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
     };
     
     const dropdownStatuses: { value: ClientNoteStatus; label: string; color: string }[] = [
-        { value: "Schedule", label: "Schedule", color: "bg-transparent border" },
-        { value: "On Work", label: "On Work", color: "bg-orange-500" },
+        { value: "Scheduled", label: "Scheduled", color: "bg-transparent border" },
+        { value: "To Do", label: "To Do", color: "bg-gray-400" },
         { value: "Urgent", label: "Urgent", color: "bg-red-500" },
         { value: "Approved", label: "Approved", color: "bg-green-500" },
-        { value: "Hold", label: "Hold", color: "bg-blue-500" },
+        { value: "Done", label: "Done", color: "bg-cyan-500" },
+        { value: "On Hold", label: "On Hold", color: "bg-blue-500" },
     ];
 
 
@@ -317,7 +319,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
                                                 <div className={cn("max-w-[75%] rounded-lg p-2 relative", remark.authorId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                                     {currentUser?.role === 'admin' && !isEditing && (
                                                       <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-2 w-2" onClick={() => handleEditRemark(note, remarkIndex)}>
-                                                        <Pen className="h-2 w-2"/>
+                                                        <Pen className="h-2 w-2" />
                                                       </Button>
                                                     )}
                                                     <p className="font-bold text-[10px] mb-1">{remark.authorId === currentUser?.uid ? 'You' : authorName}</p>
