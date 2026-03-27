@@ -48,8 +48,10 @@ export default function EmployeeDashboard({ employeeTasks, onTaskUpdate, clients
 }, [employeeTasks]);
 
   const allNonCompletedTasks = useMemo(() => {
-    return employeeTasks.filter(t => ![...approvedStatuses, 'Posted', 'To Do'].includes(t.status));
-  }, [employeeTasks, approvedStatuses]);
+    // Includes "Approved" tasks in the All My Tasks view. 
+    // Only excludes truly finished (Completed/Posted) or unstarted (To Do) work.
+    return employeeTasks.filter(t => !['Completed', 'Posted', 'To Do'].includes(t.status));
+  }, [employeeTasks]);
   
   const toDoTasks = useMemo(() => {
     return employeeTasks.filter(t => t.status === 'To Do');
