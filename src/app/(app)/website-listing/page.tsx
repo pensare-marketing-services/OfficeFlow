@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -54,6 +54,7 @@ export default function WebsiteListingPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const q = query(collection(db, 'websiteDirectory'), orderBy('createdAt', 'asc'));
@@ -163,197 +164,201 @@ export default function WebsiteListingPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0 flex-1 overflow-hidden">
-          <div className="overflow-auto h-full border-t relative">
-            <Table className="w-max min-w-full text-[10px] border-collapse">
-              <TableHeader className="relative z-20">
-                <TableRow className="hover:bg-transparent h-8">
-                  <TableHead rowSpan={2} className="w-[40px] text-center border-r sticky top-0 bg-muted z-40">Sl.</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-40">Client</TableHead>
-                  <TableHead rowSpan={2} className="w-[150px] border-r sticky top-0 bg-muted z-40">Address</TableHead>
-                  <TableHead rowSpan={2} className="w-[80px] border-r sticky top-0 bg-muted z-40">Contact</TableHead>
-                  <TableHead rowSpan={2} className="w-[80px] border-r sticky top-0 bg-muted z-40">Contact No</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r sticky top-0 bg-muted z-40">Domain Name</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-40">Domain A/c</TableHead>
-                  <TableHead rowSpan={2} className="w-[150px] border-r sticky top-0 bg-muted z-40">Domain E-mail</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-40">Purchased By</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-40">Domain Expiry</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-40">Hosting Expiry</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r sticky top-0 bg-muted z-40">Hosting Co</TableHead>
-                  <TableHead rowSpan={2} className="w-[200px] border-r sticky top-0 bg-muted z-40">Host Remarks</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-40">Platform</TableHead>
-                  <TableHead rowSpan={2} className="w-[150px] border-r sticky top-0 bg-muted z-40">Theme Link</TableHead>
-                  <TableHead rowSpan={2} className="w-[150px] border-r sticky top-0 bg-muted z-40">Admin panel link</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r sticky top-0 bg-muted z-40">Admin Panel Name</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r sticky top-0 bg-muted z-40">Panel Password</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r sticky top-0 bg-muted z-40">Work Done By</TableHead>
-                                   
-                  <TableHead colSpan={3} className="text-center border-r bg-yellow-100 text-yellow-900 sticky top-0 z-30 h-8">DB Credentials</TableHead>
-                  <TableHead colSpan={2} className="text-center border-r bg-blue-100 text-blue-900 sticky top-0 z-30 h-8">WordPress</TableHead>
-                  <TableHead colSpan={2} className="text-center border-r bg-green-100 text-green-900 sticky top-0 z-30 h-8">Webmail</TableHead>
-                  
-                  <TableHead rowSpan={2} className="w-[40px] text-center sticky top-0 bg-muted z-40">Actions</TableHead>
-                </TableRow>
-                <TableRow className="hover:bg-transparent h-8">
-                  {/* DB Headers - Top offset matches the h-8 of the first row (32px) */}
-                  <TableHead className="w-[120px] border-r bg-yellow-50 text-yellow-800 sticky top-[32px] z-30">DB Name</TableHead>
-                  <TableHead className="w-[120px] border-r bg-yellow-50 text-yellow-800 sticky top-[32px] z-30">DB User</TableHead>
-                  <TableHead className="w-[120px] border-r bg-yellow-50 text-yellow-800 sticky top-[32px] z-30">Password</TableHead>
-                  {/* WP Headers */}
-                  <TableHead className="w-[120px] border-r bg-blue-50 text-blue-800 sticky top-[32px] z-30">Username</TableHead>
-                  <TableHead className="w-[120px] border-r bg-blue-50 text-blue-800 sticky top-[32px] z-30">Password</TableHead>
-                  {/* Webmail Headers */}
-                  <TableHead className="w-[120px] border-r bg-green-50 text-green-800 sticky top-[32px] z-30">Mail</TableHead>
-                  <TableHead className="w-[120px] border-r bg-green-50 text-green-800 sticky top-[32px] z-30">Password</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={27} className="h-32 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Loading directory...</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : filteredWebsites.map((site, index) => (
-                  <TableRow key={site.id} className="hover:bg-muted/30 h-8">
-                    <TableCell className="text-center font-medium text-muted-foreground border-r bg-background">
-                      {index + 1}
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.clientName} onSave={(v) => handleUpdate(site.id, 'clientName', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.address} onSave={(v) => handleUpdate(site.id, 'address', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.contactPerson} onSave={(v) => handleUpdate(site.id, 'contactPerson', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.contactNo} onSave={(v) => handleUpdate(site.id, 'contactNo', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r relative group">
-                      <div className="flex items-center">
-                        <EditableCell 
-                          value={site.domainName}
-                          onSave={(v) => handleUpdate(site.id, 'domainName', v)} 
-                          className="flex-1"
-                        />
-                        {site.domainName && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-6 w-6 opacity-0 group-hover:opacity-100"
-                            onClick={() => openLink(site.domainName)}
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.domainAccount} onSave={(v) => handleUpdate(site.id, 'domainAccount', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.domainEmail} onSave={(v) => handleUpdate(site.id, 'domainEmail', v)} />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.purchasedBy} onSave={(v) => handleUpdate(site.id, 'purchasedBy', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.domainExpiry} onSave={(v) => handleUpdate(site.id, 'domainExpiry', v)} />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.hostingExpiry} onSave={(v) => handleUpdate(site.id, 'hostingExpiry', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.hostingCompany} onSave={(v) => handleUpdate(site.id, 'hostingCompany', v)} />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.hostRemarks} onSave={(v) => handleUpdate(site.id, 'hostRemarks', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.platform} onSave={(v) => handleUpdate(site.id, 'platform', v)} />
-                    </TableCell>
-                    <TableCell className="p-0 border-r relative group">
-                      <div className="flex items-center">
-                        <EditableCell value={site.themeLink} onSave={(v) => handleUpdate(site.id, 'themeLink', v)} className="flex-1" />
-                        {site.themeLink && (
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => openLink(site.themeLink)}>
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="p-0 border-r relative group">
-                      <div className="flex items-center">
-                        <EditableCell value={site.adminPanelLink} onSave={(v) => handleUpdate(site.id, 'adminPanelLink', v)} className="flex-1" />
-                        {site.adminPanelLink && (
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => openLink(site.adminPanelLink)}>
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.adminPanelName} onSave={(v) => handleUpdate(site.id, 'adminPanelName', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.panelPassword} onSave={(v) => handleUpdate(site.id, 'panelPassword', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.workDoneBy} onSave={(v) => handleUpdate(site.id, 'workDoneBy', v)}  />
-                    </TableCell>
+          <div 
+            ref={tableContainerRef}
+            className="overflow-auto h-full border-t relative"
+          >
+            <div className="relative">
+              <Table className="w-max min-w-full text-[10px] border-collapse">
+                <thead className="z-30">
+                  {/* First header row - Sticky at top-0 */}
+                  <tr className="hover:bg-transparent h-8">
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[40px] text-center border-r bg-muted px-2 font-medium">Sl.</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[100px] border-r bg-muted px-2 font-medium text-left">Client</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[150px] border-r bg-muted px-2 font-medium text-left">Address</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[80px] border-r bg-muted px-2 font-medium text-left">Contact</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[80px] border-r bg-muted px-2 font-medium text-left">Contact No</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[120px] border-r bg-muted px-2 font-medium text-left">Domain Name</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[100px] border-r bg-muted px-2 font-medium text-left">Domain A/c</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[150px] border-r bg-muted px-2 font-medium text-left">Domain E-mail</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[100px] border-r bg-muted px-2 font-medium text-left">Purchased By</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[100px] border-r bg-muted px-2 font-medium text-left">Domain Expiry</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[100px] border-r bg-muted px-2 font-medium text-left">Hosting Expiry</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[120px] border-r bg-muted px-2 font-medium text-left">Hosting Co</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[200px] border-r bg-muted px-2 font-medium text-left">Host Remarks</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[100px] border-r bg-muted px-2 font-medium text-left">Platform</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[150px] border-r bg-muted px-2 font-medium text-left">Theme Link</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[150px] border-r bg-muted px-2 font-medium text-left">Admin panel link</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[120px] border-r bg-muted px-2 font-medium text-left">Admin Panel Name</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[120px] border-r bg-muted px-2 font-medium text-left">Panel Password</th>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[120px] border-r bg-muted px-2 font-medium text-left">Work Done By</th>
                     
-                    {/* DB Cells */}
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.dbName} onSave={(v) => handleUpdate(site.id, 'dbName', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.dbUser} onSave={(v) => handleUpdate(site.id, 'dbUser', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.dbPassword} onSave={(v) => handleUpdate(site.id, 'dbPassword', v)} />
-                    </TableCell>
+                    <th colSpan={3} className="sticky top-0 z-30 text-center border-r bg-yellow-100 text-yellow-900 h-8 px-2 font-medium">DB Credentials</th>
+                    <th colSpan={2} className="sticky top-0 z-30 text-center border-r bg-blue-100 text-blue-900 h-8 px-2 font-medium">WordPress</th>
+                    <th colSpan={2} className="sticky top-0 z-30 text-center border-r bg-green-100 text-green-900 h-8 px-2 font-medium">Webmail</th>
                     
-                    {/* WP Cells */}
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.wpUser} onSave={(v) => handleUpdate(site.id, 'wpUser', v)} />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.wpPassword} onSave={(v) => handleUpdate(site.id, 'wpPassword', v)}  />
-                    </TableCell>
-                    
-                    {/* Webmail Cells */}
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.webmailUser} onSave={(v) => handleUpdate(site.id, 'webmailUser', v)}  />
-                    </TableCell>
-                    <TableCell className="p-0 border-r">
-                      <EditableCell value={site.webmailPassword} onSave={(v) => handleUpdate(site.id, 'webmailPassword', v)}  />
-                    </TableCell>
+                    <th rowSpan={2} className="sticky top-0 z-40 w-[40px] text-center bg-muted px-2 font-medium">Actions</th>
+                  </tr>
+                  {/* Second header row - Sticky at top-8 (32px) */}
+                  <tr className="hover:bg-transparent h-8">
+                    <th className="sticky top-8 z-30 w-[120px] border-r bg-yellow-50 text-yellow-800 px-2 font-medium text-left shadow-[inset_0_-1px_0_rgba(0,0,0,0.1)]">DB Name</th>
+                    <th className="sticky top-8 z-30 w-[120px] border-r bg-yellow-50 text-yellow-800 px-2 font-medium text-left shadow-[inset_0_-1px_0_rgba(0,0,0,0.1)]">DB User</th>
+                    <th className="sticky top-8 z-30 w-[120px] border-r bg-yellow-50 text-yellow-800 px-2 font-medium text-left shadow-[inset_0_-1px_0_rgba(0,0,0,0.1)]">Password</th>
+                    <th className="sticky top-8 z-30 w-[120px] border-r bg-blue-50 text-blue-800 px-2 font-medium text-left shadow-[inset_0_-1px_0_rgba(0,0,0,0.1)]">Username</th>
+                    <th className="sticky top-8 z-30 w-[120px] border-r bg-blue-50 text-blue-800 px-2 font-medium text-left shadow-[inset_0_-1px_0_rgba(0,0,0,0.1)]">Password</th>
+                    <th className="sticky top-8 z-30 w-[120px] border-r bg-green-50 text-green-800 px-2 font-medium text-left shadow-[inset_0_-1px_0_rgba(0,0,0,0.1)]">Mail</th>
+                    <th className="sticky top-8 z-30 w-[120px] border-r bg-green-50 text-green-800 px-2 font-medium text-left shadow-[inset_0_-1px_0_rgba(0,0,0,0.1)]">Password</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={27} className="h-32 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Loading directory...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : filteredWebsites.map((site, index) => (
+                    <tr key={site.id} className="hover:bg-muted/30 h-8 border-b">
+                      <td className="text-center font-medium text-muted-foreground border-r bg-background px-2">
+                        {index + 1}
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.clientName} onSave={(v) => handleUpdate(site.id, 'clientName', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.address} onSave={(v) => handleUpdate(site.id, 'address', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.contactPerson} onSave={(v) => handleUpdate(site.id, 'contactPerson', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.contactNo} onSave={(v) => handleUpdate(site.id, 'contactNo', v)}  />
+                      </td>
+                      <td className="p-0 border-r relative group">
+                        <div className="flex items-center">
+                          <EditableCell 
+                            value={site.domainName}
+                            onSave={(v) => handleUpdate(site.id, 'domainName', v)} 
+                            className="flex-1"
+                          />
+                          {site.domainName && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0"
+                              onClick={() => openLink(site.domainName)}
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.domainAccount} onSave={(v) => handleUpdate(site.id, 'domainAccount', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.domainEmail} onSave={(v) => handleUpdate(site.id, 'domainEmail', v)} />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.purchasedBy} onSave={(v) => handleUpdate(site.id, 'purchasedBy', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.domainExpiry} onSave={(v) => handleUpdate(site.id, 'domainExpiry', v)} />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.hostingExpiry} onSave={(v) => handleUpdate(site.id, 'hostingExpiry', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.hostingCompany} onSave={(v) => handleUpdate(site.id, 'hostingCompany', v)} />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.hostRemarks} onSave={(v) => handleUpdate(site.id, 'hostRemarks', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.platform} onSave={(v) => handleUpdate(site.id, 'platform', v)} />
+                      </td>
+                      <td className="p-0 border-r relative group">
+                        <div className="flex items-center">
+                          <EditableCell value={site.themeLink} onSave={(v) => handleUpdate(site.id, 'themeLink', v)} className="flex-1" />
+                          {site.themeLink && (
+                            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0" onClick={() => openLink(site.themeLink)}>
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-0 border-r relative group">
+                        <div className="flex items-center">
+                          <EditableCell value={site.adminPanelLink} onSave={(v) => handleUpdate(site.id, 'adminPanelLink', v)} className="flex-1" />
+                          {site.adminPanelLink && (
+                            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0" onClick={() => openLink(site.adminPanelLink)}>
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.adminPanelName} onSave={(v) => handleUpdate(site.id, 'adminPanelName', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.panelPassword} onSave={(v) => handleUpdate(site.id, 'panelPassword', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.workDoneBy} onSave={(v) => handleUpdate(site.id, 'workDoneBy', v)}  />
+                      </td>
+                      
+                      {/* DB Cells */}
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.dbName} onSave={(v) => handleUpdate(site.id, 'dbName', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.dbUser} onSave={(v) => handleUpdate(site.id, 'dbUser', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.dbPassword} onSave={(v) => handleUpdate(site.id, 'dbPassword', v)} />
+                      </td>
+                      
+                      {/* WP Cells */}
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.wpUser} onSave={(v) => handleUpdate(site.id, 'wpUser', v)} />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.wpPassword} onSave={(v) => handleUpdate(site.id, 'wpPassword', v)}  />
+                      </td>
+                      
+                      {/* Webmail Cells */}
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.webmailUser} onSave={(v) => handleUpdate(site.id, 'webmailUser', v)}  />
+                      </td>
+                      <td className="p-0 border-r">
+                        <EditableCell value={site.webmailPassword} onSave={(v) => handleUpdate(site.id, 'webmailPassword', v)}  />
+                      </td>
 
-                    <TableCell className="p-0 text-center bg-background">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDelete(site.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {!loading && filteredWebsites.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={27} className="h-24 text-center text-muted-foreground">
-                      No matching records found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                      <td className="p-0 text-center bg-background">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDelete(site.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                  {!loading && filteredWebsites.length === 0 && (
+                    <tr>
+                      <td colSpan={27} className="h-24 text-center text-muted-foreground">
+                        No matching records found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>
