@@ -164,47 +164,47 @@ export default function WebsiteListingPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-auto max-h-[calc(100vh-12rem)] border-t">
+          <div className="overflow-auto max-h-[calc(100vh-12rem)] border-t relative">
             <Table className="w-max min-w-full text-[10px] border-collapse">
-              <TableHeader className="sticky top-0 bg-muted/50 z-10">
-                <TableRow>
-                  <TableHead rowSpan={2} className="w-[40px] text-center border-r">Sl.</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r">Client</TableHead>
-                  <TableHead rowSpan={2} className="w-[150px] border-r">Address</TableHead>
-                  <TableHead rowSpan={2} className="w-[8px] border-r">Contact</TableHead>
-                  <TableHead rowSpan={2} className="w-[80px] border-r">Contact No</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r">Domain Name</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r">Domain A/c</TableHead>
-                  <TableHead rowSpan={2} className="w-[150px] border-r">Domain E-mail</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r">Purchased By</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r">Domain Expiry</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r">Hosting Expiry</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r">Hosting Co</TableHead>
-                  <TableHead rowSpan={2} className="w-[200px] border-r">Host Remarks</TableHead>
-                  <TableHead rowSpan={2} className="w-[100px] border-r">Platform</TableHead>
-                  <TableHead rowSpan={2} className="w-[150px] border-r">Theme Link</TableHead>
-                  <TableHead rowSpan={2} className="w-[150px] border-r">Admin panel link</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r">Admin Panel Name</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r">Panel Password</TableHead>
-                  <TableHead rowSpan={2} className="w-[120px] border-r">Work Done By</TableHead>
+              <TableHeader className="z-20">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead rowSpan={2} className="w-[40px] text-center border-r sticky top-0 bg-muted z-30">Sl.</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-30">Client</TableHead>
+                  <TableHead rowSpan={2} className="w-[150px] border-r sticky top-0 bg-muted z-30">Address</TableHead>
+                  <TableHead rowSpan={2} className="w-[8px] border-r sticky top-0 bg-muted z-30">Contact</TableHead>
+                  <TableHead rowSpan={2} className="w-[80px] border-r sticky top-0 bg-muted z-30">Contact No</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r sticky top-0 bg-muted z-30">Domain Name</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-30">Domain A/c</TableHead>
+                  <TableHead rowSpan={2} className="w-[150px] border-r sticky top-0 bg-muted z-30">Domain E-mail</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-30">Purchased By</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-30">Domain Expiry</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-30">Hosting Expiry</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r sticky top-0 bg-muted z-30">Hosting Co</TableHead>
+                  <TableHead rowSpan={2} className="w-[200px] border-r sticky top-0 bg-muted z-30">Host Remarks</TableHead>
+                  <TableHead rowSpan={2} className="w-[100px] border-r sticky top-0 bg-muted z-30">Platform</TableHead>
+                  <TableHead rowSpan={2} className="w-[150px] border-r sticky top-0 bg-muted z-30">Theme Link</TableHead>
+                  <TableHead rowSpan={2} className="w-[150px] border-r sticky top-0 bg-muted z-30">Admin panel link</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r sticky top-0 bg-muted z-30">Admin Panel Name</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r sticky top-0 bg-muted z-30">Panel Password</TableHead>
+                  <TableHead rowSpan={2} className="w-[120px] border-r sticky top-0 bg-muted z-30">Work Done By</TableHead>
                   
-                  <TableHead colSpan={3} className="text-center border-r bg-yellow-100/50">DB Credentials</TableHead>
-                  <TableHead colSpan={2} className="text-center border-r bg-blue-100/50">WordPress</TableHead>
-                  <TableHead colSpan={2} className="text-center border-r bg-green-100/50">Webmail</TableHead>
+                  <TableHead colSpan={3} className="text-center border-r bg-yellow-100 sticky top-0 z-30">DB Credentials</TableHead>
+                  <TableHead colSpan={2} className="text-center border-r bg-blue-100 sticky top-0 z-30">WordPress</TableHead>
+                  <TableHead colSpan={2} className="text-center border-r bg-green-100 sticky top-0 z-30">Webmail</TableHead>
                   
-                  <TableHead rowSpan={2} className="w-[40px] text-center">Actions</TableHead>
+                  <TableHead rowSpan={2} className="w-[40px] text-center sticky top-0 bg-muted z-30">Actions</TableHead>
                 </TableRow>
-                <TableRow>
+                <TableRow className="hover:bg-transparent">
                   {/* DB Headers */}
-                  <TableHead className="w-[120px] border-r bg-yellow-50/50">DB Name</TableHead>
-                  <TableHead className="w-[120px] border-r bg-yellow-50/50">DB User</TableHead>
-                  <TableHead className="w-[120px] border-r bg-yellow-50/50">Password</TableHead>
+                  <TableHead className="w-[120px] border-r bg-yellow-50 sticky top-[36px] z-30">DB Name</TableHead>
+                  <TableHead className="w-[120px] border-r bg-yellow-50 sticky top-[36px] z-30">DB User</TableHead>
+                  <TableHead className="w-[120px] border-r bg-yellow-50 sticky top-[36px] z-30">Password</TableHead>
                   {/* WP Headers */}
-                  <TableHead className="w-[120px] border-r bg-blue-50/50">Username</TableHead>
-                  <TableHead className="w-[120px] border-r bg-blue-50/50">Password</TableHead>
+                  <TableHead className="w-[120px] border-r bg-blue-50 sticky top-[36px] z-30">Username</TableHead>
+                  <TableHead className="w-[120px] border-r bg-blue-50 sticky top-[36px] z-30">Password</TableHead>
                   {/* Webmail Headers */}
-                  <TableHead className="w-[120px] border-r bg-green-50/50">Mail</TableHead>
-                  <TableHead className="w-[120px] border-r bg-green-50/50">Password</TableHead>
+                  <TableHead className="w-[120px] border-r bg-green-50 sticky top-[36px] z-30">Mail</TableHead>
+                  <TableHead className="w-[120px] border-r bg-green-50 sticky top-[36px] z-30">Password</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
