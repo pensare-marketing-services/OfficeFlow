@@ -141,7 +141,7 @@ export default function WebsiteListingPage() {
                 <Globe className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg font-headline">Website Director</CardTitle>
+                <CardTitle className="text-lg font-headline">Website Directory</CardTitle>
                 <CardDescription className="text-[10px]">Manage all client web properties and credentials.</CardDescription>
               </div>
             </div>

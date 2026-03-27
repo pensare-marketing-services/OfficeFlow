@@ -458,12 +458,12 @@ const DailyTaskTable: React.FC<{
       return (
         <div className="border rounded-lg overflow-hidden" ref={tableRef}>
             <div className="overflow-auto relative" style={{ height: 'calc(100vh - 150px)' }}>
-                <Table className="text-[10px] border-collapse min-w-full table-fixed">
-                    <TableHeader className="sticky top-0 bg-background z-30 shadow-sm">
-                        <TableRow className="h-6">
-                            <TableHead className='border-r p-1 w-[10px] sticky left-0 bg-background z-40'>Sl.</TableHead>
-                            <TableHead className='border-r p-1 w-[80px] sticky left-[30px] bg-background z-40'>Client</TableHead>
-                            <TableHead className='border-r p-0 w-[80px] sticky left-[100px] bg-background z-40'>
+                <table className="w-full text-[10px] border-collapse min-w-full table-fixed">
+                    <thead className="sticky top-0 z-30 shadow-sm">
+                        <tr className="h-6">
+                            <th className='border-r border-b p-1 w-[40px] sticky left-0 top-0 bg-background z-50 text-muted-foreground font-medium text-left'>Sl.</th>
+                            <th className='border-r border-b p-1 w-[150px] sticky left-[40px] top-0 bg-background z-50 text-muted-foreground font-medium text-left'>Client</th>
+                            <th className='border-r border-b p-0 w-[100px] sticky left-[190px] top-0 bg-background z-50 text-muted-foreground font-medium text-left'>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" size="sm" className="h-full w-full justify-between font-semibold text-[10px] p-1 rounded-none border-0">
@@ -483,12 +483,12 @@ const DailyTaskTable: React.FC<{
                                         ))}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
-                            </TableHead>
+                            </th>
                             {displayedEmployees.map((employee) => (
                                 <React.Fragment key={employee.id}>
-                                    <TableHead
+                                    <th
                                         style={{ width: `${employeeColWidth}px` }}
-                                        className="bg-muted/80 border-r p-0"
+                                        className="sticky top-0 bg-muted border-r border-b p-0 z-30 text-muted-foreground font-medium"
                                     >
                                         <div className="h-full w-full flex items-center justify-center px-1">
                                             {onViewEmployee ? (
@@ -503,18 +503,18 @@ const DailyTaskTable: React.FC<{
                                                 <span className="truncate">{employee.nickname || employee.username}</span>
                                             )}
                                         </div>
-                                    </TableHead>
-                                    <TableHead
+                                    </th>
+                                    <th
                                         style={{ width: `${orderColWidth}px` }}
-                                        className="bg-muted/80 border-r p-0 text-center"
+                                        className="sticky top-0 bg-muted border-r border-b p-0 text-center z-30 text-muted-foreground font-medium"
                                     >
                                         O
-                                    </TableHead>
+                                    </th>
                                 </React.Fragment>
                             ))}
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-background">
                         {seoWebClients.map((client, clientIndex) => {
                             const assignedEmployees = (client.employeeIds || [])
                                 .map((id) => {
@@ -539,26 +539,26 @@ const DailyTaskTable: React.FC<{
                             return (
                                 <React.Fragment key={client.id}>
                                     {Array.from({ length: maxTasks }).map((_, rowIndex) => (
-                                        <TableRow
+                                        <tr
                                             key={`${client.id}-${rowIndex}`}
-                                            className={cn('hover:bg-muted/30', selectedClientId === client.id && 'bg-accent/20')}
+                                            className={cn('hover:bg-muted/30 border-b', selectedClientId === client.id && 'bg-accent/20')}
                                             onClick={() => setSelectedClientId(client.id)}
                                         >
                                             {rowIndex === 0 && (
                                                 <>
-                                                    <TableCell rowSpan={maxTasks} className="border-r align-middle text-center sticky left-0 bg-background z-20">
+                                                    <td rowSpan={maxTasks} className="border-r border-b align-middle text-center sticky left-0 bg-background z-20">
                                                         {clientIndex + 1}
-                                                    </TableCell>
-                                                    <TableCell
+                                                    </td>
+                                                    <td
                                                         rowSpan={maxTasks}
-                                                        className={cn("border-r align-middle px-1 sticky left-[30px] bg-background z-20", isHighlighted && "bg-yellow-200")}
+                                                        className={cn("border-r border-b align-middle px-1 sticky left-[40px] bg-background z-20", isHighlighted && "bg-yellow-200")}
                                                         onDoubleClick={() => toggleHighlight(client.id)}
                                                     >
                                                         <span className="truncate">{client.name}</span>
-                                                    </TableCell>
-                                                    <TableCell rowSpan={maxTasks} className="border-r align-middle px-1 sticky left-[150px] bg-background z-20">
+                                                    </td>
+                                                    <td rowSpan={maxTasks} className="border-r border-b align-middle px-1 sticky left-[190px] bg-background z-20">
                                                         <span className="truncate">{assignedEmployees}</span>
-                                                    </TableCell>
+                                                    </td>
                                                 </>
                                             )}
                                             
@@ -573,22 +573,22 @@ const DailyTaskTable: React.FC<{
                                                 
                                                 return (
                                                     <React.Fragment key={employee.id}>
-                                                        <TableCell className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
-                                                            {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} isOverdue={isOverdue} /> : <div className='h-6 border-b'></div>}
-                                                        </TableCell>
-                                                        <TableCell className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
-                                                            {task ? <PriorityDisplayItem task={task} employeeId={employee.id} /> : <div className='h-6 border-b'></div>}
-                                                        </TableCell>
+                                                        <td className="p-0 border-r align-top" style={{ width: `${employeeColWidth}px` }}>
+                                                            {task ? <TaskDisplayItem task={task} isSelected={selectedClientId === client.id} isOverdue={isOverdue} /> : <div className='h-6'></div>}
+                                                        </td>
+                                                        <td className="p-0 border-r align-top" style={{ width: `${orderColWidth}px` }}>
+                                                            {task ? <PriorityDisplayItem task={task} employeeId={employee.id} /> : <div className='h-6'></div>}
+                                                        </td>
                                                     </React.Fragment>
                                                 );
                                             })}
-                                        </TableRow>
+                                        </tr>
                                     ))}
                                 </React.Fragment>
                             );
                         })}
-                    </TableBody>
-                </Table>
+                    </tbody>
+                </table>
             </div>
         </div>
       );
