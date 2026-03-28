@@ -168,8 +168,8 @@ export default function WebsiteListingPage() {
             className="overflow-auto h-full border-t relative scrollbar-thin scrollbar-thumb-muted-foreground/20"
           >
             <table className="w-max min-w-full text-[10px] border-collapse table-fixed">
-              <thead>
-                {/* First header row - Sticky at top-0 */}
+              <thead className="sticky top-0 z-50">
+                {/* First header row */}
                 <tr className="h-8">
                   <th rowSpan={2} className="sticky top-0 z-40 w-[40px] text-center border-r border-b bg-muted px-2 font-medium">Sl.</th>
                   <th rowSpan={2} className="sticky top-0 z-40 w-[100px] border-r border-b bg-muted px-2 font-medium text-left">Client</th>
@@ -197,7 +197,7 @@ export default function WebsiteListingPage() {
                   
                   <th rowSpan={2} className="sticky top-0 z-40 w-[40px] text-center border-b bg-muted px-2 font-medium">Actions</th>
                 </tr>
-                {/* Second header row - Sticky at top-8 (32px) */}
+                {/* Second header row */}
                 <tr className="h-8">
                   <th className="sticky top-8 z-30 w-[120px] border-r border-b bg-yellow-50 text-yellow-800 px-2 font-medium text-left">DB Name</th>
                   <th className="sticky top-8 z-30 w-[120px] border-r border-b bg-yellow-50 text-yellow-800 px-2 font-medium text-left">DB User</th>

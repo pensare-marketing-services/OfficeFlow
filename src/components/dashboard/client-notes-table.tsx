@@ -32,11 +32,6 @@ const statusColors: Record<string, string> = {
     "Approved": "bg-green-500",
     "Done": "bg-cyan-500",
     "On Hold": "bg-blue-500",
-    // Compatibility for legacy values
-    "Schedule": "bg-transparent border",
-    "On Work": "bg-orange-500",
-    "Hold": "bg-blue-500",
-    "Pending": "bg-transparent border",
 };
 
 interface ClientNotesTableProps {
@@ -120,7 +115,7 @@ export default function ClientNotesTable({ notes, onUpdate }: ClientNotesTablePr
   };
   
   const handleNewRemark = (e: React.KeyboardEvent<HTMLTextAreaElement>, noteIndex: number) => {
-        if (e.key === 'Enter' && !e.shiftKey && currentUser) {
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             const text = noteInput.trim();
             if(text){

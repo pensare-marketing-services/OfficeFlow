@@ -320,7 +320,7 @@ export default function EmployeeMasterView({ tasks, users, clients, onViewEmploy
             </div>
         </div>
         
-        <div>
+        <div className="relative">
             <DailyTaskTable 
                 tasks={tasksForSelectedDay}
                 users={users}

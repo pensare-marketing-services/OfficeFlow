@@ -319,7 +319,7 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients, onView
             </div>
         </div>
         
-        <div>
+        <div className="relative">
             <DailyTaskTable 
                 tasks={tasksForSelectedDay}
                 users={users}
