@@ -5,7 +5,7 @@ import type { WebsiteEntry } from '@/lib/data';
 
 /**
  * Generates a comprehensive PDF report of the Website Directory.
- * Uses A3 landscape format to accommodate the many credential columns.
+ * Includes all data columns and uses A3 landscape format.
  */
 export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
     const doc = new jsPDF({
@@ -14,50 +14,68 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
         format: 'a3'
     });
 
-    const title = "Website Directory & Credentials Report";
+    const title = "Website Directory & Credentials Master Report";
     const date = format(new Date(), 'PPP');
 
     // --- Header ---
-    doc.setFontSize(22);
+    doc.setFontSize(24);
     doc.setTextColor(40);
     doc.text(title, 14, 20);
     
-    doc.setFontSize(10);
+    doc.setFontSize(11);
     doc.setTextColor(100);
-    doc.text(`Total Entries: ${entries.length} | Generated on: ${date}`, 14, 28);
+    doc.text(`Total Records: ${entries.length} | Generated on: ${date}`, 14, 28);
 
-    // --- Table Definition ---
-    // We select the most critical columns for the directory view
+    // --- Multi-Row Headers for PDF ---
     const headers = [
         [
-            'Sl.', 
-            'Client', 
-            'Domain Name', 
-            'Platform', 
-            'Domain Expiry', 
-            'Hosting Expiry', 
-            'Admin Panel', 
-            'WP User', 
-            'WP Pass', 
-            'DB User', 
-            'DB Pass', 
-            'Webmail', 
-            'Mail Pass'
+            { content: 'Sl.', rowSpan: 2 },
+            { content: 'Client Info', colSpan: 4, styles: { halign: 'center' } },
+            { content: 'Domain & Hosting Details', colSpan: 8, styles: { halign: 'center' } },
+            { content: 'Access Credentials', colSpan: 4, styles: { halign: 'center' } },
+            { content: 'DB Credentials', colSpan: 3, styles: { halign: 'center', fillColor: [250, 240, 180], textColor: [100, 80, 0] } },
+            { content: 'WordPress', colSpan: 2, styles: { halign: 'center', fillColor: [210, 230, 255], textColor: [0, 50, 150] } },
+            { content: 'Webmail', colSpan: 2, styles: { halign: 'center', fillColor: [220, 250, 230], textColor: [0, 80, 40] } }
+        ],
+        [
+            'Client', 'Address', 'Contact', 'Phone', // Client Info
+            'Domain Name', 'Domain A/c', 'Domain E-mail', 'Buyer', 'Dom Exp', 'Host Exp', 'Hoster', 'Remarks', // Domain/Hosting
+            'Platform', 'Theme', 'Admin Link', 'Admin User', // Access
+            'Name', 'User', 'Pass', // DB
+            'User', 'Pass', // WP
+            'Mail', 'Pass'  // Webmail
         ]
     ];
 
     const body = entries.map((site, index) => [
         index + 1,
+        // Client Info
         site.clientName || '-',
+        site.address || '-',
+        site.contactPerson || '-',
+        site.contactNo || '-',
+        // Domain & Hosting
         site.domainName || '-',
-        site.platform || '-',
+        site.domainAccount || '-',
+        site.domainEmail || '-',
+        site.purchasedBy || '-',
         site.domainExpiry || '-',
         site.hostingExpiry || '-',
+        site.hostingCompany || '-',
+        site.hostRemarks || '-',
+        // Access
+        site.platform || '-',
+        site.themeLink || '-',
         site.adminPanelLink || '-',
-        site.wpUser || '-',
-        site.wpPassword || '-',
+        site.adminPanelName || '-',
+        // DB
+        site.dbName || '-',
         site.dbUser || '-',
         site.dbPassword || '-',
+        // WP
+        site.wpUser || '-',
+        site.wpPassword || '-',
+        // Webmail
         site.webmailUser || '-',
         site.webmailPassword || '-'
     ]);
@@ -68,31 +86,31 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
         body: body,
         theme: 'grid',
         styles: { 
-            fontSize: 8, 
-            cellPadding: 3,
+            fontSize: 6, 
+            cellPadding: 2,
             overflow: 'linebreak',
-            halign: 'left'
+            lineWidth: 0.1,
+            lineColor: [200, 200, 200]
         },
         headStyles: { 
-            fillColor: [33, 37, 41], 
+            fillColor: [40, 40, 40], 
             textColor: 255, 
             fontStyle: 'bold',
-            halign: 'center'
+            halign: 'left',
+            valign: 'middle'
         },
         columnStyles: {
-            0: { cellWidth: 12, halign: 'center' }, // Sl.
-            1: { cellWidth: 35 }, // Client
-            2: { cellWidth: 45 }, // Domain
-            3: { cellWidth: 25 }, // Platform
-            4: { cellWidth: 25 }, // Domain Exp
-            5: { cellWidth: 25 }, // Hosting Exp
-            6: { cellWidth: 40 }, // Admin Link
-            // Credentials use standard widths
+            0: { cellWidth: 8, halign: 'center' }, // Sl.
+            1: { cellWidth: 25 }, // Client
+            5: { cellWidth: 35 }, // Domain Name
+            12: { cellWidth: 30 }, // Host Remarks
+            15: { cellWidth: 35 }, // Admin Link
         },
         alternateRowStyles: {
-            fillColor: [245, 245, 245]
+            fillColor: [250, 250, 250]
         },
-        margin: { left: 14, right: 14 }
+        margin: { left: 10, right: 10 },
+        tableWidth: 'auto'
     });
 
     // --- Footer ---
@@ -102,7 +120,7 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
         doc.setFontSize(8);
         doc.setTextColor(150);
         doc.text(
-            `Page ${i} of ${pageCount} - OfficeFlow Website Directory`,
+            `OfficeFlow Master Website Directory - Page ${i} of ${pageCount}`,
             doc.internal.pageSize.getWidth() / 2,
             doc.internal.pageSize.getHeight() - 10,
             { align: 'center' }
