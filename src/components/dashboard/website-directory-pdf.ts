@@ -8,7 +8,7 @@ import type { WebsiteEntry } from '@/lib/data';
  * Includes all 26 data columns and uses A2 landscape format for maximum readability.
  */
 export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
-    // Using A2 landscape to provide enough horizontal space for 26 columns
+    // Using A2 landscape to provide enough horizontal space for 26 columns (594mm x 420mm)
     const doc = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
@@ -95,12 +95,13 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
         body: body,
         theme: 'grid',
         styles: { 
-            fontSize: 8, // Increased font size for A2
-            cellPadding: 3,
+            fontSize: 8, 
+            cellPadding: 2,
             overflow: 'linebreak',
             lineWidth: 0.1,
             lineColor: [200, 200, 200],
-            valign: 'middle'
+            valign: 'middle',
+            minCellWidth: 15 // Prevents vertical text by enforcing minimum width
         },
         headStyles: { 
             fillColor: [40, 40, 40], 
@@ -109,13 +110,26 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
             halign: 'left'
         },
         columnStyles: {
-            0: { cellWidth: 12, halign: 'center' }, // Sl.
+            0: { cellWidth: 10, halign: 'center' }, // Sl.
             1: { cellWidth: 35 }, // Client
-            2: { cellWidth: 50 }, // Address
-            5: { cellWidth: 45 }, // Domain Name
-            12: { cellWidth: 50 }, // Host Remarks
-            14: { cellWidth: 45 }, // Theme Link
-            15: { cellWidth: 45 }, // Admin Link
+            2: { cellWidth: 45 }, // Address
+            3: { cellWidth: 25 }, // Contact
+            4: { cellWidth: 25 }, // Phone
+            5: { cellWidth: 40 }, // Domain Name
+            6: { cellWidth: 25 }, // Domain A/c
+            7: { cellWidth: 35 }, // Domain Email
+            8: { cellWidth: 25 }, // Buyer
+            9: { cellWidth: 22 }, // Dom Exp
+            10: { cellWidth: 22 }, // Host Exp
+            11: { cellWidth: 30 }, // Hoster
+            12: { cellWidth: 45 }, // Remarks
+            13: { cellWidth: 20 }, // Platform
+            14: { cellWidth: 40 }, // Theme Link
+            15: { cellWidth: 40 }, // Admin Link
+            16: { cellWidth: 25 }, // Admin User
+            17: { cellWidth: 25 }, // Panel Pass
+            18: { cellWidth: 25 }, // Done By
+            // DB, WP, Webmail use default min width logic effectively here
         },
         alternateRowStyles: {
             fillColor: [250, 250, 250]
