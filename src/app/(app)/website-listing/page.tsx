@@ -4,12 +4,14 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, Trash2, ExternalLink, Globe, Loader2 } from 'lucide-react';
+import { Search, Plus, Trash2, ExternalLink, Globe, Loader2, Download } from 'lucide-react';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { WebsiteEntry } from '@/lib/data';
+import { generateWebsiteDirectoryPDF } from '@/components/dashboard/website-directory-pdf';
+import { saveAs } from 'file-saver';
 
 const EditableCell: React.FC<{
   value: string;
@@ -52,6 +54,7 @@ export default function WebsiteListingPage() {
   const [websites, setWebsites] = useState<WebsiteEntry[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
@@ -125,6 +128,25 @@ export default function WebsiteListingPage() {
     );
   }, [websites, search]);
 
+  const handleDownloadPDF = async () => {
+    if (filteredWebsites.length === 0) {
+      toast({ variant: 'destructive', title: 'No Data', description: 'There are no website entries to download.' });
+      return;
+    }
+
+    setIsDownloading(true);
+    try {
+      const blob = generateWebsiteDirectoryPDF(filteredWebsites);
+      saveAs(blob, `Website_Directory_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast({ title: 'Download Started', description: 'Your website directory PDF is being generated.' });
+    } catch (error) {
+      console.error("PDF Export error:", error);
+      toast({ variant: 'destructive', title: 'Export Failed', description: 'Could not generate the PDF report.' });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const openLink = (url: string) => {
     if (!url) return;
     const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
@@ -132,7 +154,7 @@ export default function WebsiteListingPage() {
   };
 
   return (
-    <div className="space-y-4 h-[calc(100vh-6rem)]">
+    <div className="space-y-4 h-[calc(100vh-6rem)] relative">
       <Card className="h-full flex flex-col">
         <CardHeader className="p-2 shrink-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -359,6 +381,19 @@ export default function WebsiteListingPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Floating Download Button */}
+      <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
+        <Button
+          size="icon"
+          className="h-14 w-14 rounded-full shadow-lg"
+          onClick={handleDownloadPDF}
+          disabled={loading || isDownloading}
+          aria-label="Download Directory"
+        >
+          {isDownloading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Download className="h-6 w-6" />}
+        </Button>
+      </div>
     </div>
   );
 }

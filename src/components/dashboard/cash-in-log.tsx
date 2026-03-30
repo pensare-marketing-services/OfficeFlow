@@ -96,8 +96,8 @@ export default function CashInLog({ clientId, transactions, totalCashIn, activeM
                  <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[80px] text-[10px]">Date</TableHead>
-                            <TableHead className="w-[90px] text-[10px]">Status</TableHead>
+                            <TableHead className="w-[110px] text-[10px]">Date</TableHead>
+                            <TableHead className="w-[120px] text-[10px]">Status</TableHead>
                             <TableHead className="text-[10px]">Remark</TableHead>
                             <TableHead className="w-[80px] text-right text-[10px]">Amount</TableHead>
                             <TableHead className="w-[40px] text-[10px]"></TableHead>
