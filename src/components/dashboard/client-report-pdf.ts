@@ -1,4 +1,4 @@
-import jsPDF from 'jsPDF';
+import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import type { Client, MonthData, Task, CashInTransaction, PaidPromotion } from '@/lib/data';
@@ -123,7 +123,7 @@ export const generateClientReportPDF = (data: ReportData): Blob => {
     const gst = totalSpent * 0.18;
     const grandTotal = totalSpent + gst;
     const totalCashIn = cashIn.reduce((acc, t) => acc + Number(t.amount || 0), 0);
-    const oldBalance = client.paidPromotionsOldBalance || 0;
+    const oldBalance = monthData.paidPromotionsOldBalance || 0;
     const balance = (totalCashIn + oldBalance) - grandTotal;
 
     addTable(
