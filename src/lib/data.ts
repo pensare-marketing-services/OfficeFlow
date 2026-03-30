@@ -113,6 +113,7 @@ export type CashInTransaction = {
     amount: number;
     status: CashInTransactionStatus;
     month?: string;
+    remark?: string;
 }
 
 export type BillStatus = "Issued" | "Paid" | "Partially" | "Overdue" | "Cancelled";

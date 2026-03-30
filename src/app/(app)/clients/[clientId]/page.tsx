@@ -804,8 +804,8 @@ export default function ClientIdPage() {
             const balance = (totalCashIn + oldBalanceVal) - grandTotal;
             const cashInBlob = await createReportImage(
                 'Paid Ads - Budget',
-                ['Date', 'Amount', 'Status'],
-                cashInTransactions.map(t => [format(new Date(t.date), 'MMM dd, yyyy'), t.amount.toFixed(2), t.status]),
+                ['Date', 'Amount', 'Status', 'Remark'],
+                cashInTransactions.map(t => [format(new Date(t.date), 'MMM dd, yyyy'), t.amount.toFixed(2), t.status, t.remark || '-']),
                 [
                     { label: 'Total Spent', value: totalSpent.toFixed(2) },
                     { label: 'Old Balance', value: oldBalanceVal.toFixed(2) },

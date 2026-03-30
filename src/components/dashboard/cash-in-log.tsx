@@ -9,7 +9,7 @@ import { Plus, Trash2, CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, capitalizeSentences } from '@/lib/utils';
 import { collection, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { Separator } from '../ui/separator';
@@ -25,9 +25,44 @@ interface CashInLogProps {
 
 const statuses: CashInTransactionStatus[] = ['Received', 'Not Received'];
 
+const EditableRemarkCell: React.FC<{ value: string; onSave: (value: string) => void }> = ({ value, onSave }) => {
+    const [currentValue, setCurrentValue] = React.useState(value || '');
+
+    React.useEffect(() => {
+        setCurrentValue(value || '');
+    }, [value]);
+
+    const handleBlur = () => {
+        const formatted = capitalizeSentences(currentValue);
+        if (formatted !== value) {
+            onSave(formatted);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            const formatted = capitalizeSentences(currentValue);
+            onSave(formatted);
+            e.currentTarget.blur();
+        }
+    };
+
+    return (
+        <Input
+            value={currentValue}
+            onChange={(e) => setCurrentValue(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            placeholder="Remark"
+            className="h-7 text-[10px] p-1 border-transparent hover:border-border focus:border-ring bg-transparent"
+        />
+    );
+};
+
 export default function CashInLog({ clientId, transactions, totalCashIn, activeMonth }: CashInLogProps) {
     const [newDate, setNewDate] = React.useState<Date | undefined>(new Date());
     const [newAmount, setNewAmount] = React.useState<number | ''>('');
+    const [newRemark, setNewRemark] = React.useState('');
     const [openPopover, setOpenPopover] = React.useState(false);
 
 
@@ -39,19 +74,17 @@ export default function CashInLog({ clientId, transactions, totalCashIn, activeM
             amount: Number(newAmount),
             status: 'Not Received',
             month: activeMonth,
+            remark: capitalizeSentences(newRemark),
         };
         await addDoc(collection(db, `clients/${clientId}/cashInTransactions`), newTransaction);
         setNewDate(new Date());
         setNewAmount('');
+        setNewRemark('');
     };
 
     const handleTransactionChange = async (id: string, field: keyof CashInTransaction, value: any) => {
         const transactionRef = doc(db, `clients/${clientId}/cashInTransactions`, id);
         await updateDoc(transactionRef, { [field]: value });
-    };
-
-    const deleteTransaction = async (id: string) => {
-        await deleteDoc(doc(db, `clients/${clientId}/cashInTransactions`, id));
     };
 
     return (
@@ -63,9 +96,10 @@ export default function CashInLog({ clientId, transactions, totalCashIn, activeM
                  <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[100px] text-[10px]">Date</TableHead>
-                            <TableHead className="w-[120px] text-[10px]">Status</TableHead>
-                            <TableHead className="text-right text-[10px]">Amount</TableHead>
+                            <TableHead className="w-[80px] text-[10px]">Date</TableHead>
+                            <TableHead className="w-[90px] text-[10px]">Status</TableHead>
+                            <TableHead className="text-[10px]">Remark</TableHead>
+                            <TableHead className="w-[80px] text-right text-[10px]">Amount</TableHead>
                             <TableHead className="w-[40px] text-[10px]"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -83,9 +117,15 @@ export default function CashInLog({ clientId, transactions, totalCashIn, activeM
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
+                                <TableCell className="p-0">
+                                    <EditableRemarkCell 
+                                        value={t.remark || ''} 
+                                        onSave={(val) => handleTransactionChange(t.id, 'remark', val)} 
+                                    />
+                                </TableCell>
                                 <TableCell className="py-1 px-2 text-[10px] text-right font-medium">{t.amount.toFixed(2)}</TableCell>
                                 <TableCell className="p-0 text-center">
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteTransaction(t.id)}>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteDoc(doc(db, `clients/${clientId}/cashInTransactions`, t.id))}>
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </TableCell>
@@ -93,7 +133,7 @@ export default function CashInLog({ clientId, transactions, totalCashIn, activeM
                         ))}
                         {transactions.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                                     No cash-in for this month.
                                 </TableCell>
                             </TableRow>
@@ -103,40 +143,48 @@ export default function CashInLog({ clientId, transactions, totalCashIn, activeM
             </CardContent>
             <CardFooter className="p-3 flex-col items-stretch gap-2">
                  <Separator className="my-1" />
-                 <div className="flex items-center gap-2">
-                    <Popover open={openPopover} onOpenChange={setOpenPopover}>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant={'outline'}
-                                size="sm"
-                                className={cn('w-[150px] justify-start text-left font-normal h-8 text-[10px]', !newDate && 'text-muted-foreground')}
-                            >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {newDate ? format(newDate, 'MMM dd, yyyy') : <span>Pick a date</span>}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                            <Calendar
-                                mode="single"
-                                selected={newDate}
-                                onSelect={(date) => {
-                                    setNewDate(date);
-                                    setOpenPopover(false);
-                                }}
-                                initialFocus
-                            />
-                        </PopoverContent>
-                    </Popover>
-                    <Input 
-                        type="number"
-                        placeholder="Amount"
-                        value={newAmount}
-                        onChange={(e) => setNewAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                        className="h-8 text-[10px] placeholder:text-[10px]"
-                    />
-                    <Button size="sm" className="h-8" onClick={addTransaction} disabled={!newDate || newAmount === '' || Number(newAmount) <= 0}>
-                        <Plus className="h-4 w-4" />
-                    </Button>
+                 <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <Popover open={openPopover} onOpenChange={setOpenPopover}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={'outline'}
+                                    size="sm"
+                                    className={cn('w-[130px] justify-start text-left font-normal h-8 text-[10px]', !newDate && 'text-muted-foreground')}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {newDate ? format(newDate, 'MMM dd, yyyy') : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={newDate}
+                                    onSelect={(date) => {
+                                        setNewDate(date);
+                                        setOpenPopover(false);
+                                    }}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                        <Input 
+                            type="number"
+                            placeholder="Amount"
+                            value={newAmount}
+                            onChange={(e) => setNewAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                            className="h-8 w-24 text-[10px] placeholder:text-[10px]"
+                        />
+                        <Input 
+                            placeholder="Add Remark"
+                            value={newRemark}
+                            onChange={(e) => setNewRemark(e.target.value)}
+                            className="h-8 flex-1 text-[10px] placeholder:text-[10px]"
+                        />
+                        <Button size="sm" className="h-8" onClick={addTransaction} disabled={!newDate || newAmount === '' || Number(newAmount) <= 0}>
+                            <Plus className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
                 <Separator className="my-1" />
                  <div className="flex justify-between items-center p-2 bg-muted rounded-md">

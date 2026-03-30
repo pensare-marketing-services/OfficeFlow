@@ -1,5 +1,4 @@
-
-import jsPDF from 'jspdf';
+import jsPDF from 'jsPDF';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import type { Client, MonthData, Task, CashInTransaction, PaidPromotion } from '@/lib/data';
@@ -129,15 +128,15 @@ export const generateClientReportPDF = (data: ReportData): Blob => {
 
     addTable(
         'Paid Ads - Budget',
-        [['Date', 'Amount', 'Status']],
-        cashIn.length > 0 ? cashIn.map(t => [format(new Date(t.date), 'MMM dd, yyyy'), t.amount.toFixed(2), t.status]) : [['-', '-', '-']],
+        [['Date', 'Amount', 'Status', 'Remark']],
+        cashIn.length > 0 ? cashIn.map(t => [format(new Date(t.date), 'MMM dd, yyyy'), t.amount.toFixed(2), t.status, t.remark || '-']) : [['-', '-', '-', '-']],
         [
-            ['Total Spent', '', totalSpent.toFixed(2)],
-            ['Old Balance', '', oldBalance.toFixed(2)],
-            ['GST 18%', '', gst.toFixed(2)],
-            ['Grand Total', '', grandTotal.toFixed(2)],
-            ['Total Cash In', '', totalCashIn.toFixed(2)],
-            ['Balance', '', balance.toFixed(2)],
+            ['Total Spent', '', '', totalSpent.toFixed(2)],
+            ['Old Balance', '', '', oldBalance.toFixed(2)],
+            ['GST 18%', '', '', gst.toFixed(2)],
+            ['Grand Total', '', '', grandTotal.toFixed(2)],
+            ['Total Cash In', '', '', totalCashIn.toFixed(2)],
+            ['Balance', '', '', balance.toFixed(2)],
         ]
     );
     
