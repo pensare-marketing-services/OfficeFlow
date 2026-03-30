@@ -15,7 +15,7 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
         format: 'a2'
     });
 
-    const title = "Website Directory & Credentials Master Report";
+    const title = "Website Credentials Report";
     const date = format(new Date(), 'PPP');
 
     // --- Header ---
@@ -28,15 +28,16 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
     doc.text(`Total Records: ${entries.length} | Generated on: ${date}`, 14, 35);
 
     // --- Multi-Row Headers for PDF ---
-    const headers = [
+    // Using any[] here to bypass complex jspdf-autotable nested type issues with rowSpan/colSpan
+    const headers: any[][] = [
         [
-            { content: 'Sl.', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
-            { content: 'Client Info', colSpan: 4, styles: { halign: 'center', fillColor: [60, 60, 60] } },
-            { content: 'Domain & Hosting Details', colSpan: 8, styles: { halign: 'center', fillColor: [80, 80, 80] } },
-            { content: 'Access Credentials', colSpan: 6, styles: { halign: 'center', fillColor: [100, 100, 100] } },
-            { content: 'DB Credentials', colSpan: 3, styles: { halign: 'center', fillColor: [250, 240, 180], textColor: [100, 80, 0] } },
-            { content: 'WordPress', colSpan: 2, styles: { halign: 'center', fillColor: [210, 230, 255], textColor: [0, 50, 150] } },
-            { content: 'Webmail', colSpan: 2, styles: { halign: 'center', fillColor: [220, 250, 230], textColor: [0, 80, 40] } }
+            { content: 'Sl.', rowSpan: 2, styles: { halign: 'center' as const, valign: 'middle' as const } },
+            { content: 'Client Info', colSpan: 4, styles: { halign: 'center' as const, fillColor: [60, 60, 60] } },
+            { content: 'Domain & Hosting Details', colSpan: 8, styles: { halign: 'center' as const, fillColor: [80, 80, 80] } },
+            { content: 'Access Credentials', colSpan: 6, styles: { halign: 'center' as const, fillColor: [100, 100, 100] } },
+            { content: 'DB Credentials', colSpan: 3, styles: { halign: 'center' as const, fillColor: [250, 240, 180], textColor: [100, 80, 0] } },
+            { content: 'WordPress', colSpan: 2, styles: { halign: 'center' as const, fillColor: [210, 230, 255], textColor: [0, 50, 150] } },
+            { content: 'Webmail', colSpan: 2, styles: { halign: 'center' as const, fillColor: [220, 250, 230], textColor: [0, 80, 40] } }
         ],
         [
             // Client Info
@@ -95,54 +96,54 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
         body: body,
         theme: 'grid',
         styles: { 
-            fontSize: 7, // Reduced from 8 to help fit wide content
+            fontSize: 6,
             cellPadding: 2,
             overflow: 'linebreak',
             lineWidth: 0.1,
             lineColor: [200, 200, 200],
-            valign: 'middle',
+            valign: 'middle' as const,
             minCellWidth: 10
         },
         headStyles: { 
             fillColor: [40, 40, 40], 
             textColor: 255, 
             fontStyle: 'bold',
-            halign: 'left'
+            halign: 'left' as const
         },
-        // Recalibrated column widths to ensure sum is exactly the available width (574mm)
+        // Total usable width on A2 landscape is 574mm (594mm - 20mm margins)
         columnStyles: {
-            0: { cellWidth: 8, halign: 'center' }, // Sl.
-            1: { cellWidth: 25 }, // Client
+            0: { cellWidth: 8, halign: 'center' as const }, // Sl.
+            1: { cellWidth: 20 }, // Client
             2: { cellWidth: 35 }, // Address
-            3: { cellWidth: 20 }, // Contact
-            4: { cellWidth: 20 }, // Phone
+            3: { cellWidth: 18 }, // Contact
+            4: { cellWidth: 22 }, // Phone
             5: { cellWidth: 35 }, // Domain Name
-            6: { cellWidth: 20 }, // Domain A/c
-            7: { cellWidth: 30 }, // Domain Email
-            8: { cellWidth: 20 }, // Buyer
+            6: { cellWidth: 22 }, // Domain A/c
+            7: { cellWidth: 35 }, // Domain Email
+            8: { cellWidth: 18 }, // Buyer
             9: { cellWidth: 18 }, // Dom Exp
             10: { cellWidth: 18 }, // Host Exp
             11: { cellWidth: 25 }, // Hoster
             12: { cellWidth: 35 }, // Remarks
-            13: { cellWidth: 15 }, // Platform
-            14: { cellWidth: 35 }, // Theme Link
-            15: { cellWidth: 35 }, // Admin Link
-            16: { cellWidth: 20 }, // Admin User
-            17: { cellWidth: 20 }, // Panel Pass
-            18: { cellWidth: 20 }, // Done By
-            19: { cellWidth: 20 }, // DB Name
-            20: { cellWidth: 20 }, // DB User
-            21: { cellWidth: 20 }, // DB Pass
-            22: { cellWidth: 20 }, // WP User
-            23: { cellWidth: 20 }, // WP Pass
-            24: { cellWidth: 20 }, // Webmail User
-            25: { cellWidth: 20 }  // Webmail Pass
+            13: { cellWidth: 12 }, // Platform
+            14: { cellWidth: 25 }, // Theme Link
+            15: { cellWidth: 25 }, // Admin Link
+            16: { cellWidth: 18 }, // Admin User
+            17: { cellWidth: 18 }, // Panel Pass
+            18: { cellWidth: 18 }, // Done By
+            19: { cellWidth: 22 }, // DB Name
+            20: { cellWidth: 22 }, // DB User
+            21: { cellWidth: 22 }, // DB Pass
+            22: { cellWidth: 22 }, // WP User
+            23: { cellWidth: 22 }, // WP Pass
+            24: { cellWidth: 22 }, // Webmail User
+            25: { cellWidth: 22 }  // Webmail Pass
         },
         alternateRowStyles: {
             fillColor: [250, 250, 250]
         },
         margin: { left: 10, right: 10 },
-        tableWidth: 574 // Exactly 594mm (A2 width) minus 20mm margins
+        tableWidth: 574 
     });
 
     // --- Footer ---
@@ -155,7 +156,7 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
             `OfficeFlow Master Website Directory - Page ${i} of ${pageCount}`,
             doc.internal.pageSize.getWidth() / 2,
             doc.internal.pageSize.getHeight() - 10,
-            { align: 'center' }
+            { align: 'center' as const }
         );
     }
 
