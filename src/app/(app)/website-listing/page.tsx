@@ -198,7 +198,7 @@ export default function WebsiteListingPage() {
                   <th rowSpan={2} className="sticky top-0 z-40 w-[150px] border-r border-b bg-muted px-2 font-medium text-left">Address</th>
                   <th rowSpan={2} className="sticky top-0 z-40 w-[80px] border-r border-b bg-muted px-2 font-medium text-left">Contact</th>
                   <th rowSpan={2} className="sticky top-0 z-40 w-[80px] border-r border-b bg-muted px-2 font-medium text-left">Contact No</th>
-                  <th rowSpan={2} className="sticky top-0 z-40 w-[120px] border-r border-b bg-muted px-2 font-medium text-left">Domain Name</th>
+                  <th rowSpan={2} className="sticky top-0 z-40 w-[180px] border-r border-b bg-muted px-2 font-medium text-left">Domain Name</th>
                   <th rowSpan={2} className="sticky top-0 z-40 w-[100px] border-r border-b bg-muted px-2 font-medium text-left">Domain A/c</th>
                   <th rowSpan={2} className="sticky top-0 z-40 w-[150px] border-r border-b bg-muted px-2 font-medium text-left">Domain E-mail</th>
                   <th rowSpan={2} className="sticky top-0 z-40 w-[100px] border-r border-b bg-muted px-2 font-medium text-left">Purchased By</th>

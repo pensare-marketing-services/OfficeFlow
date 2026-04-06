@@ -28,7 +28,6 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
     doc.text(`Total Records: ${entries.length} | Generated on: ${date}`, 14, 35);
 
     // --- Multi-Row Headers for PDF ---
-    // Using any[] here to bypass complex jspdf-autotable nested type issues with rowSpan/colSpan
     const headers: any[][] = [
         [
             { content: 'Sl.', rowSpan: 2, styles: { halign: 'center' as const, valign: 'middle' as const } },
@@ -57,12 +56,10 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
 
     const body = entries.map((site, index) => [
         index + 1,
-        // Client Info
         site.clientName || '-',
         site.address || '-',
         site.contactPerson || '-',
         site.contactNo || '-',
-        // Domain & Hosting
         site.domainName || '-',
         site.domainAccount || '-',
         site.domainEmail || '-',
@@ -71,21 +68,17 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
         site.hostingExpiry || '-',
         site.hostingCompany || '-',
         site.hostRemarks || '-',
-        // Access
         site.platform || '-',
         site.themeLink || '-',
         site.adminPanelLink || '-',
         site.adminPanelName || '-',
         site.panelPassword || '-',
         site.workDoneBy || '-',
-        // DB
         site.dbName || '-',
         site.dbUser || '-',
         site.dbPassword || '-',
-        // WP
         site.wpUser || '-',
         site.wpPassword || '-',
-        // Webmail
         site.webmailUser || '-',
         site.webmailPassword || '-'
     ]);
@@ -110,34 +103,34 @@ export const generateWebsiteDirectoryPDF = (entries: WebsiteEntry[]): Blob => {
             fontStyle: 'bold',
             halign: 'left' as const
         },
-        // Total usable width on A2 landscape is 574mm (594mm - 20mm margins)
+        // Usable width: 574mm. Total of widths below: 574mm.
         columnStyles: {
-            0: { cellWidth: 8, halign: 'center' as const }, // Sl.
+            0: { cellWidth: 6, halign: 'center' as const }, // Sl.
             1: { cellWidth: 20 }, // Client
-            2: { cellWidth: 35 }, // Address
-            3: { cellWidth: 18 }, // Contact
-            4: { cellWidth: 22 }, // Phone
-            5: { cellWidth: 35 }, // Domain Name
-            6: { cellWidth: 22 }, // Domain A/c
-            7: { cellWidth: 35 }, // Domain Email
-            8: { cellWidth: 18 }, // Buyer
-            9: { cellWidth: 18 }, // Dom Exp
-            10: { cellWidth: 18 }, // Host Exp
-            11: { cellWidth: 25 }, // Hoster
-            12: { cellWidth: 35 }, // Remarks
+            2: { cellWidth: 45 }, // Address
+            3: { cellWidth: 15 }, // Contact
+            4: { cellWidth: 20 }, // Phone
+            5: { cellWidth: 45 }, // Domain Name
+            6: { cellWidth: 20 }, // Domain A/c
+            7: { cellWidth: 45 }, // Domain Email
+            8: { cellWidth: 15 }, // Buyer
+            9: { cellWidth: 15 }, // Dom Exp
+            10: { cellWidth: 15 }, // Host Exp
+            11: { cellWidth: 20 }, // Hoster
+            12: { cellWidth: 45 }, // Remarks
             13: { cellWidth: 12 }, // Platform
-            14: { cellWidth: 25 }, // Theme Link
-            15: { cellWidth: 25 }, // Admin Link
+            14: { cellWidth: 28 }, // Theme Link
+            15: { cellWidth: 28 }, // Admin Link
             16: { cellWidth: 18 }, // Admin User
             17: { cellWidth: 18 }, // Panel Pass
             18: { cellWidth: 18 }, // Done By
-            19: { cellWidth: 22 }, // DB Name
-            20: { cellWidth: 22 }, // DB User
-            21: { cellWidth: 22 }, // DB Pass
-            22: { cellWidth: 22 }, // WP User
-            23: { cellWidth: 22 }, // WP Pass
-            24: { cellWidth: 22 }, // Webmail User
-            25: { cellWidth: 22 }  // Webmail Pass
+            19: { cellWidth: 18 }, // DB Name
+            20: { cellWidth: 18 }, // DB User
+            21: { cellWidth: 18 }, // DB Pass
+            22: { cellWidth: 18 }, // WP User
+            23: { cellWidth: 18 }, // WP Pass
+            24: { cellWidth: 18 }, // Webmail User
+            25: { cellWidth: 18 }  // Webmail Pass
         },
         alternateRowStyles: {
             fillColor: [250, 250, 250]
