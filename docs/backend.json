@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -42,6 +43,10 @@
           "type": "string",
           "enum": ["digitalmarketing", "contentwriter", "designers", "videoeditor", "web", "seo"],
           "description": "The department the employee belongs to."
+        },
+        "visibleInMasterView": {
+          "type": "boolean",
+          "description": "Whether the employee should be listed in the Master View tables."
         }
       },
       "required": [

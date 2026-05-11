@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileoverview This action handles user creation securely on the backend
@@ -71,6 +72,7 @@ export async function createUser(data: CreateUserInput): Promise<{ uid: string }
     nickname: { stringValue: nickname },
     password: { stringValue: password },
     email: { stringValue: randomEmail },
+    visibleInMasterView: { booleanValue: true }, // Default to visible
   };
 
   if (department) {

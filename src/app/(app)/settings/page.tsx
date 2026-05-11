@@ -1,3 +1,4 @@
+
 'use client';
 import { useMemo, useState, useEffect } from 'react';
 import { Users, Building, Trash2, Eye, EyeOff, Pen, Settings  } from "lucide-react";
@@ -595,7 +596,7 @@ const ClientTable = ({ clients, users, loading, onUpdate, startIndex = 0 }: { cl
 };
 
 export default function SettingsPage() {
-    const { users, loading: usersLoading, error, deleteUser } = useUsers();
+    const { users, loading: usersLoading, error, deleteUser, updateUserVisibility } = useUsers();
     const { clients, loading: clientsLoading, updateClientPriority } = useClients();
     const { toast } = useToast();
 
@@ -659,16 +660,17 @@ export default function SettingsPage() {
                     <TableHead className="px-2 text-[10px] h-8">Username</TableHead>
                     <TableHead className="px-2 text-[10px] h-8">Password</TableHead>
                     <TableHead className="text-center px-2 text-[10px] h-8">Priority</TableHead>
+                    <TableHead className="text-center px-2 text-[10px] h-8">View</TableHead>
                     <TableHead className="text-right px-2 text-[10px] h-8">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
                 {usersLoading && Array.from({length: 3}).map((_, i) => (
                     <TableRow key={i}>
-                        <TableCell colSpan={6} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
+                        <TableCell colSpan={7} className="p-1"><Skeleton className="h-7 w-full" /></TableCell>
                     </TableRow>
                 ))}
-                {error && <TableRow><TableCell colSpan={6} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
+                {error && <TableRow><TableCell colSpan={7} className="text-destructive p-4">{error.message}</TableCell></TableRow>}
                 {!usersLoading && employeeList.map((employee, index) => (
                     <TableRow key={employee.id}>
                         <TableCell className="px-1 py-1 text-[10px] text-center w-[30px]">{startIndex + index + 1}</TableCell>
@@ -688,6 +690,16 @@ export default function SettingsPage() {
                         </TableCell>
                         <TableCell className="py-0 px-0">
                             <EditablePriorityCell  userId={employee.id} initialPriority={employee.priority} />
+                        </TableCell>
+                        <TableCell className="text-center p-0">
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className={cn("h-7 w-7", employee.visibleInMasterView === false ? "text-muted-foreground" : "text-primary")}
+                                onClick={() => updateUserVisibility(employee.id, employee.visibleInMasterView === false)}
+                            >
+                                {employee.visibleInMasterView === false ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                            </Button>
                         </TableCell>
                         <TableCell className="text-right px-2 py-1">
                             <AlertDialog>

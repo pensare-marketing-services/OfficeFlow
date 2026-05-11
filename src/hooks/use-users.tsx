@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
@@ -16,6 +17,7 @@ interface UserContextType {
     updateUserPassword: (userId: string, newPassword: string) => Promise<void>;
     updateUserPriority: (userId: string, newPriority: number) => Promise<void>;
     updateUserNickname: (userId: string, newNickname: string) => Promise<void>;
+    updateUserVisibility: (userId: string, isVisible: boolean) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -100,6 +102,16 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, []);
 
+    const updateUserVisibility = useCallback(async (userId: string, isVisible: boolean) => {
+        try {
+            const userDocRef = doc(db, 'users', userId);
+            await updateDoc(userDocRef, { visibleInMasterView: isVisible });
+        } catch (e: any) {
+            console.error("Error updating user visibility:", e);
+            throw new Error("Failed to update visibility. Please try again.");
+        }
+    }, []);
+
     const value = {
         users,
         loading,
@@ -108,6 +120,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updateUserPassword,
         updateUserPriority,
         updateUserNickname,
+        updateUserVisibility,
     };
 
     return (

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -186,7 +187,12 @@ export default function SeoWebEmployeeMasterView({ tasks, users, clients, onView
   const employees = useMemo(() => {
     const departmentOrder: Exclude<UserProfile['department'], undefined>[] = ['seo', 'web'];
     return users
-      .filter((u) => u.role === 'employee' && u.department && departmentOrder.includes(u.department))
+      .filter((u) => 
+        u.role === 'employee' && 
+        u.department && 
+        departmentOrder.includes(u.department) &&
+        u.visibleInMasterView !== false // Filter for visibility
+      )
       .sort((a, b) => {
         const priorityA = a.priority ?? 99;
         const priorityB = b.priority ?? 99;
