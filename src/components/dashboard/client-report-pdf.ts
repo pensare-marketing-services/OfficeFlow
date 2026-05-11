@@ -7,13 +7,15 @@ interface ReportData {
     client: Client;
     monthData: MonthData;
     dmTasks: Task[];
+    seoTasks: Task[];
+    websiteTasks: Task[];
     otherTasks: Task[];
     cashIn: (CashInTransaction & { id: string })[];
     paidPromotions: (PaidPromotion & { id: string })[];
 }
 
 export const generateClientReportPDF = (data: ReportData): Blob => {
-    const { client, monthData, dmTasks, otherTasks, cashIn, paidPromotions } = data;
+    const { client, monthData, dmTasks, seoTasks, websiteTasks, otherTasks, cashIn, paidPromotions } = data;
     const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height;
     const pageMargin = 15;
@@ -83,6 +85,34 @@ export const generateClientReportPDF = (data: ReportData): Blob => {
                 task.title,
                 task.description || '-',
                 task.contentType || '-',
+                task.status
+            ])
+        );
+    }
+
+    // SEO Tasks
+    if (seoTasks.length > 0) {
+        addTable(
+            'SEO Tasks',
+            [['Date', 'Task', 'Description', 'Status']],
+            seoTasks.map(task => [
+                format(new Date(task.deadline), 'MMM dd, yyyy'),
+                task.title,
+                task.description || '-',
+                task.status
+            ])
+        );
+    }
+
+    // Website Tasks
+    if (websiteTasks.length > 0) {
+        addTable(
+            'Website Tasks',
+            [['Date', 'Task', 'Description', 'Status']],
+            websiteTasks.map(task => [
+                format(new Date(task.deadline), 'MMM dd, yyyy'),
+                task.title,
+                task.description || '-',
                 task.status
             ])
         );

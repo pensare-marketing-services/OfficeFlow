@@ -766,7 +766,35 @@ export default function ClientIdPage() {
                 );
                 if (dmBlob) zip.file('digital-marketing-tasks.png', dmBlob);
             }
-    
+
+            if (seoTasks.length > 0) {
+                const seoBlob = await createReportImage(
+                    'SEO Tasks',
+                    ['Date', 'Task', 'Description', 'Status'],
+                    seoTasks.map(task => [
+                        format(new Date(task.deadline), 'MMM dd, yyyy'),
+                        task.title,
+                        task.description || '-',
+                        task.status
+                    ])
+                );
+                if (seoBlob) zip.file('seo-tasks.png', seoBlob);
+            }
+
+            if (websiteTasks.length > 0) {
+                const webBlob = await createReportImage(
+                    'Website Tasks',
+                    ['Date', 'Task', 'Description', 'Status'],
+                    websiteTasks.map(task => [
+                        format(new Date(task.deadline), 'MMM dd, yyyy'),
+                        task.title,
+                        task.description || '-',
+                        task.status
+                    ])
+                );
+                if (webBlob) zip.file('website-tasks.png', webBlob);
+            }
+   
             if (otherTasks.length > 0) {
                 const otherBlob = await createReportImage(
                     'Other Works',
@@ -823,6 +851,8 @@ export default function ClientIdPage() {
                 client,
                 monthData: activeMonthData,
                 dmTasks: filteredTasks,
+                seoTasks: seoTasks,
+                websiteTasks: websiteTasks,
                 otherTasks: otherTasks,
                 cashIn: cashInTransactions,
                 paidPromotions: paidPromotions,
