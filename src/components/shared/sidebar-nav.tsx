@@ -69,8 +69,8 @@ export function SidebarNav() {
     }
   };
 
-  const isWebOrSeoEmployee = user?.department === 'web' || user?.department === 'seo';
-  const canSeeHub = user?.role === 'admin' || isWebOrSeoEmployee;
+  // Restrict Hub/Website-Listing to Admin only as requested
+  const canSeeHub = user?.role === 'admin';
 
 
   return (

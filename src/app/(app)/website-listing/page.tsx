@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 import type { WebsiteEntry } from '@/lib/data';
 import { generateWebsiteDirectoryPDF } from '@/components/dashboard/website-directory-pdf';
 import { saveAs } from 'file-saver';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 const EditableCell: React.FC<{
   value: string;
@@ -51,6 +53,8 @@ const EditableCell: React.FC<{
 };
 
 export default function WebsiteListingPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [websites, setWebsites] = useState<WebsiteEntry[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -58,7 +62,16 @@ export default function WebsiteListingPage() {
   const { toast } = useToast();
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
+  // Security check: only admins can view this page
   useEffect(() => {
+    if (!authLoading && user && user.role !== 'admin') {
+      router.replace('/dashboard');
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (user?.role !== 'admin') return;
+
     const q = query(collection(db, 'websiteDirectory'), orderBy('createdAt', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as WebsiteEntry));
@@ -66,7 +79,7 @@ export default function WebsiteListingPage() {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const handleAddWebsite = async () => {
     try {
@@ -153,6 +166,14 @@ export default function WebsiteListingPage() {
     window.open(formattedUrl, '_blank');
   };
 
+  if (authLoading || (user && user.role !== 'admin')) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 h-[calc(100vh-6rem)] relative">
       <Card className="h-full flex flex-col">
@@ -191,7 +212,6 @@ export default function WebsiteListingPage() {
           >
             <table className="w-max min-w-full text-[10px] border-collapse table-fixed">
               <thead className="sticky top-0 z-50">
-                {/* First header row */}
                 <tr className="h-8">
                   <th rowSpan={2} className="sticky top-0 z-40 w-[40px] text-center border-r border-b bg-muted px-2 font-medium">Sl.</th>
                   <th rowSpan={2} className="sticky top-0 z-40 w-[100px] border-r border-b bg-muted px-2 font-medium text-left">Client</th>
@@ -212,14 +232,11 @@ export default function WebsiteListingPage() {
                   <th rowSpan={2} className="sticky top-0 z-40 w-[120px] border-r border-b bg-muted px-2 font-medium text-left">Admin Panel Name</th>
                   <th rowSpan={2} className="sticky top-0 z-40 w-[120px] border-r border-b bg-muted px-2 font-medium text-left">Panel Password</th>
                   <th rowSpan={2} className="sticky top-0 z-40 w-[120px] border-r border-b bg-muted px-2 font-medium text-left">Work Done By</th>
-                  
                   <th colSpan={3} className="sticky top-0 z-30 text-center border-r border-b bg-yellow-100 text-yellow-900 h-8 px-2 font-semibold">DB Credentials</th>
                   <th colSpan={2} className="sticky top-0 z-30 text-center border-r border-b bg-blue-100 text-blue-900 h-8 px-2 font-semibold">WordPress</th>
                   <th colSpan={2} className="sticky top-0 z-30 text-center border-r border-b bg-green-100 text-green-900 h-8 px-2 font-semibold">Webmail</th>
-                  
                   <th rowSpan={2} className="sticky top-0 z-40 w-[40px] text-center border-b bg-muted px-2 font-medium">Actions</th>
                 </tr>
-                {/* Second header row */}
                 <tr className="h-8">
                   <th className="sticky top-8 z-30 w-[120px] border-r border-b bg-yellow-50 text-yellow-800 px-2 font-medium text-left">DB Name</th>
                   <th className="sticky top-8 z-30 w-[120px] border-r border-b bg-yellow-50 text-yellow-800 px-2 font-medium text-left">DB User</th>
@@ -242,155 +259,62 @@ export default function WebsiteListingPage() {
                   </tr>
                 ) : filteredWebsites.map((site, index) => (
                   <tr key={site.id} className="hover:bg-muted/30 h-8 border-b">
-                    <td className="text-center font-medium text-muted-foreground border-r bg-background px-2">
-                      {index + 1}
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.clientName} onSave={(v) => handleUpdate(site.id, 'clientName', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.address} onSave={(v) => handleUpdate(site.id, 'address', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.contactPerson} onSave={(v) => handleUpdate(site.id, 'contactPerson', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.contactNo} onSave={(v) => handleUpdate(site.id, 'contactNo', v)}  />
-                    </td>
+                    <td className="text-center font-medium text-muted-foreground border-r bg-background px-2">{index + 1}</td>
+                    <td className="p-0 border-r"><EditableCell value={site.clientName} onSave={(v) => handleUpdate(site.id, 'clientName', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.address} onSave={(v) => handleUpdate(site.id, 'address', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.contactPerson} onSave={(v) => handleUpdate(site.id, 'contactPerson', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.contactNo} onSave={(v) => handleUpdate(site.id, 'contactNo', v)} /></td>
                     <td className="p-0 border-r relative group">
                       <div className="flex items-center">
-                        <EditableCell 
-                          value={site.domainName}
-                          onSave={(v) => handleUpdate(site.id, 'domainName', v)} 
-                          className="flex-1"
-                        />
-                        {site.domainName && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0"
-                            onClick={() => openLink(site.domainName)}
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
+                        <EditableCell value={site.domainName} onSave={(v) => handleUpdate(site.id, 'domainName', v)} className="flex-1" />
+                        {site.domainName && <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0" onClick={() => openLink(site.domainName)}><ExternalLink className="h-3 w-3" /></Button>}
                       </div>
                     </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.domainAccount} onSave={(v) => handleUpdate(site.id, 'domainAccount', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.domainEmail} onSave={(v) => handleUpdate(site.id, 'domainEmail', v)} />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.purchasedBy} onSave={(v) => handleUpdate(site.id, 'purchasedBy', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.domainExpiry} onSave={(v) => handleUpdate(site.id, 'domainExpiry', v)} />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.hostingExpiry} onSave={(v) => handleUpdate(site.id, 'hostingExpiry', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.hostingCompany} onSave={(v) => handleUpdate(site.id, 'hostingCompany', v)} />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.hostRemarks} onSave={(v) => handleUpdate(site.id, 'hostRemarks', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.platform} onSave={(v) => handleUpdate(site.id, 'platform', v)} />
-                    </td>
+                    <td className="p-0 border-r"><EditableCell value={site.domainAccount} onSave={(v) => handleUpdate(site.id, 'domainAccount', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.domainEmail} onSave={(v) => handleUpdate(site.id, 'domainEmail', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.purchasedBy} onSave={(v) => handleUpdate(site.id, 'purchasedBy', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.domainExpiry} onSave={(v) => handleUpdate(site.id, 'domainExpiry', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.hostingExpiry} onSave={(v) => handleUpdate(site.id, 'hostingExpiry', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.hostingCompany} onSave={(v) => handleUpdate(site.id, 'hostingCompany', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.hostRemarks} onSave={(v) => handleUpdate(site.id, 'hostRemarks', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.platform} onSave={(v) => handleUpdate(site.id, 'platform', v)} /></td>
                     <td className="p-0 border-r relative group">
                       <div className="flex items-center">
                         <EditableCell value={site.themeLink} onSave={(v) => handleUpdate(site.id, 'themeLink', v)} className="flex-1" />
-                        {site.themeLink && (
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0" onClick={() => openLink(site.themeLink)}>
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
+                        {site.themeLink && <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0" onClick={() => openLink(site.themeLink)}><ExternalLink className="h-3 w-3" /></Button>}
                       </div>
                     </td>
                     <td className="p-0 border-r relative group">
                       <div className="flex items-center">
                         <EditableCell value={site.adminPanelLink} onSave={(v) => handleUpdate(site.id, 'adminPanelLink', v)} className="flex-1" />
-                        {site.adminPanelLink && (
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0" onClick={() => openLink(site.adminPanelLink)}>
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
+                        {site.adminPanelLink && <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0" onClick={() => openLink(site.adminPanelLink)}><ExternalLink className="h-3 w-3" /></Button>}
                       </div>
                     </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.adminPanelName} onSave={(v) => handleUpdate(site.id, 'adminPanelName', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.panelPassword} onSave={(v) => handleUpdate(site.id, 'panelPassword', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.workDoneBy} onSave={(v) => handleUpdate(site.id, 'workDoneBy', v)}  />
-                    </td>
-                    
-                    {/* DB Cells */}
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.dbName} onSave={(v) => handleUpdate(site.id, 'dbName', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.dbUser} onSave={(v) => handleUpdate(site.id, 'dbUser', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.dbPassword} onSave={(v) => handleUpdate(site.id, 'dbPassword', v)} />
-                    </td>
-                    
-                    {/* WP Cells */}
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.wpUser} onSave={(v) => handleUpdate(site.id, 'wpUser', v)} />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.wpPassword} onSave={(v) => handleUpdate(site.id, 'wpPassword', v)}  />
-                    </td>
-                    
-                    {/* Webmail Cells */}
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.webmailUser} onSave={(v) => handleUpdate(site.id, 'webmailUser', v)}  />
-                    </td>
-                    <td className="p-0 border-r">
-                      <EditableCell value={site.webmailPassword} onSave={(v) => handleUpdate(site.id, 'webmailPassword', v)}  />
-                    </td>
-
+                    <td className="p-0 border-r"><EditableCell value={site.adminPanelName} onSave={(v) => handleUpdate(site.id, 'adminPanelName', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.panelPassword} onSave={(v) => handleUpdate(site.id, 'panelPassword', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.workDoneBy} onSave={(v) => handleUpdate(site.id, 'workDoneBy', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.dbName} onSave={(v) => handleUpdate(site.id, 'dbName', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.dbUser} onSave={(v) => handleUpdate(site.id, 'dbUser', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.dbPassword} onSave={(v) => handleUpdate(site.id, 'dbPassword', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.wpUser} onSave={(v) => handleUpdate(site.id, 'wpUser', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.wpPassword} onSave={(v) => handleUpdate(site.id, 'wpPassword', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.webmailUser} onSave={(v) => handleUpdate(site.id, 'webmailUser', v)} /></td>
+                    <td className="p-0 border-r"><EditableCell value={site.webmailPassword} onSave={(v) => handleUpdate(site.id, 'webmailPassword', v)} /></td>
                     <td className="p-0 text-center bg-background">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDelete(site.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(site.id)}><Trash2 className="h-3 w-3" /></Button>
                     </td>
                   </tr>
                 ))}
                 {!loading && filteredWebsites.length === 0 && (
-                  <tr>
-                    <td colSpan={27} className="h-24 text-center text-muted-foreground">
-                      No matching records found.
-                    </td>
-                  </tr>
+                  <tr><td colSpan={27} className="h-24 text-center text-muted-foreground">No matching records found.</td></tr>
                 )}
               </tbody>
             </table>
           </div>
         </CardContent>
       </Card>
-
-      {/* Floating Download Button */}
       <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
-        <Button
-          size="icon"
-          className="h-14 w-14 rounded-full shadow-lg"
-          onClick={handleDownloadPDF}
-          disabled={loading || isDownloading}
-          aria-label="Download Directory"
-        >
+        <Button size="icon" className="h-14 w-14 rounded-full shadow-lg" onClick={handleDownloadPDF} disabled={loading || isDownloading} aria-label="Download Directory">
           {isDownloading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Download className="h-6 w-6" />}
         </Button>
       </div>
