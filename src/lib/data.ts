@@ -184,3 +184,14 @@ export type WebsiteEntry = {
   webmailPassword: string;
   createdAt: any;
 };
+
+export type SpecialDayMonth = {
+  id: string;
+  name: string;
+};
+
+export type SpecialDayRow = {
+  id: string;
+  day: number;
+  events: Record<string, string[]>;
+};

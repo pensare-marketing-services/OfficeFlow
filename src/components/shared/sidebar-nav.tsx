@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -10,7 +11,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Briefcase, ChevronDown, CreditCard, StickyNote, Globe } from 'lucide-react';
+import { LayoutDashboard, Settings, Briefcase, ChevronDown, CreditCard, StickyNote, Globe, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useClients } from '@/hooks/use-clients';
@@ -24,6 +25,7 @@ import { cn } from '@/lib/utils';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
+  { href: '/special-days', label: 'Special Days', icon: CalendarDays, adminOnly: false },
 ];
 
 const accountNavItem = { href: '/account', label: 'Accounts', icon: CreditCard, adminOnly: true };
