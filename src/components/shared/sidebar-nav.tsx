@@ -201,28 +201,10 @@ export function SidebarNav() {
           }
 
           <SidebarMenuItem>
-            <Link href="/notes/dm">
-              <SidebarMenuButton isActive={pathname === '/notes/dm'} tooltip="DM Notes">
-                <StickyNote className="h-4 w-4" />
-                <span>DM Notes</span>
-              </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
             <Link href="/notes/web">
-              <SidebarMenuButton isActive={pathname === '/notes/web'} tooltip="Web Notes">
+              <SidebarMenuButton isActive={pathname === '/notes/web'} tooltip="Web-SEO Notes">
                 <StickyNote className="h-4 w-4" />
-                <span>Web Notes</span>
-              </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <Link href="/notes/seo">
-              <SidebarMenuButton isActive={pathname === '/notes/seo'} tooltip="SEO Notes">
-                <StickyNote className="h-4 w-4" />
-                <span>SEO Notes</span>
+                <span>Web-SEO Notes</span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>

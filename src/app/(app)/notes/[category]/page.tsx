@@ -164,6 +164,7 @@ function SortableNoteCard({ note, onView, onEdit, onDelete }: SortableNoteCardPr
 
 export default function CategoryNotesPage() {
     const params = useParams();
+    // Default to 'web' for the unified Web-SEO Notes
     const category = (params.category as NoteType) || 'web';
     const { notes, loading, addNote, updateNote, deleteNote, reorderNotes } = useNotes();
     const { clients } = useClients();
@@ -178,7 +179,7 @@ export default function CategoryNotesPage() {
     const [noteTitle, setNoteTitle] = useState('');
     const [noteContent, setNoteContent] = useState('');
     const [noteClientId, setNoteClientId] = useState('none');
-    const [noteType, setNoteType] = useState<NoteType>(category);
+    const [noteType, setNoteType] = useState<NoteType>('web');
 
     const { toast } = useToast();
 
@@ -197,7 +198,8 @@ export default function CategoryNotesPage() {
     const filteredNotes = useMemo(() => {
         const query = search.toLowerCase();
         return notes.filter(n => {
-            const typeMatch = (n.type || 'web') === category;
+            // Include everything that is 'web' or where the UI might have consolidated previous types
+            const typeMatch = (n.type || 'web') === 'web';
             if (!typeMatch) return false;
 
             return n.title.toLowerCase().includes(query) ||
@@ -205,13 +207,13 @@ export default function CategoryNotesPage() {
                 (n.clientName && n.clientName.toLowerCase().includes(query)) ||
                 (n.authorName && n.authorName.toLowerCase().includes(query))
         });
-    }, [notes, search, category]);
+    }, [notes, search]);
 
     const resetForm = () => {
         setNoteTitle('');
         setNoteContent('');
         setNoteClientId('none');
-        setNoteType(category);
+        setNoteType('web');
     };
 
     const handleAddNote = async () => {
@@ -221,7 +223,7 @@ export default function CategoryNotesPage() {
             await addNote(
                 capitalizeSentences(noteTitle),
                 capitalizeSentences(noteContent),
-                noteType,
+                'web', // Consolidated type
                 'bg-card',
                 noteClientId === 'none' ? undefined : noteClientId,
                 client?.name
@@ -250,7 +252,7 @@ export default function CategoryNotesPage() {
             await updateNote(selectedNote.id, {
                 title: capitalizeSentences(noteTitle),
                 content: capitalizeSentences(noteContent),
-                type: noteType,
+                type: 'web',
                 color: 'bg-card',
                 clientId: noteClientId === 'none' ? null : noteClientId,
                 clientName: noteClientId === 'none' ? null : client?.name
@@ -304,7 +306,7 @@ export default function CategoryNotesPage() {
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Create Internal Note</DialogTitle>
+                            <DialogTitle>Create Web-SEO Note</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
@@ -318,14 +320,12 @@ export default function CategoryNotesPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Category</label>
-                                    <Select value={noteType} onValueChange={(v: NoteType) => setNoteType(v)}>
+                                    <Select value="web" disabled>
                                         <SelectTrigger>
-                                            <SelectValue />
+                                            <SelectValue placeholder="Web-SEO" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="dm">Digital Marketing</SelectItem>
-                                            <SelectItem value="web">Web Development</SelectItem>
-                                            <SelectItem value="seo">SEO</SelectItem>
+                                            <SelectItem value="web">Web-SEO</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -389,7 +389,7 @@ export default function CategoryNotesPage() {
                             {filteredNotes.length === 0 && (
                                 <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed rounded-lg">
                                     <StickyNote className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                                    <p>No notes found in this category.</p>
+                                    <p>No Web-SEO notes found.</p>
                                 </div>
                             )}
                         </div>
@@ -404,7 +404,7 @@ export default function CategoryNotesPage() {
                         <div className="flex flex-col gap-2">
                             <DialogTitle className="text-xl font-bold">{selectedNote?.title}</DialogTitle>
                             <div className="flex gap-2">
-                                <Badge variant="outline" className="capitalize">{selectedNote?.type || 'web'}</Badge>
+                                <Badge variant="outline" className="capitalize">Web-SEO</Badge>
                                 {selectedNote?.clientName && (
                                     <Badge variant="secondary" className="w-fit flex items-center gap-1">
                                         <Building className="h-3 w-3" />
@@ -433,7 +433,7 @@ export default function CategoryNotesPage() {
             <Dialog open={isEditOpen} onOpenChange={(open) => { setIsEditOpen(open); if (!open) resetForm(); }}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit Internal Note</DialogTitle>
+                        <DialogTitle>Edit Web-SEO Note</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
@@ -447,14 +447,12 @@ export default function CategoryNotesPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Category</label>
-                                <Select value={noteType} onValueChange={(v: NoteType) => setNoteType(v)}>
+                                <Select value="web" disabled>
                                     <SelectTrigger>
-                                        <SelectValue />
+                                        <SelectValue placeholder="Web-SEO" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="dm">Digital Marketing</SelectItem>
-                                        <SelectItem value="web">Web Development</SelectItem>
-                                        <SelectItem value="seo">SEO</SelectItem>
+                                        <SelectItem value="web">Web-SEO</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
