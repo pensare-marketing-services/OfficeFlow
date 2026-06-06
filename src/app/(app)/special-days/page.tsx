@@ -257,7 +257,7 @@ export default function SpecialDaysPage() {
             <table className="w-full text-[9px] border-collapse min-w-full table-fixed">
               <thead className="sticky top-0 z-30 shadow-sm">
                 <tr className="h-7 bg-muted">
-                  <th className="sticky left-0 bg-muted border-r border-b p-0 w-[25px] z-40 text-muted-foreground font-medium text-center">Day</th>
+                  <th className="sticky left-0 bg-muted border-r border-b p-0 w-[10px] z-40 text-muted-foreground font-medium text-center">Day</th>
                   {months.map(month => (
                     <th key={month.id} className="border-r border-b p-0.5 w-[160px] text-left group">
                       <div className="flex items-center justify-between px-1">
@@ -283,7 +283,7 @@ export default function SpecialDaysPage() {
               <tbody className="bg-background">
                 {rows.map((row) => (
                   <tr key={row.id} className="h-6 border-b hover:bg-muted/30">
-                    <td className="sticky left-0 bg-background border-r p-0 text-center font-bold text-muted-foreground z-20">
+                    <td className="sticky left-0 bg-background border-r p-0 w-[10px] text-center font-bold text-muted-foreground z-20 overflow-hidden text-[8px]">
                       {row.day}
                     </td>
                     {months.map(month => (
