@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -17,13 +16,13 @@ import { useRouter } from 'next/navigation';
 
 // Sub-component: CellContent
 const CellContent: React.FC<{ events?: string[] }> = ({ events }) => {
-  if (!events || events.length === 0) return <div className="min-h-[24px] w-full" />;
-  if (events.length === 1) return <div className="text-[10px] break-words">{events[0]}</div>;
+  if (!events || events.length === 0) return <div className="min-h-[18px] w-full" />;
+  if (events.length === 1) return <div className="text-[9px] leading-tight break-words truncate">{events[0]}</div>;
   return (
-    <ul className="list-disc list-inside text-[10px] space-y-0.5">
+    <ul className="list-disc list-inside text-[9px] leading-none space-y-0.5">
       {events.map((e, i) => (
-        <li key={i} className="break-words">
-          <span className="ml-[-4px]">{e}</span>
+        <li key={i} className="break-words truncate">
+          <span className="ml-[-6px]">{e}</span>
         </li>
       ))}
     </ul>
@@ -227,23 +226,23 @@ export default function SpecialDaysPage() {
   }
 
   return (
-    <div className="space-y-4 h-[calc(100vh-8rem)] flex flex-col">
-      <Card className="shrink-0">
-        <CardHeader className="p-3">
+    <div className="space-y-2 h-[calc(100vh-6rem)] flex flex-col">
+      <Card className="shrink-0 shadow-none border">
+        <CardHeader className="p-2">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-primary" />
-              <CardTitle className="text-base font-headline">Special Days Planner</CardTitle>
+              <CalendarDays className="h-4 w-4 text-primary" />
+              <CardTitle className="text-sm font-headline">Special Days Planner</CardTitle>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Input
                 placeholder="New Month (e.g., Oct 2024)"
                 value={newMonthName}
                 onChange={(e) => setNewMonthName(e.target.value)}
-                className="h-8 text-[11px] w-full sm:w-48"
+                className="h-7 text-[10px] w-full sm:w-48"
                 onKeyDown={(e) => e.key === 'Enter' && handleAddMonth()}
               />
-              <Button size="sm" onClick={handleAddMonth} disabled={isAddingMonth || !newMonthName.trim()} className="h-8 gap-1 shrink-0">
+              <Button size="sm" onClick={handleAddMonth} disabled={isAddingMonth || !newMonthName.trim()} className="h-7 gap-1 shrink-0 text-[10px]">
                 {isAddingMonth ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
                 Add Month
               </Button>
@@ -252,17 +251,17 @@ export default function SpecialDaysPage() {
         </CardHeader>
       </Card>
 
-      <Card className="flex-1 overflow-hidden flex flex-col">
+      <Card className="flex-1 overflow-hidden flex flex-col shadow-none border">
         <CardContent className="p-0 flex-1 overflow-hidden relative">
           <div ref={scrollRef} className="overflow-auto h-full scrollbar-thin scrollbar-thumb-muted-foreground/20">
-            <table className="w-full text-[10px] border-collapse min-w-full table-fixed">
+            <table className="w-full text-[9px] border-collapse min-w-full table-fixed">
               <thead className="sticky top-0 z-30 shadow-sm">
-                <tr className="h-8 bg-muted">
-                  <th className="sticky left-0 bg-muted border-r border-b p-1 w-[50px] z-40 text-muted-foreground font-medium text-center">Day</th>
+                <tr className="h-7 bg-muted">
+                  <th className="sticky left-0 bg-muted border-r border-b p-0 w-[25px] z-40 text-muted-foreground font-medium text-center">Day</th>
                   {months.map(month => (
-                    <th key={month.id} className="border-r border-b p-1 w-[200px] text-left group">
+                    <th key={month.id} className="border-r border-b p-0.5 w-[160px] text-left group">
                       <div className="flex items-center justify-between px-1">
-                        <span className="truncate">{month.name}</span>
+                        <span className="truncate font-bold">{month.name}</span>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -283,15 +282,15 @@ export default function SpecialDaysPage() {
               </thead>
               <tbody className="bg-background">
                 {rows.map((row) => (
-                  <tr key={row.id} className="border-b hover:bg-muted/30">
-                    <td className="sticky left-0 bg-background border-r p-1 text-center font-bold text-muted-foreground z-20">
+                  <tr key={row.id} className="h-6 border-b hover:bg-muted/30">
+                    <td className="sticky left-0 bg-background border-r p-0 text-center font-bold text-muted-foreground z-20">
                       {row.day}
                     </td>
                     {months.map(month => (
                       <td key={month.id} className="border-r p-0 align-top relative group">
                         <Popover>
                           <PopoverTrigger asChild>
-                            <div className="w-full min-h-[40px] p-1.5 cursor-pointer transition-colors group-hover:bg-accent/10">
+                            <div className="w-full min-h-[22px] p-0.5 cursor-pointer transition-colors group-hover:bg-accent/10">
                               <CellContent events={row.events?.[month.id] || []} />
                             </div>
                           </PopoverTrigger>
