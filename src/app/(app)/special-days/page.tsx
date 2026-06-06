@@ -12,6 +12,8 @@ import { collection, onSnapshot, doc, updateDoc, writeBatch, query, orderBy } fr
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { SpecialDayMonth, SpecialDayRow } from '@/lib/data';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 // Sub-component: CellContent
 const CellContent: React.FC<{ events?: string[] }> = ({ events }) => {
@@ -92,6 +94,8 @@ const CellEditor: React.FC<{
 };
 
 export default function SpecialDaysPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [months, setMonths] = useState<SpecialDayMonth[]>([]);
   const [rows, setRows] = useState<SpecialDayRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,6 +105,14 @@ export default function SpecialDaysPage() {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!authLoading && user && user.role !== 'admin') {
+      router.replace('/dashboard');
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (user?.role !== 'admin') return;
+
     const unsubConfig = onSnapshot(doc(db, 'specialDaysData', 'config'), (snap) => {
       if (snap.exists()) {
         setMonths(snap.data().months || []);
@@ -122,7 +134,7 @@ export default function SpecialDaysPage() {
       unsubConfig();
       unsubRows();
     };
-  }, []);
+  }, [user]);
 
   const initializeRows = async () => {
     const batch = writeBatch(db);
@@ -197,6 +209,14 @@ export default function SpecialDaysPage() {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete month.' });
     }
   };
+
+  if (authLoading || (user && user.role !== 'admin')) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

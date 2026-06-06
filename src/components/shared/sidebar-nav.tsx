@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { href: '/special-days', label: 'Special Days', icon: CalendarDays, adminOnly: false },
+  { href: '/special-days', label: 'Special Days', icon: CalendarDays, adminOnly: true },
 ];
 
 const accountNavItem = { href: '/account', label: 'Accounts', icon: CreditCard, adminOnly: true };
@@ -85,7 +85,9 @@ export function SidebarNav() {
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
-          {mainNavItems.map((item) => (
+          {mainNavItems
+            .filter((item) => !item.adminOnly || user?.role === 'admin')
+            .map((item) => (
             <SidebarMenuItem key={item.href}>
               <Link href={item.href!}>
                 <SidebarMenuButton
