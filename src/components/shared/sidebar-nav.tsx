@@ -25,8 +25,9 @@ import { cn } from '@/lib/utils';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { href: '/special-days', label: 'Special Days', icon: CalendarDays, adminOnly: true },
 ];
+
+const specialDaysNavItem = { href: '/special-days', label: 'Special Days', icon: CalendarDays, adminOnly: true };
 
 const accountNavItem = { href: '/account', label: 'Accounts', icon: CreditCard, adminOnly: true };
 
@@ -105,67 +106,85 @@ export function SidebarNav() {
               </Link>
             </SidebarMenuItem>
           ))}
+          
+          <Collapsible
+            className="w-full"
+            open={isClientCollapsibleOpen}
+            onOpenChange={setClientCollapsibleOpen}
+          >
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton asChild isActive={pathname.startsWith('/clients')} className="group justify-between">
+                  <div className="flex w-full items-center justify-between">
+                    <span className='flex items-center gap-2'>
+                      <Briefcase className="h-4 w-4" />
+                      <span>Clients</span>
+                    </span>
+                    <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
+                  </div>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <div className="flex items-center gap-0.5 group-data-[collapsible=icon]:hidden px-1 pt-1">
+                <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'digital marketing' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('digital marketing'); }}>DM</Button>
+                <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'seo' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('seo'); }}>SEO</Button>
+                <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'website' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('website'); }}>Web</Button>
+                <Button size="sm" variant={categoryFilter === 'gd' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'gd' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('gd'); }}>GD</Button>
+                <Button size="sm" variant={categoryFilter === 'logo/branding' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'logo/branding' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('logo/branding'); }}>L/B</Button>
+                <Button size="sm" variant={categoryFilter === 'trademark/company' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'trademark/company' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('trademark/company'); }}>TM/C</Button>
+              </div>
+            </SidebarMenuItem>
+            <CollapsibleContent>
+              <SidebarMenuSub>
+                {clientsLoading && (
+                  <>
+                    <Skeleton className="h-7 w-full" />
+                    <Skeleton className="h-7 w-full" />
+                    <Skeleton className="h-7 w-full" />
+                  </>
+                )}
+                {!clientsLoading && filteredClients.map((client, index) => (
+                  <SidebarMenuItem key={client.id}>
+                    <Link href={`/clients/${client.id}`}>
+                      <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
+                        <span>
+                          <span className="flex h-4 w-4 items-center justify-center text-[10px]">{index + 1}</span>
+                          <span>{client.name}</span>
+                        </span>
+                      </SidebarMenuSubButton>
+                    </Link>
+                  </SidebarMenuItem>
+                ))}
+                {!clientsLoading && filteredClients.length === 0 && (
+                  <SidebarMenuItem>
+                    <span
+                      aria-disabled="true"
+                      className="flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-xs text-sidebar-foreground opacity-50 outline-none [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground"
+                    >
+                      No clients found
+                    </span>
+                  </SidebarMenuItem>
+                )}
+              </SidebarMenuSub>
+            </CollapsibleContent>
+          </Collapsible>
+
           {user?.role === 'admin' && (
-            <Collapsible
-              className="w-full"
-              open={isClientCollapsibleOpen}
-              onOpenChange={setClientCollapsibleOpen}
-            >
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith('/clients')} className="group justify-between">
-                    <div className="flex w-full items-center justify-between">
-                      <span className='flex items-center gap-2'>
-                        <Briefcase className="h-4 w-4" />
-                        <span>Clients</span>
-                      </span>
-                      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
-                    </div>
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <div className="flex items-center gap-0.5 group-data-[collapsible=icon]:hidden px-1 pt-1">
-                  <Button size="sm" variant={categoryFilter === 'digital marketing' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'digital marketing' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('digital marketing'); }}>DM</Button>
-                  <Button size="sm" variant={categoryFilter === 'seo' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'seo' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('seo'); }}>SEO</Button>
-                  <Button size="sm" variant={categoryFilter === 'website' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'website' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('website'); }}>Web</Button>
-                  <Button size="sm" variant={categoryFilter === 'gd' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'gd' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('gd'); }}>GD</Button>
-                  <Button size="sm" variant={categoryFilter === 'logo/branding' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'logo/branding' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('logo/branding'); }}>L/B</Button>
-                  <Button size="sm" variant={categoryFilter === 'trademark/company' ? 'secondary' : 'outline'} className={cn("h-5 px-0.5 text-[9px] border-sidebar-border w-full flex-1", categoryFilter === 'trademark/company' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-transparent hover:bg-sidebar-accent')} onClick={(e) => { e.stopPropagation(); handleFilterClick('trademark/company'); }}>TM/C</Button>
-                </div>
-              </SidebarMenuItem>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  {clientsLoading && (
-                    <>
-                      <Skeleton className="h-7 w-full" />
-                      <Skeleton className="h-7 w-full" />
-                      <Skeleton className="h-7 w-full" />
-                    </>
-                  )}
-                  {!clientsLoading && filteredClients.map((client, index) => (
-                    <SidebarMenuItem key={client.id}>
-                      <Link href={`/clients/${client.id}`}>
-                        <SidebarMenuSubButton asChild isActive={pathname === `/clients/${client.id}`}>
-                          <span>
-                            <span className="flex h-4 w-4 items-center justify-center text-[10px]">{index + 1}</span>
-                            <span>{client.name}</span>
-                          </span>
-                        </SidebarMenuSubButton>
-                      </Link>
-                    </SidebarMenuItem>
-                  ))}
-                  {!clientsLoading && filteredClients.length === 0 && (
-                    <SidebarMenuItem>
-                      <span
-                        aria-disabled="true"
-                        className="flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-xs text-sidebar-foreground opacity-50 outline-none [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground"
-                      >
-                        No clients found
-                      </span>
-                    </SidebarMenuItem>
-                  )}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </Collapsible>
+            <SidebarMenuItem>
+              <Link href={specialDaysNavItem.href!}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith(specialDaysNavItem.href!)}
+                  tooltip={{
+                    children: specialDaysNavItem.label,
+                  }}
+                >
+                  <span>
+                    <specialDaysNavItem.icon />
+                    <span>{specialDaysNavItem.label}</span>
+                  </span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
           )}
 
           {user?.role === 'admin' && (
