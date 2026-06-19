@@ -1,22 +1,14 @@
-
 'use client';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { UserNav } from '@/components/shared/user-nav';
 import { usePathname, useRouter } from 'next/navigation';
-import { Button } from '../ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Separator } from '../ui/separator';
-import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
-import { useEffect, useState } from 'react';
 
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/dashboard')) return 'Dashboard';
   if (pathname.startsWith('/clients')) return 'Clients';
   if (pathname.startsWith('/website-listing')) return 'Website List';
   if (pathname.startsWith('/settings')) return 'Settings';
-  if (pathname.startsWith('/account')) return 'Accounts';
   if (pathname.startsWith('/notes')) return 'Web-SEO Notes';
   if (pathname.startsWith('/special-days')) return 'Special Days';
   return 'OfficeFlow';
@@ -24,7 +16,6 @@ function getPageTitle(pathname: string): string {
 
 export function Header() {
   const pathname = usePathname();
-  const router = useRouter();
   const title = getPageTitle(pathname);
 
   return (

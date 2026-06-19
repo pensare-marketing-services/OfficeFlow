@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import type { Client } from '@/lib/data';
-import { collection, onSnapshot, query, orderBy, getDocs, where, writeBatch, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, getDocs, where, writeBatch, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { useAuth } from './use-auth';
 
@@ -68,7 +68,7 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         const tasksSnapshot = await getDocs(tasksQuery);
         tasksSnapshot.forEach(doc => batch.delete(doc.ref));
 
-        const subcollections = ['promotions', 'planPromotions', 'cashInTransactions', 'seoTasks', 'bills'];
+        const subcollections = ['promotions', 'planPromotions', 'cashInTransactions', 'seoTasks'];
         for (const subcollectionName of subcollections) {
             const subcollectionRef = collection(db, 'clients', clientId, subcollectionName);
             const subcollectionSnapshot = await getDocs(subcollectionRef);

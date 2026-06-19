@@ -42,6 +42,10 @@
           "type": "string",
           "enum": ["digitalmarketing", "contentwriter", "designers", "videoeditor", "web", "seo"],
           "description": "The department the employee belongs to."
+        },
+        "visibleInMasterView": {
+          "type": "boolean",
+          "description": "Whether the employee should be listed in the Master View tables."
         }
       },
       "required": [
@@ -247,13 +251,6 @@
           "type": "number",
           "description": "A number used to sort clients for display. Lower numbers appear first."
         },
-        "notes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/entities/ClientNote"
-          },
-          "description": "[DEPRECATED] A list of notes specific to this client. Now stored in the 'months' array."
-        },
         "categories": {
             "type": "array",
             "items": {
@@ -279,10 +276,6 @@
                 "items": {
                   "$ref": "#/entities/ClientNote"
                 }
-              },
-              "billingStatus": {
-                "type": "string",
-                "enum": ["Issued", "Not Issued"]
               }
             }
           },
@@ -494,71 +487,35 @@
         "status": {
           "type": "string",
           "enum": ["Received", "Not Received"]
-        }
+        },
+        "month": { "type": "string" },
+        "remark": { "type": "string" }
       },
       "required": ["date", "amount", "status"]
     },
-     "SeoTask": {
-      "title": "SEO Task",
-      "description": "Represents a single SEO-related task for a client.",
+    "SpecialDayMonth": {
+      "title": "Special Day Month",
+      "description": "Configuration for a month in the special days planner.",
       "type": "object",
       "properties": {
-        "date": {
-          "type": "string",
-          "format": "date"
-        },
-        "taskName": {
-          "type": "string"
-        },
-        "assigneeId": {
-          "type": "string",
-          "description": "The UID of the user this task is assigned to."
-        },
-        "status": {
-          "type": "string",
-          "enum": ["Pending", "Completed"]
-        },
-        "remarks": {
-          "type": "string"
-        },
-        "clientId": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "date",
-        "taskName",
-        "status",
-        "clientId"
-      ]
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      }
     },
-    "Bill": {
-      "title": "Bill",
-      "description": "Represents a bill issued to a client.",
+    "SpecialDayRow": {
+      "title": "Special Day Row",
+      "description": "A single day in the special days planner with events for multiple months.",
       "type": "object",
       "properties": {
-        "slNo": { "type": "number" },
-        "duration": { "type": "string" },
-        "status": { "type": "string", "enum": ["Issued", "Paid", "Overdue", "Cancelled"] },
-        "view": { "type": "string" },
-        "billAmount": { "type": "number" },
-        "balance": { "type": "number" },
-        "clientId": { "type": "string" },
-        "month": { "type": "string" },
-        "issuedDate": { "type": "string", "format": "date-time" },
-        "items": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "description": { "type": "string" },
-              "amount": { "type": "number" }
-            },
-            "required": ["description", "amount"]
+        "day": { "type": "number" },
+        "events": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
           }
         }
-      },
-      "required": ["slNo", "duration", "status", "billAmount", "balance", "clientId", "month", "issuedDate"]
+      }
     }
   },
   "auth": {
@@ -609,17 +566,40 @@
       },
       "description": "Stores all cash-in transactions for a specific client."
     },
-     "/clients/{clientId}/seoTasks/{seoTaskId}": {
-      "schema": {
-        "$ref": "#/entities/SeoTask"
-      },
-      "description": "Stores all SEO tasks for a specific client."
+    "/specialDays/{dayId}": {
+      "schema": { "$ref": "#/entities/SpecialDayRow" },
+      "description": "Stores daily event mapping for the planner."
     },
-    "/clients/{clientId}/bills/{billId}": {
+    "/specialDaysData/config": {
       "schema": {
-        "$ref": "#/entities/Bill"
+        "type": "object",
+        "properties": {
+          "months": {
+            "type": "array",
+            "items": { "$ref": "#/entities/SpecialDayMonth" }
+          }
+        }
       },
-      "description": "Stores all bills for a specific client."
+      "description": "Global config for the planner."
+    },
+    "/dailyHighlights/{syncKey}": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "clientIds": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "description": "Stores highlighted clients for a specific date."
+    },
+    "/websiteDirectory/{siteId}": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "clientName": { "type": "string" },
+          "domainName": { "type": "string" }
+        }
+      },
+      "description": "Stores client website credentials."
     }
   }
 }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -11,7 +10,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Briefcase, ChevronDown, CreditCard, StickyNote, Globe, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, Settings, Briefcase, ChevronDown, StickyNote, Globe, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useClients } from '@/hooks/use-clients';
@@ -28,8 +27,6 @@ const mainNavItems = [
 ];
 
 const specialDaysNavItem = { href: '/special-days', label: 'Special Days', icon: CalendarDays, adminOnly: true };
-
-const accountNavItem = { href: '/account', label: 'Accounts', icon: CreditCard, adminOnly: true };
 
 const settingsNavItem = { href: '/settings', label: 'Settings', icon: Settings, adminOnly: true };
 
@@ -72,8 +69,8 @@ export function SidebarNav() {
     }
   };
 
-  // Restrict Hub/Website-Listing to Admin only as requested
-  const canSeeHub = user?.role === 'admin';
+  // Restrict Websites to Admin only
+  const isAdmin = user?.role === 'admin';
 
 
   return (
@@ -81,7 +78,6 @@ export function SidebarNav() {
       <SidebarHeader>
         <div className="flex items-center group-data-[collapsible=icon]:justify-center">
           <AppLogo />
-
         </div>
       </SidebarHeader>
       <SidebarContent className="p-2">
@@ -168,7 +164,7 @@ export function SidebarNav() {
             </CollapsibleContent>
           </Collapsible>
 
-          {user?.role === 'admin' && (
+          {isAdmin && (
             <SidebarMenuItem>
               <Link href={specialDaysNavItem.href!}>
                 <SidebarMenuButton
@@ -187,31 +183,12 @@ export function SidebarNav() {
             </SidebarMenuItem>
           )}
 
-          {user?.role === 'admin' && (
-            <SidebarMenuItem>
-              <Link href={accountNavItem.href!}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith(accountNavItem.href!)}
-                  tooltip={{
-                    children: accountNavItem.label,
-                  }}
-                >
-                  <span>
-                    <accountNavItem.icon />
-                    <span>{accountNavItem.label}</span>
-                  </span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          )}
-
-          {canSeeHub && (
+          {isAdmin && (
             <SidebarMenuItem>
               <Link href="/website-listing">
                 <SidebarMenuButton
                   isActive={pathname === '/website-listing'}
-                  tooltip="Website-List"
+                  tooltip="Websites"
                 >
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4" /> 
@@ -220,8 +197,7 @@ export function SidebarNav() {
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
-          )
-          }
+          )}
 
           <SidebarMenuItem>
             <Link href="/notes/web">
@@ -232,7 +208,7 @@ export function SidebarNav() {
             </Link>
           </SidebarMenuItem>
 
-          {user?.role === 'admin' && (
+          {isAdmin && (
             <SidebarMenuItem>
               <Link href={settingsNavItem.href!}>
                 <SidebarMenuButton

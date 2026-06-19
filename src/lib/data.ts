@@ -1,4 +1,3 @@
-
 export type UserProfile = {
   uid?: string;
   name?: string;
@@ -64,7 +63,6 @@ export type MonthData = {
     paidPromotionsOldBalance?: number;
     planPromotionsOldBalance?: number;
     notes?: ClientNote[];
-    billingStatus?: 'Issued' | 'Not Issued';
 };
 
 export type Client = {
@@ -117,27 +115,6 @@ export type CashInTransaction = {
     month?: string;
     remark?: string;
 }
-
-export type BillStatus = "Issued" | "Paid" | "Partially" | "Overdue" | "Cancelled";
-
-export type BillItem = {
-    description: string;
-    amount: number;
-};
-
-export type Bill = {
-  id: string;
-  slNo: number;
-  duration: string;
-  status: BillStatus;
-  view: string; 
-  billAmount: number;
-  balance: number;
-  clientId: string;
-  month: string;
-  issuedDate: string;
-  items?: BillItem[];
-};
 
 export type NoteType = 'dm' | 'web' | 'seo';
 
