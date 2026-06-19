@@ -172,3 +172,15 @@ export type SpecialDayRow = {
   day: number;
   events: Record<string, string[]>;
 };
+
+export type GmbMetric = {
+  id: string;
+  monthLabel: string;
+  overview: number | null;
+  calls: number | null;
+  bookings: number | null;
+  directions: number | null;
+  websiteClicks: number | null;
+  remarks: string;
+  month: string;
+};

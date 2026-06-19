@@ -516,6 +516,21 @@
           }
         }
       }
+    },
+    "GmbMetric": {
+      "title": "GMB Metric",
+      "description": "Tracking metrics for Google My Business listings.",
+      "type": "object",
+      "properties": {
+        "monthLabel": { "type": "string" },
+        "overview": { "type": ["number", "null"] },
+        "calls": { "type": ["number", "null"] },
+        "bookings": { "type": ["number", "null"] },
+        "directions": { "type": ["number", "null"] },
+        "websiteClicks": { "type": ["number", "null"] },
+        "remarks": { "type": "string" },
+        "month": { "type": "string" }
+      }
     }
   },
   "auth": {
@@ -600,6 +615,10 @@
         }
       },
       "description": "Stores client website credentials."
+    },
+    "/clients/{clientId}/gmbMetrics/{metricId}": {
+      "schema": { "$ref": "#/entities/GmbMetric" },
+      "description": "Stores monthly GMB tracking metrics for a client."
     }
   }
 }

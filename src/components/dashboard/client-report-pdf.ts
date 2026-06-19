@@ -1,8 +1,7 @@
-
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
-import type { Client, MonthData, Task, CashInTransaction, PaidPromotion } from '@/lib/data';
+import type { Client, MonthData, Task, CashInTransaction, PaidPromotion, GmbMetric } from '@/lib/data';
 
 interface ReportData {
     client: Client;
@@ -13,10 +12,11 @@ interface ReportData {
     otherTasks: Task[];
     cashIn: (CashInTransaction & { id: string })[];
     paidPromotions: (PaidPromotion & { id: string })[];
+    gmbMetrics: (GmbMetric & { id: string })[];
 }
 
 export const generateClientReportPDF = (data: ReportData): Blob => {
-    const { client, monthData, dmTasks, seoTasks, websiteTasks, otherTasks, cashIn, paidPromotions } = data;
+    const { client, monthData, dmTasks, seoTasks, websiteTasks, otherTasks, cashIn, paidPromotions, gmbMetrics } = data;
     const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height;
     const pageMargin = 15;
@@ -133,6 +133,44 @@ export const generateClientReportPDF = (data: ReportData): Blob => {
         );
     }
     
+    // Google My Business Metrics
+    if (gmbMetrics.length > 0) {
+        const sums = gmbMetrics.reduce((acc, m) => {
+            acc.overview += m.overview || 0;
+            acc.calls += m.calls || 0;
+            acc.bookings += m.bookings || 0;
+            acc.directions += m.directions || 0;
+            acc.websiteClicks += m.websiteClicks || 0;
+            return acc;
+        }, { overview: 0, calls: 0, bookings: 0, directions: 0, websiteClicks: 0 });
+
+        const count = gmbMetrics.length;
+        const averages = [
+            'Average',
+            Math.round(sums.overview / count),
+            Math.round(sums.calls / count),
+            Math.round(sums.bookings / count),
+            Math.round(sums.directions / count),
+            Math.round(sums.websiteClicks / count),
+            ''
+        ];
+
+        addTable(
+            'Google My Business Metrics',
+            [['Month', 'Overview', 'Calls', 'Bookings', 'Directions', 'Web clicks', 'Remarks']],
+            gmbMetrics.map(m => [
+                m.monthLabel,
+                m.overview || 0,
+                m.calls || 0,
+                m.bookings || 0,
+                m.directions || 0,
+                m.websiteClicks || 0,
+                m.remarks || '-'
+            ]),
+            [averages]
+        );
+    }
+
     // Paid Promotions
     if (paidPromotions.length > 0) {
          addTable(
