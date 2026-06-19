@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -125,7 +126,7 @@ export default function GmbMetricsTable({ clientId, metrics, loading, activeMont
         <Card>
             <CardHeader className="flex flex-row items-center justify-between p-3">
                 <CardTitle className="text-base font-headline">Google My Business</CardTitle>
-                <Button size="sm" onClick={addMetricRow} className="h-7 gap-1" variant="outline">
+                <Button size="sm" onClick={addMetricRow} className="h-7 gap-1">
                     <Plus className="h-4 w-4" />
                     Add Row
                 </Button>
