@@ -1060,15 +1060,6 @@ export default function ClientIdPage() {
                             activeMonth={activeMonth}
                         />
                     )}
-
-                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
-                        <GmbMetricsTable 
-                            clientId={client.id}
-                            metrics={gmbMetrics}
-                            loading={gmbLoading}
-                            activeMonth={activeMonth}
-                        />
-                    )}
                 </div>
 
                 {/* Right Column */}
@@ -1116,6 +1107,14 @@ export default function ClientIdPage() {
                         />
                     )}
                     </div>
+                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
+                        <GmbMetricsTable 
+                            clientId={client.id}
+                            metrics={gmbMetrics}
+                            loading={gmbLoading}
+                            activeMonth={activeMonth}
+                        />
+                    )}
                 </div>
             </div>
             <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-14">
