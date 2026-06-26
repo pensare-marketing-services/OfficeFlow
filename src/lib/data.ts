@@ -188,12 +188,10 @@ export type GmbMetric = {
 export type SeoKeyword = {
   id: string;
   keyword: string;
-  initialRank: number | null;
-  currentRank: number | null;
-  targetRank: number | null;
   volume: string;
   difficulty: string;
   url: string;
   month: string;
   createdAt: any;
+  rankings: Record<string, number | null>;
 };

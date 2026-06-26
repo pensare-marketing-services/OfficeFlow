@@ -538,9 +538,10 @@
       "type": "object",
       "properties": {
         "keyword": { "type": "string" },
-        "initialRank": { "type": ["number", "null"] },
-        "currentRank": { "type": ["number", "null"] },
-        "targetRank": { "type": ["number", "null"] },
+        "rankings": { 
+          "type": "object",
+          "additionalProperties": { "type": ["number", "null"] }
+        },
         "volume": { "type": "string" },
         "difficulty": { "type": "string" },
         "url": { "type": "string" },
