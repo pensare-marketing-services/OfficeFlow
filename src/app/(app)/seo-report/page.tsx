@@ -18,6 +18,7 @@ import GmbMetricsTable from '@/components/dashboard/gmb-metrics-table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
 export default function SeoReportPage() {
     const { user, loading: authLoading } = useAuth();
@@ -47,7 +48,6 @@ export default function SeoReportPage() {
             .filter(c => c.active !== false)
             .filter(c => 
                 c.name.toLowerCase().includes(search.toLowerCase())
-                // Removed category filter to list all clients regardless of their service tags
             )
             .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
     }, [clients, search]);
@@ -71,7 +71,7 @@ export default function SeoReportPage() {
         return () => unsubClient();
     }, [selectedClientId]);
 
-    // Fetch Keywords & GMB (Removed Month Filtering)
+    // Fetch Keywords & GMB
     useEffect(() => {
         if (!selectedClientId) return;
         setDataLoading(true);
@@ -86,7 +86,6 @@ export default function SeoReportPage() {
 
         const unsubKw = onSnapshot(kwQuery, (snap) => {
             const kwData = snap.docs.map(d => ({ ...d.data() as SeoKeyword, id: d.id }));
-            // Perform sorting client-side
             const sortedKw = kwData.sort((a, b) => {
                 const timeA = a.createdAt?.seconds || 0;
                 const timeB = b.createdAt?.seconds || 0;
@@ -110,8 +109,8 @@ export default function SeoReportPage() {
 
     return (
         <div className="flex h-[calc(100vh-4rem)] overflow-hidden -m-4">
-            {/* Left Sidebar - Client List (15%) */}
-             <div className="w-[15%] border-r bg-card flex flex-col">
+            {/* Left Sidebar - Client List (25%) */}
+             <div className="w-[25%] border-r bg-card flex flex-col">
                 <div className="p-4 border-b space-y-3">
                     <div className="flex items-center gap-2">
                         <BarChart2 className="h-5 w-5 text-primary" />
@@ -128,38 +127,33 @@ export default function SeoReportPage() {
                     </div>
                 </div>
                 <ScrollArea className="flex-1">
-                    <div className="p-2 space-y-1">
+                    <div className="p-2">
                         {clientsLoading ? (
                             Array.from({length: 8}).map((_, i) => <Skeleton key={i} className="h-10 w-full mb-1" />)
-                        ) : filteredClients.map(client => (
-                            <button
-                                key={client.id}
-                                onClick={() => setSelectedClientId(client.id)}
-                                className={cn(
-                                    "w-full text-left p-3 rounded-md transition-all group hover:bg-accent",
-                                    selectedClientId === client.id ? "bg-accent shadow-sm border" : "transparent"
-                                )}
-                            >
-                                <div className="flex justify-between items-start">
-                                    <span className={cn("text-xs font-semibold", selectedClientId === client.id ? "text-primary" : "text-foreground")}>
-                                        {client.name}
-                                    </span>
-                                    <TrendingUp className={cn("h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity", selectedClientId === client.id && "opacity-100 text-primary")} />
-                                </div>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                    {client.categories?.map(cat => (
-                                        <Badge key={cat} variant="outline" className="text-[8px] px-1 py-0 capitalize opacity-70">
-                                            {cat}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </button>
+                        ) : filteredClients.map((client, index) => (
+                            <React.Fragment key={client.id}>
+                                <button
+                                    onClick={() => setSelectedClientId(client.id)}
+                                    className={cn(
+                                        "w-full text-left p-3 rounded-md transition-all group hover:bg-accent",
+                                        selectedClientId === client.id ? "bg-accent shadow-sm border" : "transparent"
+                                    )}
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <span className={cn("text-xs font-semibold", selectedClientId === client.id ? "text-primary" : "text-foreground")}>
+                                            {client.name}
+                                        </span>
+                                        <TrendingUp className={cn("h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity", selectedClientId === client.id && "opacity-100 text-primary")} />
+                                    </div>
+                                </button>
+                                {index < filteredClients.length - 1 && <Separator className="my-1 opacity-40" />}
+                            </React.Fragment>
                         ))}
                     </div>
                 </ScrollArea>
             </div>
 
-            {/* Right Side - Dashboard Content (85%) */}
+            {/* Right Side - Dashboard Content (75%) */}
             <div className="flex-1 overflow-y-auto bg-muted/20">
                 {selectedClientId && activeClient ? (
                     <div className="p-6 space-y-6 max-w-6xl mx-auto">
