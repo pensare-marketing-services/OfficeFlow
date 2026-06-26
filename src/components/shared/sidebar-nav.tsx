@@ -10,7 +10,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Briefcase, ChevronDown, StickyNote, Globe, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, Settings, Briefcase, ChevronDown, StickyNote, Globe, CalendarDays, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useClients } from '@/hooks/use-clients';
@@ -69,8 +69,9 @@ export function SidebarNav() {
     }
   };
 
-  // Restrict Websites to Admin only
   const isAdmin = user?.role === 'admin';
+  const isSeoOrWeb = user?.department === 'seo' || user?.department === 'web';
+  const canSeeHub = isAdmin || isSeoOrWeb;
 
 
   return (
@@ -193,6 +194,22 @@ export function SidebarNav() {
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4" /> 
                     <span>Websites</span>
+                  </div>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          )}
+
+          {canSeeHub && (
+            <SidebarMenuItem>
+              <Link href="/seo-report">
+                <SidebarMenuButton
+                  isActive={pathname.startsWith('/seo-report')}
+                  tooltip="SEO / Keyword Report"
+                >
+                  <div className="flex items-center gap-2">
+                    <BarChart2 className="h-4 w-4" /> 
+                    <span>SEO / Keyword Report</span>
                   </div>
                 </SidebarMenuButton>
               </Link>

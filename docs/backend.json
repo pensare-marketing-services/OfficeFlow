@@ -531,6 +531,22 @@
         "remarks": { "type": "string" },
         "month": { "type": "string" }
       }
+    },
+    "SeoKeyword": {
+      "title": "SEO Keyword",
+      "description": "A specific keyword being tracked for SEO ranking.",
+      "type": "object",
+      "properties": {
+        "keyword": { "type": "string" },
+        "initialRank": { "type": ["number", "null"] },
+        "currentRank": { "type": ["number", "null"] },
+        "targetRank": { "type": ["number", "null"] },
+        "volume": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "url": { "type": "string" },
+        "month": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
@@ -619,6 +635,10 @@
     "/clients/{clientId}/gmbMetrics/{metricId}": {
       "schema": { "$ref": "#/entities/GmbMetric" },
       "description": "Stores monthly GMB tracking metrics for a client."
+    },
+    "/clients/{clientId}/seoKeywords/{keywordId}": {
+      "schema": { "$ref": "#/entities/SeoKeyword" },
+      "description": "Stores keywords tracked for SEO for a specific client."
     }
   }
 }
