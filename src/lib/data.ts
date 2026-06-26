@@ -116,22 +116,6 @@ export type CashInTransaction = {
     remark?: string;
 }
 
-export type NoteType = 'dm' | 'web' | 'seo';
-
-export type InternalNote = {
-  id: string;
-  title: string;
-  content: string;
-  authorId: string;
-  authorName: string;
-  createdAt: any;
-  color?: string;
-  clientId?: string;
-  clientName?: string;
-  order?: number;
-  type?: NoteType;
-};
-
 export type WebsiteEntry = {
   id: string;
   clientName: string;

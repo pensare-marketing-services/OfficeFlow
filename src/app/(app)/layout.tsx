@@ -1,4 +1,3 @@
-
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
@@ -11,7 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TaskProvider } from '@/hooks/use-tasks';
 import { UserProvider } from '@/hooks/use-users';
 import { ClientProvider } from '@/hooks/use-clients';
-import { NoteProvider } from '@/hooks/use-notes';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -58,17 +56,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <UserProvider>
       <TaskProvider>
         <ClientProvider>
-          <NoteProvider>
-            <SidebarProvider>
-              <Sidebar>
-                <SidebarNav />
-              </Sidebar>
-              <SidebarInset>
-                <Header />
-                <main className="flex-1 overflow-y-auto p-1 sm:p-3 lg:p-4">{children}</main>
-              </SidebarInset>
-            </SidebarProvider>
-          </NoteProvider>
+          <SidebarProvider>
+            <Sidebar>
+              <SidebarNav />
+            </Sidebar>
+            <SidebarInset>
+              <Header />
+              <main className="flex-1 overflow-y-auto p-1 sm:p-3 lg:p-4">{children}</main>
+            </SidebarInset>
+          </SidebarProvider>
         </ClientProvider>
       </TaskProvider>
     </UserProvider>

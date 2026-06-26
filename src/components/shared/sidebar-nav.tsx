@@ -10,7 +10,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Settings, Briefcase, ChevronDown, StickyNote, Globe, CalendarDays, BarChart2 } from 'lucide-react';
+import { LayoutDashboard, Settings, Briefcase, ChevronDown, Globe, CalendarDays, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useClients } from '@/hooks/use-clients';
@@ -215,15 +215,6 @@ export function SidebarNav() {
               </Link>
             </SidebarMenuItem>
           )}
-
-          <SidebarMenuItem>
-            <Link href="/notes/web">
-              <SidebarMenuButton isActive={pathname === '/notes/web'} tooltip="Web-SEO Notes">
-                <StickyNote className="h-4 w-4" />
-                <span>Web-SEO Notes</span>
-              </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
 
           {isAdmin && (
             <SidebarMenuItem>

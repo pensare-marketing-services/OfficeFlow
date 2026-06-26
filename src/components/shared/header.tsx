@@ -9,7 +9,6 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/clients')) return 'Clients';
   if (pathname.startsWith('/website-listing')) return 'Website List';
   if (pathname.startsWith('/settings')) return 'Settings';
-  if (pathname.startsWith('/notes')) return 'Web-SEO Notes';
   if (pathname.startsWith('/special-days')) return 'Special Days';
   if (pathname.startsWith('/seo-report')) return 'SEO / Keyword Report';
   return 'OfficeFlow';

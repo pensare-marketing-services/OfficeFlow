@@ -160,23 +160,6 @@
         "deadline"
       ]
     },
-    "InternalNote": {
-      "title": "Internal Note",
-      "description": "A global agency note not tied to a specific client.",
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "content": { "type": "string" },
-        "authorId": { "type": "string" },
-        "authorName": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "color": { "type": "string" },
-        "clientId": { "type": "string" },
-        "clientName": { "type": "string" },
-        "order": { "type": "number" }
-      },
-      "required": ["title", "content", "authorId", "authorName", "createdAt"]
-    },
     "ClientNote": {
       "title": "Client Note",
       "description": "A single note or remark for a client.",
@@ -573,12 +556,6 @@
         "$ref": "#/entities/Client"
       },
       "description": "Stores all clients for the organization."
-    },
-    "/internalNotes/{noteId}": {
-      "schema": {
-        "$ref": "#/entities/InternalNote"
-      },
-      "description": "Stores agency-wide internal notes."
     },
      "/clients/{clientId}/promotions/{promotionId}": {
       "schema": {
