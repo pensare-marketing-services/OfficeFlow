@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -17,7 +16,7 @@ interface GmbMetricsTableProps {
     clientId: string;
     metrics: (GmbMetric & { id: string })[];
     loading: boolean;
-    activeMonth: string;
+    activeMonth?: string;
 }
 
 const EditableCell: React.FC<{
@@ -78,7 +77,7 @@ export default function GmbMetricsTable({ clientId, metrics, loading, activeMont
             directions: null,
             websiteClicks: null,
             remarks: '',
-            month: activeMonth,
+            month: activeMonth || 'General',
         };
         await addDoc(collection(db, `clients/${clientId}/gmbMetrics`), newMetric);
     };
@@ -214,7 +213,7 @@ export default function GmbMetricsTable({ clientId, metrics, loading, activeMont
                         {!loading && metrics.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
-                                    No GMB data for this month.
+                                    No GMB data.
                                 </TableCell>
                             </TableRow>
                         )}

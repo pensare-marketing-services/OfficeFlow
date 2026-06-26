@@ -16,7 +16,7 @@ interface SeoKeywordTableProps {
     clientId: string;
     keywords: (SeoKeyword & { id: string })[];
     loading: boolean;
-    activeMonth: string;
+    activeMonth?: string;
 }
 
 const EditableCell: React.FC<{
@@ -98,7 +98,7 @@ export default function SeoKeywordTable({ clientId, keywords, loading, activeMon
             volume: '',
             difficulty: '',
             url: '',
-            month: activeMonth,
+            month: activeMonth || 'General',
             createdAt: serverTimestamp(),
         };
         await addDoc(collection(db, `clients/${clientId}/seoKeywords`), newKeyword);
@@ -239,7 +239,7 @@ export default function SeoKeywordTable({ clientId, keywords, loading, activeMon
                         {!loading && keywords.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={10} className="h-24 text-center text-muted-foreground italic">
-                                    No keywords added yet for this month.
+                                    No keywords added yet.
                                 </TableCell>
                             </TableRow>
                         )}

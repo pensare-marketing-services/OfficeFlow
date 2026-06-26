@@ -30,7 +30,6 @@ export default function SeoReportPage() {
     const [activeClient, setActiveClient] = useState<Client | null>(null);
     const [keywords, setKeywords] = useState<(SeoKeyword & { id: string })[]>([]);
     const [gmbMetrics, setGmbMetrics] = useState<(GmbMetric & { id: string })[]>([]);
-    const [activeMonth, setActiveMonth] = useState("");
     const [dataLoading, setDataLoading] = useState(false);
 
     // Security check
@@ -66,32 +65,23 @@ export default function SeoReportPage() {
             if (snap.exists()) {
                 const cData = { ...snap.data() as Client, id: snap.id };
                 setActiveClient(cData);
-                if (cData.months && cData.months.length > 0) {
-                    const lastMonth = cData.months[cData.months.length - 1].name;
-                    setActiveMonth(prev => prev || lastMonth);
-                } else {
-                    setActiveMonth("Month 1");
-                }
             }
         });
 
         return () => unsubClient();
     }, [selectedClientId]);
 
-    // Fetch Keywords & GMB
+    // Fetch Keywords & GMB (Removed Month Filtering)
     useEffect(() => {
-        if (!selectedClientId || !activeMonth) return;
+        if (!selectedClientId) return;
         setDataLoading(true);
 
-        // Removed orderBy('createdAt', 'asc') to avoid requiring a composite index
         const kwQuery = query(
-            collection(db, `clients/${selectedClientId}/seoKeywords`),
-            where('month', '==', activeMonth)
+            collection(db, `clients/${selectedClientId}/seoKeywords`)
         );
 
         const gmbQuery = query(
-            collection(db, `clients/${selectedClientId}/gmbMetrics`),
-            where('month', '==', activeMonth)
+            collection(db, `clients/${selectedClientId}/gmbMetrics`)
         );
 
         const unsubKw = onSnapshot(kwQuery, (snap) => {
@@ -114,7 +104,7 @@ export default function SeoReportPage() {
             unsubKw();
             unsubGmb();
         };
-    }, [selectedClientId, activeMonth]);
+    }, [selectedClientId]);
 
     if (authLoading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
 
@@ -178,31 +168,6 @@ export default function SeoReportPage() {
                                 <h1 className="text-2xl font-bold font-headline tracking-tight">{activeClient.name}</h1>
                                 <p className="text-sm text-muted-foreground">SEO Ranking and Google My Business Overview</p>
                             </div>
-                            
-                            <Card className="shadow-none border bg-background/50">
-                                <CardContent className="p-2 flex items-center gap-3">
-                                    <div className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded border text-[10px] font-medium shrink-0">
-                                        <Calendar className="h-3 w-3" />
-                                        Month:
-                                    </div>
-                                    <Tabs value={activeMonth} onValueChange={setActiveMonth}>
-                                        <ScrollArea className="w-full">
-                                            <TabsList className="bg-transparent h-8 gap-1">
-                                                {(activeClient.months || [{name: "Month 1"}]).map(m => (
-                                                    <TabsTrigger 
-                                                        key={m.name} 
-                                                        value={m.name}
-                                                        className="h-7 text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                                                    >
-                                                        {m.name}
-                                                    </TabsTrigger>
-                                                ))}
-                                            </TabsList>
-                                            <ScrollBar orientation="horizontal" />
-                                        </ScrollArea>
-                                    </Tabs>
-                                </CardContent>
-                            </Card>
                         </div>
 
                         <div className="grid grid-cols-1 gap-6">
@@ -210,14 +175,12 @@ export default function SeoReportPage() {
                                 clientId={selectedClientId}
                                 keywords={keywords}
                                 loading={dataLoading}
-                                activeMonth={activeMonth}
                             />
                             
                             <GmbMetricsTable 
                                 clientId={selectedClientId}
                                 metrics={gmbMetrics}
                                 loading={dataLoading}
-                                activeMonth={activeMonth}
                             />
                         </div>
                     </div>
