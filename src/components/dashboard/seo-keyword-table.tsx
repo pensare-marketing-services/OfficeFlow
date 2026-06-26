@@ -68,7 +68,7 @@ const EditableCell: React.FC<{
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className={cn("h-8 text-[11px] p-1 border-transparent hover:border-border focus:border-ring bg-transparent", className)}
+            className={cn("h-8 p-1 border-transparent hover:border-border focus:border-ring bg-transparent", className)}
         />
     );
 };
@@ -101,7 +101,7 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
             url: '',
             month: 'General',
             createdAt: serverTimestamp(),
-            dateText: 'As on ',
+            dateText: '',
             rankings: {}, // Use rankings object
         };
         await addDoc(collection(db, `clients/${clientId}/seoKeywords`), newKeyword);
@@ -183,17 +183,17 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
             </CardHeader>
             <CardContent className="p-0">
                 <div className="overflow-x-auto border rounded-md">
-                    <table className="table-fixed min-w-max w-full border-collapse">
+                    <table className="table-fixed min-w-max w-full border-collapse text-[10px]">
                         <thead>
-                            <tr className="h-10 bg-[#ffff00]">
-                                <th className="sticky left-0 z-40 w-[40px] border border-black bg-[#ffff00] px-2 text-center text-black font-bold">SI .NO</th>
-                                <th className="sticky left-[40px] z-40 w-[80px] border border-black bg-[#ffff00] px-2 text-left text-black font-bold">Date</th>
-                                <th className="sticky left-[120px] z-40 w-[200px] border border-black bg-[#ffff00] px-2 text-left text-black font-bold">KEYWORDS</th>
-                                <th className="sticky left-[320px] z-40 w-[100px] border border-black bg-[#ffff00] px-2 text-center text-black font-bold">Search Vol</th>
-                                <th className="sticky left-[420px] z-40 w-[100px] border border-black border-r-2 bg-[#ffff00] px-2 text-center text-black font-bold">Difficulty</th>
+                            <tr className="h-10 bg-muted/50">
+                                <th className="sticky left-0 z-40 w-[40px] border-r border-b bg-muted px-2 text-center text-muted-foreground font-medium">SI .NO</th>
+                                <th className="sticky left-[40px] z-40 w-[80px] border-r border-b bg-muted px-2 text-left text-muted-foreground font-medium">Date</th>
+                                <th className="sticky left-[120px] z-40 w-[200px] border-r border-b bg-muted px-2 text-left text-muted-foreground font-medium">KEYWORDS</th>
+                                <th className="sticky left-[320px] z-40 w-[100px] border-r border-b bg-muted px-2 text-center text-muted-foreground font-medium">Search Vol</th>
+                                <th className="sticky left-[420px] z-40 w-[100px] border-r-2 border-b bg-muted px-2 text-center text-muted-foreground font-medium">Difficulty</th>
                                 
                                 {dateColumns.map(dateKey => (
-                                    <th key={dateKey} className="group relative w-[90px] border border-black bg-[#ffff00] px-2 text-center text-black font-bold text-[10px]">
+                                    <th key={dateKey} className="group relative w-[90px] border-r border-b px-2 text-center text-muted-foreground font-medium">
                                         As on {dateKey}
                                         <button 
                                             onClick={() => handleDeleteDateColumn(dateKey)}
@@ -204,7 +204,7 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
                                     </th>
                                 ))}
                                 
-                                <th className="w-[40px] border border-black bg-white"></th>
+                                <th className="w-[40px] border-b bg-background"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -212,21 +212,22 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
                                 <tr><td colSpan={6 + dateColumns.length} className="h-32 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></td></tr>
                             ) : keywords.map((k, index) => (
                                 <tr key={k.id} className="h-9 hover:bg-muted/5 transition-colors group">
-                                    <td className="sticky left-0 z-20 border border-slate-300 bg-background text-center font-bold text-black">{index + 1}</td>
-                                    <td className="sticky left-[40px] z-20 border border-slate-300 bg-background p-0">
+                                    <td className="sticky left-0 z-20 border-r border-b bg-background text-center font-bold">{index + 1}</td>
+                                    <td className="sticky left-[40px] z-20 border-r border-b bg-background p-0">
                                         <EditableCell 
                                             value={k.dateText || ''} 
                                             onSave={(v) => handleUpdate(k.id, 'dateText', v)} 
                                             placeholder="e.g. Aug 26"
+                                            className="text-[10px]"
                                         />
                                     </td>
-                                    <td className="sticky left-[120px] z-20 border border-slate-300 bg-background p-0">
+                                    <td className="sticky left-[120px] z-20 border-r border-b bg-background p-0">
                                         <div className="flex items-center group/cell">
                                             <EditableCell 
                                                 value={k.keyword} 
                                                 onSave={(v) => handleUpdate(k.id, 'keyword', v)} 
                                                 placeholder="Keyword..."
-                                                className="flex-1"
+                                                className="flex-1 text-[10px]"
                                             />
                                             {k.url && (
                                                 <Button 
@@ -240,25 +241,25 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
                                             )}
                                         </div>
                                     </td>
-                                    <td className="sticky left-[320px] z-20 border border-slate-300 bg-background p-0">
+                                    <td className="sticky left-[320px] z-20 border-r border-b bg-background p-0">
                                         <EditableCell 
                                             value={k.volume} 
                                             onSave={(v) => handleUpdate(k.id, 'volume', v)} 
                                             placeholder="—"
-                                            className="text-center"
+                                            className="text-center text-[10px]"
                                         />
                                     </td>
-                                    <td className={cn("sticky left-[420px] z-20 border border-slate-300 border-r-2 p-0", getDifficultyStyle(k.difficulty) || "bg-background")}>
+                                    <td className={cn("sticky left-[420px] z-20 border-r-2 border-b p-0", getDifficultyStyle(k.difficulty) || "bg-background")}>
                                         <EditableCell 
                                             value={k.difficulty} 
                                             onSave={(v) => handleUpdate(k.id, 'difficulty', v)} 
                                             placeholder="—"
-                                            className={cn("text-center difficulty", getDifficultyStyle(k.difficulty))}
+                                            className={cn("text-center difficulty text-[10px]", getDifficultyStyle(k.difficulty))}
                                         />
                                     </td>
 
                                     {dateColumns.map(dateKey => (
-                                        <td key={dateKey} className="border border-slate-300 p-0">
+                                        <td key={dateKey} className="border-r border-b p-0">
                                             <EditableCell 
                                                 value={k.rankings?.[dateKey] ?? ''} 
                                                 onSave={(v) => handleUpdateRanking(k.id, dateKey, v)}
@@ -269,7 +270,7 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
                                         </td>
                                     ))}
 
-                                    <td className="border border-slate-300 p-0 text-center bg-background">
+                                    <td className="border-b p-0 text-center bg-background">
                                         <Button 
                                             variant="ghost" 
                                             size="icon" 
