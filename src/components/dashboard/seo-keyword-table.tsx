@@ -23,16 +23,24 @@ const EditableCell: React.FC<{
     placeholder?: string;
     className?: string;
 }> = ({ value, onSave, type = 'text', placeholder, className }) => {
-    const [currentValue, setCurrentValue] = useState(value === null ? '' : value);
+    // Utility to check for actual NaN values
+    const isReallyNaN = (val: any) => typeof val === 'number' && isNaN(val);
+    
+    // Sanitize initial value to ensure we never set NaN to state
+    const sanitizeValue = (val: any) => (val === null || isReallyNaN(val)) ? '' : val;
+
+    const [currentValue, setCurrentValue] = useState<string | number>(sanitizeValue(value));
 
     useEffect(() => {
-        setCurrentValue(value === null ? '' : value);
+        setCurrentValue(sanitizeValue(value));
     }, [value]);
 
     const handleBlur = () => {
         let finalValue: any = currentValue;
         if (type === 'number') {
-            finalValue = currentValue === '' ? null : Number(currentValue);
+            const num = Number(currentValue);
+            // If it's empty or invalid number, save as null
+            finalValue = (currentValue === '' || isNaN(num)) ? null : num;
         } else {
             finalValue = String(currentValue);
             if (!className?.includes('difficulty')) {
@@ -106,8 +114,8 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
 
     const handleUpdateRanking = async (keywordId: string, dateKey: string, value: any) => {
         const ref = doc(db, `clients/${clientId}/seoKeywords`, keywordId);
-        const val = value === '' ? null : Number(value);
-        await updateDoc(ref, { [`rankings.${dateKey}`]: val });
+        // Value is already sanitized to null or number by handleBlur
+        await updateDoc(ref, { [`rankings.${dateKey}`]: value });
     };
 
     const handleDelete = async (id: string) => {
