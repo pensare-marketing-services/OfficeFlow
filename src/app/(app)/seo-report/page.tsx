@@ -46,8 +46,8 @@ export default function SeoReportPage() {
         return clients
             .filter(c => c.active !== false)
             .filter(c => 
-                c.name.toLowerCase().includes(search.toLowerCase()) &&
-                (c.categories?.includes('seo') || c.categories?.includes('website'))
+                c.name.toLowerCase().includes(search.toLowerCase())
+                // Removed category filter to list all clients regardless of their service tags
             )
             .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
     }, [clients, search]);
@@ -110,9 +110,7 @@ export default function SeoReportPage() {
 
     return (
         <div className="flex h-[calc(100vh-4rem)] overflow-hidden -m-4">
-            {/* Left Sidebar - Client List (25%) */}
-            {/* <div className="w-1/4 border-r bg-card flex flex-col">
-             */}
+            {/* Left Sidebar - Client List (15%) */}
              <div className="w-[15%] border-r bg-card flex flex-col">
                 <div className="p-4 border-b space-y-3">
                     <div className="flex items-center gap-2">
@@ -161,7 +159,7 @@ export default function SeoReportPage() {
                 </ScrollArea>
             </div>
 
-            {/* Right Side - Dashboard Content (75%) */}
+            {/* Right Side - Dashboard Content (85%) */}
             <div className="flex-1 overflow-y-auto bg-muted/20">
                 {selectedClientId && activeClient ? (
                     <div className="p-6 space-y-6 max-w-6xl mx-auto">
