@@ -193,5 +193,7 @@ export type SeoKeyword = {
   url: string;
   month: string;
   createdAt: any;
-  rankings: Record<string, number | null>;
+  dateText?: string;
+  rank?: string;
+  rankings?: Record<string, number | null>; // Kept for backward compatibility
 };
