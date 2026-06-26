@@ -83,10 +83,10 @@ export default function SeoReportPage() {
         if (!selectedClientId || !activeMonth) return;
         setDataLoading(true);
 
+        // Removed orderBy('createdAt', 'asc') to avoid requiring a composite index
         const kwQuery = query(
             collection(db, `clients/${selectedClientId}/seoKeywords`),
-            where('month', '==', activeMonth),
-            orderBy('createdAt', 'asc')
+            where('month', '==', activeMonth)
         );
 
         const gmbQuery = query(
@@ -95,7 +95,14 @@ export default function SeoReportPage() {
         );
 
         const unsubKw = onSnapshot(kwQuery, (snap) => {
-            setKeywords(snap.docs.map(d => ({ ...d.data() as SeoKeyword, id: d.id })));
+            const kwData = snap.docs.map(d => ({ ...d.data() as SeoKeyword, id: d.id }));
+            // Perform sorting client-side
+            const sortedKw = kwData.sort((a, b) => {
+                const timeA = a.createdAt?.seconds || 0;
+                const timeB = b.createdAt?.seconds || 0;
+                return timeA - timeB;
+            });
+            setKeywords(sortedKw);
         });
 
         const unsubGmb = onSnapshot(gmbQuery, (snap) => {
