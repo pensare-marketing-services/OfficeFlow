@@ -160,23 +160,6 @@
         "deadline"
       ]
     },
-    "InternalNote": {
-      "title": "Internal Note",
-      "description": "A global agency note not tied to a specific client.",
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "content": { "type": "string" },
-        "authorId": { "type": "string" },
-        "authorName": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "color": { "type": "string" },
-        "clientId": { "type": "string" },
-        "clientName": { "type": "string" },
-        "order": { "type": "number" }
-      },
-      "required": ["title", "content", "authorId", "authorName", "createdAt"]
-    },
     "ClientNote": {
       "title": "Client Note",
       "description": "A single note or remark for a client.",
@@ -516,6 +499,38 @@
           }
         }
       }
+    },
+    "GmbMetric": {
+      "title": "GMB Metric",
+      "description": "Tracking metrics for Google My Business listings.",
+      "type": "object",
+      "properties": {
+        "monthLabel": { "type": "string" },
+        "overview": { "type": ["number", "null"] },
+        "calls": { "type": ["number", "null"] },
+        "bookings": { "type": ["number", "null"] },
+        "directions": { "type": ["number", "null"] },
+        "websiteClicks": { "type": ["number", "null"] },
+        "remarks": { "type": "string" },
+        "month": { "type": "string" }
+      }
+    },
+    "SeoKeyword": {
+      "title": "SEO Keyword",
+      "description": "A specific keyword being tracked for SEO ranking.",
+      "type": "object",
+      "properties": {
+        "keyword": { "type": "string" },
+        "rankings": { 
+          "type": "object",
+          "additionalProperties": { "type": ["number", "null"] }
+        },
+        "volume": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "url": { "type": "string" },
+        "month": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
@@ -541,12 +556,6 @@
         "$ref": "#/entities/Client"
       },
       "description": "Stores all clients for the organization."
-    },
-    "/internalNotes/{noteId}": {
-      "schema": {
-        "$ref": "#/entities/InternalNote"
-      },
-      "description": "Stores agency-wide internal notes."
     },
      "/clients/{clientId}/promotions/{promotionId}": {
       "schema": {
@@ -600,6 +609,14 @@
         }
       },
       "description": "Stores client website credentials."
+    },
+    "/clients/{clientId}/gmbMetrics/{metricId}": {
+      "schema": { "$ref": "#/entities/GmbMetric" },
+      "description": "Stores monthly GMB tracking metrics for a client."
+    },
+    "/clients/{clientId}/seoKeywords/{keywordId}": {
+      "schema": { "$ref": "#/entities/SeoKeyword" },
+      "description": "Stores keywords tracked for SEO for a specific client."
     }
   }
 }

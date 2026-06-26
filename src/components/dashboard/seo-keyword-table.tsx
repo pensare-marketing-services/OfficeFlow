@@ -23,10 +23,7 @@ const EditableCell: React.FC<{
     placeholder?: string;
     className?: string;
 }> = ({ value, onSave, type = 'text', placeholder, className }) => {
-    // Utility to check for actual NaN values
     const isReallyNaN = (val: any) => typeof val === 'number' && isNaN(val);
-    
-    // Sanitize initial value to ensure we never set NaN to state
     const sanitizeValue = (val: any) => (val === null || isReallyNaN(val)) ? '' : val;
 
     const [currentValue, setCurrentValue] = useState<string | number>(sanitizeValue(value));
@@ -39,7 +36,6 @@ const EditableCell: React.FC<{
         let finalValue: any = currentValue;
         if (type === 'number') {
             const num = Number(currentValue);
-            // If it's empty or invalid number, save as null
             finalValue = (currentValue === '' || isNaN(num)) ? null : num;
         } else {
             finalValue = String(currentValue);
@@ -79,7 +75,6 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
     const [newDateLabel, setNewDateLabel] = useState('');
     const [configLoading, setConfigLoading] = useState(true);
 
-    // Fetch column configuration
     useEffect(() => {
         const configRef = doc(db, `clients/${clientId}/keywordRankingConfig`, 'config');
         const unsub = onSnapshot(configRef, (snap) => {
@@ -102,7 +97,7 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
             month: 'General',
             createdAt: serverTimestamp(),
             dateText: '',
-            rankings: {}, // Use rankings object
+            rankings: {},
         };
         await addDoc(collection(db, `clients/${clientId}/seoKeywords`), newKeyword);
     };
@@ -113,9 +108,13 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
     };
 
     const handleUpdateRanking = async (keywordId: string, dateKey: string, value: any) => {
+        const keyword = keywords.find(k => k.id === keywordId);
+        if (!keyword) return;
+
         const ref = doc(db, `clients/${clientId}/seoKeywords`, keywordId);
-        // Value is already sanitized to null or number by handleBlur
-        await updateDoc(ref, { [`rankings.${dateKey}`]: value });
+        // Update entire object to avoid dot-notation errors with slashes in date keys
+        const newRankings = { ...(keyword.rankings || {}), [dateKey]: value };
+        await updateDoc(ref, { rankings: newRankings });
     };
 
     const handleDelete = async (id: string) => {
@@ -186,14 +185,14 @@ export default function SeoKeywordTable({ clientId, keywords, loading }: SeoKeyw
                     <table className="table-fixed min-w-max w-full border-collapse text-[10px]">
                         <thead>
                             <tr className="h-10 bg-muted/50">
-                                <th className="sticky left-0 z-40 w-[40px] border-r border-b bg-muted px-2 text-center text-muted-foreground font-medium">SI .NO</th>
+                                <th className="sticky left-0 z-40 w-[40px] border-r border-b bg-muted px-2 text-center text-muted-foreground font-medium">SI.NO</th>
                                 <th className="sticky left-[40px] z-40 w-[80px] border-r border-b bg-muted px-2 text-left text-muted-foreground font-medium">Date</th>
                                 <th className="sticky left-[120px] z-40 w-[200px] border-r border-b bg-muted px-2 text-left text-muted-foreground font-medium">KEYWORDS</th>
                                 <th className="sticky left-[320px] z-40 w-[100px] border-r border-b bg-muted px-2 text-center text-muted-foreground font-medium">Search Vol</th>
                                 <th className="sticky left-[420px] z-40 w-[100px] border-r-2 border-b bg-muted px-2 text-center text-muted-foreground font-medium">Difficulty</th>
                                 
                                 {dateColumns.map(dateKey => (
-                                    <th key={dateKey} className="group relative w-[90px] border-r border-b px-2 text-center text-muted-foreground font-medium">
+                                    <th key={dateKey} className="group relative w-[120px] border-r border-b px-2 text-center text-muted-foreground font-medium">
                                         As on {dateKey}
                                         <button 
                                             onClick={() => handleDeleteDateColumn(dateKey)}
