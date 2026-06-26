@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction, MonthData, PaidPromotion, PlanPromotion, GmbMetric } from '@/lib/data';
+import type { Task, UserProfile as User, Client, ClientNote, CashInTransaction, MonthData, PaidPromotion, PlanPromotion } from '@/lib/data';
 import ContentSchedule from '@/components/dashboard/content-schedule';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -13,7 +13,7 @@ import { db } from '@/firebase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientPlanSummary } from '@/components/dashboard/client-plan-summary';
 import { Input } from '@/components/ui/input';
-import { Pen, Plus, Trash2, MoreVertical, Download } from 'lucide-react';
+import { Pen, Plus, Trash2, MoreVertical, Download, Loader2 } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
 import ClientNotesTable from '@/components/dashboard/client-notes-table';
 import PaidPromotionsTable from '@/components/dashboard/paid-promotions-table';
@@ -22,13 +22,11 @@ import SeoTable from '@/components/dashboard/seo-table';
 import WebsiteTable from '@/components/dashboard/website-table';
 import OtherTaskTable from '@/components/dashboard/other-task-table';
 import PlanPromotionsTable from '@/components/dashboard/plan-promotions-table';
-import GmbMetricsTable from '@/components/dashboard/gmb-metrics-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Loader2 } from 'lucide-react';
 import { generateClientReportPDF } from '@/components/dashboard/client-report-pdf';
 import html2canvas from 'html2canvas';
 import JSZip from 'jszip';
@@ -370,8 +368,6 @@ export default function ClientIdPage() {
     const [paidPromotionsLoading, setPaidPromotionsLoading] = useState(true);
     const [planPromotions, setPlanPromotions] = useState<(PlanPromotion & { id: string })[]>([]);
     const [planPromotionsLoading, setPlanPromotionsLoading] = useState(true);
-    const [gmbMetrics, setGmbMetrics] = useState<(GmbMetric & { id: string })[]>([]);
-    const [gmbLoading, setGmbLoading] = useState(true);
     const { toast } = useToast();
     
     const params = useParams();
@@ -659,22 +655,6 @@ export default function ClientIdPage() {
         return () => unsubscribe();
     }, [clientId, activeMonth]);
 
-    useEffect(() => {
-        if (!clientId || !activeMonth) return;
-        setGmbLoading(true);
-        const gmbQuery = query(collection(db, `clients/${clientId}/gmbMetrics`), where("month", "==", activeMonth));
-        const unsubscribe = onSnapshot(gmbQuery, (snapshot) => {
-            const gmbData = snapshot.docs.map(doc => ({ ...doc.data() as GmbMetric, id: doc.id }));
-            setGmbMetrics(gmbData);
-            setGmbLoading(false);
-        }, (error) => {
-            console.error("Error fetching GMB metrics:", error);
-            setGmbLoading(false);
-        });
-
-        return () => unsubscribe();
-    }, [clientId, activeMonth]);
-
 
     const handleTaskUpdate = (updatedTask: Partial<Task> & { id: string }) => {
         updateTask(updatedTask.id, updatedTask);
@@ -770,7 +750,7 @@ export default function ClientIdPage() {
         return cashInTransactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
     }, [cashInTransactions]);
 
-    const pageLoading = loading || tasksLoading || usersLoading || cashInLoading || paidPromotionsLoading || planPromotionsLoading || gmbLoading;
+    const pageLoading = loading || tasksLoading || usersLoading || cashInLoading || paidPromotionsLoading || planPromotionsLoading;
     const activeMonthData = useMemo(() => monthlyTabs.find(m => m.name === activeMonth), [monthlyTabs, activeMonth]);
 
     const handleDownloadBundle = async () => {
@@ -841,43 +821,6 @@ export default function ClientIdPage() {
                 );
                 if (otherBlob) zip.file('other-tasks.png', otherBlob);
             }
-
-            if (gmbMetrics.length > 0) {
-                const sums = gmbMetrics.reduce((acc, m) => {
-                    acc.overview += m.overview || 0;
-                    acc.calls += m.calls || 0;
-                    acc.bookings += m.bookings || 0;
-                    acc.directions += m.directions || 0;
-                    acc.websiteClicks += m.websiteClicks || 0;
-                    return acc;
-                }, { overview: 0, calls: 0, bookings: 0, directions: 0, websiteClicks: 0 });
-
-                const gmbBlob = await createReportImage(
-                    'Google My Business Metrics',
-                    ['Month', 'Overview', 'Calls', 'Bookings', 'Directions', 'Web clicks', 'Remarks'],
-                    [
-                        ...gmbMetrics.map(m => [
-                            m.monthLabel,
-                            m.overview || 0,
-                            m.calls || 0,
-                            m.bookings || 0,
-                            m.directions || 0,
-                            m.websiteClicks || 0,
-                            m.remarks || '-'
-                        ]),
-                        [
-                            'Average',
-                            Math.round(sums.overview / gmbMetrics.length),
-                            Math.round(sums.calls / gmbMetrics.length),
-                            Math.round(sums.bookings / gmbMetrics.length),
-                            Math.round(sums.directions / gmbMetrics.length),
-                            Math.round(sums.websiteClicks / gmbMetrics.length),
-                            ''
-                        ]
-                    ]
-                );
-                if (gmbBlob) zip.file('gmb-metrics.png', gmbBlob);
-            }
             
             if (paidPromotions.length > 0) {
                 const paidPromoBlob = await createReportImage(
@@ -926,7 +869,7 @@ export default function ClientIdPage() {
                 otherTasks: otherTasks,
                 cashIn: cashInTransactions,
                 paidPromotions: paidPromotions,
-                gmbMetrics: gmbMetrics,
+                gmbMetrics: [], // GMB is now in SEO section
             });
             zip.file(`${client.name}_Report_${activeMonthData.name}.pdf`, pdfBlob);
 
@@ -1107,14 +1050,6 @@ export default function ClientIdPage() {
                         />
                     )}
                     </div>
-                    {pageLoading ? <Skeleton className="h-96 w-full" /> : client && (
-                        <GmbMetricsTable 
-                            clientId={client.id}
-                            metrics={gmbMetrics}
-                            loading={gmbLoading}
-                            activeMonth={activeMonth}
-                        />
-                    )}
                 </div>
             </div>
             <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-14">
