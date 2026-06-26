@@ -110,7 +110,7 @@ export default function SeoReportPage() {
     return (
         <div className="flex h-[calc(100vh-4rem)] overflow-hidden -m-4">
             {/* Left Sidebar - Client List (25%) */}
-             <div className="w-[25%] border-r bg-card flex flex-col">
+             <div className="w-[15%] border-r bg-card flex flex-col">
                 <div className="p-4 border-b space-y-3">
                     <div className="flex items-center gap-2">
                         <BarChart2 className="h-5 w-5 text-primary" />
